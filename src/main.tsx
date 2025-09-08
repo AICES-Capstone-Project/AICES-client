@@ -1,10 +1,19 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import App from './App.tsx'
+import { StrictMode, Suspense } from "react";
+import { createRoot } from "react-dom/client";
+import { RouterProvider } from "react-router-dom";
+import "./index.css";
 
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-)
+import Loading from "./components/UI/Loading.tsx";
+import { router } from "./routes/appRoutes.tsx";
+
+createRoot(document.getElementById("root")!).render(
+	<StrictMode>
+		<Suspense
+			fallback={
+				<Loading fullScreen size="lg" variant="primary" text="Loading..." />
+			}
+		>
+			<RouterProvider router={router} />
+		</Suspense>
+	</StrictMode>
+);

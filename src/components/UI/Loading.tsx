@@ -23,7 +23,7 @@ const Loading: React.FC<LoadingProps> = ({
 	};
 
 	const variantClasses = {
-		primary: "border-red-500 border-t-transparent",
+		primary: "border-red-500 border-t-transparent ",
 		white: "border-white border-t-transparent",
 		red: "border-red-500 border-t-transparent",
 	};
@@ -41,7 +41,7 @@ const Loading: React.FC<LoadingProps> = ({
 				className={`animate-spin rounded-full ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
 			/>
 			{text && (
-				<p className={`text-gray-300 font-medium ${textSizeClasses[size]}`}>
+				<p className={`text-black font-medium ${textSizeClasses[size]}`}>
 					{text}
 				</p>
 			)}
@@ -50,7 +50,7 @@ const Loading: React.FC<LoadingProps> = ({
 
 	if (fullScreen) {
 		return (
-			<div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/80 backdrop-blur-sm">
+			<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 backdrop-blur-sm">
 				{spinner}
 			</div>
 		);

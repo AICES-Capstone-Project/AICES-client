@@ -1,12 +1,6 @@
-import { Button } from "antd";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./routes";
 
-function App() {
-	return (
-		<>
-			<h1 className="text-3xl font-bold">Home Page nè</h1>
-			<Button type="primary">Ant Design Button</Button>
-		</>
-	);
+export default function App() {
+  return <RouterProvider router={router} />;
 }
-
-export default App;

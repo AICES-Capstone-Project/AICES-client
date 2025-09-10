@@ -4,9 +4,9 @@ import { lazy } from "react";
 /* ============== Layouts ==============*/
 const MainLayout = lazy(() => import("../components/Layout/MainLayout"));
 const AdminLayout = lazy(() => import("../components/Layout/AdminLayout"));
-
+const Login = lazy(() => import("../pages/Login/Login"));
 /* ============== Candidates Pages ==============*/
-const Home = lazy(() => import("../App"));
+const Home = lazy(() => import("../pages/Homepage/Homepage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 /* ============== Admin Pages ==============*/
@@ -17,8 +17,12 @@ export const router = createBrowserRouter([
 	{
 		path: "/",
 		element: <MainLayout />,
-		children: [{ path: "", element: <Home /> }],
+		children: [
+			{ index: true, element: <Home /> },
+		
+		],
 	},
+	{ path: "login", element: <Login /> },
 
 	/* ============== Admin Pages ==============*/
 	{

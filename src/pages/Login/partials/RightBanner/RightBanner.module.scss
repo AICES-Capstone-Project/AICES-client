@@ -1,0 +1,45 @@
+.rightBanner {
+  width: 100%;
+  display: flex;
+  align-items: center;   
+  justify-content: center; 
+  background: #fff;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+.wrap {
+  width: min(520px, 80%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  text-align: center;
+}
+
+/* logo/text */
+.brand { font-weight: 800; font-size: 44px; color: #1f513f; letter-spacing: 2px; }
+.headline { font-size: 22px; line-height: 1.45; color: #1f513f; }
+
+/* stats */
+.stats { display: flex; gap: 28px; flex-wrap: wrap; justify-content: center; }
+.stat {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; border-radius: 12px;
+  background: #e6f5ea;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.stat:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(14,84,47,.12); }
+
+.iconBox {
+  width: 40px; height: 40px; border-radius: 8px;
+  background: #a8d5b8; display: grid; place-items: center;
+  font-size: 22px; color: #0a5f2d;
+}
+.meta { display: flex; flex-direction: column; align-items: flex-start; }
+.value { font-weight: 800; color: #134e37; font-size: 16px; line-height: 1.1; }
+.label { margin-top: 2px; font-size: 12px; color: #6b7a71; }
+
+@media (max-width: 992px) {
+  .rightBanner { display: none; } /* mobile: ẩn banner, cho form full width */
+}

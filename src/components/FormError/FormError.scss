@@ -1,0 +1,25 @@
+.form-message {
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+  font-family: var(--body-medium-400-font-family);
+  font-size: var(--body-medium-400-font-size);
+  font-style: var(--body-medium-400-font-style);
+  font-weight: var(--body-medium-400-font-weight);
+  letter-spacing: var(--body-medium-400-letter-spacing);
+  line-height: var(--body-medium-400-line-height);
+  margin-right: 5px;
+  position: relative;
+  white-space: nowrap;
+  width: 100%;
+}
+
+.form-message.error {
+  background-color: rgba(255, 69, 58, 0.05);
+  color: #ff453a;
+}
+
+.form-message.success {
+  background-color: rgba(52, 199, 89, 0.1);
+  color: #28a745;
+}

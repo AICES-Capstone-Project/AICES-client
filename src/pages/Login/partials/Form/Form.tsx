@@ -4,113 +4,115 @@ import { Button, Input } from "antd";
 import "antd/dist/reset.css";
 
 import FormError from "../../../../components/FormError/FormError";
-import styles from "./Form.module.scss";
 
 const Form: React.FC = () => {
-  const navigate = useNavigate();
+	const navigate = useNavigate();
 
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+	const [email, setEmail] = useState<string>("");
+	const [password, setPassword] = useState<string>("");
 
-  const [formError, setFormError] = useState<string>("");
-  const [emailError, setEmailError] = useState<string>("");
-  const [passwordError, setPasswordError] = useState<string>("");
+	const [formError, setFormError] = useState<string>("");
+	const [emailError, setEmailError] = useState<string>("");
+	const [passwordError, setPasswordError] = useState<string>("");
 
-  const handleSubmit = () => {
-    let hasError = false;
-    setFormError("");
-    setEmailError("");
-    setPasswordError("");
+	const handleSubmit = () => {
+		let hasError = false;
+		setFormError("");
+		setEmailError("");
+		setPasswordError("");
 
-    if (!email.trim()) {
-      setEmailError("Please enter your email address.");
-      hasError = true;
-    }
-    if (!password) {
-      setPasswordError("Please enter your password.");
-      hasError = true;
-    }
+		if (!email.trim()) {
+			setEmailError("Please enter your email address.");
+			hasError = true;
+		}
+		if (!password) {
+			setPasswordError("Please enter your password.");
+			hasError = true;
+		}
 
-    if (hasError) {
-      setFormError("Please fix the errors below.");
-      return;
-    }
+		if (hasError) {
+			setFormError("Please fix the errors below.");
+			return;
+		}
 
-    navigate("/");
-  };
+		navigate("/");
+	};
 
-  return (
-    <div className={styles.login_form}>
-      <div className={styles.heading_wrapper}>
-        <div className={styles.heading}>
-          <div className={styles.title}>Log in</div>
+	return (
+		<div className="flex flex-col gap-8">
+			{/* Heading */}
+			<div>
+				<div className="flex flex-col gap-4">
+					<div className="text-gray-900 font-inter text-[32px] font-medium">
+						Log in
+					</div>
 
-          <div className={styles.create_account_wrapper}>
-            <div className={styles.create_account_text}>
-              Don&apos;t have an account?
-            </div>
-            <div
-              className={styles.create_account_link}
-              onClick={() => navigate("/register")}
-            >
-              Register
-            </div>
-          </div>
-        </div>
-      </div>
+					<div className="flex gap-1">
+						<div className="text-gray-600 font-inter text-base font-normal">
+							Don&apos;t have an account?
+						</div>
+						<div
+							className="cursor-pointer text-green-600 font-inter text-base font-medium"
+							onClick={() => navigate("/register")}
+						>
+							Register
+						</div>
+					</div>
+				</div>
+			</div>
 
-      <div className={styles.input_container}>
-        {formError && <FormError type="error">{formError}</FormError>}
+			{/* Inputs */}
+			<div className="flex flex-col gap-5">
+				{formError && <FormError type="error">{formError}</FormError>}
 
-        <div className={styles.input_wrapper}>
-          <Input
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            status={emailError ? "error" : undefined}
-            className={styles.input_field}
-          />
-          {emailError ? (
-            <div className={styles.field_error}>{emailError}</div>
-          ) : null}
-        </div>
+				<div className="flex flex-col gap-1">
+					<Input
+						placeholder="Email address"
+						value={email}
+						onChange={(e) => setEmail(e.target.value)}
+						status={emailError ? "error" : undefined}
+						className="!flex !items-center !px-3 !py-2 !w-[536px] !gap-1"
+					/>
+					{emailError && (
+						<div className="text-red-500 text-sm">{emailError}</div>
+					)}
+				</div>
 
-        <div className={styles.input_wrapper}>
-          <Input.Password
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            status={passwordError ? "error" : undefined}
-            className={styles.input_field}
-          />
-          {passwordError ? (
-            <div className={styles.field_error}>{passwordError}</div>
-          ) : null}
-        </div>
+				<div className="flex flex-col gap-1">
+					<Input.Password
+						placeholder="Password"
+						value={password}
+						onChange={(e) => setPassword(e.target.value)}
+						status={passwordError ? "error" : undefined}
+						className="!flex !items-center !px-3 !py-2 !w-[536px] !gap-1"
+					/>
+					{passwordError && (
+						<div className="text-red-500 text-sm">{passwordError}</div>
+					)}
+				</div>
 
-        <div className={styles.checkbox_container}>
-          <p className={styles.agree_text}>
-            <span
-              className={styles.terms_link}
-              onClick={() => navigate("/forgot-password")}
-            >
-              Forget password
-            </span>
-          </p>
-        </div>
-      </div>
+				<div className="flex items-end gap-2">
+					<p className="w-full flex justify-end">
+						<span
+							className="cursor-pointer text-green-600 font-inter text-sm font-medium"
+							onClick={() => navigate("/forgot-password")}
+						>
+							Forget password
+						</span>
+					</p>
+				</div>
+			</div>
 
-      <Button
-        type="default"
-        size="large"
-        className={styles.success_button}
-        onClick={handleSubmit}
-        block
-      >
-        Log in
-      </Button>
-    </div>
-  );
+			<Button
+				size="large"
+				onClick={handleSubmit}
+				block
+				className="!bg-green-600 !border-green-600 !text-white !font-semibold hover:!bg-green-700 hover:!border-green-700"
+			>
+				Log in
+			</Button>
+		</div>
+	);
 };
 
 export default Form;

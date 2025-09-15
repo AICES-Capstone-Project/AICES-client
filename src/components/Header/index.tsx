@@ -1,13 +1,20 @@
 import React, { useState } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
-import { Layout, Menu, Avatar, Dropdown, Button, Typography, Space, Badge, Divider } from "antd";
-import type { MenuProps } from "antd";
 import {
-	UserOutlined,
-	BellOutlined,
-} from "@ant-design/icons";
-import defaultAvatar from "../../../public/logo/logo_AICES_sample.png";
-import logo from "../../../public/logo/logo_long.png";
+	Layout,
+	Menu,
+	Avatar,
+	Dropdown,
+	Button,
+	Typography,
+	Space,
+	Badge,
+	Divider,
+} from "antd";
+import type { MenuProps } from "antd";
+import { UserOutlined, BellOutlined } from "@ant-design/icons";
+import defaultAvatar from "../../assets/logo/logo_AICES_sample.png";
+import logo from "../../assets/logo/logo_long.png";
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -113,7 +120,11 @@ const AppHeader: React.FC = () => {
 	const userMenuItems: MenuProps["items"] = [
 		{
 			key: "profile",
-			label: <Link to="/profile" style={{ fontWeight: 600 }}>Profile</Link>,
+			label: (
+				<Link to="/profile" style={{ fontWeight: 600 }}>
+					Profile
+				</Link>
+			),
 		},
 		{ type: "divider" },
 		{
@@ -144,8 +155,8 @@ const AppHeader: React.FC = () => {
 				background: "#fff",
 				borderBottom: "1px solid #f0f0f0",
 				gap: 16,
-				height: 80, 
-    lineHeight: "80px",
+				height: 80,
+				lineHeight: "80px",
 			}}
 		>
 			<Link to="/" style={{ display: "flex", alignItems: "center" }}>
@@ -180,7 +191,10 @@ const AppHeader: React.FC = () => {
 			) : (
 				<Space size={16} align="center">
 					<Badge count={unreadCount} size="default">
-						<Button type="text" icon={<BellOutlined style={{ fontSize: 20 }} />} />
+						<Button
+							type="text"
+							icon={<BellOutlined style={{ fontSize: 20 }} />}
+						/>
 					</Badge>
 					<Divider type="vertical" />
 					<Dropdown

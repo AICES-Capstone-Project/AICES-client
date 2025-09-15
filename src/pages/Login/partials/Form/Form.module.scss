@@ -1,107 +1,107 @@
-.login_form {
-    display: flex;
-    flex-direction: column;
-    gap: 32px;
+// .login_form {
+//     display: flex;
+//     flex-direction: column;
+//     gap: 32px;
 
-    .heading_wrapper {
-        .heading {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
+//     .heading_wrapper {
+//         .heading {
+//             display: flex;
+//             flex-direction: column;
+//             gap: 16px;
 
-            .title {
-                color: var(--Gray-900, #18191C);
-                font-family: Inter;
-                font-size: 32px;
-                font-weight: 500;
-            }
+//             .title {
+//                 color: var(--Gray-900, #18191C);
+//                 font-family: Inter;
+//                 font-size: 32px;
+//                 font-weight: 500;
+//             }
 
-        }
+//         }
 
-        .create_account_wrapper {
-            display: flex;
-            gap: 3px;
+//         .create_account_wrapper {
+//             display: flex;
+//             gap: 3px;
 
-            .create_account_text {
-                color: var(--Gray-600, #5E6670);
-                font-family: Inter;
-                font-size: 16px;
-                font-weight: 400;
-            }
+//             .create_account_text {
+//                 color: var(--Gray-600, #5E6670);
+//                 font-family: Inter;
+//                 font-size: 16px;
+//                 font-weight: 400;
+//             }
 
-            .create_account_link {
-                cursor: pointer;
-                color: var(--Success-500, #0BA02C);
-                font-family: Inter;
-                font-size: 16px;
-                font-weight: 500;
-            }
-        }
-    }
+//             .create_account_link {
+//                 cursor: pointer;
+//                 color: var(--Success-500, #0BA02C);
+//                 font-family: Inter;
+//                 font-size: 16px;
+//                 font-weight: 500;
+//             }
+//         }
+//     }
 
-    .input_container {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
+//     .input_container {
+//         display: flex;
+//         flex-direction: column;
+//         gap: 20px;
 
-        .input_field {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-            width: 536px;
-            gap: 5px;
-        }
+//         .input_field {
+//             display: flex;
+//             align-items: center;
+//             padding: 10px;
+//             width: 536px;
+//             gap: 5px;
+//         }
 
-        .checkbox_container {
-            display: flex;
-            align-items: end;
-            gap: 10px;
+//         .checkbox_container {
+//             display: flex;
+//             align-items: end;
+//             gap: 10px;
 
-            .agree_text {
-                width: 100%;
-                display: flex;
-                justify-content: end;
+//             .agree_text {
+//                 width: 100%;
+//                 display: flex;
+//                 justify-content: end;
 
-                .agree_statement {
-                    color: var(--Gray-500, #767F8C);
-                    font-family: Inter;
-                    font-size: 14px;
-                    font-weight: 400;
-                }
+//                 .agree_statement {
+//                     color: var(--Gray-500, #767F8C);
+//                     font-family: Inter;
+//                     font-size: 14px;
+//                     font-weight: 400;
+//                 }
 
-                .terms_link {
-                    cursor: pointer;
-                    color: var(--Success-500, #0BA02C);
-                    font-family: Inter;
-                    font-size: 14px;
-                    font-weight: 500;
-                }
-            }
-        }
-    }
+//                 .terms_link {
+//                     cursor: pointer;
+//                     color: var(--Success-500, #0BA02C);
+//                     font-family: Inter;
+//                     font-size: 14px;
+//                     font-weight: 500;
+//                 }
+//             }
+//         }
+//     }
 
-    .worker_button {
-        background: var(--Success-500, #0BA02C) !important;
-    }
+//     .worker_button {
+//         background: var(--Success-500, #0BA02C) !important;
+//     }
 
-    .worker_button:hover {
-        background: var(--Primary-500, #0acc3a) !important;
-    }
+//     .worker_button:hover {
+//         background: var(--Primary-500, #0acc3a) !important;
+//     }
 
-    .success_button {
-        background-color: #0BA02C;
-        /* antd green-6 */
-        border-color: #0BA02C;
-        color: #fff;
-        font-weight: 600;
+//     .success_button {
+//         background-color: #0BA02C;
+//         /* antd green-6 */
+//         border-color: #0BA02C;
+//         color: #fff;
+//         font-weight: 600;
 
-        &:hover,
-        &:focus {
-            background-color: #0BA02C;
-            /* darker green */
-            border-color: #389e0d;
-            color: #fff;
-        }
-    }
+//         &:hover,
+//         &:focus {
+//             background-color: #0BA02C;
+//             /* darker green */
+//             border-color: #389e0d;
+//             color: #fff;
+//         }
+//     }
 
-}
+// }

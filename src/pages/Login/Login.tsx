@@ -25,7 +25,7 @@ const LogIn: React.FC = () => {
 
 			{/* Footer */}
 			<div className="flex justify-center items-end w-full h-[100px] pb-10">
-				<p className="text-green-800 font-inter text-lg font-normal p-5 text-center">
+				<p className="text-lg font-normal p-5 text-center">
 					© 2025 AICES - AI Powered Candidate Evaluation System for Recruiters.
 					All rights Reserved
 				</p>

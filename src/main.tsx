@@ -8,7 +8,7 @@ import "@fontsource/inter/500.css"; // Medium
 import "@fontsource/inter/600.css"; // Semi-bold
 import "@fontsource/inter/700.css"; // Bold
 
-import "./index.css";
+import "./assets/styles/globals.css";
 
 import Loading from "./components/UI/Loading.tsx";
 import { router } from "./routes/index.tsx";

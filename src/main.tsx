@@ -12,6 +12,7 @@ import "./assets/styles/globals.css";
 
 import Loading from "./components/UI/Loading.tsx";
 import { router } from "./routes/index.tsx";
+import { Bounce, ToastContainer } from "react-toastify";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
@@ -21,6 +22,19 @@ createRoot(document.getElementById("root")!).render(
 			}
 		>
 			<RouterProvider router={router} />
+			<ToastContainer
+				position="top-right"
+				autoClose={3000}
+				hideProgressBar={false}
+				newestOnTop={false}
+				closeOnClick={false}
+				rtl={false}
+				pauseOnFocusLoss
+				draggable
+				pauseOnHover
+				theme="light"
+				transition={Bounce}
+			/>
 		</Suspense>
 	</StrictMode>
 );

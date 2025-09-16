@@ -2,20 +2,8 @@
 
 /* ========== Global Styles ========== */
 :root {
-	width: 100%;
-	max-width: 100%;
 	margin: 0;
 	padding: 0;
-
-	/* width: 100%;
-	max-width: 1280px;
-	margin: 0 auto; 
-	padding: 1rem;  */
-	/* line-height: 1.5; */
-	/* font-weight: 400; */
-	/* color-scheme: light; */
-	/* color: rgba(255, 255, 255, 0.87); */
-	/* background-color: #242424; */
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -39,7 +27,6 @@ body,
 body {
 	font-family: "Inter", sans-serif;
 	min-height: 100vh;
-	display: block;
 	overflow-x: hidden;
 	/* justify-content: center; 
 	align-items: center;  */
@@ -68,6 +55,10 @@ button {
 @layer utilities {
 	.text-primary-mint {
 		color: var(--color-primary-mint);
+	}
+
+	.bg-mint {
+		background-color: var(--color-primary-mint);
 	}
 
 	.h1-bold {

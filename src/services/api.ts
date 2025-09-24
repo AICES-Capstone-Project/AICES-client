@@ -1,9 +1,9 @@
 import { API_CONFIG, STORAGE_KEYS } from "./config";
 
 interface ApiResponse<T> {
-	success: boolean;
-	data?: T;
-	error?: string;
+	status: number; // enum từ backend (200, 400, 401…)
+	message?: string; // message từ backend
+	data?: T; // data trả về (generic)
 }
 
 export const fetchApi = async <T>(
@@ -16,7 +16,7 @@ export const fetchApi = async <T>(
 			? localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
 			: null;
 
-	// Smart Content-Type handling: don't set Content-Type for FormData
+	// Nếu body là FormData thì không set Content-Type
 	const isFormData = options.body instanceof FormData;
 
 	const headers: HeadersInit = {
@@ -32,20 +32,22 @@ export const fetchApi = async <T>(
 
 	try {
 		const response = await fetch(`${baseUrl}${url}`, config);
-		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
-		}
-		const data = response.status !== 204 ? await response.json() : null;
-		return { success: true, data };
+
+		const result: ApiResponse<T> =
+			response.status !== 204 ? await response.json() : { status: 204 };
+
+		return result;
 	} catch (error) {
 		console.error("API call failed:", error);
+
 		return {
-			success: false,
-			error: error instanceof Error ? error.message : "Unknown error",
+			status: 500,
+			message: error instanceof Error ? error.message : "Unknown error",
 		};
 	}
 };
 
+// Các shortcut methods
 export const get = <T>(url: string) => fetchApi<T>(url, { method: "GET" });
 
 export const post = <T>(

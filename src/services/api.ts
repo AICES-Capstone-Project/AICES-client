@@ -1,3 +1,5 @@
+import axios, { AxiosError } from "axios";
+import type { AxiosRequestConfig } from "axios";
 import { API_CONFIG, STORAGE_KEYS } from "./config";
 
 interface ApiResponse<T> {
@@ -6,73 +8,128 @@ interface ApiResponse<T> {
 	data?: T; // data trả về (generic)
 }
 
-export const fetchApi = async <T>(
-	url: string,
-	options: RequestInit = {}
-): Promise<ApiResponse<T>> => {
-	const baseUrl = API_CONFIG.BASE_URL;
+// Tạo axios instance
+const api = axios.create({
+	baseURL: API_CONFIG.BASE_URL,
+	timeout: 10000,
+});
+
+// Interceptor để thêm token vào header
+api.interceptors.request.use((config) => {
 	const token =
 		typeof window !== "undefined"
 			? localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
 			: null;
 
-	// Nếu body là FormData thì không set Content-Type
-	const isFormData = options.body instanceof FormData;
+	if (token && config.headers) {
+		config.headers["Authorization"] = `Bearer ${token}`;
+	}
+	return config;
+});
 
-	const headers: HeadersInit = {
-		...(!isFormData && { "Content-Type": "application/json" }),
-		...(token && { Authorization: `Bearer ${token}` }),
-		...options.headers,
-	};
-
-	const config: RequestInit = {
-		...options,
-		headers,
-	};
-
+// Hàm wrapper cho axios
+export const requestApi = async <T>(
+	url: string,
+	options: AxiosRequestConfig = {}
+): Promise<ApiResponse<T>> => {
 	try {
-		const response = await fetch(`${baseUrl}${url}`, config);
+		const response = await api.request<ApiResponse<T>>({
+			url,
+			...options,
+		});
 
-		const result: ApiResponse<T> =
-			response.status !== 204 ? await response.json() : { status: 204 };
-
-		return result;
+		return response.data;
 	} catch (error) {
-		console.error("API call failed:", error);
+		const err = error as AxiosError<ApiResponse<T>>;
+
+		console.error("API call failed:", err);
 
 		return {
-			status: 500,
-			message: error instanceof Error ? error.message : "Unknown error",
-		};
+			status: err.response?.status || 500,
+			message: err.response?.data?.message || err.message || "Unknown error",
+		} as ApiResponse<T>;
 	}
 };
 
-// Các shortcut methods
-export const get = <T>(url: string) => fetchApi<T>(url, { method: "GET" });
+// Shortcut methods
 
-export const post = <T>(
+// ---------------------
+// JSON methods
+// ---------------------
+export const getJson = <T>(url: string, config?: AxiosRequestConfig) =>
+	requestApi<T>(url, { method: "GET", ...config });
+
+export const postJson = async <T, B = unknown>(
 	url: string,
-	body: FormData | Record<string, unknown>
+	body?: B,
+	config?: AxiosRequestConfig
 ) =>
-	fetchApi<T>(url, {
+	requestApi<T>(url, {
 		method: "POST",
-		body: body instanceof FormData ? body : JSON.stringify(body),
+		data: body,
+		headers: { "Content-Type": "application/json", ...(config?.headers || {}) },
+		...config,
 	});
 
-export const put = <T>(url: string, body: FormData | Record<string, unknown>) =>
-	fetchApi<T>(url, {
-		method: "PUT",
-		body: body instanceof FormData ? body : JSON.stringify(body),
-	});
-
-export const patch = <T>(
+export const putJson = <T>(
 	url: string,
-	body: FormData | Record<string, unknown>
+	body?: Record<string, unknown>,
+	config?: AxiosRequestConfig
 ) =>
-	fetchApi<T>(url, {
-		method: "PATCH",
-		body: body instanceof FormData ? body : JSON.stringify(body),
+	requestApi<T>(url, {
+		method: "PUT",
+		data: body,
+		headers: { "Content-Type": "application/json", ...(config?.headers || {}) },
+		...config,
 	});
 
-export const remove = <T>(url: string) =>
-	fetchApi<T>(url, { method: "DELETE" });
+export const patchJson = <T>(
+	url: string,
+	body?: Record<string, unknown>,
+	config?: AxiosRequestConfig
+) =>
+	requestApi<T>(url, {
+		method: "PATCH",
+		data: body,
+		headers: { "Content-Type": "application/json", ...(config?.headers || {}) },
+		...config,
+	});
+
+export const deleteJson = <T>(url: string, config?: AxiosRequestConfig) =>
+	requestApi<T>(url, { method: "DELETE", ...config });
+
+// ---------------------
+// FormData methods
+// ---------------------
+export const postForm = <T>(
+	url: string,
+	formData: FormData,
+	config?: AxiosRequestConfig
+) =>
+	requestApi<T>(url, {
+		method: "POST",
+		data: formData,
+		...config, // không set Content-Type, axios tự set
+	});
+
+export const putForm = <T>(
+	url: string,
+	formData: FormData,
+	config?: AxiosRequestConfig
+) =>
+	requestApi<T>(url, {
+		method: "PUT",
+		data: formData,
+		...config,
+	});
+
+export const patchForm = <T>(
+	url: string,
+	formData: FormData,
+	config?: AxiosRequestConfig
+) =>
+	requestApi<T>(url, {
+		method: "PATCH",
+		data: formData,
+		...config,
+	});

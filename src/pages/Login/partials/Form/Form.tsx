@@ -4,6 +4,8 @@ import { Button, Input } from "antd";
 import "antd/dist/reset.css";
 
 import FormError from "../../../../components/FormError/FormError";
+import { authService } from "../../../../services/authService";
+import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 
 const Form: React.FC = () => {
 	const navigate = useNavigate();
@@ -15,7 +17,7 @@ const Form: React.FC = () => {
 	const [emailError, setEmailError] = useState<string>("");
 	const [passwordError, setPasswordError] = useState<string>("");
 
-	const handleSubmit = () => {
+	const handleSubmit = async () => {
 		let hasError = false;
 		setFormError("");
 		setEmailError("");
@@ -35,7 +37,20 @@ const Form: React.FC = () => {
 			return;
 		}
 
-		navigate("/");
+		// Call API login
+		console.log("Submitting:", { email, password });
+
+		const res = await authService.login({ email, password });
+
+		console.log(res);
+
+		if (res.status === 200 && res.data) {
+			toastSuccess("Login Success!", res.message);
+			navigate("/");
+		} else {
+			console.log("Login failed:", res);
+			toastError("Login failed", res.message || "Failed to login");
+		}
 	};
 
 	return (

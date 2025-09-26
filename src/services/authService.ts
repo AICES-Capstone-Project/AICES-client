@@ -17,10 +17,9 @@ export const authService = {
 
 		if (res.status === 200 && res.data) {
 			// Lưu token
-			localStorage.setItem(STORAGE_KEYS.AUTH_TOKEN, res.data.accessToken);
+			localStorage.setItem(STORAGE_KEYS.ASSESS_TOKEN, res.data.accessToken);
 			// localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, res.data.refreshToken);
 		}
-
 		return res;
 	},
 };

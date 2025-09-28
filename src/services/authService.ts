@@ -1,4 +1,4 @@
-import { postJson } from "./api";
+import { getJson, postJson } from "./api";
 import { STORAGE_KEYS } from "./config";
 
 interface LoginRequest {
@@ -11,6 +11,11 @@ interface LoginResponse {
 	refreshToken: string;
 }
 
+interface VerifyEmailResponse {
+	success: boolean;
+	message: string;
+}
+
 export const authService = {
 	login: async (data: LoginRequest) => {
 		const res = await postJson<LoginResponse>("/auth/login", data);
@@ -21,5 +26,11 @@ export const authService = {
 			// localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, res.data.refreshToken);
 		}
 		return res;
+	},
+
+	verifyEmail: async (token: string) => {
+		return await getJson<VerifyEmailResponse>(
+			`/auth/verify-email?token=${token}`
+		);
 	},
 };

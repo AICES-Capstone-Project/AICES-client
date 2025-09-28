@@ -18,7 +18,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
 	const token =
 		typeof window !== "undefined"
-			? localStorage.getItem(STORAGE_KEYS.AUTH_TOKEN)
+			? localStorage.getItem(STORAGE_KEYS.ASSESS_TOKEN)
 			: null;
 
 	if (token && config.headers) {

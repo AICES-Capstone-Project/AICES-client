@@ -49,7 +49,10 @@ const Form: React.FC = () => {
 			navigate("/");
 		} else {
 			console.log("Login failed:", res);
-			toastError("Login failed", res.message || "Failed to login");
+			toastError(
+				`Login failed ${res.status}`,
+				res.message || "Failed to login"
+			);
 		}
 	};
 

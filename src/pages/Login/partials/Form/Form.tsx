@@ -37,7 +37,6 @@ const Form: React.FC = () => {
 			return;
 		}
 
-		// Call API login
 		console.log("Submitting:", { email, password });
 
 		const res = await authService.login({ email, password });
@@ -55,7 +54,6 @@ const Form: React.FC = () => {
 
 	return (
 		<div className="flex flex-col gap-8">
-			{/* Heading */}
 			<div>
 				<div className="flex flex-col gap-4">
 					<div className="text-gray-900 font-inter text-[32px] font-medium">
@@ -68,7 +66,7 @@ const Form: React.FC = () => {
 						</div>
 						<div
 							className="cursor-pointer text-green-600 font-inter text-base font-medium"
-							onClick={() => navigate("/register")}
+							onClick={() => navigate("/signup")}
 						>
 							Register
 						</div>

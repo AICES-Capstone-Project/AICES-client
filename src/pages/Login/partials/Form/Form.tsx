@@ -6,6 +6,7 @@ import "antd/dist/reset.css";
 import FormError from "../../../../components/FormError/FormError";
 import { authService } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
+import SocialAuthForm from "../../../../components/Forms/SocialAuthForm";
 
 const Form: React.FC = () => {
 	const navigate = useNavigate();
@@ -83,7 +84,7 @@ const Form: React.FC = () => {
 						</div>
 						<div
 							className="cursor-pointer text-green-600 font-inter text-base font-medium"
-							onClick={() => navigate("/signup")}
+							onClick={() => navigate("/sign-up")}
 						>
 							Register
 						</div>
@@ -143,6 +144,7 @@ const Form: React.FC = () => {
 			>
 				Log in
 			</Button>
+			<SocialAuthForm />
 		</div>
 	);
 };

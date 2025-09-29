@@ -13,6 +13,7 @@ import "./assets/styles/globals.css";
 import Loading from "./components/UI/Loading.tsx";
 import { router } from "./routes/index.tsx";
 import { Bounce, ToastContainer } from "react-toastify";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
@@ -21,7 +22,9 @@ createRoot(document.getElementById("root")!).render(
 				<Loading fullScreen size="lg" variant="primary" text="Loading..." />
 			}
 		>
-			<RouterProvider router={router} />
+			<GoogleOAuthProvider clientId={import.meta.env.VITE_AUTH_GOOGLE_ID}>
+				<RouterProvider router={router} />
+			</GoogleOAuthProvider>
 			<ToastContainer
 				position="top-right"
 				autoClose={3000}

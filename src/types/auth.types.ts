@@ -18,3 +18,12 @@ export interface LoginResponse {
 	fullName: string;
 	roleName: string;
 }
+
+export interface LoginGoogleResponse {
+	accessToken: string;
+	userId: number;
+	email: string;
+	fullName: string;
+	avatarUrl: string;
+	roleName: string;
+}

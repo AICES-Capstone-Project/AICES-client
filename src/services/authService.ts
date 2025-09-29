@@ -3,6 +3,7 @@ import { STORAGE_KEYS } from "./config";
 import type {
 	LoginRequest,
 	LoginResponse,
+	LoginGoogleResponse,
 	SignUpRequest,
 } from "../types/auth.types";
 import type { ApiResponse } from "./../types/api.types";
@@ -18,6 +19,14 @@ export const authService = {
 			// localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, res.data.refreshToken);
 		}
 		return res;
+	},
+
+	googleLogin: async (
+		idToken: string
+	): Promise<ApiResponse<LoginGoogleResponse>> => {
+		return await post<ApiResponse<LoginResponse>>("/auth/google", {
+			idToken, // backend expects idToken now
+		});
 	},
 
 	signUp: async (data: SignUpRequest) => {

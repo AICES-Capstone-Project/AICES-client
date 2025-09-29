@@ -5,7 +5,7 @@ export const API_CONFIG = {
 
 // Storage Keys
 export const STORAGE_KEYS = {
-	ASSESS_TOKEN: "assess_token",
+	ACCESS_TOKEN: "access_token",
 	REFRESH_TOKEN: "refresh_token",
 	USER_DATA: "user_data",
 } as const;

@@ -17,6 +17,8 @@ const Form: React.FC = () => {
 	const [emailError, setEmailError] = useState<string>("");
 	const [passwordError, setPasswordError] = useState<string>("");
 
+	const [loading, setLoading] = useState(false);
+
 	const handleSubmit = async () => {
 		let hasError = false;
 		setFormError("");
@@ -39,19 +41,31 @@ const Form: React.FC = () => {
 
 		console.log("Submitting:", { email, password });
 
-		const res = await authService.login({ email, password });
+		try {
+			setLoading(true);
+			console.log("Submitting:", { email, password });
 
-		console.log(res);
+			const res = await authService.login({ email, password });
 
-		if (res.status === 200 && res.data) {
-			toastSuccess("Login Success!", res.message);
-			navigate("/");
-		} else {
-			console.log("Login failed:", res);
+			console.log(res);
+
+			if (res.status === 200 && res.data) {
+				toastSuccess("Login Success!", res.message);
+				navigate("/");
+			} else {
+				console.log("Login failed:", res);
+				toastError(
+					`Login failed ${res.status}`,
+					res.message || "Failed to login"
+				);
+			}
+		} catch (err) {
 			toastError(
-				`Login failed ${res.status}`,
-				res.message || "Failed to login"
+				"Login error",
+				err instanceof Error ? err.message : "Something went wrong."
 			);
+		} finally {
+			setLoading(false);
 		}
 	};
 
@@ -123,6 +137,8 @@ const Form: React.FC = () => {
 				size="large"
 				onClick={handleSubmit}
 				block
+				loading={loading}
+				disabled={loading}
 				className="!bg-green-600 !border-green-600 !text-white !font-semibold hover:!bg-green-700 hover:!border-green-700"
 			>
 				Log in

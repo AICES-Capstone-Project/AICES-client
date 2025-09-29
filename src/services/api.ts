@@ -1,12 +1,7 @@
 import axios, { AxiosError } from "axios";
 import type { AxiosRequestConfig } from "axios";
 import { API_CONFIG, STORAGE_KEYS } from "./config";
-
-interface ApiResponse<T> {
-	status: number; // enum từ backend (200, 400, 401…)
-	message?: string; // message từ backend
-	data?: T; // data trả về (generic)
-}
+import type { ApiResponse } from "../types/api.types";
 
 // Tạo axios instance
 const api = axios.create({
@@ -18,7 +13,7 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
 	const token =
 		typeof window !== "undefined"
-			? localStorage.getItem(STORAGE_KEYS.ASSESS_TOKEN)
+			? localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
 			: null;
 
 	if (token && config.headers) {
@@ -56,10 +51,10 @@ export const requestApi = async <T>(
 // ---------------------
 // JSON methods
 // ---------------------
-export const getJson = <T>(url: string, config?: AxiosRequestConfig) =>
+export const get = <T>(url: string, config?: AxiosRequestConfig) =>
 	requestApi<T>(url, { method: "GET", ...config });
 
-export const postJson = async <T, B = unknown>(
+export const post = async <T, B = unknown>(
 	url: string,
 	body?: B,
 	config?: AxiosRequestConfig
@@ -71,7 +66,7 @@ export const postJson = async <T, B = unknown>(
 		...config,
 	});
 
-export const putJson = <T>(
+export const put = <T>(
 	url: string,
 	body?: Record<string, unknown>,
 	config?: AxiosRequestConfig
@@ -83,7 +78,7 @@ export const putJson = <T>(
 		...config,
 	});
 
-export const patchJson = <T>(
+export const patch = <T>(
 	url: string,
 	body?: Record<string, unknown>,
 	config?: AxiosRequestConfig
@@ -95,7 +90,7 @@ export const patchJson = <T>(
 		...config,
 	});
 
-export const deleteJson = <T>(url: string, config?: AxiosRequestConfig) =>
+export const remove = <T>(url: string, config?: AxiosRequestConfig) =>
 	requestApi<T>(url, { method: "DELETE", ...config });
 
 // ---------------------

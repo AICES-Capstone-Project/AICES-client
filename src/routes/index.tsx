@@ -9,9 +9,7 @@ const AdminLayout = lazy(() => import("../components/Layout/AdminLayout"));
 const Home = lazy(() => import("../pages/Homepage/Homepage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 const Login = lazy(() => import("../pages/Login/Login"));
-const VerifyEmailPage = lazy(
-	() => import("../pages/CandidatePages/VerifyEmailPage")
-);
+const VerifyEmailPage = lazy(() => import("../pages/SignUp/VerifyEmailPage"));
 const SignUp = lazy(() => import("../pages/SignUp/Signup"));
 const ForgetPassword = lazy(
 	() => import("../pages/Login/partials/ForgetPassword/ForgetPass")
@@ -28,7 +26,7 @@ export const router = createBrowserRouter([
 		children: [{ index: true, element: <Home /> }],
 	},
 	{ path: "login", element: <Login /> },
-	{ path: "signup", element: <SignUp /> },
+	{ path: "sign-up", element: <SignUp /> },
 	{ path: "verify-email", element: <VerifyEmailPage /> },
 	{ path: "forgot-password", element: <ForgetPassword /> },
 

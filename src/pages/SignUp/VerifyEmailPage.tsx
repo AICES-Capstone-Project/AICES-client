@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 import { toast } from "react-toastify";
@@ -9,16 +9,15 @@ const VerifyEmailPage = () => {
 	const [countdown, setCountdown] = useState(5);
 	const navigate = useNavigate();
 	const location = useLocation();
+	const called = useRef(false);
 
 	useEffect(() => {
-		let called = false;
-
 		const params = new URLSearchParams(location.search);
 		const token = params.get("token");
 
 		const verify = async () => {
-			if (called) return;
-			called = true;
+			if (called.current) return;
+			called.current = true;
 
 			if (!token) {
 				setMessage("❌ Invalid verification link");

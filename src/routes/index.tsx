@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
+import UserProfileTest from "../pages/UserProfileTest";
 
 /* ============== Layouts ==============*/
 const MainLayout = lazy(() => import("../components/Layout/MainLayout"));
@@ -29,7 +30,7 @@ export const router = createBrowserRouter([
 	{ path: "sign-up", element: <SignUp /> },
 	{ path: "verify-email", element: <VerifyEmailPage /> },
 	{ path: "forgot-password", element: <ForgetPassword /> },
-
+	{ path: "test", element: <UserProfileTest /> },
 	/* ============== Admin Pages ==============*/
 	{
 		path: "/admin",

@@ -18,6 +18,7 @@ export const API_ENDPOINTS = {
 		LOGIN: "/auth/login",
 		GOOGLE_LOGIN: "/auth/google",
 		VERIFY_EMAIL: (token: string) => `/auth/verify-email?token=${token}`,
+		ME: "/auth/me",
 	},
 } as const;
 

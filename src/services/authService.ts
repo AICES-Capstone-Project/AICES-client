@@ -3,8 +3,8 @@ import { STORAGE_KEYS, API_ENDPOINTS } from "./config";
 import type {
 	LoginRequest,
 	LoginResponse,
-	LoginGoogleResponse,
 	SignUpRequest,
+	UserResponse,
 } from "../types/auth.types";
 import type { ApiResponse } from "./../types/api.types";
 
@@ -21,12 +21,17 @@ export const authService = {
 		return res;
 	},
 
-	googleLogin: async (
-		idToken: string
-	): Promise<ApiResponse<LoginGoogleResponse>> => {
-		return await post<LoginGoogleResponse>(API_ENDPOINTS.AUTH.GOOGLE_LOGIN, {
+	googleLogin: async (idToken: string): Promise<ApiResponse<LoginResponse>> => {
+		const res = await post<LoginResponse>(API_ENDPOINTS.AUTH.GOOGLE_LOGIN, {
 			idToken,
 		});
+		if (res.status === 200 && res.data) {
+			// Lưu token
+			localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, res.data.accessToken);
+			// localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, res.data.refreshToken);
+		}
+
+		return res;
 	},
 
 	signUp: async (data: SignUpRequest) => {
@@ -35,5 +40,9 @@ export const authService = {
 
 	verifyEmail: async (token: string) => {
 		return await get<ApiResponse<null>>(API_ENDPOINTS.AUTH.VERIFY_EMAIL(token));
+	},
+
+	getCurrentUser: async (): Promise<ApiResponse<UserResponse>> => {
+		return await get<UserResponse>(API_ENDPOINTS.AUTH.ME);
 	},
 };

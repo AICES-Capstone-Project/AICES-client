@@ -13,17 +13,13 @@ export interface SignUpRequest {
 // ---- Responses ----
 export interface LoginResponse {
 	accessToken: string;
-	userId: number;
-	email: string;
-	fullName: string;
-	roleName: string;
 }
 
-export interface LoginGoogleResponse {
-	accessToken: string;
+export interface UserResponse {
 	userId: number;
 	email: string;
-	fullName: string;
-	avatarUrl: string;
-	roleName: string;
+	fullName: string | null;
+	roleName: string | null;
+	avatarUrl: string | null;
+	isActive: boolean;
 }

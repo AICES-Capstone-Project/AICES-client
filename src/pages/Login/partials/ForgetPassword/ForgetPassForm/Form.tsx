@@ -30,29 +30,31 @@ const ForgotPasswordForm: React.FC = () => {
     setSubmitted(true);
   };
 
+    // Tạo "token" giả để điều hướng (chỉ dùng cho UX/UI)
+  const buildMockToken = (mail: string) =>
+    `demo-${btoa(encodeURIComponent(mail))}-${Date.now()}`;
+
   if (submitted) {
+    const mockToken = buildMockToken(email);
     return (
       <div className="flex flex-col gap-8">
-        {/* Heading */}
-        <div>
-          <div className="flex flex-col gap-4">
-            <div className="text-gray-900 font-inter text-[32px] font-medium">
-              Check your email
-            </div>
-            <div className="text-gray-600 font-inter text-base font-normal">
-              If an account exists for <span className="font-medium">{email}</span>, 
-              we’ve sent a password reset link. Please follow the instructions in the email.
-            </div>
+        <div className="flex flex-col gap-4">
+          <div className="text-gray-900 font-inter text-[32px] font-medium">
+            Check your email
+          </div>
+          <div className="text-gray-600 font-inter text-base font-normal">
+            If an account exists for <span className="font-medium">{email}</span>,
+            we’ve sent a password reset link. Please follow the instructions in the email.
           </div>
         </div>
 
         <Button
           size="large"
-          onClick={() => navigate("/login")}
+          onClick={() => navigate(`/reset-password?token=${mockToken}`)}
           block
           className="!bg-green-600 !border-green-600 !text-white !font-semibold hover:!bg-green-700 hover:!border-green-700"
         >
-          Back to log in
+          Open reset link
         </Button>
       </div>
     );

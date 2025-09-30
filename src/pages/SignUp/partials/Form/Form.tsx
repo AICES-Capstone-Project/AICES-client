@@ -6,6 +6,7 @@ import "antd/dist/reset.css";
 import FormError from "../../../../components/FormError/FormError";
 import { authService } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
+import { APP_ROUTES } from "../../../../services/config";
 
 const SignupForm: React.FC = () => {
 	const navigate = useNavigate();
@@ -65,7 +66,7 @@ const SignupForm: React.FC = () => {
 
 			if (res.status === 200) {
 				toastSuccess("Signup Success!", res.message);
-				navigate("/");
+				navigate(APP_ROUTES.LOGIN);
 			} else {
 				toastError(
 					`Signup failed ${res.status}`,
@@ -97,7 +98,7 @@ const SignupForm: React.FC = () => {
 						</div>
 						<div
 							className="cursor-pointer text-green-600 font-inter text-base font-medium"
-							onClick={() => navigate("/login")}
+							onClick={() => navigate(APP_ROUTES.LOGIN)}
 						>
 							Log in
 						</div>

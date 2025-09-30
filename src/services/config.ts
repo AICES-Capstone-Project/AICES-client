@@ -14,28 +14,24 @@ export const STORAGE_KEYS = {
 export const API_ENDPOINTS = {
 	// Auth endpoints
 	AUTH: {
-		REGISTER: "/auth/register",
+		SIGN_UP: "/auth/register",
 		LOGIN: "/auth/login",
+		GOOGLE_LOGIN: "/auth/google",
+		VERIFY_EMAIL: (token: string) => `/auth/verify-email?token=${token}`,
 	},
 } as const;
 
 // App Routes Configuration
 export const APP_ROUTES = {
 	// Public routes
-	// HOME: "/",
-	// EVENTS: "/events",
-	// EVENT_DETAIL: (id: number) => `/events/${id}`,
-	// EVENT_BOOKING: (eventId: number, showtimeId: number) =>
-	// 	`/events/${eventId}/booking/${showtimeId}`,
+	HOME: "/",
+
 	// Auth routes
-	// SIGN_IN: "/sign-in",
-	// SIGN_UP: "/sign-up",
+	LOGIN: "/login",
+	SIGN_UP: "/sign-up",
+
 	// Role-based routes
-	// ADMIN_DASHBOARD: "/admin",
-	// ADMIN_USERS: "/admin/users",
-	// ADMIN_EVENTS: "/admin/events",
-	// STAFF_DASHBOARD: "/staff",
-	// STAFF_EVENTS: "/staff/events",
+	ADMIN_DASHBOARD: "/admin",
 } as const;
 
 export default {

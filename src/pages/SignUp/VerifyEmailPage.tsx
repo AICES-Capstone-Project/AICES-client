@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
 import { toast } from "react-toastify";
+import { APP_ROUTES } from "../../services/config";
 
 const VerifyEmailPage = () => {
 	const [loading, setLoading] = useState(true);
@@ -35,7 +36,7 @@ const VerifyEmailPage = () => {
 					setCountdown((prev) => {
 						if (prev === 1) {
 							clearInterval(timer);
-							navigate("/login");
+							navigate(APP_ROUTES.LOGIN);
 						}
 						return prev - 1;
 					});

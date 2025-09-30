@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 
 import Form from "./partials/Form/Form";
 import RightBanner from "../../components/RightBanner/RightBanner";
+import { APP_ROUTES } from "../../services/config";
 
 const SignUp: React.FC = () => {
 	const { pathname: currentPath } = useLocation();
@@ -16,7 +17,7 @@ const SignUp: React.FC = () => {
 					</div>
 
 					<div className="flex items-center justify-center">
-						{currentPath === "/signup" && <RightBanner />}
+						{currentPath === APP_ROUTES.SIGN_UP && <RightBanner />}
 					</div>
 				</div>
 			</div>

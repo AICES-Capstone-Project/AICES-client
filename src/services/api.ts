@@ -42,6 +42,7 @@ export const requestApi = async <T>(
 		return {
 			status: err.response?.status || 500,
 			message: err.response?.data?.message || err.message || "Unknown error",
+			data: null,
 		} as ApiResponse<T>;
 	}
 };

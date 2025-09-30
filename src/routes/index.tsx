@@ -15,6 +15,9 @@ const SignUp = lazy(() => import("../pages/SignUp/Signup"));
 const ForgetPassword = lazy(
 	() => import("../pages/Login/partials/ForgetPassword/ForgetPass")
 );
+const ResetPassword = lazy(
+	() => import("../pages/Login/partials/ResetPassword/ResetPassword")
+);
 
 /* ============== Admin Pages ==============*/
 const AdminDashboard = lazy(() => import("../pages/AdminPages/Dashboard"));
@@ -30,6 +33,7 @@ export const router = createBrowserRouter([
 	{ path: "sign-up", element: <SignUp /> },
 	{ path: "verify-email", element: <VerifyEmailPage /> },
 	{ path: "forgot-password", element: <ForgetPassword /> },
+	{ path: "reset-password", element: <ResetPassword /> },
 	{ path: "test", element: <UserProfileTest /> },
 	/* ============== Admin Pages ==============*/
 	{

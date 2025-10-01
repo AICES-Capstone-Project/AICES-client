@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
+import ProtectedRoute from "./ProtectedRoute";
 import UserProfileTest from "../pages/UserProfileTest";
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
@@ -22,6 +23,7 @@ const ResetPassword = lazy(
 
 /* ============== Admin Pages ==============*/
 const AdminDashboard = lazy(() => import("../pages/AdminPages/Dashboard"));
+const AdminAccounts = lazy(() => import("../pages/AdminPages/Accounts"));
 
 export const router = createBrowserRouter([
 	/* ============== Candidates Pages ==============*/
@@ -40,8 +42,15 @@ export const router = createBrowserRouter([
 	/* ============== Admin Pages ==============*/
 	{
 		path: "/admin",
-		element: <AdminLayout />,
-		children: [{ path: "dashboard", element: <AdminDashboard /> }],
+		element: <ProtectedRoute allowedRoles={["Admin"]} />,
+		children: [
+			{
+				index: true,
+				element: <AdminLayout />,
+			},
+			{ path: "dashboard", element: <AdminDashboard /> },
+			{ path: "accounts", element: <AdminAccounts /> },
+		],
 	},
 
 	/* ============== Error Pages ==============*/

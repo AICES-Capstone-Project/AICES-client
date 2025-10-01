@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { APP_ROUTES } from "../../services/config";
 import { useAppDispatch } from "../../hooks/redux";
 import { fetchUser } from "../../stores/slices/authSlice";
+import { getRoleBasedRoute } from "../../routes/navigation";
 
 const SocialAuthForm = () => {
 	// const buttonClass =
@@ -35,8 +36,17 @@ const SocialAuthForm = () => {
 		if (res.status === 200 && res.data) {
 			toastSuccess("Login Success!", res.message);
 			// Fetch user data after successful login
-			dispatch(fetchUser());
-			navigate(APP_ROUTES.HOME);
+			const userResult = await dispatch(fetchUser());
+
+			// Navigate based on user role
+			if (fetchUser.fulfilled.match(userResult)) {
+				const userRole = userResult.payload.roleName;
+				const redirectRoute = getRoleBasedRoute(userRole);
+				navigate(redirectRoute);
+			} else {
+				// Fallback to home if user fetch fails
+				navigate(APP_ROUTES.HOME);
+			}
 		} else {
 			console.log("Login failed:", res);
 			toastError(

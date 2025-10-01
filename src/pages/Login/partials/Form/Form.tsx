@@ -9,6 +9,7 @@ import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 import SocialAuthForm from "../../../../components/Forms/SocialAuthForm";
 import { useAppDispatch } from "../../../../hooks/redux";
 import { fetchUser } from "../../../../stores/slices/authSlice";
+import { getRoleBasedRoute } from "../../../../routes/navigation";
 
 const Form: React.FC = () => {
 	const navigate = useNavigate();
@@ -56,8 +57,17 @@ const Form: React.FC = () => {
 			if (res.status === 200 && res.data) {
 				toastSuccess("Login Success!", res.message);
 				// Fetch user data after successful login
-				dispatch(fetchUser());
-				navigate("/");
+				const userResult = await dispatch(fetchUser());
+
+				// Navigate based on user role
+				if (fetchUser.fulfilled.match(userResult)) {
+					const userRole = userResult.payload.roleName;
+					const redirectRoute = getRoleBasedRoute(userRole);
+					navigate(redirectRoute);
+				} else {
+					// Fallback to home if user fetch fails
+					navigate("/");
+				}
 			} else {
 				console.log("Login failed:", res);
 				toastError(

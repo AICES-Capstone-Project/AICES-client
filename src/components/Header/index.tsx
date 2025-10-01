@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
 	Layout,
@@ -13,26 +13,30 @@ import {
 } from "antd";
 import type { MenuProps } from "antd";
 import { UserOutlined, BellOutlined } from "@ant-design/icons";
-import defaultAvatar from "../../assets/logo/logo_AICES_sample.png";
+import defaultAvatar from "../../assets/images/Avatar_Default.jpg";
 import logo from "../../assets/logo/logo_long.png";
+import { APP_ROUTES, STORAGE_KEYS } from "../../services/config";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
+import { fetchUser, logout } from "../../stores/slices/authSlice";
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
 
-type User = {
-	name: string;
-	avatarUrl?: string;
-};
-
 const AppHeader: React.FC = () => {
 	const location = useLocation();
 	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
 
-	const [user, setUser] = useState<User | null>({
-		name: "SNEYTAA",
-		avatarUrl: defaultAvatar,
-	});
+	const { user } = useAppSelector((state) => state.auth);
 	const unreadCount = 3;
+
+	// Check for existing token and fetch user data on component mount
+	useEffect(() => {
+		const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+		if (token && !user) {
+			dispatch(fetchUser());
+		}
+	}, [dispatch, user]);
 
 	const navItems: MenuProps["items"] = [
 		{
@@ -136,9 +140,8 @@ const AppHeader: React.FC = () => {
 
 	const handleUserMenuClick: MenuProps["onClick"] = (e) => {
 		if (e.key === "logout") {
-			console.log("logout clicked");
-			setUser(null);
-			navigate("/login");
+			dispatch(logout());
+			navigate(APP_ROUTES.HOME);
 		}
 	};
 
@@ -182,10 +185,10 @@ const AppHeader: React.FC = () => {
 			{!user ? (
 				<Space>
 					<Button style={{ fontWeight: 600 }}>
-						<Link to="/login">Sign In</Link>
+						<Link to={APP_ROUTES.LOGIN}>Sign In</Link>
 					</Button>
 					<Button type="primary" style={{ fontWeight: 600 }}>
-						<Link to="/register">Sign Up</Link>
+						<Link to={APP_ROUTES.SIGN_UP}>Sign Up</Link>
 					</Button>
 				</Space>
 			) : (
@@ -205,11 +208,11 @@ const AppHeader: React.FC = () => {
 						<Space style={{ cursor: "pointer" }}>
 							<Avatar
 								size={36}
-								src={user.avatarUrl}
+								src={user.avatarUrl || defaultAvatar}
 								icon={!user.avatarUrl ? <UserOutlined /> : undefined}
 							/>
 							<Text style={{ color: "#0f172a", fontWeight: 600 }}>
-								{user.name}
+								{user.fullName || user.email}
 							</Text>
 						</Space>
 					</Dropdown>

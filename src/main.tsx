@@ -1,6 +1,7 @@
 import { StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router-dom";
+import { Provider } from "react-redux";
 
 // font
 import "@fontsource/inter/400.css"; // Regular
@@ -14,30 +15,33 @@ import Loading from "./components/UI/Loading.tsx";
 import { router } from "./routes/index.tsx";
 import { Bounce, ToastContainer } from "react-toastify";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { store } from "./stores/store.ts";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<Suspense
-			fallback={
-				<Loading fullScreen size="lg" variant="primary" text="Loading..." />
-			}
-		>
-			<GoogleOAuthProvider clientId={import.meta.env.VITE_AUTH_GOOGLE_ID}>
-				<RouterProvider router={router} />
-			</GoogleOAuthProvider>
-			<ToastContainer
-				position="top-right"
-				autoClose={3000}
-				hideProgressBar={false}
-				newestOnTop={false}
-				closeOnClick={false}
-				rtl={false}
-				pauseOnFocusLoss
-				draggable
-				pauseOnHover
-				theme="light"
-				transition={Bounce}
-			/>
-		</Suspense>
+		<Provider store={store}>
+			<Suspense
+				fallback={
+					<Loading fullScreen size="lg" variant="primary" text="Loading..." />
+				}
+			>
+				<GoogleOAuthProvider clientId={import.meta.env.VITE_AUTH_GOOGLE_ID}>
+					<RouterProvider router={router} />
+				</GoogleOAuthProvider>
+				<ToastContainer
+					position="top-right"
+					autoClose={3000}
+					hideProgressBar={false}
+					newestOnTop={false}
+					closeOnClick={false}
+					rtl={false}
+					pauseOnFocusLoss
+					draggable
+					pauseOnHover
+					theme="light"
+					transition={Bounce}
+				/>
+			</Suspense>
+		</Provider>
 	</StrictMode>
 );

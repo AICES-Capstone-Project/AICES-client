@@ -3,16 +3,30 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { authService } from "../../services/authService";
 import { toastError, toastSuccess } from "../UI/Toast";
+import type { CredentialResponse } from "@react-oauth/google";
+import { useNavigate } from "react-router-dom";
+import { APP_ROUTES } from "../../services/config";
+import { useAppDispatch } from "../../hooks/redux";
+import { fetchUser } from "../../stores/slices/authSlice";
 
 const SocialAuthForm = () => {
 	// const buttonClass =
 	// 	"!font-medium min-h-12 w-full rounded-2 px-4 py-3.5 cursor-pointer transition-all duration-300 ease-in-out hover:bg-gray-50 hover:scale-[1.02] hover:shadow-lg !hover:shadow-gray-200/50 active:scale-[0.98] border !border-gray-200 !hover:border-gray-300";
 
-	const handleGoogleSuccess = async (credentialResponse: any) => {
+	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
+	const handleGoogleSuccess = async (
+		credentialResponse: CredentialResponse
+	) => {
 		console.log("Google login success:", credentialResponse);
 
 		const idToken = credentialResponse.credential;
 		console.log("ID Token:", idToken);
+
+		if (!idToken) {
+			toastError("Login failed", "No credential received from Google");
+			return;
+		}
 
 		const res = await authService.googleLogin(idToken);
 
@@ -20,6 +34,9 @@ const SocialAuthForm = () => {
 
 		if (res.status === 200 && res.data) {
 			toastSuccess("Login Success!", res.message);
+			// Fetch user data after successful login
+			dispatch(fetchUser());
+			navigate(APP_ROUTES.HOME);
 		} else {
 			console.log("Login failed:", res);
 			toastError(

@@ -32,7 +32,7 @@ export const APP_ROUTES = {
 	SIGN_UP: "/sign-up",
 
 	// Role-based routes
-	ADMIN_DASHBOARD: "/admin",
+	ADMIN_DASHBOARD: "/admin/dashboard",
 } as const;
 
 export default {

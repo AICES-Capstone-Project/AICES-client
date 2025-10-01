@@ -7,9 +7,12 @@ import FormError from "../../../../components/FormError/FormError";
 import { authService } from "../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 import SocialAuthForm from "../../../../components/Forms/SocialAuthForm";
+import { useAppDispatch } from "../../../../hooks/redux";
+import { fetchUser } from "../../../../stores/slices/authSlice";
 
 const Form: React.FC = () => {
 	const navigate = useNavigate();
+	const dispatch = useAppDispatch();
 
 	const [email, setEmail] = useState<string>("");
 	const [password, setPassword] = useState<string>("");
@@ -52,6 +55,8 @@ const Form: React.FC = () => {
 
 			if (res.status === 200 && res.data) {
 				toastSuccess("Login Success!", res.message);
+				// Fetch user data after successful login
+				dispatch(fetchUser());
 				navigate("/");
 			} else {
 				console.log("Login failed:", res);

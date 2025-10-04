@@ -9,6 +9,8 @@ import { APP_ROUTES } from "../../services/config";
 import { useAppDispatch } from "../../hooks/redux";
 import { fetchUser } from "../../stores/slices/authSlice";
 import { getRoleBasedRoute } from "../../routes/navigation";
+import { useState } from "react";
+import { Spin } from "antd";
 
 const SocialAuthForm = () => {
 	// const buttonClass =
@@ -16,6 +18,8 @@ const SocialAuthForm = () => {
 
 	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
+	const [loading, setLoading] = useState(false);
+
 	const handleGoogleSuccess = async (
 		credentialResponse: CredentialResponse
 	) => {
@@ -29,39 +33,55 @@ const SocialAuthForm = () => {
 			return;
 		}
 
-		const res = await authService.googleLogin(idToken);
+		try {
+			setLoading(true);
 
-		console.log(res);
+			// Add minimum 3 second loading time
+			const [res] = await Promise.all([
+				authService.googleLogin(idToken),
+				new Promise((resolve) => setTimeout(resolve, 3000)),
+			]);
 
-		if (res.status === 200 && res.data) {
-			toastSuccess("Login Success!", res.message);
-			// Fetch user data after successful login
-			const userResult = await dispatch(fetchUser());
+			console.log(res);
 
-			// Navigate based on user role
-			if (fetchUser.fulfilled.match(userResult)) {
-				const userRole = userResult.payload.roleName;
-				const redirectRoute = getRoleBasedRoute(userRole);
-				navigate(redirectRoute);
+			if (res.status === 200 && res.data) {
+				toastSuccess("Login Success!", res.message);
+				// Fetch user data after successful login
+				const userResult = await dispatch(fetchUser());
+
+				// Navigate based on user role
+				if (fetchUser.fulfilled.match(userResult)) {
+					const userRole = userResult.payload.roleName;
+					const redirectRoute = getRoleBasedRoute(userRole);
+					navigate(redirectRoute);
+				} else {
+					// Fallback to home if user fetch fails
+					navigate(APP_ROUTES.HOME);
+				}
 			} else {
-				// Fallback to home if user fetch fails
-				navigate(APP_ROUTES.HOME);
+				console.log("Login failed:", res);
+				toastError(
+					`Login failed ${res.status}`,
+					res.message || "Failed to login"
+				);
 			}
-		} else {
-			console.log("Login failed:", res);
-			toastError(
-				`Login failed ${res.status}`,
-				res.message || "Failed to login"
-			);
+		} finally {
+			setLoading(false);
 		}
 	};
 
 	return (
 		<div className="mt-10">
-			<GoogleLogin
-				onSuccess={handleGoogleSuccess}
-				onError={() => console.error("Google login failed")}
-			/>
+			{loading ? (
+				<div className="flex justify-center items-center py-3">
+					<Spin size="large" />
+				</div>
+			) : (
+				<GoogleLogin
+					onSuccess={handleGoogleSuccess}
+					onError={() => console.error("Google login failed")}
+				/>
+			)}
 		</div>
 	);
 

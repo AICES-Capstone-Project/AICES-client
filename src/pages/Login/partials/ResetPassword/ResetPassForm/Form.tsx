@@ -6,6 +6,7 @@ import FormError from "../../../../../components/FormError/FormError";
 import { authService } from "../../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../../components/UI/Toast";
 import { APP_ROUTES } from "../../../../../services/config";
+import { resetPasswordSchema } from "../../../../../utils/validations/auth.validation";
 
 const ResetPasswordForm: React.FC = () => {
 	const navigate = useNavigate();
@@ -16,39 +17,40 @@ const ResetPasswordForm: React.FC = () => {
 	);
 
 	const [newPassword, setNewPassword] = useState("");
-	const [confirm, setConfirm] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
 	const [formError, setFormError] = useState("");
-	const [pwError, setPwError] = useState("");
-	const [confirmError, setConfirmError] = useState("");
+	const [newPasswordError, setNewPasswordError] = useState("");
+	const [confirmPasswordError, setConfirmPasswordError] = useState("");
 	const [done, setDone] = useState(false);
 	const [loading, setLoading] = useState(false);
 
-	const validate = () => {
-		let ok = true;
-		setFormError("");
-		setPwError("");
-		setConfirmError("");
-
-		if (!token) {
-			setFormError(
-				"Invalid or missing link. Please request a new reset email."
-			);
-			return false;
-		}
-		if (!newPassword || newPassword.length < 8) {
-			setPwError("Password must be at least 8 characters.");
-			ok = false;
-		}
-		if (!confirm || confirm !== newPassword) {
-			setConfirmError("Passwords do not match.");
-			ok = false;
-		}
-		if (!ok) setFormError("Please fix the errors below.");
-		return ok;
-	};
-
 	const handleSubmit = async () => {
-		if (!validate()) return;
+		// Reset errors
+		setFormError("");
+		setNewPasswordError("");
+		setConfirmPasswordError("");
+
+		// Validate using Zod
+		const validationResult = resetPasswordSchema.safeParse({
+			token,
+			newPassword,
+			confirmPassword,
+		});
+
+		if (!validationResult.success) {
+			const errors = validationResult.error.issues; // Change from .errors to .issues
+			errors.forEach((error) => {
+				if (error.path[0] === "token") {
+					setFormError(error.message);
+				} else if (error.path[0] === "newPassword") {
+					setNewPasswordError(error.message);
+				} else if (error.path[0] === "confirmPassword") {
+					setConfirmPasswordError(error.message);
+				}
+			});
+			if (!formError) setFormError("Please fix the errors below.");
+			return;
+		}
 
 		try {
 			setLoading(true);
@@ -124,24 +126,26 @@ const ResetPasswordForm: React.FC = () => {
 						placeholder="New password"
 						value={newPassword}
 						onChange={(e) => setNewPassword(e.target.value)}
-						status={pwError ? "error" : undefined}
+						status={newPasswordError ? "error" : undefined}
 						className="!px-3 !py-2 !w-[536px]"
 						onPressEnter={handleSubmit}
 					/>
-					{pwError && <div className="text-red-500 text-sm">{pwError}</div>}
+					{newPasswordError && (
+						<div className="text-red-500 text-sm">{newPasswordError}</div>
+					)}
 				</div>
 
 				<div className="flex flex-col gap-1">
 					<Input.Password
 						placeholder="Confirm new password"
-						value={confirm}
-						onChange={(e) => setConfirm(e.target.value)}
-						status={confirmError ? "error" : undefined}
+						value={confirmPassword}
+						onChange={(e) => setConfirmPassword(e.target.value)}
+						status={confirmPasswordError ? "error" : undefined}
 						className="!px-3 !py-2 !w-[536px]"
 						onPressEnter={handleSubmit}
 					/>
-					{confirmError && (
-						<div className="text-red-500 text-sm">{confirmError}</div>
+					{confirmPasswordError && (
+						<div className="text-red-500 text-sm">{confirmPasswordError}</div>
 					)}
 				</div>
 			</div>

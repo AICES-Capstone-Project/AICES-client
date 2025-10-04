@@ -30,7 +30,17 @@ api.interceptors.response.use(
 			_retry?: boolean;
 		};
 
-		if (error.response?.status === 401 && !originalRequest._retry) {
+		// Skip token refresh for login/signup endpoints
+		const isAuthEndpoint =
+			originalRequest.url?.includes(API_ENDPOINTS.AUTH.LOGIN) ||
+			originalRequest.url?.includes(API_ENDPOINTS.AUTH.SIGN_UP) ||
+			originalRequest.url?.includes(API_ENDPOINTS.AUTH.GOOGLE_LOGIN);
+
+		if (
+			error.response?.status === 401 &&
+			!originalRequest._retry &&
+			!isAuthEndpoint
+		) {
 			originalRequest._retry = true;
 
 			try {

@@ -2,6 +2,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../../services/authService";
 import type { UserResponse } from "../../types/auth.types";
+import { toast } from "react-toastify";
 
 type User = UserResponse;
 
@@ -44,6 +45,7 @@ export const logoutUser = createAsyncThunk(
 			console.log(res);
 
 			if (res.status === 200) {
+				toast.success(res.message || "Logout successful");
 				return;
 			}
 			return thunkAPI.rejectWithValue(res.message || "Failed to logout");

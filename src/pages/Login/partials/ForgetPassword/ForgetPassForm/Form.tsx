@@ -8,6 +8,7 @@ import FormError from "../../../../../components/FormError/FormError";
 import { APP_ROUTES } from "../../../../../services/config";
 import { authService } from "../../../../../services/authService";
 import { toastError, toastSuccess } from "../../../../../components/UI/Toast";
+import { forgotPasswordSchema } from "../../../../../utils/validations/auth.validation";
 
 const ForgotPasswordForm: React.FC = () => {
 	const navigate = useNavigate();
@@ -19,13 +20,20 @@ const ForgotPasswordForm: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 
 	const handleSubmit = async () => {
-		// reset errors
+		// Reset errors
 		setFormError("");
 		setEmailError("");
 
-		// validate
-		if (!email.trim()) {
-			setEmailError("Please enter your email address.");
+		// Validate using Zod
+		const validationResult = forgotPasswordSchema.safeParse({ email });
+
+		if (!validationResult.success) {
+			const errors = validationResult.error.issues;
+			errors.forEach((error) => {
+				if (error.path[0] === "email") {
+					setEmailError(error.message);
+				}
+			});
 			setFormError("Please fix the errors below.");
 			return;
 		}

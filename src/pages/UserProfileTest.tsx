@@ -1,21 +1,5 @@
 import { useState } from "react";
-
-// Mock auth service - replace with your actual import
-const authService = {
-	getCurrentUser: async () => {
-		const token = localStorage.getItem("access_token");
-
-		const response = await fetch("https://localhost:7220/api/auth/me", {
-			method: "GET",
-			headers: {
-				Authorization: `Bearer ${token}`,
-				"Content-Type": "application/json",
-			},
-		});
-
-		return await response.json();
-	},
-};
+import { authService } from "../services/authService"; // Import the real authService
 
 export default function UserProfileTest() {
 	const [user, setUser] = useState(null);
@@ -28,6 +12,7 @@ export default function UserProfileTest() {
 		setUser(null);
 
 		try {
+			// Use the real authService.getCurrentUser()
 			const response = await authService.getCurrentUser();
 
 			console.log("API Response:", response);

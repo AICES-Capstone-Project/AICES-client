@@ -11,6 +11,7 @@ import { useAppDispatch } from "../../../../hooks/redux";
 import { fetchUser } from "../../../../stores/slices/authSlice";
 import { getRoleBasedRoute } from "../../../../routes/navigation";
 import { APP_ROUTES } from "../../../../services/config";
+import { loginSchema } from "../../../../utils/validations/auth.validation";
 
 const Form: React.FC = () => {
 	const navigate = useNavigate();
@@ -25,22 +26,25 @@ const Form: React.FC = () => {
 
 	const [loading, setLoading] = useState(false);
 
-	const handleSubmit = async () => {
-		let hasError = false;
+	const handleSubmit = async (e?: React.FormEvent) => {
+		e?.preventDefault();
+		// Reset errors
 		setFormError("");
 		setEmailError("");
 		setPasswordError("");
 
-		if (!email.trim()) {
-			setEmailError("Please enter your email address.");
-			hasError = true;
-		}
-		if (!password) {
-			setPasswordError("Please enter your password.");
-			hasError = true;
-		}
+		// Validate using Zod
+		const validationResult = loginSchema.safeParse({ email, password });
 
-		if (hasError) {
+		if (!validationResult.success) {
+			const errors = validationResult.error.issues;
+			errors.forEach((error) => {
+				if (error.path[0] === "email") {
+					setEmailError(error.message);
+				} else if (error.path[0] === "password") {
+					setPasswordError(error.message);
+				}
+			});
 			setFormError("Please fix the errors below.");
 			return;
 		}
@@ -49,12 +53,14 @@ const Form: React.FC = () => {
 
 		try {
 			setLoading(true);
-			console.log("Submitting:", { email, password });
 
-			const res = await authService.login({ email, password });
+			// Add minimum 3 second loading time
+			const [res] = await Promise.all([
+				authService.login({ email, password }),
+				new Promise((resolve) => setTimeout(resolve, 3000)),
+			]);
 
 			console.log(res);
-
 			if (res.status === 200 && res.data) {
 				toastSuccess("Login Success!", res.message);
 				// Fetch user data after successful login
@@ -66,8 +72,7 @@ const Form: React.FC = () => {
 					const redirectRoute = getRoleBasedRoute(userRole);
 					navigate(redirectRoute);
 				} else {
-					// Fallback to home if user fetch fails
-					navigate("/");
+					navigate(APP_ROUTES.HOME);
 				}
 			} else {
 				console.log("Login failed:", res);
@@ -119,6 +124,7 @@ const Form: React.FC = () => {
 						onChange={(e) => setEmail(e.target.value)}
 						status={emailError ? "error" : undefined}
 						className="!flex !items-center !px-3 !py-2 !w-[536px] !gap-1"
+						onPressEnter={handleSubmit}
 					/>
 					{emailError && (
 						<div className="text-red-500 text-sm">{emailError}</div>
@@ -132,6 +138,7 @@ const Form: React.FC = () => {
 						onChange={(e) => setPassword(e.target.value)}
 						status={passwordError ? "error" : undefined}
 						className="!flex !items-center !px-3 !py-2 !w-[536px] !gap-1"
+						onPressEnter={handleSubmit}
 					/>
 					{passwordError && (
 						<div className="text-red-500 text-sm">{passwordError}</div>

@@ -10,6 +10,7 @@ import SocialAuthForm from "../../../../components/Forms/SocialAuthForm";
 import { useAppDispatch } from "../../../../hooks/redux";
 import { fetchUser } from "../../../../stores/slices/authSlice";
 import { getRoleBasedRoute } from "../../../../routes/navigation";
+import { APP_ROUTES } from "../../../../services/config";
 
 const Form: React.FC = () => {
 	const navigate = useNavigate();
@@ -99,7 +100,7 @@ const Form: React.FC = () => {
 						</div>
 						<div
 							className="cursor-pointer text-green-600 font-inter text-base font-medium"
-							onClick={() => navigate("/sign-up")}
+							onClick={() => navigate(APP_ROUTES.SIGN_UP)}
 						>
 							Register
 						</div>
@@ -141,7 +142,7 @@ const Form: React.FC = () => {
 					<p className="w-full flex justify-end">
 						<span
 							className="cursor-pointer text-green-600 font-inter text-sm font-medium"
-							onClick={() => navigate("/forgot-password")}
+							onClick={() => navigate(APP_ROUTES.FORGOT_PASSWORD)}
 						>
 							Forget password
 						</span>

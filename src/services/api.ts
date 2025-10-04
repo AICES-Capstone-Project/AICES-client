@@ -1,12 +1,13 @@
 import axios, { AxiosError } from "axios";
 import type { AxiosRequestConfig } from "axios";
-import { API_CONFIG, STORAGE_KEYS } from "./config";
+import { API_CONFIG, API_ENDPOINTS, APP_ROUTES, STORAGE_KEYS } from "./config";
 import type { ApiResponse } from "../types/api.types";
 
 // Tạo axios instance
 const api = axios.create({
 	baseURL: API_CONFIG.BASE_URL,
 	timeout: 10000,
+	withCredentials: true,
 });
 
 // Interceptor để thêm token vào header
@@ -21,6 +22,51 @@ api.interceptors.request.use((config) => {
 	}
 	return config;
 });
+
+api.interceptors.response.use(
+	(response) => response,
+	async (error: AxiosError) => {
+		const originalRequest = error.config as AxiosRequestConfig & {
+			_retry?: boolean;
+		};
+
+		if (error.response?.status === 401 && !originalRequest._retry) {
+			originalRequest._retry = true;
+
+			try {
+				// Call refresh (refresh token sent via cookie automatically)
+				console.log("Attempting token refresh...");
+
+				const response = await axios.post(
+					`${API_CONFIG.BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`,
+					{},
+					{ withCredentials: true }
+				);
+				console.log("Refresh response:", response);
+
+				if (response.data?.status === 200 && response.data?.data?.accessToken) {
+					localStorage.setItem(
+						STORAGE_KEYS.ACCESS_TOKEN,
+						response.data.data.accessToken
+					);
+
+					if (originalRequest.headers) {
+						originalRequest.headers[
+							"Authorization"
+						] = `Bearer ${response.data.data.accessToken}`;
+					}
+					return api.request(originalRequest);
+				}
+			} catch (refreshError) {
+				localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+				window.location.href = APP_ROUTES.LOGIN;
+				return Promise.reject(refreshError);
+			}
+		}
+
+		return Promise.reject(error);
+	}
+);
 
 // Hàm wrapper cho axios
 export const requestApi = async <T>(

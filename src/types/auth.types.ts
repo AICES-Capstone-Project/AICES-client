@@ -23,3 +23,12 @@ export interface UserResponse {
 	avatarUrl: string | null;
 	isActive: boolean;
 }
+
+export interface ResetPasswordResetRequest {
+	email: string;
+}
+
+export interface ResetPasswordRequest {
+	token: string;
+	newPassword: string;
+}

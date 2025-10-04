@@ -3,6 +3,8 @@ import { STORAGE_KEYS, API_ENDPOINTS } from "./config";
 import type {
 	LoginRequest,
 	LoginResponse,
+	ResetPasswordRequest,
+	ResetPasswordResetRequest,
 	SignUpRequest,
 	UserResponse,
 } from "../types/auth.types";
@@ -16,7 +18,6 @@ export const authService = {
 		if (res.status === 200 && res.data) {
 			// Lưu token
 			localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, res.data.accessToken);
-			// localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, res.data.refreshToken);
 		}
 		return res;
 	},
@@ -28,7 +29,6 @@ export const authService = {
 		if (res.status === 200 && res.data) {
 			// Lưu token
 			localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, res.data.accessToken);
-			// localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, res.data.refreshToken);
 		}
 
 		return res;
@@ -44,5 +44,29 @@ export const authService = {
 
 	getCurrentUser: async (): Promise<ApiResponse<UserResponse>> => {
 		return await get<UserResponse>(API_ENDPOINTS.AUTH.ME);
+	},
+
+	logout: async (): Promise<ApiResponse<null>> => {
+		const res = await post<null>(API_ENDPOINTS.AUTH.LOGOUT);
+		console.log("logout response:", res);
+
+		// Clear access token từ localStorage
+		localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+
+		return res;
+	},
+
+	requestPasswordReset: async (data: ResetPasswordResetRequest) => {
+		return await post<ApiResponse<null>>(
+			API_ENDPOINTS.AUTH.REQUEST_PASSWORD_RESET,
+			data
+		);
+	},
+
+	resetPassword: async (data: ResetPasswordRequest) => {
+		return await post<ApiResponse<null>>(
+			API_ENDPOINTS.AUTH.RESET_PASSWORD,
+			data
+		);
 	},
 };

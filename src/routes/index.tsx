@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { lazy } from "react";
 import ProtectedRoute from "./ProtectedRoute";
 import UserProfileTest from "../pages/UserProfileTest";
+import { APP_ROUTES } from "../services/config";
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
@@ -28,28 +29,28 @@ const AdminAccounts = lazy(() => import("../pages/AdminPages/Accounts"));
 export const router = createBrowserRouter([
 	/* ============== Candidates Pages ==============*/
 	{
-		path: "/",
+		path: APP_ROUTES.HOME,
 		element: <MainLayout />,
 		errorElement: <ErrorPage />,
 		children: [{ index: true, element: <Home /> }],
 	},
-	{ path: "login", element: <Login /> },
-	{ path: "sign-up", element: <SignUp /> },
-	{ path: "verify-email", element: <VerifyEmailPage /> },
-	{ path: "forgot-password", element: <ForgetPassword /> },
-	{ path: "reset-password", element: <ResetPassword /> },
-	{ path: "test", element: <UserProfileTest /> },
+	{ path: APP_ROUTES.LOGIN, element: <Login /> },
+	{ path: APP_ROUTES.SIGN_UP, element: <SignUp /> },
+	{ path: APP_ROUTES.VERIFY_EMAIL, element: <VerifyEmailPage /> },
+	{ path: APP_ROUTES.FORGOT_PASSWORD, element: <ForgetPassword /> },
+	{ path: APP_ROUTES.RESET_PASSWORD, element: <ResetPassword /> },
+	{ path: APP_ROUTES.TEST, element: <UserProfileTest /> },
 	/* ============== Admin Pages ==============*/
 	{
-		path: "/admin",
+		path: APP_ROUTES.ADMIN,
 		element: <ProtectedRoute allowedRoles={["Admin"]} />,
 		children: [
 			{
 				index: true,
 				element: <AdminLayout />,
 			},
-			{ path: "dashboard", element: <AdminDashboard /> },
-			{ path: "accounts", element: <AdminAccounts /> },
+			{ path: APP_ROUTES.ADMIN_DASHBOARD, element: <AdminDashboard /> },
+			{ path: APP_ROUTES.ADMIN_USERS, element: <AdminAccounts /> },
 		],
 	},
 

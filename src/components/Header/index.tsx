@@ -17,7 +17,7 @@ import defaultAvatar from "../../assets/images/Avatar_Default.jpg";
 import logo from "../../assets/logo/logo_long.png";
 import { APP_ROUTES, STORAGE_KEYS } from "../../services/config";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
-import { fetchUser, logout } from "../../stores/slices/authSlice";
+import { fetchUser, logoutUser } from "../../stores/slices/authSlice";
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -35,6 +35,7 @@ const AppHeader: React.FC = () => {
 		const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
 		if (token && !user) {
 			dispatch(fetchUser());
+			console.log("Fetching user data with token:", user);
 		}
 	}, [dispatch, user]);
 
@@ -140,7 +141,7 @@ const AppHeader: React.FC = () => {
 
 	const handleUserMenuClick: MenuProps["onClick"] = (e) => {
 		if (e.key === "logout") {
-			dispatch(logout());
+			dispatch(logoutUser());
 			navigate(APP_ROUTES.HOME);
 		}
 	};

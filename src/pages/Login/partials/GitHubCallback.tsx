@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../../hooks/redux";
 import { authService } from "../../../services/authService";
@@ -11,8 +11,12 @@ import { Spin } from "antd";
 const GitHubCallback = () => {
 	const navigate = useNavigate();
 	const dispatch = useAppDispatch();
+	const hasProcessed = useRef(false);
 
 	useEffect(() => {
+		// Prevent double execution in StrictMode
+		if (hasProcessed.current) return;
+		hasProcessed.current = true;
 		const handleGithubCallback = async () => {
 			const urlParams = new URLSearchParams(window.location.search);
 			const code = urlParams.get("code");
@@ -100,5 +104,3 @@ const GitHubCallback = () => {
 };
 
 export default GitHubCallback;
-
-

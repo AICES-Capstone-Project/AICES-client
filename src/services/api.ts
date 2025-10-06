@@ -34,7 +34,8 @@ api.interceptors.response.use(
 		const isAuthEndpoint =
 			originalRequest.url?.includes(API_ENDPOINTS.AUTH.LOGIN) ||
 			originalRequest.url?.includes(API_ENDPOINTS.AUTH.SIGN_UP) ||
-			originalRequest.url?.includes(API_ENDPOINTS.AUTH.GOOGLE_LOGIN);
+			originalRequest.url?.includes(API_ENDPOINTS.AUTH.GOOGLE_LOGIN) ||
+			originalRequest.url?.includes(API_ENDPOINTS.AUTH.GITHUB_LOGIN);
 
 		if (
 			error.response?.status === 401 &&

@@ -34,6 +34,26 @@ export const authService = {
 		return res;
 	},
 
+	githubLogin: async (code: string): Promise<ApiResponse<LoginResponse>> => {
+		console.log("🔐 [authService] Calling GitHub login API with code:", code);
+		const res = await post<LoginResponse>(API_ENDPOINTS.AUTH.GITHUB_LOGIN, {
+			code,
+		});
+		console.log("✅ [authService] GitHub login API response:", {
+			status: res.status,
+			hasData: !!res.data,
+			message: res.message,
+		});
+
+		if (res.status === 200 && res.data) {
+			// Lưu token
+			localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, res.data.accessToken);
+			console.log("💾 [authService] Access token saved to localStorage");
+		}
+
+		return res;
+	},
+
 	signUp: async (data: SignUpRequest) => {
 		return await post<ApiResponse<null>>(API_ENDPOINTS.AUTH.SIGN_UP, data);
 	},

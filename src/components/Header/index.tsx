@@ -210,7 +210,7 @@ const AppHeader: React.FC = () => {
 							<Avatar
 								size={36}
 								src={user.avatarUrl || defaultAvatar}
-								icon={!user.avatarUrl ? <UserOutlined /> : undefined}
+								icon={<UserOutlined />}
 							/>
 							<Text style={{ color: "#0f172a", fontWeight: 600 }}>
 								{user.fullName || user.email}

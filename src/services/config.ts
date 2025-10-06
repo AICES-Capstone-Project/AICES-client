@@ -17,12 +17,24 @@ export const API_ENDPOINTS = {
 		SIGN_UP: "/auth/register",
 		LOGIN: "/auth/login",
 		GOOGLE_LOGIN: "/auth/google",
+		GITHUB_LOGIN: "/auth/github",
 		VERIFY_EMAIL: (token: string) => `/auth/verify-email?token=${token}`,
 		ME: "/auth/me",
 		REFRESH: "/auth/refresh",
 		LOGOUT: "/auth/logout",
 		REQUEST_PASSWORD_RESET: "/auth/request-password-reset",
 		RESET_PASSWORD: "/auth/reset-password",
+	},
+
+	// Admin endpoints
+	ADMIN: {
+		USERS: {
+			LIST: "/admin/users",
+			CREATE: "/admin/users",
+			DETAIL: (id: number | string) => `/admin/users/${id}`,
+			UPDATE: (id: number | string) => `/admin/users/${id}`,
+			DELETE: (id: number | string) => `/admin/users/${id}`,
+		},
 	},
 } as const;
 
@@ -38,11 +50,19 @@ export const APP_ROUTES = {
 	VERIFY_EMAIL: "/verify-email",
 	FORGOT_PASSWORD: "/forgot-password",
 	RESET_PASSWORD: "/reset-password",
+	AUTH_CALLBACK: "/auth/callback",
 
 	// Role-based routes
 	ADMIN: "/admin",
 	ADMIN_DASHBOARD: "/admin/dashboard",
 	ADMIN_USERS: "/admin/users",
+	ADMIN_RECRUITMENT_APPROVAL: "/admin/recruitment-approval",
+	ADMIN_JOBS: "/admin/jobs",
+	ADMIN_ASSESSMENTS: "/admin/assessments",
+	ADMIN_REPORTS: "/admin/reports",
+	ADMIN_SETTINGS: "/admin/settings",
+	ADMIN_NOTIFICATIONS: "/admin/notifications",
+	ADMIN_LOGS: "/admin/logs",
 } as const;
 
 export default {

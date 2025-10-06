@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 import { APP_ROUTES, STORAGE_KEYS } from "../services/config";
 import { useAppDispatch, useAppSelector } from "../hooks/redux";
@@ -17,21 +17,37 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 	const dispatch = useAppDispatch();
 	const { user, loading } = useAppSelector((state) => state.auth);
 
-	// Check for token and fetch user if needed
-	useEffect(() => {
-		const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-		if (token && !user && !loading) {
-			dispatch(fetchUser());
-		}
-	}, [dispatch, user, loading]);
+	// Read token once per render
+	const token = useMemo(
+		() =>
+			typeof window !== "undefined"
+				? localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN)
+				: null,
+		[]
+	);
 
-	// Show loading while fetching user data
-	if (loading) {
+	// Local bootstrap flag to avoid redirecting before we try fetching user on reload
+	const [bootstrapping, setBootstrapping] = useState<boolean>(!!token && !user);
+
+	// Fetch user if we have a token but no user yet
+	useEffect(() => {
+		if (token && !user) {
+			setBootstrapping(true);
+			// Dispatch and clear bootstrap flag when done
+			Promise.resolve(dispatch(fetchUser())).finally(() =>
+				setBootstrapping(false)
+			);
+		}
+		// we intentionally omit dependencies to avoid re-fetch loops
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	// Show loading while bootstrapping or fetching user data
+	if (bootstrapping || loading) {
 		return <Loading fullScreen size="lg" variant="primary" text="Loading..." />;
 	}
 
 	// Check if user is logged in
-	const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
 	if (!token || !user) {
 		// Not logged in → redirect to login
 		return <Navigate to={APP_ROUTES.LOGIN} replace />;

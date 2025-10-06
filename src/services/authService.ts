@@ -22,9 +22,11 @@ export const authService = {
 		return res;
 	},
 
-	googleLogin: async (idToken: string): Promise<ApiResponse<LoginResponse>> => {
+	googleLogin: async (
+		accessToken: string
+	): Promise<ApiResponse<LoginResponse>> => {
 		const res = await post<LoginResponse>(API_ENDPOINTS.AUTH.GOOGLE_LOGIN, {
-			idToken,
+			accessToken,
 		});
 		if (res.status === 200 && res.data) {
 			// Lưu token

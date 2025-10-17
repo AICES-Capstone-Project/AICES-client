@@ -20,11 +20,9 @@ const ForgotPasswordForm: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 
 	const handleSubmit = async () => {
-		// Reset errors
 		setFormError("");
 		setEmailError("");
 
-		// Validate using Zod
 		const validationResult = forgotPasswordSchema.safeParse({ email });
 
 		if (!validationResult.success) {
@@ -34,7 +32,6 @@ const ForgotPasswordForm: React.FC = () => {
 					setEmailError(error.message);
 				}
 			});
-			setFormError("Please fix the errors below.");
 			return;
 		}
 
@@ -66,16 +63,16 @@ const ForgotPasswordForm: React.FC = () => {
 
 	if (submitted) {
 		return (
-			<div className="flex flex-col gap-8">
-				<div className="flex flex-col gap-4">
-					<div className="text-gray-900 font-inter text-[32px] font-medium">
+			<div className="flex flex-col gap-4">
+				<div className="flex flex-col gap-3 text-center items-center">
+					<h2 className="text-3xl font-bold text-gray-800 tracking-tight">
 						Check your email
-					</div>
-					<div className="text-gray-600 font-inter text-base font-normal">
+					</h2>
+					<p className="text-gray-600 text-base max-w-md">
 						If an account exists for{" "}
-						<span className="font-medium">{email}</span>, we've sent a password
-						reset link. Please follow the instructions in the email.
-					</div>
+						<span className="font-medium text-gray-900">{email}</span>, we’ve sent you a
+						password reset link. Please check your inbox and follow the instructions.
+					</p>
 				</div>
 
 				<Button
@@ -91,22 +88,17 @@ const ForgotPasswordForm: React.FC = () => {
 	}
 
 	return (
-		<div className="flex flex-col gap-8">
-			{/* Heading */}
-			<div>
-				<div className="flex flex-col gap-4">
-					<div className="text-gray-900 font-inter text-[32px] font-medium">
-						Forgot password
-					</div>
-
-					<div className="text-gray-600 font-inter text-base font-normal">
-						Enter the email address associated with your account and we'll send
-						you a reset link.
-					</div>
-				</div>
+		<div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+			<div className="flex flex-col gap-2 items-center text-center mb-6">
+				<h2 className="text-3xl font-bold text-gray-800 tracking-tight">
+					Forgot password
+				</h2>
+				<p className="text-sm text-gray-500">
+					Enter the email address associated with your account and we'll send
+					you a reset link.
+				</p>
 			</div>
 
-			{/* Inputs */}
 			<div className="flex flex-col gap-5">
 				{formError && <FormError type="error">{formError}</FormError>}
 
@@ -116,11 +108,13 @@ const ForgotPasswordForm: React.FC = () => {
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
 						status={emailError ? "error" : undefined}
-						className="!flex !items-center !px-3 !py-2 !w-[536px] !gap-1"
+						className="!w-full !h-12 !px-3 !py-2 !rounded-lg 
+						!border-green-600 focus:!border-green-700 
+						hover:!border-green-700 transition-all duration-300"
 						onPressEnter={handleSubmit}
 					/>
 					{emailError && (
-						<div className="text-red-500 text-sm">{emailError}</div>
+						<div className="text-red-500 text-sm !mb-1">{emailError}</div>
 					)}
 				</div>
 			</div>
@@ -132,15 +126,18 @@ const ForgotPasswordForm: React.FC = () => {
 				block
 				loading={loading}
 				disabled={loading}
-				className="!bg-green-600 !border-green-600 !text-white !font-semibold hover:!bg-green-700 hover:!border-green-700"
+				className="!bg-gradient-to-r from-emerald-800 via-lime-700 to-lime-600
+				!text-white !border-none rounded-xl font-semibold shadow-md
+				hover:from-emerald-700 hover:via-lime-600 hover:to-lime-500
+				transition-all duration-300"
 			>
 				Send reset link
 			</Button>
 
-			<div className="text-gray-600 font-inter text-sm text-center">
-				Remember your password?{" "}
+			<div className="flex justify-center items-center gap-1 text-sm">
+				<span className="text-gray-600">Remember your password?</span>
 				<span
-					className="cursor-pointer text-green-600 font-medium underline"
+					className="cursor-pointer text-green-600 font-medium hover:underline"
 					onClick={() => navigate(APP_ROUTES.LOGIN)}
 				>
 					Log in

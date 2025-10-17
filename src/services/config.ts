@@ -45,6 +45,8 @@ export const APP_ROUTES = {
 	TEST: "/test",
 
 	// Auth routes
+	
+	PRICING: "/pricing",
 	LOGIN: "/login",
 	SIGN_UP: "/sign-up",
 	VERIFY_EMAIL: "/verify-email",

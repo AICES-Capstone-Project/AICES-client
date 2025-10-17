@@ -55,7 +55,10 @@ api.interceptors.response.use(
 				);
 				console.log("Refresh response:", response);
 
-				if (response.data?.status === 200 && response.data?.data?.accessToken) {
+				if (
+					response.data?.status === "Success" &&
+					response.data?.data?.accessToken
+				) {
 					localStorage.setItem(
 						STORAGE_KEYS.ACCESS_TOKEN,
 						response.data.data.accessToken
@@ -97,7 +100,7 @@ export const requestApi = async <T>(
 		console.error("API call failed:", err);
 
 		return {
-			status: err.response?.status || 500,
+			status: err.response?.status || "Error",
 			message: err.response?.data?.message || err.message || "Unknown error",
 			data: null,
 		} as ApiResponse<T>;

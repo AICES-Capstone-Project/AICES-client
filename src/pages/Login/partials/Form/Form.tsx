@@ -61,7 +61,7 @@ const Form: React.FC = () => {
 			]);
 
 			console.log(res);
-			if (res.status === 200 && res.data) {
+			if (res.status === "Success" && res.data) {
 				toastSuccess("Login Success!", res.message);
 				// Fetch user data after successful login
 				const userResult = await dispatch(fetchUser());

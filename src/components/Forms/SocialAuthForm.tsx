@@ -44,8 +44,9 @@ const SocialAuthForm = () => {
 				]);
 
 				console.log("📝 [Google] Server response:", res);
+				console.log(res.status);
 
-				if (res.status === 200 && res.data) {
+				if (res.status === "Success" && res.data) {
 					toastSuccess("Login Success!", res.message);
 					const userResult = await dispatch(fetchUser());
 

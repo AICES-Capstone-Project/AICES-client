@@ -60,7 +60,7 @@ const ResetPasswordForm: React.FC = () => {
 				newPassword,
 			});
 
-			if (res.status === 200) {
+			if (res.status === "Success") {
 				toastSuccess(
 					"Password reset successful!",
 					"You can now log in with your new password."

@@ -15,7 +15,7 @@ export const authService = {
 		const res = await post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, data);
 		console.log(res);
 
-		if (res.status === 200 && res.data) {
+		if (res.status === "Success" && res.data) {
 			// Lưu token
 			localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, res.data.accessToken);
 		}
@@ -28,7 +28,7 @@ export const authService = {
 		const res = await post<LoginResponse>(API_ENDPOINTS.AUTH.GOOGLE_LOGIN, {
 			accessToken,
 		});
-		if (res.status === 200 && res.data) {
+		if (res.status === "Success" && res.data) {
 			// Lưu token
 			localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, res.data.accessToken);
 		}
@@ -47,7 +47,7 @@ export const authService = {
 			message: res.message,
 		});
 
-		if (res.status === 200 && res.data) {
+		if (res.status === "Success" && res.data) {
 			// Lưu token
 			localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, res.data.accessToken);
 			console.log("💾 [authService] Access token saved to localStorage");

@@ -48,7 +48,7 @@ export default function Accounts() {
 	const fetchData = async (page = 1, pageSize = DEFAULT_PAGE_SIZE, kw = "") => {
 		setLoading(true);
 		const res = await userService.list({ page, pageSize, keyword: kw });
-		if (res.status === 200 && res.data) {
+		if (res.status === "Success" && res.data) {
 			setUsers(res.data.items);
 			setTotal(res.data.total);
 		} else {
@@ -126,7 +126,7 @@ export default function Accounts() {
 		try {
 			const values = await createForm.validateFields();
 			const res = await userService.create(values);
-			if (res.status === 200) {
+			if (res.status === "Success") {
 				message.success("User created");
 				setIsCreateOpen(false);
 				createForm.resetFields();
@@ -160,7 +160,7 @@ export default function Accounts() {
 		try {
 			const values = await editForm.validateFields();
 			const res = await userService.update(editingUser.userId, values);
-			if (res.status === 200) {
+			if (res.status === "Success") {
 				message.success("User updated");
 				setIsEditOpen(false);
 				setEditingUser(null);
@@ -186,7 +186,7 @@ export default function Accounts() {
 			icon: undefined,
 			onOk: async () => {
 				const res = await userService.remove(user.userId);
-				if (res.status === 200) {
+				if (res.status === "Success") {
 					message.success("User deleted");
 					fetchData(
 						pagination.current || 1,

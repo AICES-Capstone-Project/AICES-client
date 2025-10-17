@@ -42,7 +42,7 @@ const ForgotPasswordForm: React.FC = () => {
 			setLoading(true);
 			const res = await authService.requestPasswordReset({ email });
 
-			if (res.status === 200) {
+			if (res.status === "Success") {
 				toastSuccess(
 					"Reset link sent!",
 					"Please check your email for reset instructions."

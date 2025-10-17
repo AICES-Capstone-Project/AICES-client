@@ -24,7 +24,7 @@ export const fetchUser = createAsyncThunk(
 	async (_, thunkAPI) => {
 		try {
 			const res = await authService.getCurrentUser();
-			if (res.status === 200 && res.data) {
+			if (res.status === "Success" && res.data) {
 				console.log(res.data);
 				return res.data;
 			}
@@ -44,7 +44,7 @@ export const logoutUser = createAsyncThunk(
 			const res = await authService.logout();
 			console.log(res);
 
-			if (res.status === 200) {
+			if (res.status === "Success") {
 				toast.success(res.message || "Logout successful");
 				return;
 			}

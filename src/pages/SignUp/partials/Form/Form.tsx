@@ -69,7 +69,7 @@ const SignupForm: React.FC = () => {
 				new Promise((resolve) => setTimeout(resolve, 3000)),
 			]);
 
-			if (res.status === 200) {
+			if (res.status === "Success") {
 				toastSuccess("Signup Success!", res.message);
 				navigate(APP_ROUTES.LOGIN);
 			} else {

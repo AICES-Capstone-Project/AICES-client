@@ -27,7 +27,7 @@ const VerifyEmailPage = () => {
 			}
 
 			const res = await authService.verifyEmail(token);
-			if (res.status === 200) {
+			if (res.status === "Success") {
 				toast.success(res.message);
 				setMessage("✅ Email verified successfully! Redirecting to login...");
 				setLoading(false);

@@ -52,7 +52,7 @@ const GitHubCallback = () => {
 
 				console.log("📦 [GitHub] Login response:", res);
 
-				if (res.status === 200 && res.data) {
+				if (res.status === "Success" && res.data) {
 					console.log("✅ [GitHub] Login successful!");
 					toastSuccess("Login Success!", res.message);
 

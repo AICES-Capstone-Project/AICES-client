@@ -52,7 +52,10 @@ export const APP_ROUTES = {
 	RESET_PASSWORD: "/reset-password",
 	AUTH_CALLBACK: "/auth/callback",
 
-	// Role-based routes
+	// Recruiter routes
+	RECRUITER: "/recruiter",
+
+	// Admin routes
 	ADMIN: "/admin",
 	ADMIN_DASHBOARD: "/admin/dashboard",
 	ADMIN_USERS: "/admin/users",

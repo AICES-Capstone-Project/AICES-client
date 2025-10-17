@@ -99,47 +99,44 @@ const SocialAuthForm = () => {
 	};
 
 	return (
-		<div className="w-full mt-10 gap-5 flex flex-row">
-			<div className="flex-1">
-				<Button
-					loading={googleLoading}
-					disabled={githubLoading}
-					className={buttonClass}
-					onClick={handleGoogleClick}
-				>
-					<Image
-						src={GoogleIcon}
-						alt="Google Logo"
-						width={20}
-						height={20}
-						className="mr-3 object-contain transition-transform duration-300 ease-in-out group-hover:scale-110 w-[20px] h-[20px]"
-						preview={false}
-					/>
-					<span>
-						{googleLoading ? "Connecting to Google..." : "Log in with Google"}
-					</span>
-				</Button>
-			</div>
-			<div className="flex-1">
-				<Button
-					loading={githubLoading}
-					disabled={googleLoading}
-					className={buttonClass}
-					onClick={handleGithubLogin}
-				>
-					<Image
-						src={GithubIcon}
-						alt="Github Logo"
-						width={20}
-						height={20}
-						className="mr-3 object-contain transition-transform duration-300 ease-in-out group-hover:scale-110 w-[20px] h-[20px]"
-						preview={false}
-					/>
-					<span className="transition-colors duration-300 ease-in-out">
-						{githubLoading ? "Connecting to GitHub..." : "Log in with GitHub"}
-					</span>
-				</Button>
-			</div>
+		<div className="w-full mt-10 flex flex-row gap-2">
+			<Button
+				loading={googleLoading}
+				disabled={githubLoading}
+				className={`${buttonClass} flex flex-1 items-center justify-center gap-3 h-12`}
+				onClick={handleGoogleClick}
+			>
+				<Image
+					src={GoogleIcon}
+					alt="Google Logo"
+					width={20}
+					height={20}
+					preview={false}
+					className="block"
+				/>
+				<span>
+					{googleLoading ? "Connecting to Google..." : "Log in with Google"}
+				</span>
+			</Button>
+
+			<Button
+				loading={githubLoading}
+				disabled={googleLoading}
+				className={`${buttonClass} flex flex-1 items-center justify-center gap-3 h-12`}
+				onClick={handleGithubLogin}
+			>
+				<Image
+					src={GithubIcon}
+					alt="Github Logo"
+					width={20}
+					height={20}
+					preview={false}
+					className="block"
+				/>
+				<span>
+					{githubLoading ? "Connecting to GitHub..." : "Log in with GitHub"}
+				</span>
+			</Button>
 		</div>
 	);
 };

@@ -26,14 +26,12 @@ const SignupForm: React.FC = () => {
 	const [loading, setLoading] = useState(false);
 
 	const handleSubmit = async () => {
-		// Reset errors
 		setFormError("");
 		setFullNameError("");
 		setEmailError("");
 		setPasswordError("");
 		setConfirmPasswordError("");
 
-		// Validate using Zod
 		const validationResult = registerSchema.safeParse({
 			fullName,
 			email,
@@ -54,7 +52,6 @@ const SignupForm: React.FC = () => {
 					setConfirmPasswordError(error.message);
 				}
 			});
-			setFormError("Please fix the errors below.");
 			return;
 		}
 
@@ -63,7 +60,6 @@ const SignupForm: React.FC = () => {
 		try {
 			setLoading(true);
 
-			// Add minimum 3 second loading time
 			const [res] = await Promise.all([
 				authService.signUp({ fullName, email, password }),
 				new Promise((resolve) => setTimeout(resolve, 3000)),
@@ -89,29 +85,16 @@ const SignupForm: React.FC = () => {
 	};
 
 	return (
-		<div className="flex flex-col gap-8">
-			{/* Heading */}
-			<div>
-				<div className="flex flex-col gap-4">
-					<div className="text-gray-900 font-inter text-[32px] font-medium">
-						Register
-					</div>
-
-					<div className="flex gap-1">
-						<div className="text-gray-600 font-inter text-base font-normal">
-							Already have an account?
-						</div>
-						<div
-							className="cursor-pointer text-green-600 font-inter text-base font-medium"
-							onClick={() => navigate(APP_ROUTES.LOGIN)}
-						>
-							Log in
-						</div>
-					</div>
-				</div>
+		<div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+			<div className="flex flex-col gap-2 items-center text-center mb-6">
+				<h2 className="text-3xl font-bold text-gray-800 tracking-tight">
+					Create a AICES Account
+				</h2>
+				<p className="text-sm text-gray-500">
+					Welcome! Please enter your details.
+				</p>
 			</div>
 
-			{/* Inputs */}
 			<div className="flex flex-col gap-5">
 				{formError && <FormError type="error">{formError}</FormError>}
 
@@ -121,11 +104,13 @@ const SignupForm: React.FC = () => {
 						value={fullName}
 						onChange={(e) => setFullName(e.target.value)}
 						status={fullNameError ? "error" : undefined}
-						className="!flex !items-center !px-3 !py-2 !w-[536px] !gap-1"
+						className="!w-full !h-12 !px-3 !py-2 !rounded-lg 
+						!border-green-600 focus:!border-green-700 
+						hover:!border-green-700 transition-all duration-300"
 						onPressEnter={handleSubmit}
 					/>
 					{fullNameError && (
-						<div className="text-red-500 text-sm">{fullNameError}</div>
+						<div className="text-red-500 text-xs !mb-1">{fullNameError}</div>
 					)}
 				</div>
 
@@ -135,11 +120,13 @@ const SignupForm: React.FC = () => {
 						value={email}
 						onChange={(e) => setEmail(e.target.value)}
 						status={emailError ? "error" : undefined}
-						className="!flex !items-center !px-3 !py-2 !w-[536px] !gap-1"
+						className="!w-full !h-12 !px-3 !py-2 !rounded-lg 
+						!border-green-600 focus:!border-green-700 
+						hover:!border-green-700 transition-all duration-300"
 						onPressEnter={handleSubmit}
 					/>
 					{emailError && (
-						<div className="text-red-500 text-sm">{emailError}</div>
+						<div className="text-red-500 text-xs !mb-1">{emailError}</div>
 					)}
 				</div>
 
@@ -149,11 +136,13 @@ const SignupForm: React.FC = () => {
 						value={password}
 						onChange={(e) => setPassword(e.target.value)}
 						status={passwordError ? "error" : undefined}
-						className="!flex !items-center !px-3 !py-2 !w-[536px] !gap-1"
+						className="!w-full !h-12 !px-3 !py-2 !rounded-lg 
+						!border-green-600 focus:!border-green-700 
+						hover:!border-green-700 transition-all duration-300"
 						onPressEnter={handleSubmit}
 					/>
 					{passwordError && (
-						<div className="text-red-500 text-sm">{passwordError}</div>
+						<div className="text-red-500 text-xs !mb-1">{passwordError}</div>
 					)}
 				</div>
 
@@ -163,11 +152,13 @@ const SignupForm: React.FC = () => {
 						value={confirmPassword}
 						onChange={(e) => setConfirmPassword(e.target.value)}
 						status={confirmPasswordError ? "error" : undefined}
-						className="!flex !items-center !px-3 !py-2 !w-[536px] !gap-1"
+						className="!w-full !h-12 !px-3 !py-2 !rounded-lg 
+						!border-green-600 focus:!border-green-700 
+						hover:!border-green-700 transition-all duration-300"
 						onPressEnter={handleSubmit}
 					/>
 					{confirmPasswordError && (
-						<div className="text-red-500 text-sm">{confirmPasswordError}</div>
+						<div className="text-red-500 text-xs !mb-1">{confirmPasswordError}</div>
 					)}
 				</div>
 			</div>
@@ -178,10 +169,24 @@ const SignupForm: React.FC = () => {
 				block
 				loading={loading}
 				disabled={loading}
-				className="!bg-green-600 !border-green-600 !text-white !font-semibold hover:!bg-green-700 hover:!border-green-700"
+				className="!bg-gradient-to-r from-emerald-800 via-lime-700 to-lime-600
+				!text-white !border-none rounded-xl font-semibold shadow-md
+				hover:from-emerald-700 hover:via-lime-600 hover:to-lime-500
+				transition-all duration-300"
 			>
 				Register
 			</Button>
+
+			<div className="flex justify-center items-center gap-1 text-sm">
+				<span className="text-gray-600">Already have an account?</span>
+				<span
+					className="cursor-pointer text-green-600 font-medium hover:underline"
+					onClick={() => navigate(APP_ROUTES.LOGIN)}
+				>
+					Log in
+				</span>
+			</div>
+
 		</div>
 	);
 };

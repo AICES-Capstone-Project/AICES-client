@@ -1,18 +1,29 @@
-import React, { useEffect } from "react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import {
-	Layout,
-	Menu,
-	Avatar,
-	Dropdown,
-	Button,
-	Typography,
-	Space,
-	Badge,
-	Divider,
+  Link,
+  NavLink,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import {
+  Layout,
+  Menu,
+  Avatar,
+  Dropdown,
+  Button,
+  Typography,
+  Space,
+  Badge,
+  Divider,
+  Drawer,
 } from "antd";
 import type { MenuProps } from "antd";
-import { UserOutlined, BellOutlined } from "@ant-design/icons";
+import {
+  UserOutlined,
+  BellOutlined,
+  MenuOutlined,
+  CloseOutlined,
+} from "@ant-design/icons";
 import defaultAvatar from "../../assets/images/Avatar_Default.jpg";
 import logo from "../../assets/logo/logo_long.png";
 import { APP_ROUTES, STORAGE_KEYS } from "../../services/config";
@@ -23,204 +34,203 @@ const { Header: AntHeader } = Layout;
 const { Text } = Typography;
 
 const AppHeader: React.FC = () => {
-	const location = useLocation();
-	const navigate = useNavigate();
-	const dispatch = useAppDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { user } = useAppSelector((state) => state.auth);
 
-	const { user } = useAppSelector((state) => state.auth);
-	const unreadCount = 3;
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const unreadCount = 3;
 
-	// Check for existing token and fetch user data on component mount
-	useEffect(() => {
-		const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-		if (token && !user) {
-			dispatch(fetchUser());
-			console.log("Fetching user data with token:", user);
-		}
-	}, [dispatch, user]);
+  useEffect(() => {
+    const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    if (token && !user) {
+      dispatch(fetchUser());
+    }
+  }, [dispatch, user]);
 
-	const navItems: MenuProps["items"] = [
-		{
-			key: "/",
-			label: (
-				<NavLink
-					to="/"
-					style={({ isActive }) => ({
-						fontWeight: 700,
-						color: isActive ? "#16a34a" : "#1e293b",
-						fontSize: 18,
-						margin: 30,
-					})}
-				>
-					Home
-				</NavLink>
-			),
-		},
-		{
-			key: "/find-job",
-			label: (
-				<NavLink
-					to="/find-job"
-					style={({ isActive }) => ({
-						fontWeight: 700,
-						color: isActive ? "#16a34a" : "#1e293b",
-						fontSize: 18,
-						margin: 30,
-					})}
-				>
-					Find Job
-				</NavLink>
-			),
-		},
-		{
-			key: "/company",
-			label: (
-				<NavLink
-					to="/company"
-					style={({ isActive }) => ({
-						fontWeight: 700,
-						color: isActive ? "#16a34a" : "#1e293b",
-						fontSize: 18,
-						margin: 30,
-					})}
-				>
-					Company
-				</NavLink>
-			),
-		},
-		{
-			key: "/candidate",
-			label: (
-				<NavLink
-					to="/candidate"
-					style={({ isActive }) => ({
-						fontWeight: 700,
-						color: isActive ? "#16a34a" : "#1e293b",
-						fontSize: 18,
-						margin: 30,
-					})}
-				>
-					Candidate
-				</NavLink>
-			),
-		},
-		{
-			key: "/contact-us",
-			label: (
-				<NavLink
-					to="/contact-us"
-					style={({ isActive }) => ({
-						fontWeight: 700,
-						color: isActive ? "#16a34a" : "#1e293b",
-						fontSize: 18,
-						margin: 30,
-					})}
-				>
-					Contact Us
-				</NavLink>
-			),
-		},
-	];
+  const navItems: MenuProps["items"] = [
+    {
+      key: "/how-it-works",
+      label: (
+        <NavLink
+          to="/how-it-works"
+          className={({ isActive }) =>
+            isActive ? "text-primary font-bold" : "text-slate-800"
+          }
+          style={({ isActive }) => ({ color: isActive ? "var(--color-primary)" : undefined })}
+          onClick={() => setDrawerOpen(false)}
+        >
+          How It Works
+        </NavLink>
+      ),
+    },
+    {
+      key: "/resources",
+      label: (
+        <NavLink
+          to="/resources"
+          className={({ isActive }) =>
+            isActive ? "text-primary font-bold" : "text-slate-800"
+          }
+          style={({ isActive }) => ({ color: isActive ? "var(--color-primary)" : undefined })}
+          onClick={() => setDrawerOpen(false)}
+        >
+          Resources
+        </NavLink>
+      ),
+    },
+    {
+      key: "/pricing",
+      label: (
+        <NavLink
+          to="/pricing"
+          className={({ isActive }) =>
+            isActive ? "text-primary font-bold" : "text-slate-800"
+          }
+          style={({ isActive }) => ({ color: isActive ? "var(--color-primary)" : undefined })}
+          onClick={() => setDrawerOpen(false)}
+        >
+          Pricing
+        </NavLink>
+      ),
+    },
+  ];
 
-	const userMenuItems: MenuProps["items"] = [
-		{
-			key: "profile",
-			label: (
-				<Link to="/profile" style={{ fontWeight: 600 }}>
-					Profile
-				</Link>
-			),
-		},
-		{ type: "divider" },
-		{
-			key: "logout",
-			danger: true,
-			label: <span style={{ fontWeight: 600 }}>Log out</span>,
-		},
-	];
+  const userMenuItems: MenuProps["items"] = [
+    {
+      key: "profile",
+      label: <Link to="/profile">Profile</Link>,
+    },
+    { type: "divider" },
+    {
+      key: "logout",
+      danger: true,
+      label: <span>Log out</span>,
+    },
+  ];
 
-	const handleUserMenuClick: MenuProps["onClick"] = (e) => {
-		if (e.key === "logout") {
-			dispatch(logoutUser());
-			navigate(APP_ROUTES.HOME);
-		}
-	};
+  const handleUserMenuClick: MenuProps["onClick"] = (e) => {
+    if (e.key === "logout") {
+      dispatch(logoutUser());
+      navigate(APP_ROUTES.HOME);
+    }
+  };
 
-	return (
-		<AntHeader
-			style={{
-				position: "sticky",
-				top: 0,
-				zIndex: 1000,
-				width: "100%",
-				display: "flex",
-				alignItems: "center",
-				padding: "10 16px",
-				background: "#fff",
-				borderBottom: "1px solid #f0f0f0",
-				gap: 16,
-				height: 80,
-				lineHeight: "80px",
-			}}
-		>
-			<Link to="/" style={{ display: "flex", alignItems: "center" }}>
-				<img
-					src={logo}
-					alt="MetaJobs Logo"
-					style={{ height: 40, width: "auto" }}
-				/>
-			</Link>
+  return (
+    <>
+      <AntHeader
+        className="flex items-center justify-between h-[70px] px-6 md:px-24 border-b border-gray-100 sticky top-0 z-[1000]"
+        style={{
+          backgroundColor: "#fff",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+        }}
+      >
 
-			<Menu
-				mode="horizontal"
-				selectedKeys={[location.pathname]}
-				items={navItems}
-				style={{
-					flex: 1,
-					marginLeft: 16,
-					borderBottom: "none",
-					fontWeight: 600,
-				}}
-			/>
+        <Link to="/" className="flex items-center">
+          <img
+            src={logo}
+            alt="AICES Logo"
+            style={{ height: 50, width: "auto", cursor: "pointer" }}
+          />
+        </Link>
 
-			{!user ? (
-				<Space>
-					<Button style={{ fontWeight: 600 }}>
-						<Link to={APP_ROUTES.LOGIN}>Sign In</Link>
-					</Button>
-					<Button type="primary" style={{ fontWeight: 600 }}>
-						<Link to={APP_ROUTES.SIGN_UP}>Sign Up</Link>
-					</Button>
-				</Space>
-			) : (
-				<Space size={16} align="center">
-					<Badge count={unreadCount} size="default">
-						<Button
-							type="text"
-							icon={<BellOutlined style={{ fontSize: 20 }} />}
-						/>
-					</Badge>
-					<Divider type="vertical" />
-					<Dropdown
-						menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
-						placement="bottomRight"
-						trigger={["click"]}
-					>
-						<Space style={{ cursor: "pointer" }}>
-							<Avatar
-								size={36}
-								src={user.avatarUrl || defaultAvatar}
-								icon={<UserOutlined />}
-							/>
-							<Text style={{ color: "#0f172a", fontWeight: 600 }}>
-								{user.fullName || user.email}
-							</Text>
-						</Space>
-					</Dropdown>
-				</Space>
-			)}
-		</AntHeader>
-	);
+        <div className="hidden md:flex flex-1 justify-center">
+          <Menu
+            mode="horizontal"
+            selectedKeys={[location.pathname]}
+            items={navItems}
+            rootClassName="custom-menu"
+            style={{ borderBottom: "none" }}
+          />
+        </div>
+
+        <Space size={16} align="center" className="hidden md:flex">
+          {user ? (
+            <>
+              <Badge count={unreadCount} size="default">
+                <Button
+                  type="text"
+                  icon={<BellOutlined className="text-xl" />}
+                />
+              </Badge>
+              <Divider type="vertical" />
+              <Dropdown
+                menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
+                placement="bottomRight"
+                trigger={["click"]}
+              >
+                <Space className="cursor-pointer">
+                  <Avatar
+                    size={36}
+                    src={user.avatarUrl || defaultAvatar}
+                    icon={<UserOutlined />}
+                  />
+                  <Text className="hidden md:inline text-slate-900 font-semibold">
+                    {user.fullName || user.email}
+                  </Text>
+                </Space>
+              </Dropdown>
+
+            </>
+          ) : (
+            <>
+              <Button
+                style={{
+                  color: "var(--color-primary-dark)",
+                  borderColor: "var(--color-primary-dark)",
+                }}
+              >
+                <Link to={APP_ROUTES.LOGIN}>Sign In</Link>
+              </Button>
+
+              <Button
+                type="primary"
+                style={{
+                  backgroundColor: "var(--color-primary-dark)",
+                  borderColor: "var(--color-primary-dark)",
+                }}
+              >
+                <Link to={APP_ROUTES.SIGN_UP}>Sign Up</Link>
+              </Button>
+            </>
+
+          )}
+        </Space>
+
+        <Button
+          className="inline-flex md:!hidden"
+          type="text"
+          icon={<MenuOutlined className="text-[22px]" />}
+          onClick={() => setDrawerOpen(true)}
+        />
+      </AntHeader>
+
+      <Drawer
+        title={
+          <div className="flex justify-between items-center">
+            <span className="font-semibold">Menu</span>
+            <Button
+              type="text"
+              icon={<CloseOutlined />}
+              onClick={() => setDrawerOpen(false)}
+            />
+          </div>
+        }
+        placement="right"
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        bodyStyle={{ padding: 0 }}
+      >
+        <Menu
+          mode="vertical"
+          selectedKeys={[location.pathname]}
+          items={navItems}
+          className="border-none"
+        />
+      </Drawer>
+    </>
+  );
 };
 
 export default AppHeader;

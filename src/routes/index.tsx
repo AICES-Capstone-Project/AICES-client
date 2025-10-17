@@ -14,6 +14,7 @@ const AdminLayout = lazy(() => import("../components/Layout/AdminLayout"));
 
 /* ============== Candidates Pages ==============*/
 const Home = lazy(() => import("../pages/Homepage/Homepage"));
+const Pricing = lazy(() => import("../pages/Pricing/Pricing"));
 const Login = lazy(() => import("../pages/Login/Login"));
 const VerifyEmailPage = lazy(() => import("../pages/SignUp/VerifyEmailPage"));
 const SignUp = lazy(() => import("../pages/SignUp/Signup"));
@@ -45,7 +46,7 @@ export const router = createBrowserRouter([
 		path: APP_ROUTES.HOME,
 		element: <MainLayout />,
 		errorElement: <ErrorPage />,
-		children: [{ index: true, element: <Home /> }],
+		children: [{ index: true, element: <Home /> }, { path: APP_ROUTES.PRICING, element: <Pricing /> }],
 	},
 	{ path: APP_ROUTES.LOGIN, element: <Login /> },
 	{ path: APP_ROUTES.SIGN_UP, element: <SignUp /> },

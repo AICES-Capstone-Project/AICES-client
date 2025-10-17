@@ -1,57 +1,27 @@
 import React from "react";
-import { CarryOutOutlined, BankOutlined } from "@ant-design/icons";
-import classNames from "classnames/bind";
-import styles from "./RightBanner.module.scss";
-
-const cx = classNames.bind(styles);
 
 const RightBanner: React.FC = () => {
-	return (
-		<aside className={cx("rightBanner")}>
-			<div className={cx("wrap")}>
-				{/* Logo */}
-				<div className={cx("brand")}>
-					<span className={cx("brandMark")}>AICES</span>
-				</div>
+  return (
+    <aside className="w-full h-full flex items-center justify-center bg-transparent text-white">
+      <div className="text-center px-6 max-w-2xl">
+        <div className="mb-6">
+          <span className="text-3xl font-bold tracking-widest text-lime-200">
+            AICES
+          </span>
+        </div>
 
-				<p className={cx("headline")}>
-					Over 12,345 job seeker <br /> waiting for good employees.
-				</p>
+        <h1 className="text-4xl md:text-5xl font-bold leading-snug mb-4">
+          Let AI handle the screening —<br />
+          <span className="text-lime-200">you focus on hiring.</span>
+        </h1>
 
-				<div className={cx("stats")}>
-					<div className={cx("stat")}>
-						<div className={cx("iconBox")}>
-							<CarryOutOutlined />
-						</div>
-						<div className={cx("meta")}>
-							<div className={cx("value")}>1,000</div>
-							<div className={cx("label")}>Live Job</div>
-						</div>
-					</div>
-
-					<div className={cx("stat")}>
-						<div className={cx("iconBox")}>
-							<BankOutlined />
-						</div>
-						<div className={cx("meta")}>
-							<div className={cx("value")}>500</div>
-							<div className={cx("label")}>Companies</div>
-						</div>
-					</div>
-
-					<div className={cx("stat")}>
-						<div className={cx("iconBox")}>
-							<CarryOutOutlined />
-						</div>
-						<div className={cx("meta")}>
-							<div className={cx("value")}>6,789</div>
-							<div className={cx("label")}>New Jobs</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</aside>
-	);
+        <p className="text-lg text-lime-100 leading-relaxed">
+          Empower your recruitment process with intelligent automation. <br />
+          Save time, streamline workflows, and discover top talent effortlessly.
+        </p>
+      </div>
+    </aside>
+  );
 };
 
 export default RightBanner;

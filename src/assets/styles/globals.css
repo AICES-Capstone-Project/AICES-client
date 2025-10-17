@@ -47,18 +47,56 @@ button {
 }
 
 @theme {
-	--color-primary-mint: #429e9d;
+	--color-primary-dark: #0e5107;
+	--color-primary: #618c3d;
+	--color-primary-medium: #a4d175;
+	--color-primary-light: #c3f481;
 }
 
 /* ---------------TailwindCSS Customization --------------- */
-
-@layer utilities {
-	.text-primary-mint {
-		color: var(--color-primary-mint);
+@layer components {
+		.custom-menu .ant-menu-item::after {
+		border-bottom: 2px solid transparent !important;
+		transition: border-color 0.3s ease;
 	}
 
-	.bg-mint {
-		background-color: var(--color-primary-mint);
+	.custom-menu .ant-menu-item:hover::after {
+		border-bottom: 2px solid var(--color-primary-light) !important;
+	}
+
+	.custom-menu .ant-menu-item-selected::after {
+		border-bottom: 2px solid var(--color-primary) !important;
+	}
+
+	.custom-menu .ant-menu-item-selected > a {
+		color: var(--color-primary) !important;
+		font-weight: 600;
+	}
+}
+
+@layer utilities {
+	.text-primary {
+		color: var(--color-primary);
+	}
+
+	.text-primary-dark {
+		color: var(--color-primary-dark);
+	}
+
+	.text-primary-light {
+		color: var(--color-primary-light);
+	}
+
+	.bg-primary {
+		background-color: var(--color-primary);
+	}
+
+	.bg-primary-dark {
+		background-color: var(--color-primary-dark);
+	}
+
+	.bg-primary-light {
+		background-color: var(--color-primary-light);
 	}
 
 	.h1-bold {
@@ -142,19 +180,15 @@ button {
 	}
 
 	.dark-gradient {
-		background: linear-gradient(
-			232deg,
-			rgba(23, 28, 35, 0.41) 0%,
-			rgba(19, 22, 28, 0.7) 100%
-		);
+		background: linear-gradient(232deg,
+				rgba(23, 28, 35, 0.41) 0%,
+				rgba(19, 22, 28, 0.7) 100%);
 	}
 
 	.light-gradient {
-		background: linear-gradient(
-			132deg,
-			rgba(247, 249, 255, 0.5) 0%,
-			rgba(229, 237, 255, 0.25) 100%
-		);
+		background: linear-gradient(132deg,
+				rgba(247, 249, 255, 0.5) 0%,
+				rgba(229, 237, 255, 0.25) 100%);
 	}
 
 	.primary-text-gradient {

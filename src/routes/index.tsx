@@ -46,7 +46,10 @@ export const router = createBrowserRouter([
 		path: APP_ROUTES.HOME,
 		element: <MainLayout />,
 		errorElement: <ErrorPage />,
-		children: [{ index: true, element: <Home /> }, { path: APP_ROUTES.PRICING, element: <Pricing /> }],
+		children: [
+			{ index: true, element: <Home /> },
+			{ path: APP_ROUTES.PRICING, element: <Pricing /> },
+		],
 	},
 	{ path: APP_ROUTES.LOGIN, element: <Login /> },
 	{ path: APP_ROUTES.SIGN_UP, element: <SignUp /> },
@@ -59,7 +62,7 @@ export const router = createBrowserRouter([
 	{
 		path: APP_ROUTES.ADMIN,
 		element: (
-			<ProtectedRoute allowedRoles={["Admin"]}>
+			<ProtectedRoute allowedRoles={["System_Admin"]}>
 				<AdminLayout />
 			</ProtectedRoute>
 		),

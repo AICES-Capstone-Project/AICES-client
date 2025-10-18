@@ -6,7 +6,7 @@ import { fetchUser } from "../stores/slices/authSlice";
 import Loading from "../components/UI/Loading";
 
 interface ProtectedRouteProps {
-	allowedRoles: string[];
+	allowedRoles?: string[];
 	children?: React.ReactNode;
 }
 
@@ -53,11 +53,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 		return <Navigate to={APP_ROUTES.LOGIN} replace />;
 	}
 
-	// Check if user has required role
-	if (!allowedRoles.includes(user.roleName || "")) {
-		// Wrong role → redirect to homepage
-		return <Navigate to={APP_ROUTES.HOME} replace />;
-	}
+	// Check if user has required role (chỉ check nếu có allowedRoles)
+if (allowedRoles && !allowedRoles.includes(user.roleName || "")) {
+	// Wrong role → redirect to homepage
+	return <Navigate to={APP_ROUTES.HOME} replace />;
+}
 
 	// User is authenticated and has correct role
 	return children ? <>{children}</> : <Outlet />;

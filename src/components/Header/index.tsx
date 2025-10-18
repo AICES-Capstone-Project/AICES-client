@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Link,
-  NavLink,
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Layout,
   Menu,
@@ -58,7 +53,9 @@ const AppHeader: React.FC = () => {
           className={({ isActive }) =>
             isActive ? "text-primary font-bold" : "text-slate-800"
           }
-          style={({ isActive }) => ({ color: isActive ? "var(--color-primary)" : undefined })}
+          style={({ isActive }) => ({
+            color: isActive ? "var(--color-primary)" : undefined,
+          })}
           onClick={() => setDrawerOpen(false)}
         >
           How It Works
@@ -73,7 +70,9 @@ const AppHeader: React.FC = () => {
           className={({ isActive }) =>
             isActive ? "text-primary font-bold" : "text-slate-800"
           }
-          style={({ isActive }) => ({ color: isActive ? "var(--color-primary)" : undefined })}
+          style={({ isActive }) => ({
+            color: isActive ? "var(--color-primary)" : undefined,
+          })}
           onClick={() => setDrawerOpen(false)}
         >
           Resources
@@ -88,7 +87,9 @@ const AppHeader: React.FC = () => {
           className={({ isActive }) =>
             isActive ? "text-primary font-bold" : "text-slate-800"
           }
-          style={({ isActive }) => ({ color: isActive ? "var(--color-primary)" : undefined })}
+          style={({ isActive }) => ({
+            color: isActive ? "var(--color-primary)" : undefined,
+          })}
           onClick={() => setDrawerOpen(false)}
         >
           Pricing
@@ -100,7 +101,7 @@ const AppHeader: React.FC = () => {
   const userMenuItems: MenuProps["items"] = [
     {
       key: "profile",
-      label: <Link to="/profile">Profile</Link>,
+      label: <Link to={APP_ROUTES.PROFILE}>Profile</Link>,
     },
     { type: "divider" },
     {
@@ -126,7 +127,6 @@ const AppHeader: React.FC = () => {
           boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
         }}
       >
-
         <Link to="/" className="flex items-center">
           <img
             src={logo}
@@ -171,7 +171,6 @@ const AppHeader: React.FC = () => {
                   </Text>
                 </Space>
               </Dropdown>
-
             </>
           ) : (
             <>
@@ -194,7 +193,6 @@ const AppHeader: React.FC = () => {
                 <Link to={APP_ROUTES.SIGN_UP}>Sign Up</Link>
               </Button>
             </>
-
           )}
         </Space>
 

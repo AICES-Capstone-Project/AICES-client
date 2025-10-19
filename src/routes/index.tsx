@@ -6,6 +6,8 @@ import { APP_ROUTES } from "../services/config";
 import GitHubCallback from "../pages/Login/partials/GitHubCallback";
 import { ROLES } from "../types/auth.types";
 
+
+
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
@@ -41,7 +43,7 @@ const AdminNotifications = lazy(
 );
 const AdminLogs = lazy(() => import("../pages/AdminPages/Logs"));
 
-const ProfileLayout = lazy(() => import("../pages/Profile/ProfileLayout"));
+const ProfileLayout = lazy(() => import("../components/Layout/ProfileLayout"));
 const ProfileDetail = lazy(() => import("../pages/Profile/ProfileDetail"));
 
 export const router = createBrowserRouter([

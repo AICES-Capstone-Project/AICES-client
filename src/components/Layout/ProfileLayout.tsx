@@ -1,5 +1,5 @@
-// src/pages/Profile/ProfileLayout.tsx
-import React, { useEffect } from "react";
+// src/components/Layout/ProfileLayout.tsx
+import React, { useEffect, useMemo } from "react";
 import { useLocation, useNavigate, NavLink } from "react-router-dom";
 import {
   Card,
@@ -18,8 +18,8 @@ import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { fetchUser, logoutUser } from "../../stores/slices/authSlice";
 import dayjs from "dayjs";
 
-// 👉 import form chi tiết
-import ProfileDetail from "./ProfileDetail";
+// 👉 dùng lại form chi tiết
+import ProfileDetail from "../../pages/Profile/ProfileDetail";
 
 const { Title, Text } = Typography;
 
@@ -30,65 +30,74 @@ const ProfileLayout: React.FC = () => {
   const { user, loading } = useAppSelector((s) => s.auth);
 
   useEffect(() => {
-    const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+    const token = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) : null;
     if (token && !user) dispatch(fetchUser());
   }, [dispatch, user]);
 
-  // Menu trái
-  const items: MenuProps["items"] = [
-    {
-      key: "account-detail",
-      label: (
-        <NavLink to="account-detail" className="block">
-          Account detail
-        </NavLink>
-      ),
-    },
-    {
-      key: "password-security",
-      label: (
-        <NavLink to="password-security" className="block">
-          Password & security
-        </NavLink>
-      ),
-    },
-    {
-      key: "privacy",
-      label: (
-        <NavLink to="privacy" className="block">
-          Privacy
-        </NavLink>
-      ),
-    },
-    {
-      key: "membership",
-      label: (
-        <NavLink to="membership" className="block">
-          Paid membership
-        </NavLink>
-      ),
-    },
-  ];
+  // ---------- Menu trái ----------
+  const items: MenuProps["items"] = useMemo(
+    () => [
+      {
+        key: "account-detail",
+        label: (
+          <NavLink to={`${APP_ROUTES.PROFILE}/account-detail`} className="block">
+            Account detail
+          </NavLink>
+        ),
+      },
+      {
+        key: "password-security",
+        label: (
+          <NavLink to={`${APP_ROUTES.PROFILE}/password-security`} className="block">
+            Password & security
+          </NavLink>
+        ),
+      },
+      {
+        key: "privacy",
+        label: (
+          <NavLink to={`${APP_ROUTES.PROFILE}/privacy`} className="block">
+            Privacy
+          </NavLink>
+        ),
+      },
+      {
+        key: "membership",
+        label: (
+          <NavLink to={`${APP_ROUTES.PROFILE}/membership`} className="block">
+            Paid membership
+          </NavLink>
+        ),
+      },
+    ],
+    []
+  );
 
-  // xác định tab hiện tại từ URL
-  const path = location.pathname;
-  const isAccountDetail = path.endsWith("/account-detail");
-  const selectedKey = path.endsWith("/account-detail")
-    ? ["account-detail"]
-    : path.endsWith("/password-security")
-    ? ["password-security"]
-    : path.endsWith("/privacy")
-    ? ["privacy"]
-    : path.endsWith("/membership")
-    ? ["membership"]
-    : []; // 👉 Không chọn gì khi đang ở /profile (overview)
+  // ---------- Xác định tab đang chọn theo URL ----------
+  // Chuẩn hoá URL: bỏ dấu "/" cuối nếu có
+  const normalizedPath = useMemo(
+    () => location.pathname.replace(/\/+$/, ""),
+    [location.pathname]
+  );
+
+  const keyByPath: Record<string, string> = {
+    [`${APP_ROUTES.PROFILE}/account-detail`]: "account-detail",
+    [`${APP_ROUTES.PROFILE}/password-security`]: "password-security",
+    [`${APP_ROUTES.PROFILE}/privacy`]: "privacy",
+    [`${APP_ROUTES.PROFILE}/membership`]: "membership",
+  };
+
+  const currentKey = keyByPath[normalizedPath];
+  const selectedKeys: string[] = currentKey ? [currentKey] : []; // /profile → []
+
+  const isAccountDetail = currentKey === "account-detail";
 
   const handleSignOut = () => {
     dispatch(logoutUser());
     navigate(APP_ROUTES.HOME);
   };
 
-  // 👉 tách Overview thành component nhỏ trong file này cho gọn
+  // ---------- Overview nhỏ ngay trong layout ----------
   const Overview = () => (
     <Card title="Account overview" className="shadow-sm">
       <div className="flex items-center gap-4 mb-4">
@@ -113,9 +122,7 @@ const ProfileLayout: React.FC = () => {
           {user?.phoneNumber || "-"}
         </Descriptions.Item>
         <Descriptions.Item label="Birthday">
-          {user?.dateOfBirth
-            ? dayjs(user.dateOfBirth).format("DD/MM/YYYY")
-            : "-"}
+          {user?.dateOfBirth ? dayjs(user.dateOfBirth).format("DD/MM/YYYY") : "-"}
         </Descriptions.Item>
         <Descriptions.Item label="Address" span={2}>
           {user?.address || "-"}
@@ -123,8 +130,8 @@ const ProfileLayout: React.FC = () => {
       </Descriptions>
 
       <Text type="secondary" className="block mt-3">
-        * Các mục trên phản ánh dữ liệu hiện tại sau khi bạn chỉnh sửa trong
-        trang <b>Account detail</b>.
+        * Các mục trên phản ánh dữ liệu hiện tại sau khi bạn chỉnh sửa trong{" "}
+        <b>Account detail</b>.
       </Text>
     </Card>
   );
@@ -135,7 +142,7 @@ const ProfileLayout: React.FC = () => {
         {/* Header */}
         <Card
           className="mb-6 shadow-sm hover:bg-gray-50 transition cursor-pointer"
-          onClick={() => navigate("/profile")} // 👈 Khi bấm khung xanh → về Overview
+          onClick={() => navigate(APP_ROUTES.PROFILE)} // 👈 bấm khung xanh → Overview
         >
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
             <Avatar
@@ -158,13 +165,10 @@ const ProfileLayout: React.FC = () => {
         {/* Body */}
         <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar */}
-          <Card
-            className="w-full md:w-1/4 shadow-sm"
-            bodyStyle={{ padding: "12px 0" }}
-          >
+          <Card className="w-full md:w-1/4 shadow-sm" bodyStyle={{ padding: "12px 0" }}>
             <Menu
               mode="inline"
-              selectedKeys={selectedKey}
+              selectedKeys={selectedKeys}
               items={items}
               style={{ borderRight: "none" }}
             />
@@ -175,7 +179,7 @@ const ProfileLayout: React.FC = () => {
             </div>
           </Card>
 
-          {/* Content: nếu đang ở /account-detail → hiện form; ngược lại → Overview */}
+          {/* Content: /account-detail → form; còn lại → Overview */}
           <div className="flex-1">
             {loading ? (
               <Spin className="block mx-auto mt-10" />

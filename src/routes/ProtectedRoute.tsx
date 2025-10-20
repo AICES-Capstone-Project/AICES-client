@@ -53,11 +53,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 		return <Navigate to={APP_ROUTES.LOGIN} replace />;
 	}
 
-	// Check if user has required role (chỉ check nếu có allowedRoles)
-if (allowedRoles && !allowedRoles.includes(user.roleName || "")) {
-	// Wrong role → redirect to homepage
-	return <Navigate to={APP_ROUTES.HOME} replace />;
-}
+	// Check if user has required role
+	if (!allowedRoles.includes(user.roleName || "")) {
+		// Wrong role → redirect to not found
+		return <Navigate to={APP_ROUTES.NOTFOUND} replace />;
+	}
 
 	// User is authenticated and has correct role
 	return children ? <>{children}</> : <Outlet />;

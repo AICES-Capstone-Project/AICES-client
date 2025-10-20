@@ -120,10 +120,15 @@ const AppHeader: React.FC = () => {
   return (
     <>
       <AntHeader
-        className="flex items-center justify-between h-[70px] px-6 md:px-24 border-b border-gray-100 sticky top-0 z-[1000]"
+        className="flex items-center justify-between h-[70px] px-6 md:px-24 border-b border-gray-100"
         style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
           backgroundColor: "#fff",
           boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+          zIndex: 1000,
         }}
       >
 

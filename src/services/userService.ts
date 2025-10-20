@@ -1,23 +1,35 @@
-// // src/services/userService.ts
-// import { get, post, put /*, remove as delRequest */ } from "./api";
-// import { API_ENDPOINTS } from "./config";
+import { get, post, put } from "./api";
+import { API_ENDPOINTS } from "./config";
+import type { ApiResponse } from "../types/api.types";
+import type {
+	GetUsersResponse,
+	GetUserByIdResponse,
+	CreateUserRequest,
+	UpdateUserRequest,
+} from "../types/user.types";
+import type PagingParams from "../types/paging.types";
+import { buildQuery } from "../utils/paging";
 
-// export interface AdminUser {
-//   userId: number;
-//   email: string;
-//   fullName: string | null;
-//   roleName: string;
-//   isActive: boolean;
-// }
+export const userService = {
+	getAll: async (
+		params?: PagingParams
+	): Promise<ApiResponse<GetUsersResponse>> => {
+		const url = `${API_ENDPOINTS.USER.GET_ALL}${buildQuery(params)}`;
+		return await get<GetUsersResponse>(url);
+	},
 
-// export const userService = {
-//   list: () => get<AdminUser[]>(API_ENDPOINTS.ADMIN.USERS.LIST),
-//   detail: (id: number | string) => get<AdminUser>(API_ENDPOINTS.ADMIN.USERS.DETAIL(id)),
-//   create: (payload: Partial<AdminUser>) =>
-//     post<AdminUser>(API_ENDPOINTS.ADMIN.USERS.CREATE, payload),
-//   update: (id: number | string, payload: Partial<AdminUser>) =>
-//     put<AdminUser>(API_ENDPOINTS.ADMIN.USERS.UPDATE(id), payload),
-//   // delete: (id: number | string) => delRequest<null>(API_ENDPOINTS.ADMIN.USERS.DELETE(id)),
-// };
+	getById: async (id: number): Promise<ApiResponse<GetUserByIdResponse>> => {
+		return await get<GetUserByIdResponse>(API_ENDPOINTS.USER.GET_BY_ID(id));
+	},
 
-// export default userService;
+	create: async (data: CreateUserRequest): Promise<ApiResponse<null>> => {
+		return await post<null, CreateUserRequest>(API_ENDPOINTS.USER.CREATE, data);
+	},
+
+	update: async (
+		id: number,
+		data: UpdateUserRequest
+	): Promise<ApiResponse<null>> => {
+		return await put<null>(API_ENDPOINTS.USER.UPDATE(id), data);
+	},
+};

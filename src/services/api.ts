@@ -127,9 +127,9 @@ export const post = async <T, B = unknown>(
 		...config,
 	});
 
-export const put = <T>(
+export const put = <T, B = unknown>(
 	url: string,
-	body?: Record<string, unknown>,
+	body?: B,
 	config?: AxiosRequestConfig
 ) =>
 	requestApi<T>(url, {

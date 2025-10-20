@@ -18,19 +18,20 @@ import {
 	DeleteOutlined,
 	ReloadOutlined,
 	SearchOutlined,
+	EyeOutlined,
 } from "@ant-design/icons";
-import {
-	userService,
-	type AdminUser,
-	type CreateUserRequest,
-	type UpdateUserRequest,
-} from "../../../services/userService";
+import { userService } from "../../../services/userService";
+import type {
+	User,
+	CreateUserRequest,
+	UpdateUserRequest,
+} from "../../../types/user.types";
 
 const DEFAULT_PAGE_SIZE = 10;
 
 export default function Accounts() {
 	const [loading, setLoading] = useState(false);
-	const [users, setUsers] = useState<AdminUser[]>([]);
+	const [users, setUsers] = useState<User[]>([]);
 	const [total, setTotal] = useState(0);
 	const [keyword, setKeyword] = useState("");
 	const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -40,17 +41,20 @@ export default function Accounts() {
 
 	const [isCreateOpen, setIsCreateOpen] = useState(false);
 	const [isEditOpen, setIsEditOpen] = useState(false);
-	const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+	const [editingUser, setEditingUser] = useState<User | null>(null);
+	const [isDetailOpen, setIsDetailOpen] = useState(false);
+	const [detailUser, setDetailUser] = useState<User | null>(null);
+	const [loadingDetail, setLoadingDetail] = useState(false);
 
 	const [createForm] = Form.useForm<CreateUserRequest>();
 	const [editForm] = Form.useForm<UpdateUserRequest>();
 
 	const fetchData = async (page = 1, pageSize = DEFAULT_PAGE_SIZE, kw = "") => {
 		setLoading(true);
-		const res = await userService.list({ page, pageSize, keyword: kw });
+		const res = await userService.getAll({ page, pageSize, search: kw });
 		if (res.status === "Success" && res.data) {
-			setUsers(res.data.items);
-			setTotal(res.data.total);
+			setUsers(res.data.users);
+			setTotal(res.data.totalPages * pageSize);
 		} else {
 			message.error(res.message || "Failed to fetch users");
 		}
@@ -66,7 +70,7 @@ export default function Accounts() {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [pagination.current, pagination.pageSize]);
 
-	const columns: ColumnsType<AdminUser> = [
+	const columns: ColumnsType<User> = [
 		{ title: "ID", dataIndex: "userId", width: 80 },
 		{ title: "Email", dataIndex: "email" },
 		{
@@ -89,9 +93,12 @@ export default function Accounts() {
 		{
 			title: "Actions",
 			key: "actions",
-			width: 180,
+			width: 200,
 			render: (_, record) => (
 				<Space>
+					<Button icon={<EyeOutlined />} onClick={() => onViewDetail(record)}>
+						View
+					</Button>
 					<Button icon={<EditOutlined />} onClick={() => onEdit(record)}>
 						Edit
 					</Button>
@@ -145,11 +152,25 @@ export default function Accounts() {
 		}
 	};
 
-	const onEdit = (user: AdminUser) => {
+	const onViewDetail = async (user: User) => {
+		setLoadingDetail(true);
+		setIsDetailOpen(true);
+		const res = await userService.getById(user.userId);
+		if (res.status === "Success" && res.data) {
+			setDetailUser(res.data);
+		} else {
+			message.error(res.message || "Failed to fetch user details");
+		}
+		setLoadingDetail(false);
+	};
+
+	const onEdit = (user: User) => {
 		setEditingUser(user);
 		editForm.setFieldsValue({
+			email: user.email,
 			fullName: user.fullName || undefined,
-			roleName: user.roleName,
+			password: "",
+			roleId: 1, // You need to map roleName to roleId
 			isActive: user.isActive,
 		});
 		setIsEditOpen(true);
@@ -178,25 +199,11 @@ export default function Accounts() {
 		}
 	};
 
-	const onDelete = (user: AdminUser) => {
+	const onDelete = (user: User) => {
 		Modal.confirm({
 			title: `Delete user ${user.email}?`,
-			okText: "Delete",
-			okButtonProps: { danger: true },
-			icon: undefined,
-			onOk: async () => {
-				const res = await userService.remove(user.userId);
-				if (res.status === "Success") {
-					message.success("User deleted");
-					fetchData(
-						pagination.current || 1,
-						pagination.pageSize || DEFAULT_PAGE_SIZE,
-						keyword
-					);
-				} else {
-					message.error(res.message || "Delete failed");
-				}
-			},
+			content: "This feature is not available in the current API.",
+			okButtonProps: { disabled: true },
 		});
 	};
 
@@ -256,7 +263,11 @@ export default function Accounts() {
 					>
 						<Input />
 					</Form.Item>
-					<Form.Item name="fullName" label="Full name">
+					<Form.Item
+						name="fullName"
+						label="Full name"
+						rules={[{ required: true }]}
+					>
 						<Input />
 					</Form.Item>
 					<Form.Item
@@ -267,18 +278,28 @@ export default function Accounts() {
 						<Input.Password />
 					</Form.Item>
 					<Form.Item
-						name="roleName"
+						name="roleId"
 						label="Role"
 						rules={[{ required: true }]}
-						initialValue="User"
+						initialValue={1}
 					>
 						<Select
 							options={[
-								{ value: "Admin" },
-								{ value: "Employer" },
-								{ value: "User" },
+								{ label: "System Admin", value: 1 },
+								{ label: "System Manager", value: 2 },
+								{ label: "System Staff", value: 3 },
+								{ label: "HR Manager", value: 4 },
+								{ label: "HR Recruiter", value: 5 },
 							]}
 						/>
+					</Form.Item>
+					<Form.Item
+						name="isActive"
+						label="Active"
+						valuePropName="checked"
+						initialValue={true}
+					>
+						<Switch />
 					</Form.Item>
 				</Form>
 			</Modal>
@@ -291,15 +312,34 @@ export default function Accounts() {
 				okText="Save"
 			>
 				<Form form={editForm} layout="vertical">
-					<Form.Item name="fullName" label="Full name">
+					<Form.Item
+						name="email"
+						label="Email"
+						rules={[{ required: true, type: "email" }]}
+					>
 						<Input />
 					</Form.Item>
-					<Form.Item name="roleName" label="Role" rules={[{ required: true }]}>
+					<Form.Item
+						name="fullName"
+						label="Full name"
+						rules={[{ required: true }]}
+					>
+						<Input />
+					</Form.Item>
+					<Form.Item
+						name="password"
+						label="Password (leave empty to keep current)"
+					>
+						<Input.Password />
+					</Form.Item>
+					<Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
 						<Select
 							options={[
-								{ value: "Admin" },
-								{ value: "Employer" },
-								{ value: "User" },
+								{ label: "System Admin", value: 1 },
+								{ label: "System Manager", value: 2 },
+								{ label: "System Staff", value: 3 },
+								{ label: "HR Manager", value: 4 },
+								{ label: "HR Recruiter", value: 5 },
 							]}
 						/>
 					</Form.Item>
@@ -307,6 +347,98 @@ export default function Accounts() {
 						<Switch />
 					</Form.Item>
 				</Form>
+			</Modal>
+
+			<Modal
+				open={isDetailOpen}
+				title="User Details"
+				onCancel={() => {
+					setIsDetailOpen(false);
+					setDetailUser(null);
+				}}
+				footer={[
+					<Button key="close" onClick={() => setIsDetailOpen(false)}>
+						Close
+					</Button>,
+				]}
+				width={600}
+			>
+				{loadingDetail ? (
+					<div style={{ textAlign: "center", padding: "20px" }}>Loading...</div>
+				) : detailUser ? (
+					<div>
+						<Space direction="vertical" style={{ width: "100%" }} size="middle">
+							<div>
+								<strong>User ID:</strong> {detailUser.userId}
+							</div>
+							<div>
+								<strong>Email:</strong> {detailUser.email}
+							</div>
+							<div>
+								<strong>Full Name:</strong> {detailUser.fullName || "—"}
+							</div>
+							<div>
+								<strong>Role:</strong> {detailUser.roleName}
+							</div>
+							<div>
+								<strong>Phone:</strong> {detailUser.phoneNumber || "—"}
+							</div>
+							<div>
+								<strong>Address:</strong> {detailUser.address || "—"}
+							</div>
+							<div>
+								<strong>Date of Birth:</strong>{" "}
+								{detailUser.dateOfBirth
+									? new Date(detailUser.dateOfBirth).toLocaleDateString()
+									: "—"}
+							</div>
+							<div>
+								<strong>Status:</strong>{" "}
+								{detailUser.isActive ? (
+									<Tag color="green">Active</Tag>
+								) : (
+									<Tag color="red">Inactive</Tag>
+								)}
+							</div>
+							<div>
+								<strong>Created At:</strong>{" "}
+								{new Date(detailUser.createdAt).toLocaleString()}
+							</div>
+							<div>
+								<strong>Login Providers:</strong>
+								<div style={{ marginTop: 8 }}>
+									{detailUser.loginProviders.map((provider, index) => (
+										<Tag
+											key={index}
+											color={provider.isActive ? "blue" : "gray"}
+										>
+											{provider.authProvider}
+										</Tag>
+									))}
+								</div>
+							</div>
+							{detailUser.avatarUrl && (
+								<div>
+									<strong>Avatar:</strong>
+									<div style={{ marginTop: 8 }}>
+										<img
+											src={detailUser.avatarUrl}
+											alt="Avatar"
+											style={{
+												width: 100,
+												height: 100,
+												borderRadius: "50%",
+												objectFit: "cover",
+											}}
+										/>
+									</div>
+								</div>
+							)}
+						</Space>
+					</div>
+				) : (
+					<div>No user data available</div>
+				)}
 			</Modal>
 		</div>
 	);

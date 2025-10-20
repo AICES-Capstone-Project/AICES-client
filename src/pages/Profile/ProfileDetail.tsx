@@ -10,7 +10,6 @@ import {
 	Input,
 	Typography,
 	Spin,
-	message,
 } from "antd";
 import type { UploadProps } from "antd";
 import { UploadOutlined, SaveOutlined } from "@ant-design/icons";
@@ -19,6 +18,7 @@ import defaultAvatar from "../../assets/images/Avatar_Default.jpg";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { fetchUser } from "../../stores/slices/authSlice";
 import { profileService } from "../../services/profileService";
+import { toastError, toastSuccess } from "../../components/UI/Toast";
 
 const { Text } = Typography;
 
@@ -79,17 +79,19 @@ const ProfileDetail: React.FC = () => {
 			if (avatarFile) form.append("AvatarFile", avatarFile); // file binary
 
 			const response = await profileService.updateMultipart(form);
-
+			console.log("🔄 [ProfileDetail] Server response:", response);
 			if (response.status === "Success") {
-				message.success(response.message || "Profile updated successfully");
+				toastSuccess("Update Profile Success!", response.message);
 				dispatch(fetchUser());
 				setAvatarFile(null); // clear avatar đã chọn
 			} else {
-				message.error(response.message || "Update profile failed");
+				toastError("Update profile failed", response.message);
 			}
 		} catch (err: unknown) {
-			const error = err as Error;
-			message.error(error?.message || "Update profile failed");
+			toastError(
+				"Update profile failed",
+				err instanceof Error ? err.message : "Something went wrong."
+			);
 		} finally {
 			setSaving(false);
 		}

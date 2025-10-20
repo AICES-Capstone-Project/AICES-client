@@ -31,15 +31,13 @@ export const API_ENDPOINTS = {
 		UPDATE: "/profile/update",
 	},
 
-	// Admin endpoints
-	ADMIN: {
-		USERS: {
-			LIST: "/admin/users",
-			CREATE: "/admin/users",
-			DETAIL: (id: number | string) => `/admin/users/${id}`,
-			UPDATE: (id: number | string) => `/admin/users/${id}`,
-			DELETE: (id: number | string) => `/admin/users/${id}`,
-		},
+	// User endpoints
+	USER: {
+		GET_ALL: "/user",
+		GET_BY_ID: (id: number) => `/user/${id}`,
+		CREATE: "/user",
+		UPDATE: (id: number) => `/user/${id}`,
+		DELETE: (id: number) => `/user/${id}`,
 	},
 } as const;
 

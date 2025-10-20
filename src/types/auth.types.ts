@@ -35,7 +35,7 @@ export interface LoginResponse {
 	accessToken: string;
 }
 
-export interface UserResponse {
+export interface ProfileResponse {
 	userId: number;
 	email: string;
 	fullName: string | null;

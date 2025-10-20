@@ -10,7 +10,7 @@ const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 /* ============== Layouts ==============*/
 const MainLayout = lazy(() => import("../components/Layout/MainLayout"));
-const AdminLayout = lazy(() => import("../components/Layout/AdminLayout"));
+const SystemLayout = lazy(() => import("../components/Layout/SystemLayout"));
 const ProfileLayout = lazy(() => import("../components/Layout/ProfileLayout"));
 
 /* ============== General Pages ==============*/
@@ -27,13 +27,13 @@ const ResetPassword = lazy(
 );
 const ProfileDetail = lazy(() => import("../pages/Profile/ProfileDetail"));
 
-/* ============== Admin Pages ==============*/
-const AdminDashboard = lazy(() => import("../pages/AdminPages/Dashboard"));
-const AdminAccounts = lazy(() => import("../pages/AdminPages/Accounts"));
-const AdminRecruitmentApproval = lazy(
-	() => import("../pages/AdminPages/RecruitmentApproval")
+/* ============== System Pages ==============*/
+const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
+const SystemAccounts = lazy(() => import("../pages/SystemPages/Accounts"));
+const SystemRecruitmentApproval = lazy(
+	() => import("../pages/SystemPages/RecruitmentApproval")
 );
-const AdminJobs = lazy(() => import("../pages/AdminPages/Jobs"));
+const SystemJobs = lazy(() => import("../pages/SystemPages/Jobs"));
 
 export const router = createBrowserRouter([
 	/* ============== General Pages ==============*/
@@ -89,18 +89,18 @@ export const router = createBrowserRouter([
 					ROLES.System_Staff,
 				]}
 			>
-				<AdminLayout />
+				<SystemLayout />
 			</ProtectedRoute>
 		),
 		children: [
-			{ index: true, element: <AdminDashboard /> },
-			{ path: APP_ROUTES.SYSTEM_DASHBOARD, element: <AdminDashboard /> },
-			{ path: APP_ROUTES.SYSTEM_USERS, element: <AdminAccounts /> },
+			{ index: true, element: <SystemDashboard /> },
+			{ path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
+			{ path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
 			{
 				path: APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL,
-				element: <AdminRecruitmentApproval />,
+				element: <SystemRecruitmentApproval />,
 			},
-			{ path: APP_ROUTES.SYSTEM_JOBS, element: <AdminJobs /> },
+			{ path: APP_ROUTES.SYSTEM_JOBS, element: <SystemJobs /> },
 		],
 	},
 

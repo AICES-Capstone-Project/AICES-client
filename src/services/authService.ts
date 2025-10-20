@@ -6,7 +6,7 @@ import type {
 	ResetPasswordRequest,
 	ResetPasswordResetRequest,
 	SignUpRequest,
-	UserResponse,
+	ProfileResponse,
 } from "../types/auth.types";
 import type { ApiResponse } from "./../types/api.types";
 
@@ -64,8 +64,8 @@ export const authService = {
 		return await get<ApiResponse<null>>(API_ENDPOINTS.AUTH.VERIFY_EMAIL(token));
 	},
 
-	getCurrentUser: async (): Promise<ApiResponse<UserResponse>> => {
-		return await get<UserResponse>(API_ENDPOINTS.AUTH.ME);
+	getCurrentUser: async (): Promise<ApiResponse<ProfileResponse>> => {
+		return await get<ProfileResponse>(API_ENDPOINTS.AUTH.ME);
 	},
 
 	logout: async (): Promise<ApiResponse<null>> => {

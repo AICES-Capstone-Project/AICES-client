@@ -4,11 +4,6 @@ import {
 	TeamOutlined,
 	FileDoneOutlined,
 	AppstoreOutlined,
-	ProfileOutlined,
-	BarChartOutlined,
-	SettingOutlined,
-	BellOutlined,
-	DatabaseOutlined,
 	MenuFoldOutlined,
 	MenuUnfoldOutlined,
 } from "@ant-design/icons";
@@ -19,63 +14,38 @@ import React from "react";
 const { Sider, Content, Header } = Layout;
 const { Title } = Typography;
 
-export default function AdminLayout() {
+export default function SystemLayout() {
 	const [collapsed, setCollapsed] = React.useState(false);
 	const location = useLocation();
 
-	const selectedKey = location.pathname.startsWith(APP_ROUTES.ADMIN)
+	const selectedKey = location.pathname.startsWith(APP_ROUTES.SYSTEM)
 		? location.pathname
-		: APP_ROUTES.ADMIN_DASHBOARD;
+		: APP_ROUTES.SYSTEM_DASHBOARD;
 
 	const items = [
 		{
-			key: APP_ROUTES.ADMIN_DASHBOARD,
+			key: APP_ROUTES.SYSTEM_DASHBOARD,
 			icon: <DashboardOutlined />,
-			label: <Link to={APP_ROUTES.ADMIN_DASHBOARD}>Dashboard</Link>,
+			label: <Link to={APP_ROUTES.SYSTEM_DASHBOARD}>Dashboard</Link>,
 		},
 		{
-			key: APP_ROUTES.ADMIN_USERS,
+			key: APP_ROUTES.SYSTEM_USERS,
 			icon: <TeamOutlined />,
-			label: <Link to={APP_ROUTES.ADMIN_USERS}>Users</Link>,
+			label: <Link to={APP_ROUTES.SYSTEM_USERS}>Users</Link>,
 		},
 		{
-			key: APP_ROUTES.ADMIN_RECRUITMENT_APPROVAL,
+			key: APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL,
 			icon: <FileDoneOutlined />,
 			label: (
-				<Link to={APP_ROUTES.ADMIN_RECRUITMENT_APPROVAL}>
+				<Link to={APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL}>
 					Recruitment Approval
 				</Link>
 			),
 		},
 		{
-			key: APP_ROUTES.ADMIN_JOBS,
+			key: APP_ROUTES.SYSTEM_JOBS,
 			icon: <AppstoreOutlined />,
-			label: <Link to={APP_ROUTES.ADMIN_JOBS}>Jobs</Link>,
-		},
-		{
-			key: APP_ROUTES.ADMIN_ASSESSMENTS,
-			icon: <ProfileOutlined />,
-			label: <Link to={APP_ROUTES.ADMIN_ASSESSMENTS}>Assessments</Link>,
-		},
-		{
-			key: APP_ROUTES.ADMIN_REPORTS,
-			icon: <BarChartOutlined />,
-			label: <Link to={APP_ROUTES.ADMIN_REPORTS}>Reports</Link>,
-		},
-		{
-			key: APP_ROUTES.ADMIN_SETTINGS,
-			icon: <SettingOutlined />,
-			label: <Link to={APP_ROUTES.ADMIN_SETTINGS}>Settings</Link>,
-		},
-		{
-			key: APP_ROUTES.ADMIN_NOTIFICATIONS,
-			icon: <BellOutlined />,
-			label: <Link to={APP_ROUTES.ADMIN_NOTIFICATIONS}>Notifications</Link>,
-		},
-		{
-			key: APP_ROUTES.ADMIN_LOGS,
-			icon: <DatabaseOutlined />,
-			label: <Link to={APP_ROUTES.ADMIN_LOGS}>Logs</Link>,
+			label: <Link to={APP_ROUTES.SYSTEM_JOBS}>Jobs</Link>,
 		},
 	];
 
@@ -127,7 +97,7 @@ export default function AdminLayout() {
 						icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
 					/>
 					<Title level={4} style={{ margin: 0 }}>
-						Admin Panel
+						System Panel
 					</Title>
 				</Header>
 				<Content style={{ padding: 24 }}>

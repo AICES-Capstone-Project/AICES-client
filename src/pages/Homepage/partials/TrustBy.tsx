@@ -1,42 +1,32 @@
-interface TrustedByProps {
-  title?: string;
-  logos?: string[];
-}
-
-export default function TrustedBy({
-  title = "Trusted by leading enterprises and startups",
-  logos,
-}: TrustedByProps) {
-  // fallback logos nếu không có API
- const fallbackLogos = [
-  "https://1000logos.net/wp-content/uploads/2017/03/Adidas-Logo.png",
-  "https://1000logos.net/wp-content/uploads/2021/04/Burger-King-logo.png",
-  "https://1000logos.net/wp-content/uploads/2017/05/Hard-Rock-Logo.png",
-  "https://1000logos.net/wp-content/uploads/2021/05/Netflix-logo.png",
-  "https://1000logos.net/wp-content/uploads/2017/06/Amazon-Logo.png",
-  "https://1000logos.net/wp-content/uploads/2017/03/Microsoft-Logo.png",
-];
-
-
-  const displayLogos = logos && logos.length > 0 ? logos : fallbackLogos;
+export default function LogoBar() {
+  const companies = [
+    { name: 'Tether', placeholder: '120x40' },
+    { name: 'Adecco', placeholder: '120x40' },
+    { name: 'Instructure', placeholder: '140x40' },
+    { name: 'Greenhouse', placeholder: '120x40' },
+    { name: 'Workday', placeholder: '120x40' },
+    { name: 'BambooHR', placeholder: '120x40' },
+  ];
 
   return (
-    <section className="bg-white py-16 px-6">
-      <div className="max-w-6xl mx-auto text-center">
-        <h2 className="text-xl md:text-2xl font-semibold text-gray-900 mb-12">
-          {title}
-        </h2>
+    <section className="py-16 bg-white border-y border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-12">
+          <p className="text-sm font-semibold text-gray-500 uppercase tracking-wide">
+            Trusted by Leading Companies and Startups
+          </p>
+        </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-8 gap-y-10 items-center">
-          {displayLogos.map((logo, index) => (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center justify-items-center">
+          {companies.map((company) => (
             <div
-              key={index}
-              className="flex items-center justify-center p-4 bg-gray-50 rounded-xl shadow-sm hover:shadow-md transition duration-300"
+              key={company.name}
+              className="grayscale hover:grayscale-0 transition-all duration-300 opacity-60 hover:opacity-100"
             >
               <img
-                src={logo}
-                alt={`trusted-logo-${index}`}
-                className="max-h-12 object-contain grayscale hover:grayscale-0 transition duration-300"
+                src={`https://via.placeholder.com/${company.placeholder}/cccccc/666666?text=${company.name}`}
+                alt={`${company.name} logo`}
+                className="h-10 w-auto"
               />
             </div>
           ))}

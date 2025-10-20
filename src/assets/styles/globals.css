@@ -47,11 +47,12 @@ button {
 }
 
 @theme {
-	--color-primary-dark: #0e5107;
-	--color-primary: #618c3d;
-	--color-primary-medium: #a4d175;
-	--color-primary-light: #c3f481;
+	--color-primary-dark: #052e16;    
+	--color-primary: #065f46;         
+	--color-primary-medium: #2f6c2b;   
+	--color-primary-light: #4d7c0f;   
 }
+
 
 /* ---------------TailwindCSS Customization --------------- */
 @layer components {

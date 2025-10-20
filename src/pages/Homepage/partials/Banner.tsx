@@ -2,25 +2,19 @@ import { Button } from "antd";
 
 export default function Banner() {
   return (
-    <div
+    <section
+      className="relative text-center px-6 pb-20 pt-40 overflow-hidden min-h-screen flex flex-col justify-center items-center"
       style={{
-        minHeight: "60vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        textAlign: "center",
         background: `linear-gradient(
           135deg, 
-
           var(--color-primary) 0%, 
           var(--color-primary-medium) 50%, 
           var(--color-primary-light) 100%
         )`,
-        padding: "60px 20px",
         color: "#fff",
       }}
     >
-      <div style={{ maxWidth: 800, margin: "0 auto" }}>
+      <div style={{ maxWidth: 800, margin: "0 auto", textAlign: "center" }}>
         <h1
           style={{
             fontSize: "clamp(28px, 4vw, 52px)",
@@ -28,8 +22,12 @@ export default function Banner() {
             marginBottom: 16,
           }}
         >
-          10x Faster {" "} <span style={{ color: "var(--color-primary-dark)" }}> Resume Screening </span>
+          10x Faster{" "}
+          <span style={{ color: "var(--color-primary-dark)" }}>
+            Resume Screening
+          </span>
         </h1>
+
         <p
           style={{
             fontSize: 18,
@@ -49,7 +47,7 @@ export default function Banner() {
             height: 52,
             fontSize: 16,
             borderRadius: 8,
-            background: "var(--color-primary)",
+            background: "var(--color-primary-dark)",
             border: "none",
             color: "#fff",
             fontWeight: 600,
@@ -61,6 +59,6 @@ export default function Banner() {
           Book a Demo Now
         </Button>
       </div>
-    </div>
+    </section>
   );
 }

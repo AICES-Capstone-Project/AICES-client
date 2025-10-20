@@ -8,9 +8,15 @@ import { APP_ROUTES } from "../services/config";
 export const getRoleBasedRoute = (roleName: string | null): string => {
 	switch (roleName?.toLowerCase()) {
 		case "system_admin":
-			return APP_ROUTES.ADMIN;
+			return APP_ROUTES.SYSTEM;
+		case "system_manager":
+			return APP_ROUTES.SYSTEM;
+		case "system_staff":
+			return APP_ROUTES.SYSTEM;
+		case "hr_manager":
+			return APP_ROUTES.COMPANY;
 		case "hr_recruiter":
-			return APP_ROUTES.RECRUITER;
+			return APP_ROUTES.COMPANY;
 		default:
 			return APP_ROUTES.HOME;
 	}

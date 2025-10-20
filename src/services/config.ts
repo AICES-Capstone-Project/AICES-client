@@ -26,6 +26,11 @@ export const API_ENDPOINTS = {
 		RESET_PASSWORD: "/auth/reset-password",
 	},
 
+	// Profile endpoints
+	PROFILE: {
+		UPDATE: "/profile/update",
+	},
+
 	// Admin endpoints
 	ADMIN: {
 		USERS: {
@@ -44,28 +49,17 @@ export const APP_ROUTES = {
 	HOME: "/",
 	TEST: "/test",
 	NOTFOUND: "*",
-	// Public routes
-	HOME: "/",
-	TEST: "/test",
 
 	// Auth routes
-
-	PRICING: "/pricing",
 	LOGIN: "/login",
 	SIGN_UP: "/sign-up",
 	VERIFY_EMAIL: "/verify-email",
 	FORGOT_PASSWORD: "/forgot-password",
 	RESET_PASSWORD: "/reset-password",
 	AUTH_CALLBACK: "/auth/callback",
-	// Auth routes
 
+	// General routes
 	PRICING: "/pricing",
-	LOGIN: "/login",
-	SIGN_UP: "/sign-up",
-	VERIFY_EMAIL: "/verify-email",
-	FORGOT_PASSWORD: "/forgot-password",
-	RESET_PASSWORD: "/reset-password",
-	AUTH_CALLBACK: "/auth/callback",
 
 	// Profile routes
 	PROFILE: "/profile",
@@ -73,24 +67,23 @@ export const APP_ROUTES = {
 	PROFILE_NOTIFICATION: "/profile/notification",
 	PROFILE_SECURITY: "/profile/security",
 
-	// Base dashboards by role
-	HR: "/hr", // HR_Manager, HR_Recruiter
-	CANDIDATE: "/candidate", // Candidate
+	// System routes
+	SYSTEM: "/system",
+	SYSTEM_DASHBOARD: "/system/dashboard",
+	SYSTEM_USERS: "/system/users",
+	SYSTEM_RECRUITMENT_APPROVAL: "/system/recruitment-approval",
+	SYSTEM_JOBS: "/system/jobs",
 
-	// Recruiter routes
-	RECRUITER: "/recruiter",
+	// Company routes
+	COMPANY: "/company",
+} as const;
 
-	// Admin routes
-	ADMIN: "/admin",
-	ADMIN_DASHBOARD: "/admin/dashboard",
-	ADMIN_USERS: "/admin/users",
-	ADMIN_RECRUITMENT_APPROVAL: "/admin/recruitment-approval",
-	ADMIN_JOBS: "/admin/jobs",
-	ADMIN_ASSESSMENTS: "/admin/assessments",
-	ADMIN_REPORTS: "/admin/reports",
-	ADMIN_SETTINGS: "/admin/settings",
-	ADMIN_NOTIFICATIONS: "/admin/notifications",
-	ADMIN_LOGS: "/admin/logs",
+export const ROLES = {
+	System_Admin: "system_admin",
+	System_Manager: "system_manager",
+	System_Staff: "system_staff",
+	Hr_Manager: "hr_manager",
+	Hr_Recruiter: "hr_recruiter",
 } as const;
 
 export default {

@@ -1,13 +1,7 @@
 import axios, { AxiosError } from "axios";
 import type { AxiosRequestConfig } from "axios";
 import { API_CONFIG, API_ENDPOINTS, APP_ROUTES, STORAGE_KEYS } from "./config";
-
-// Local ApiResponse type because ../types/api.types doesn't export it
-export type ApiResponse<T> = {
-	status: number | string;
-	message?: string;
-	data: T | null;
-};
+import type { ApiResponse } from "../types/api.types";
 
 // Tạo axios instance
 const api = axios.create({

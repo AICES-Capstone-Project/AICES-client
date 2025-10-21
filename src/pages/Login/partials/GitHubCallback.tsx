@@ -44,11 +44,7 @@ const GitHubCallback = () => {
 			console.log("🔄 [GitHub] Processing authentication...");
 
 			try {
-				// Add minimum 2 second loading time for better UX
-				const [res] = await Promise.all([
-					authService.githubLogin(code),
-					new Promise((resolve) => setTimeout(resolve, 2000)),
-				]);
+				const res = await authService.githubLogin(code);
 
 				console.log("📦 [GitHub] Login response:", res);
 

@@ -38,10 +38,7 @@ const SocialAuthForm = () => {
 				setGoogleLoading(true);
 				console.log("🔄 [Google] Setting loading state...");
 
-				const [res] = await Promise.all([
-					authService.googleLogin(googleAccessToken),
-					new Promise((resolve) => setTimeout(resolve, 3000)),
-				]);
+				const res = await authService.googleLogin(googleAccessToken);
 
 				console.log("📝 [Google] Server response:", res);
 				console.log(res.status);

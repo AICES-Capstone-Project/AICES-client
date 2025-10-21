@@ -60,11 +60,7 @@ const SignupForm: React.FC = () => {
 		try {
 			setLoading(true);
 
-			const [res] = await Promise.all([
-				authService.signUp({ fullName, email, password }),
-				new Promise((resolve) => setTimeout(resolve, 3000)),
-			]);
-
+			const res = await authService.signUp({ fullName, email, password });
 			if (res.status === "Success") {
 				toastSuccess("Signup Success!", res.message);
 				navigate(APP_ROUTES.LOGIN);
@@ -158,7 +154,9 @@ const SignupForm: React.FC = () => {
 						onPressEnter={handleSubmit}
 					/>
 					{confirmPasswordError && (
-						<div className="text-red-500 text-xs !mb-1">{confirmPasswordError}</div>
+						<div className="text-red-500 text-xs !mb-1">
+							{confirmPasswordError}
+						</div>
 					)}
 				</div>
 			</div>
@@ -186,7 +184,6 @@ const SignupForm: React.FC = () => {
 					Log in
 				</span>
 			</div>
-
 		</div>
 	);
 };

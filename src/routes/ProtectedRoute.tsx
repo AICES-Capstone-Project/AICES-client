@@ -59,7 +59,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 		!allowedRoles.includes(user.roleName?.toLowerCase() || "")
 	) {
 		// Wrong role → redirect to not found
-		return <Navigate to={APP_ROUTES.HOME} replace />;
+		return <Navigate to={APP_ROUTES.NOTFOUND} replace />;
 	}
 
 	// User is authenticated and has correct role

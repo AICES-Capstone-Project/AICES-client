@@ -42,10 +42,8 @@ const Form: React.FC = () => {
 
 		try {
 			setLoading(true);
-			const [res] = await Promise.all([
-				authService.login({ email, password }),
-				new Promise((resolve) => setTimeout(resolve, 3000)),
-			]);
+
+			const res = await authService.login({ email, password });
 
 			console.log(res);
 			if (res.status === "Success" && res.data) {

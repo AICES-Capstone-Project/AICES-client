@@ -4,6 +4,12 @@ import {
 	TeamOutlined,
 	FileDoneOutlined,
 	AppstoreOutlined,
+	BarChartOutlined,
+	BellOutlined,
+	SettingOutlined,
+	ApartmentOutlined,
+	TagsOutlined,
+	PartitionOutlined,
 	MenuFoldOutlined,
 	MenuUnfoldOutlined,
 } from "@ant-design/icons";
@@ -34,18 +40,36 @@ export default function SystemLayout() {
 			label: <Link to={APP_ROUTES.SYSTEM_USERS}>Users</Link>,
 		},
 		{
-			key: APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL,
-			icon: <FileDoneOutlined />,
-			label: (
-				<Link to={APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL}>
-					Recruitment Approval
-				</Link>
-			),
+			key: APP_ROUTES.SYSTEM_COMPANY,
+			icon: <ApartmentOutlined />,
+			label: <Link to={APP_ROUTES.SYSTEM_COMPANY}>Company</Link>,
 		},
 		{
-			key: APP_ROUTES.SYSTEM_JOBS,
-			icon: <AppstoreOutlined />,
-			label: <Link to={APP_ROUTES.SYSTEM_JOBS}>Jobs</Link>,
+			key: APP_ROUTES.SYSTEM_REPORTS,
+			icon: <BarChartOutlined />,
+			label: <Link to={APP_ROUTES.SYSTEM_REPORTS}>Reports</Link>,
+		},
+		{
+			key: APP_ROUTES.SYSTEM_EMPLOYMENT_TYPE,
+			icon: <PartitionOutlined />,
+			label: <Link to={APP_ROUTES.SYSTEM_EMPLOYMENT_TYPE}>
+				Employment Type
+			</Link>,
+		},
+		{
+			key: APP_ROUTES.SYSTEM_CATEGORY,
+			icon: <TagsOutlined />,
+			label: <Link to={APP_ROUTES.SYSTEM_CATEGORY}>Category</Link>,
+		},
+		{
+			key: APP_ROUTES.SYSTEM_NOTIFICATIONS,
+			icon: <BellOutlined />,
+			label: <Link to={APP_ROUTES.SYSTEM_NOTIFICATIONS}>Notifications</Link>,
+		},
+		{
+			key: APP_ROUTES.SYSTEM_SETTINGS,
+			icon: <SettingOutlined />,
+			label: <Link to={APP_ROUTES.SYSTEM_SETTINGS}>Settings</Link>,
 		},
 	];
 
@@ -57,7 +81,10 @@ export default function SystemLayout() {
 				onCollapse={setCollapsed}
 				breakpoint="lg"
 				width={240}
-				style={{ background: "#fff", borderRight: "1px solid #f0f0f0" }}
+				style={{
+					background: "#fff",
+					borderRight: "1px solid #f0f0f0",
+				}}
 			>
 				<div
 					style={{
@@ -71,8 +98,9 @@ export default function SystemLayout() {
 						fontSize: 18,
 					}}
 				>
-					{collapsed ? "A" : "Admin"}
+					{collapsed ? "S" : "System Admin"}
 				</div>
+
 				<Menu
 					mode="inline"
 					selectedKeys={[selectedKey]}
@@ -80,6 +108,7 @@ export default function SystemLayout() {
 					style={{ height: "100%" }}
 				/>
 			</Sider>
+
 			<Layout>
 				<Header
 					style={{
@@ -100,6 +129,7 @@ export default function SystemLayout() {
 						System Panel
 					</Title>
 				</Header>
+
 				<Content style={{ padding: 24 }}>
 					<Outlet />
 				</Content>

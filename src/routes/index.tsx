@@ -4,6 +4,10 @@ import ProtectedRoute from "./ProtectedRoute";
 import UserProfileTest from "../pages/UserProfileTest";
 import { APP_ROUTES, ROLES } from "../services/config";
 import GitHubCallback from "../pages/Login/partials/GitHubCallback";
+import CompanyList from "../pages/SystemPages/Company";
+import CompanyDetail from "../pages/SystemPages/Company/CompanyDetail";
+import JobDetail from "../pages/SystemPages/Company/JobDetail";
+import ResumeDetail from "../pages/SystemPages/Company/ResumeDetail";
 
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
@@ -20,93 +24,91 @@ const Login = lazy(() => import("../pages/Login/Login"));
 const VerifyEmailPage = lazy(() => import("../pages/SignUp/VerifyEmailPage"));
 const SignUp = lazy(() => import("../pages/SignUp/Signup"));
 const ForgetPassword = lazy(
-	() => import("../pages/Login/partials/ForgetPassword/ForgetPass")
+  () => import("../pages/Login/partials/ForgetPassword/ForgetPass")
 );
 const ResetPassword = lazy(
-	() => import("../pages/Login/partials/ResetPassword/ResetPassword")
+  () => import("../pages/Login/partials/ResetPassword/ResetPassword")
 );
 const ProfileDetail = lazy(() => import("../pages/Profile/ProfileDetail"));
 
 /* ============== System Pages ==============*/
 const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
 const SystemAccounts = lazy(() => import("../pages/SystemPages/Accounts"));
-const SystemRecruitmentApproval = lazy(
-	() => import("../pages/SystemPages/RecruitmentApproval")
-);
-const SystemJobs = lazy(() => import("../pages/SystemPages/Jobs"));
 
 export const router = createBrowserRouter([
-	/* ============== General Pages ==============*/
-	{
-		path: APP_ROUTES.HOME,
-		element: <MainLayout />,
-		errorElement: <ErrorPage />,
-		children: [
-			{ index: true, element: <Home /> },
-			{ path: APP_ROUTES.PRICING, element: <Pricing /> },
-			{
-				path: APP_ROUTES.PROFILE, // /profile
-				element: (
-					<ProtectedRoute>
-						<ProfileLayout />
-					</ProtectedRoute>
-				),
-				children: [
-					// /profile -> chỉ hiện sidebar, không render detail
-					{ index: true, element: <div /> },
+  /* ============== General Pages ==============*/
+  {
+    path: APP_ROUTES.HOME,
+    element: <MainLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      { index: true, element: <Home /> },
+      { path: APP_ROUTES.PRICING, element: <Pricing /> },
+      {
+        path: APP_ROUTES.PROFILE, // /profile
+        element: (
+          <ProtectedRoute>
+            <ProfileLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          // /profile -> chỉ hiện sidebar, không render detail
+          { index: true, element: <div /> },
 
-					// /profile/account-detail
-					{ path: "account-detail", element: <ProfileDetail /> },
+          // /profile/account-detail
+          { path: "account-detail", element: <ProfileDetail /> },
 
-					// /profile/password-security (placeholder - sau này thay component thật)
-					{ path: "password-security", element: <div /> },
+          // /profile/password-security (placeholder - sau này thay component thật)
+          { path: "password-security", element: <div /> },
 
-					// /profile/privacy (placeholder)
-					{ path: "privacy", element: <div /> },
+          // /profile/privacy (placeholder)
+          { path: "privacy", element: <div /> },
 
-					// /profile/membership (placeholder)
-					{ path: "membership", element: <div /> },
-				],
-			},
-		],
-	},
-	{ path: APP_ROUTES.LOGIN, element: <Login /> },
-	{ path: APP_ROUTES.SIGN_UP, element: <SignUp /> },
-	{ path: APP_ROUTES.VERIFY_EMAIL, element: <VerifyEmailPage /> },
-	{ path: APP_ROUTES.FORGOT_PASSWORD, element: <ForgetPassword /> },
-	{ path: APP_ROUTES.RESET_PASSWORD, element: <ResetPassword /> },
-	{ path: APP_ROUTES.AUTH_CALLBACK, element: <GitHubCallback /> },
-	{ path: APP_ROUTES.TEST, element: <UserProfileTest /> },
+          // /profile/membership (placeholder)
+          { path: "membership", element: <div /> },
+        ],
+      },
+    ],
+  },
+  { path: APP_ROUTES.LOGIN, element: <Login /> },
+  { path: APP_ROUTES.SIGN_UP, element: <SignUp /> },
+  { path: APP_ROUTES.VERIFY_EMAIL, element: <VerifyEmailPage /> },
+  { path: APP_ROUTES.FORGOT_PASSWORD, element: <ForgetPassword /> },
+  { path: APP_ROUTES.RESET_PASSWORD, element: <ResetPassword /> },
+  { path: APP_ROUTES.AUTH_CALLBACK, element: <GitHubCallback /> },
+  { path: APP_ROUTES.TEST, element: <UserProfileTest /> },
 
-	/* ============== System Pages ==============*/
-	{
-		path: APP_ROUTES.SYSTEM,
-		element: (
-			<ProtectedRoute
-				allowedRoles={[
-					ROLES.System_Admin,
-					ROLES.System_Manager,
-					ROLES.System_Staff,
-				]}
-			>
-				<SystemLayout />
-			</ProtectedRoute>
-		),
-		children: [
-			{ index: true, element: <SystemDashboard /> },
-			{ path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
-			{ path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
-			{
-				path: APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL,
-				element: <SystemRecruitmentApproval />,
-			},
-			{ path: APP_ROUTES.SYSTEM_JOBS, element: <SystemJobs /> },
-		],
-	},
+  /* ============== System Pages ==============*/
+  {
+    path: APP_ROUTES.SYSTEM,
+    element: (
+      <ProtectedRoute
+        allowedRoles={[
+          ROLES.System_Admin,
+          ROLES.System_Manager,
+          ROLES.System_Staff,
+        ]}
+      >
+        <SystemLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <SystemDashboard /> },
+      { path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
+      { path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
+      { path: "company", element: <CompanyList /> },
+      { path: "company/:companyId", element: <CompanyDetail /> },
+      { path: "company/:companyId/jobs/:jobId", element: <JobDetail /> },
+      {
+        path: "company/:companyId/jobs/:jobId/resumes/:resumeId",
+        element: <ResumeDetail />,
+      },
+    ],
+  },
 
-	/* ============== Error Pages ==============*/
-	{
-		path: "*",
-		element: <NotFoundPage />,
-	},
+  /* ============== Error Pages ==============*/
+  {
+    path: "*",
+    element: <NotFoundPage />,
+  },
 ]);

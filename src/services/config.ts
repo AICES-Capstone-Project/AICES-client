@@ -71,6 +71,20 @@ export const APP_ROUTES = {
 	SYSTEM_USERS: "/system/users",
 	SYSTEM_RECRUITMENT_APPROVAL: "/system/recruitment-approval",
 	SYSTEM_JOBS: "/system/jobs",
+	
+	// === Newly added System routes ===
+	SYSTEM_COMPANY: "/system/company",
+	SYSTEM_REPORTS: "/system/reports",
+	SYSTEM_EMPLOYMENT_TYPE: "/system/employment-type",
+	SYSTEM_CATEGORY: "/system/category",
+	SYSTEM_NOTIFICATIONS: "/system/notifications",
+	SYSTEM_SETTINGS: "/system/settings",
+
+	// Optional detail routes (for future expansion)
+	SYSTEM_COMPANY_DETAIL: "/system/company/:companyId",
+	SYSTEM_COMPANY_JOB_DETAIL: "/system/company/:companyId/jobs/:jobId",
+	SYSTEM_COMPANY_RESUME_DETAIL:
+		"/system/company/:companyId/jobs/:jobId/resumes/:resumeId",
 
 	// Company routes
 	COMPANY: "/company",

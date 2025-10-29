@@ -113,11 +113,11 @@ export const router = createBrowserRouter([
 			{ index: true, element: <SystemDashboard /> },
 			{ path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
 			{ path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
-			{
-				path: APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL,
-				element: <SystemRecruitmentApproval />,
-			},
-			{ path: APP_ROUTES.SYSTEM_JOBS, element: <SystemJobs /> },
+			// {
+			// 	path: APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL,
+			// 	element: <SystemRecruitmentApproval />,
+			// },
+			// { path: APP_ROUTES.SYSTEM_JOBS, element: <SystemJobs /> },
 		],
 	},
 

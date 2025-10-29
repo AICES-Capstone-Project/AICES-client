@@ -13,8 +13,12 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo/logo_long.png";
 import { useAppDispatch } from "../../hooks/redux";
 import { logoutUser } from "../../stores/slices/authSlice";
-import { APP_ROUTES } from "../../services/config";
+import { APP_ROUTES, ROLES } from "../../services/config";
 import React from "react";
+import { useAppSelector } from "../../hooks/redux";
+
+// Prefer reading user from redux store (keeps shape consistent across the app)
+// Fallback: null
 
 const { Sider, Content } = Layout;
 
@@ -37,6 +41,9 @@ export default function CompanyLayout() {
 		}
 	};
 
+	const user = useAppSelector((s) => s.auth.user);
+	const userRole = user?.roleName ?? null;
+
 	const items = [
 		{
 			key: APP_ROUTES.COMPANY_DASHBOARD,
@@ -48,11 +55,14 @@ export default function CompanyLayout() {
 			icon: <ApartmentOutlined />,
 			label: <Link to={APP_ROUTES.COMPANY_MY_APARTMENTS}>My Company</Link>,
 		},
-		{
-			key: APP_ROUTES.COMPANY_STAFFS,
-			icon: <TeamOutlined />,
-			label: <Link to={APP_ROUTES.COMPANY_STAFFS}>Staffs</Link>,
-		},
+		// Only show Staffs if HR_Manager
+		...(userRole?.toLowerCase() === ROLES.Hr_Manager?.toLowerCase()
+			? [{
+				key: APP_ROUTES.COMPANY_STAFFS,
+				icon: <TeamOutlined />,
+				label: <Link to={APP_ROUTES.COMPANY_STAFFS}>Staffs</Link>,
+			}]
+			: []),
 		{
 			key: APP_ROUTES.COMPANY_JOBS,
 			icon: <AppstoreOutlined />,
@@ -106,7 +116,7 @@ export default function CompanyLayout() {
 				collapsed={collapsed}
 				onCollapse={setCollapsed}
 				breakpoint="lg"
-				trigger={CustomTrigger}
+trigger={CustomTrigger}
 				style={{
 					position: "fixed",
 					left: 0,

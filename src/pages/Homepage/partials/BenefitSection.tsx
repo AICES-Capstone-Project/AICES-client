@@ -34,9 +34,8 @@ export default function BenefitSection() {
     <section className="relative flex flex-col justify-center items-center min-h-screen text-center overflow-hidden">
       <div className="max-w-7xl w-full flex flex-col justify-center items-center px-4 sm:px-6 lg:px-8 gap-10">
         
-        {/* Title */}
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-4xl !font-bold text-[var(--color-primary-dark)] mb-4">
             Transform Your Hiring Process
           </h2>
           <p className="text-xl text-gray-600 leading-relaxed">
@@ -45,62 +44,45 @@ export default function BenefitSection() {
           </p>
         </div>
 
-        {/* Benefits grid */}
         <div className="grid md:grid-cols-3 gap-10 justify-center items-stretch w-full max-w-6xl">
           {benefits.map((benefit) => (
             <div
               key={benefit.title}
-              className="!py-8 !px-5 gap-5 group relative bg-white rounded-2xl p-10 shadow-lg transition-all duration-300 flex flex-col items-center text-center hover:-translate-y-2 hover:border-[var(--color-primary-light)] hover:shadow-[0_10px_25px_rgba(77,124,15,0.15)] hover:bg-[rgba(77,124,15,0.03)] border border-gray-100"
+              className="group relative bg-white text-[var(--color-primary-dark)] rounded-2xl !p-5 shadow-lg transition-all duration-300 flex flex-col items-center text-center hover:-translate-y-2 hover:border-[var(--color-primary-light)] hover:shadow-[0_10px_25px_rgba(77,124,15,0.15)] hover:bg-[rgba(77,124,15,0.03)] border border-gray-100 min-h-[320px]"
               style={{
-                transition:
-                  "all 0.3s ease, background-color 0.4s ease, border-color 0.3s ease",
+                transition: "all 0.3s ease, background-color 0.4s ease, border-color 0.3s ease",
               }}
             >
-              {/* Icon */}
-              <div>
-                <img
-                  src={benefit.icon}
-                  alt={benefit.title}
-                  className="h-20 w-20 object-contain mb-6"
-                />
+              <div className="flex-none mb-4 h-20 w-20 flex items-center justify-center">
+                <img src={benefit.icon} alt={benefit.title} className="h-20 w-20 object-contain" />
               </div>
 
-              {/* Title */}
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">
+              <h3 className="text-2xl !font-bold text-[var(--color-primary-dark)] mb-3">
                 {benefit.title}
               </h3>
 
-              {/* Description */}
-              <p className="text-gray-600 mb-8 leading-relaxed">
+              <p className="text-gray-600 leading-relaxed mb-6 flex-1">
                 {benefit.description}
               </p>
 
-              {/* Stat — chỉ text, không có nền */}
-              <div className="flex flex-col items-center gap-1">
+              <div className="flex flex-col items-center gap-1 mt-4">
                 <span
                   className="text-3xl font-bold"
                   style={{
-                    background:
-                      "linear-gradient(to right, var(--color-primary), var(--color-primary-light))",
+                    background: "linear-gradient(to right, var(--color-primary), var(--color-primary-light))",
                     WebkitBackgroundClip: "text",
                     color: "transparent",
                   }}
                 >
                   {benefit.stat}
                 </span>
-                <span className="text-sm text-gray-600 font-medium">
-                  {benefit.statLabel}
-                </span>
+                <span className="text-sm text-gray-600 font-medium">{benefit.statLabel}</span>
               </div>
 
-              {/* Hover overlay */}
               <div
-                className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                style={{
-                  background: "var(--color-primary-light)",
-                  opacity: 0.08,
-                }}
-              ></div>
+                className="absolute inset-0 rounded-2xl pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                style={{ background: "var(--color-primary-light)", opacity: 0.06 }}
+              />
             </div>
           ))}
         </div>

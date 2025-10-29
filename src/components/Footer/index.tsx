@@ -4,9 +4,9 @@ import {
 	InstagramOutlined,
 	TwitterOutlined,
 	YoutubeOutlined,
-	ArrowRightOutlined,
 } from "@ant-design/icons";
 import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import Logo from "../../assets/logo/logo_white.png";
 
 const { Footer: AntFooter } = Layout;
@@ -31,13 +31,14 @@ const FooterLink: React.FC<{ to: string; label: string }> = ({ to, label }) => {
 			}
 			onMouseLeave={(e) => (e.currentTarget.style.color = "#e5e7eb")}
 		>
-			<ArrowRightOutlined style={{ marginRight: 8, opacity: 0.8 }} />
 			{label}
 		</Link>
 	);
 };
 
 export const Footer: React.FC = () => {
+	const { t } = useTranslation();
+
 	return (
 		<AntFooter
 			style={{
@@ -48,7 +49,7 @@ export const Footer: React.FC = () => {
 		>
 			<div style={{ maxWidth: "1200px", margin: "0 auto" }}>
 				<Row gutter={[32, 32]}>
-					<Col xs={24} lg={8}>
+					<Col xs={24} lg={9}>
 						<img
 							src={Logo}
 							alt="Logo"
@@ -57,50 +58,45 @@ export const Footer: React.FC = () => {
 						<div>
 							<Space direction="vertical">
 								<Space>
-									<Text style={{ color: "#d1d5db" }}>Call Now:</Text>
+									<Text style={{ color: "#d1d5db" }}>{t('footer.callNow')}</Text>
 									<Text strong style={{ fontSize: "1.25rem", color: "#fff" }}>
 										(+84) 918273645
 									</Text>
 								</Space>
-								<Text style={{ color: "#d1d5db" }}>
-									FPT University, D1 Street, Ho Chi Minh City
-								</Text>
+								<Text style={{ color: "#d1d5db" }}>{t('footer.address')}</Text>
 							</Space>
 						</div>
 					</Col>
 
-					{/* Product */}
-					<Col xs={12} sm={6} lg={4}>
+					<Col xs={16} sm={8} lg={5}>
 						<Title level={4} style={{ color: "#fff", marginBottom: 16 }}>
-							Product
+							{t('footer.productTitle')}
 						</Title>
 						<Space direction="vertical">
-							<FooterLink to="/how-it-works" label="How it works" />
-							<FooterLink to="/no-ats" label="No ATS? No Problem!" />
+							<FooterLink to="/how-it-works" label={t('footer.product.howItWorks')} />
+							<FooterLink to="/no-ats" label={t('footer.product.noAts')} />
 						</Space>
 					</Col>
 
-					{/* Legal & Trust */}
-					<Col xs={12} sm={6} lg={4}>
+					<Col xs={16} sm={8} lg={5}>
 						<Title level={4} style={{ color: "#fff", marginBottom: 16 }}>
-							Legal & Trust
+							{t('footer.legalTitle')}
 						</Title>
 						<Space direction="vertical">
-							<FooterLink to="/terms" label="Terms of Service" />
-							<FooterLink to="/privacy" label="Privacy Policy" />
-							<FooterLink to="/security" label="Security & Privacy" />
+							<FooterLink to="/terms" label={t('footer.legal.terms')} />
+							<FooterLink to="/privacy" label={t('footer.legal.privacy')} />
+							<FooterLink to="/security" label={t('footer.legal.security')} />
 						</Space>
 					</Col>
 
-					{/* Resources */}
-					<Col xs={12} sm={6} lg={4}>
+					<Col xs={16} sm={8} lg={5}>
 						<Title level={4} style={{ color: "#fff", marginBottom: 16 }}>
-							Resources
+							{t('footer.resourcesTitle')}
 						</Title>
 						<Space direction="vertical">
-							<FooterLink to="/blog" label="Blog" />
-							<FooterLink to="/help-center" label="Help Center" />
-							<FooterLink to="/contact-us" label="Contact Us" />
+							<FooterLink to="/blog" label={t('footer.resources.blog')} />
+							<FooterLink to="/help-center" label={t('footer.resources.helpCenter')} />
+							<FooterLink to="/contact-us" label={t('footer.resources.contact')} />
 						</Space>
 					</Col>
 
@@ -135,10 +131,7 @@ export const Footer: React.FC = () => {
 						flexWrap: "wrap",
 					}}
 				>
-					<Text style={{ color: "#d1d5db" }}>
-						© 2025 AICES - AI Powered Candidate Evaluation System for Recruiters. All rights
-						reserved.
-					</Text>
+					<Text style={{ color: "#d1d5db" }}>{t('footer.copyRight')}</Text>
 					<Space
 						size="large"
 						style={{

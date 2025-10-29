@@ -1,4 +1,7 @@
+import { useTranslation } from 'react-i18next';
+
 export default function Testimonials() {
+  const { t } = useTranslation();
   const testimonials = [
     {
       company: "FPT Software",
@@ -33,7 +36,7 @@ export default function Testimonials() {
   ];
 
   return (
-    <section className="relative flex flex-col justify-center items-center min-h-screen px-4 sm:px-6 lg:px-8"
+    <section className="relative flex flex-col justify-center items-center min-h-screen !p-10 sm:px-6 lg:px-8"
       style={{
         background: `linear-gradient(
           135deg, 
@@ -43,13 +46,10 @@ export default function Testimonials() {
         )`,
       }}>
       <div className="flex flex-col items-center text-center mb-12 max-w-3xl gap-6">
-        <h2 className="text-4xl font-bold mb-4 text-[var(--color-primary-dark)]">
-          Trusted by <span className="text-white">Top Companies</span>
+        <h2 className="text-4xl !font-bold mb-4 text-[var(--color-primary-dark)]">
+          {t('homepage.testimonials.heading')} <span className="text-white">{t('homepage.testimonials.headingHighlight')}</span>
         </h2>
-        <p className="text-lg text-white">
-          HR professionals, hiring managers, and directors are using Brainner to
-          streamline their recruitment processes
-        </p>
+        <p className="text-lg text-white">{t('homepage.testimonials.sub')}</p>
       </div>
 
       <div className="flex w-full max-w-7xl gap-8 mt-5">

@@ -1,6 +1,8 @@
 import { Button } from "antd";
+import { useTranslation } from 'react-i18next';
 
 export default function Banner() {
+  const { t } = useTranslation();
   return (
     <section
       className="relative text-center px-6 pb-20 pt-40 overflow-hidden min-h-screen flex flex-col justify-center items-center"
@@ -22,10 +24,7 @@ export default function Banner() {
             marginBottom: 16,
           }}
         >
-          10x Faster{" "}
-          <span style={{ color: "var(--color-primary-dark)" }}>
-            Resume Screening
-          </span>
+          {t('homepage.banner.title')}
         </h1>
 
         <p
@@ -36,8 +35,7 @@ export default function Banner() {
             lineHeight: 1.6,
           }}
         >
-          Connect your ATS and analyze hundreds of resumes in minutes: <br />
-          Save Time, Hire Faster and Improve Accuracy
+          {t('homepage.banner.subtitle')}
         </p>
 
         <Button
@@ -56,7 +54,7 @@ export default function Banner() {
           <span role="img" aria-label="laptop" style={{ marginRight: 8 }}>
             💻
           </span>
-          Book a Demo Now
+          {t('homepage.banner.cta')}
         </Button>
       </div>
     </section>

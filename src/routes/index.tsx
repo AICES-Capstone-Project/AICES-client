@@ -4,6 +4,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import UserProfileTest from "../pages/UserProfileTest";
 import { APP_ROUTES, ROLES } from "../services/config";
 import GitHubCallback from "../pages/Login/partials/GitHubCallback";
+import Setting from "../pages/CompanyPages/Settings/Setting";
+import MyApartment from "../pages/CompanyPages/MyApartment/MyApartment";
 import CompanyList from "../pages/SystemPages/Company";
 import CompanyDetail from "../pages/SystemPages/Company/CompanyDetail";
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
@@ -15,6 +17,7 @@ const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 /* ============== Layouts ==============*/
 const MainLayout = lazy(() => import("../components/Layout/MainLayout"));
 const SystemLayout = lazy(() => import("../components/Layout/SystemLayout"));
+const CompanyLayout = lazy(() => import("../components/Layout/CompanyLayout"));
 const ProfileLayout = lazy(() => import("../components/Layout/ProfileLayout"));
 
 /* ============== General Pages ==============*/
@@ -24,91 +27,152 @@ const Login = lazy(() => import("../pages/Login/Login"));
 const VerifyEmailPage = lazy(() => import("../pages/SignUp/VerifyEmailPage"));
 const SignUp = lazy(() => import("../pages/SignUp/Signup"));
 const ForgetPassword = lazy(
-  () => import("../pages/Login/partials/ForgetPassword/ForgetPass")
+	() => import("../pages/Login/partials/ForgetPassword/ForgetPass")
 );
 const ResetPassword = lazy(
-  () => import("../pages/Login/partials/ResetPassword/ResetPassword")
+	() => import("../pages/Login/partials/ResetPassword/ResetPassword")
 );
 const ProfileDetail = lazy(() => import("../pages/Profile/ProfileDetail"));
+
+/* ============== Company Pages ==============*/
+const CompanyDashboard = lazy(
+	() => import("../pages/CompanyPages/Dashboard/Dashboard")
+);
+const CompanyStaffs = lazy(
+	() => import("../pages/CompanyPages/StaffManagement/StaffManagement")
+);
+const JobManagement = lazy(
+	() => import("../pages/CompanyPages/JobManagement/JobManagement")
+);
+const SubmissionPending = lazy(
+	() => import("../pages/CompanyPages/MyApartment/SubmissionPending")
+);
 
 /* ============== System Pages ==============*/
 const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
 const SystemAccounts = lazy(() => import("../pages/SystemPages/Accounts"));
 
 export const router = createBrowserRouter([
-  /* ============== General Pages ==============*/
-  {
-    path: APP_ROUTES.HOME,
-    element: <MainLayout />,
-    errorElement: <ErrorPage />,
-    children: [
-      { index: true, element: <Home /> },
-      { path: APP_ROUTES.PRICING, element: <Pricing /> },
-      {
-        path: APP_ROUTES.PROFILE, // /profile
-        element: (
-          <ProtectedRoute>
-            <ProfileLayout />
-          </ProtectedRoute>
-        ),
-        children: [
-          // /profile -> chỉ hiện sidebar, không render detail
-          { index: true, element: <div /> },
+	/* ============== General Pages ==============*/
+	{
+		path: APP_ROUTES.HOME,
+		element: <MainLayout />,
+		errorElement: <ErrorPage />,
+		children: [
+			{ index: true, element: <Home /> },
+			{ path: APP_ROUTES.PRICING, element: <Pricing /> },
+			{
+				path: APP_ROUTES.PROFILE, // /profile
+				element: (
+					<ProtectedRoute>
+						<ProfileLayout />
+					</ProtectedRoute>
+				),
+				children: [
+					// /profile -> chỉ hiện sidebar, không render detail
+					{ index: true, element: <div /> },
 
-          // /profile/account-detail
-          { path: "account-detail", element: <ProfileDetail /> },
+					// /profile/account-detail
+					{ path: "account-detail", element: <ProfileDetail /> },
 
-          // /profile/password-security (placeholder - sau này thay component thật)
-          { path: "password-security", element: <div /> },
+					// /profile/password-security (placeholder - sau này thay component thật)
+					{ path: "password-security", element: <div /> },
 
-          // /profile/privacy (placeholder)
-          { path: "privacy", element: <div /> },
+					// /profile/privacy (placeholder)
+					{ path: "privacy", element: <div /> },
 
-          // /profile/membership (placeholder)
-          { path: "membership", element: <div /> },
-        ],
-      },
-    ],
-  },
-  { path: APP_ROUTES.LOGIN, element: <Login /> },
-  { path: APP_ROUTES.SIGN_UP, element: <SignUp /> },
-  { path: APP_ROUTES.VERIFY_EMAIL, element: <VerifyEmailPage /> },
-  { path: APP_ROUTES.FORGOT_PASSWORD, element: <ForgetPassword /> },
-  { path: APP_ROUTES.RESET_PASSWORD, element: <ResetPassword /> },
-  { path: APP_ROUTES.AUTH_CALLBACK, element: <GitHubCallback /> },
-  { path: APP_ROUTES.TEST, element: <UserProfileTest /> },
+					// /profile/membership (placeholder)
+					{ path: "membership", element: <div /> },
+				],
+			},
+		],
+	},
+	{ path: APP_ROUTES.LOGIN, element: <Login /> },
+	{ path: APP_ROUTES.SIGN_UP, element: <SignUp /> },
+	{ path: APP_ROUTES.VERIFY_EMAIL, element: <VerifyEmailPage /> },
+	{ path: APP_ROUTES.FORGOT_PASSWORD, element: <ForgetPassword /> },
+	{ path: APP_ROUTES.RESET_PASSWORD, element: <ResetPassword /> },
+	{ path: APP_ROUTES.AUTH_CALLBACK, element: <GitHubCallback /> },
+	{ path: APP_ROUTES.TEST, element: <UserProfileTest /> },
 
-  /* ============== System Pages ==============*/
-  {
-    path: APP_ROUTES.SYSTEM,
-    element: (
-      <ProtectedRoute
-        allowedRoles={[
-          ROLES.System_Admin,
-          ROLES.System_Manager,
-          ROLES.System_Staff,
-        ]}
-      >
-        <SystemLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <SystemDashboard /> },
-      { path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
-      { path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
-      { path: "company", element: <CompanyList /> },
-      { path: "company/:companyId", element: <CompanyDetail /> },
-      { path: "company/:companyId/jobs/:jobId", element: <JobDetail /> },
-      {
-        path: "company/:companyId/jobs/:jobId/resumes/:resumeId",
-        element: <ResumeDetail />,
-      },
-    ],
-  },
+	/* ============== System Pages ==============*/
+	{
+		path: APP_ROUTES.SYSTEM,
+		element: (
+			<ProtectedRoute
+				allowedRoles={[
+					ROLES.System_Admin,
+					ROLES.System_Manager,
+					ROLES.System_Staff,
+				]}
+			>
+				<SystemLayout />
+			</ProtectedRoute>
+		),
+		children: [
+			{ index: true, element: <SystemDashboard /> },
+			{ path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
+			{ path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
+			{
+				path: APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL,
+				element: <SystemRecruitmentApproval />,
+			},
+			{ path: APP_ROUTES.SYSTEM_JOBS, element: <SystemJobs /> },
+		],
+	},
 
-  /* ============== Error Pages ==============*/
-  {
-    path: "*",
-    element: <NotFoundPage />,
-  },
+	/* ============== Comapany Pages ==============*/
+	{
+		path: APP_ROUTES.COMPANY,
+		element: (
+			<ProtectedRoute allowedRoles={[ROLES.Hr_Manager, ROLES.Hr_Recruiter]}>
+				<CompanyLayout />
+			</ProtectedRoute>
+		),
+		children: [
+			{ index: true, element: <CompanyDashboard /> },
+			{ path: APP_ROUTES.COMPANY_DASHBOARD, element: <CompanyDashboard /> },
+			{ path: APP_ROUTES.COMPANY_STAFFS, element: <CompanyStaffs /> },
+			{ path: APP_ROUTES.COMPANY_JOBS, element: <JobManagement /> },
+			{ path: APP_ROUTES.COMPANY_SETTINGS, element: <Setting /> },
+			{ path: APP_ROUTES.COMPANY_MY_APARTMENTS, element: <MyApartment /> },
+			{
+				path: APP_ROUTES.COMPANY_PENDING_APPROVAL,
+				element: <SubmissionPending />,
+			},
+		],
+	},
+	/* ============== System Pages ==============*/
+	{
+		path: APP_ROUTES.SYSTEM,
+		element: (
+			<ProtectedRoute
+				allowedRoles={[
+					ROLES.System_Admin,
+					ROLES.System_Manager,
+					ROLES.System_Staff,
+				]}
+			>
+				<SystemLayout />
+			</ProtectedRoute>
+		),
+		children: [
+			{ index: true, element: <SystemDashboard /> },
+			{ path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
+			{ path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
+			{ path: "company", element: <CompanyList /> },
+			{ path: "company/:companyId", element: <CompanyDetail /> },
+			{ path: "company/:companyId/jobs/:jobId", element: <JobDetail /> },
+			{
+				path: "company/:companyId/jobs/:jobId/resumes/:resumeId",
+				element: <ResumeDetail />,
+			},
+		],
+	},
+
+	/* ============== Error Pages ==============*/
+	{
+		path: "*",
+		element: <NotFoundPage />,
+	},
 ]);

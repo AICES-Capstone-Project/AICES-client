@@ -1,8 +1,11 @@
 import React from "react";
 import { Button } from "antd";
+import { useTranslation } from 'react-i18next';
 import { ClockCircleOutlined } from "@ant-design/icons";
 
 const BannerSecond: React.FC = () => {
+  const { t } = useTranslation();
+
   return (
     <section
       className="relative text-center overflow-hidden min-h-screen flex flex-col justify-center items-center"
@@ -33,13 +36,13 @@ const BannerSecond: React.FC = () => {
           <ClockCircleOutlined style={{ fontSize: "100px" }} />
         </div>
 
-        <h2 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-          <span style={{ color: "var(--color-primary-dark)" }}>Save up to 40 hours </span>
-          <span style={{ color: "var(--color-primary-light)" }}>per month</span>
+        <h2 className="text-4xl md:text-5xl !font-extrabold mb-4 leading-tight">
+          <span style={{ color: "var(--color-primary-dark)" }}>{t('homepage.bannerSecond.titlePrefix')}</span>
+          <span style={{ color: "var(--color-primary-light)" }}> {t('homepage.bannerSecond.titleSuffix')}</span>
         </h2>
 
         <p className="text-gray-700 max-w-2xl mx-auto mb-8 text-lg font-medium leading-relaxed">
-          Instantly identify top applicants. Say goodbye to the tedious task of reviewing the bottom 90% who aren’t a good fit for the role.
+          {t('homepage.bannerSecond.description')}
         </p>
 
         <Button
@@ -54,7 +57,7 @@ const BannerSecond: React.FC = () => {
             fontWeight: 600,
           }}
         >
-          Start Saving Time
+          {t('homepage.bannerSecond.cta')}
         </Button>
       </div>
     </section>

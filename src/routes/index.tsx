@@ -4,6 +4,8 @@ import ProtectedRoute from "./ProtectedRoute";
 import UserProfileTest from "../pages/UserProfileTest";
 import { APP_ROUTES, ROLES } from "../services/config";
 import GitHubCallback from "../pages/Login/partials/GitHubCallback";
+import Setting from "../pages/CompanyPages/Settings/Setting";
+import MyApartment from "../pages/CompanyPages/MyApartment/MyApartment";
 
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
@@ -11,6 +13,7 @@ const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 /* ============== Layouts ==============*/
 const MainLayout = lazy(() => import("../components/Layout/MainLayout"));
 const SystemLayout = lazy(() => import("../components/Layout/SystemLayout"));
+const CompanyLayout = lazy(() => import("../components/Layout/CompanyLayout"));
 const ProfileLayout = lazy(() => import("../components/Layout/ProfileLayout"));
 
 /* ============== General Pages ==============*/
@@ -26,6 +29,13 @@ const ResetPassword = lazy(
 	() => import("../pages/Login/partials/ResetPassword/ResetPassword")
 );
 const ProfileDetail = lazy(() => import("../pages/Profile/ProfileDetail"));
+
+/* ============== Company Pages ==============*/
+const CompanyDashboard = lazy(() => import("../pages/CompanyPages/Dashboard/Dashboard"));
+const CompanyStaffs = lazy(() => import("../pages/CompanyPages/StaffManagement/StaffManagement"));
+const JobManagement = lazy(() => import("../pages/CompanyPages/JobManagement/JobManagement"));
+const SubmissionPending = lazy(() => import("../pages/CompanyPages/MyApartment/SubmissionPending"));
+
 
 /* ============== System Pages ==============*/
 const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
@@ -101,6 +111,30 @@ export const router = createBrowserRouter([
 				element: <SystemRecruitmentApproval />,
 			},
 			{ path: APP_ROUTES.SYSTEM_JOBS, element: <SystemJobs /> },
+		],
+	},
+
+	/* ============== Comapany Pages ==============*/
+	{
+		path: APP_ROUTES.COMPANY,
+		element: (
+			<ProtectedRoute
+				allowedRoles={[
+					ROLES.Hr_Manager,
+					ROLES.Hr_Recruiter,
+				]}
+			>
+				<CompanyLayout />
+			</ProtectedRoute>
+		),
+		children: [
+			{ index: true, element: <CompanyDashboard /> },
+			{ path: APP_ROUTES.COMPANY_DASHBOARD, element: <CompanyDashboard /> },
+			{ path: APP_ROUTES.COMPANY_STAFFS, element: <CompanyStaffs /> },
+			{ path: APP_ROUTES.COMPANY_JOBS, element: <JobManagement /> },
+			{ path: APP_ROUTES.COMPANY_SETTINGS, element: <Setting /> },
+			{ path: APP_ROUTES.COMPANY_MY_APARTMENTS, element: <MyApartment /> },
+			{ path: APP_ROUTES.COMPANY_PENDING_APPROVAL, element: <SubmissionPending /> },
 		],
 	},
 

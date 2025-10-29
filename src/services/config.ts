@@ -39,6 +39,11 @@ export const API_ENDPOINTS = {
 		UPDATE: (id: number) => `/user/${id}`,
 		DELETE: (id: number) => `/user/${id}`,
 	},
+
+	// Company endpoints
+	COMPANY: {
+		CREATE: "/companies/self",
+	},
 } as const;
 
 // App Routes Configuration
@@ -74,6 +79,12 @@ export const APP_ROUTES = {
 
 	// Company routes
 	COMPANY: "/company",
+	COMPANY_DASHBOARD: "/company/dashboard",
+	COMPANY_STAFFS: "/company/staffs",
+	COMPANY_JOBS: "/company/jobs",
+	COMPANY_SETTINGS: "/company/settings",
+	COMPANY_MY_APARTMENTS: "/company/my-apartments",
+	COMPANY_PENDING_APPROVAL: "/company/pending-approval",
 } as const;
 
 export const ROLES = {

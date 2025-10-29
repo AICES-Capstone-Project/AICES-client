@@ -8,7 +8,7 @@ export default function MainLayout() {
 			<header>
 				<Header />
 			</header>
-			<main style={{ marginTop: "70px" }}>
+			<main style={{ marginTop: "60px" }}>
 				<Outlet /> {/* renders child route */}
 			</main>
 			<footer>

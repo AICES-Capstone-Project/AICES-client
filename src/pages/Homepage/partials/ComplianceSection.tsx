@@ -52,7 +52,7 @@ export default function ComplianceSection() {
 
       <div className="max-w-7xl mx-auto flex flex-col items-center text-center gap-y-15 !p-8">
         <div>
-          <h2 className="text-4xl md:text-5xl font-bold !m-10">
+          <h2 className="text-4xl md:text-5xl !font-bold !m-10">
             Built with{" "}
             <span className="text-[var(--color-primary-dark)]">Security</span>{" "}
             and{" "}
@@ -75,7 +75,7 @@ export default function ComplianceSection() {
                 <div className="w-14 h-14 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Icon className="w-10 h-10 text-white" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                <h3 className="text-lg !font-semibold mb-2">{item.title}</h3>
                 <p className="text-white text-sm leading-relaxed">
                   {item.description}
                 </p>
@@ -85,7 +85,7 @@ export default function ComplianceSection() {
         </div>
 
         <div className="!py-18 !px-5 bg-white/5 rounded-3xl backdrop-blur-xl shadow-xl">
-          <h2 className="text-2xl font-bold !mb-10 text-[var(--color-primary-dark)]">
+          <h2 className="text-2xl !font-bold !mb-10 text-[var(--color-primary-dark)]">
             Comprehensive Security Features
           </h2>
 

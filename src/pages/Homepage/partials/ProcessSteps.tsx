@@ -1,63 +1,10 @@
-import React, { useState} from "react";
-
-interface Step {
-  title: string;
-  description: string;
-  icon: React.ReactNode; // bạn có thể dùng SVG hoặc icon component
-}
-
-const steps: Step[] = [
-  {
-    title: "Step 1: Plan",
-    description: "This is the first step of the process.",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="80"
-        height="80"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="text-purple-600"
-      >
-        <circle cx="12" cy="12" r="10" />
-      </svg>
-    ),
-  },
-  {
-    title: "Step 2: Design",
-    description: "This is the second step of the process.",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="80"
-        height="80"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="text-purple-600"
-      >
-        <rect x="4" y="4" width="16" height="16" rx="2" />
-      </svg>
-    ),
-  },
-  {
-    title: "Step 3: Build",
-    description: "This is the third step of the process.",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="80"
-        height="80"
-        viewBox="0 0 24 24"
-        fill="currentColor"
-        className="text-purple-600"
-      >
-        <polygon points="12,2 22,22 2,22" />
-      </svg>
-    ),
-  },
-];
+import React, { useState } from "react";
+import { useTranslation } from 'react-i18next';
 
 const ProcessSteps: React.FC = () => {
+  const { t } = useTranslation();
+  const steps = t('homepage.process.steps', { returnObjects: true }) as Array<any>;
+
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [scrolling, setScrolling] = useState<boolean>(false);
 
@@ -98,6 +45,5 @@ const ProcessSteps: React.FC = () => {
     </div>
   );
 };
-
 
 export default ProcessSteps;

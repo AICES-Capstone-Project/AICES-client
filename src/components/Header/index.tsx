@@ -19,11 +19,14 @@ import {
   MenuOutlined,
   CloseOutlined,
 } from "@ant-design/icons";
+import { useTranslation } from 'react-i18next';
 import defaultAvatar from "../../assets/images/Avatar_Default.jpg";
 import logo from "../../assets/logo/logo_long.png";
 import { APP_ROUTES, STORAGE_KEYS } from "../../services/config";
+import { getRoleBasedRoute } from "../../routes/navigation";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { fetchUser, logoutUser } from "../../stores/slices/authSlice";
+import VietnamFlag from '../../assets/images/vietnam.png';
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -36,6 +39,7 @@ const AppHeader: React.FC = () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const unreadCount = 3;
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
@@ -51,14 +55,11 @@ const AppHeader: React.FC = () => {
         <NavLink
           to="/how-it-works"
           className={({ isActive }) =>
-            isActive ? "text-primary font-bold" : "text-slate-800"
+            isActive ? "font-semibold" : "text-slate-800"
           }
-          style={({ isActive }) => ({
-            color: isActive ? "var(--color-primary)" : undefined,
-          })}
           onClick={() => setDrawerOpen(false)}
         >
-          How It Works
+          {t('app.howItWorks')}
         </NavLink>
       ),
     },
@@ -68,14 +69,11 @@ const AppHeader: React.FC = () => {
         <NavLink
           to="/resources"
           className={({ isActive }) =>
-            isActive ? "text-primary font-bold" : "text-slate-800"
+            isActive ? "font-semibold" : "text-slate-800"
           }
-          style={({ isActive }) => ({
-            color: isActive ? "var(--color-primary)" : undefined,
-          })}
           onClick={() => setDrawerOpen(false)}
         >
-          Resources
+          {t('app.resources')}
         </NavLink>
       ),
     },
@@ -85,14 +83,11 @@ const AppHeader: React.FC = () => {
         <NavLink
           to="/pricing"
           className={({ isActive }) =>
-            isActive ? "text-primary font-bold" : "text-slate-800"
+            isActive ? "font-semibold" : "text-slate-800"
           }
-          style={({ isActive }) => ({
-            color: isActive ? "var(--color-primary)" : undefined,
-          })}
           onClick={() => setDrawerOpen(false)}
         >
-          Pricing
+          {t('app.pricing')}
         </NavLink>
       ),
     },
@@ -100,14 +95,35 @@ const AppHeader: React.FC = () => {
 
   const userMenuItems: MenuProps["items"] = [
     {
-      key: "profile",
-      label: <Link to={APP_ROUTES.PROFILE}>Profile</Link>,
+      key: "works",
+      label: <span>{t('app.works', 'Works')}</span>,
     },
     { type: "divider" },
     {
       key: "logout",
       danger: true,
-      label: <span>Log out</span>,
+      label: <span>{t('app.logout', 'Log out')}</span>,
+    },
+  ];
+
+  const languageMenuItems: MenuProps["items"] = [
+    {
+      key: 'en',
+      label: (
+        <span>
+          <span role="img" aria-label="globe">🌐</span> English
+        </span>
+      ),
+    },
+    {
+      key: 'vi',
+      label: (
+        <span className="flex items-center gap-2">
+          <img src={VietnamFlag} alt="Vietnam flag" style={{ width: 14, height: 14 }} />
+          Tiếng Việt
+        </span>
+      ),
+
     },
   ];
 
@@ -115,6 +131,13 @@ const AppHeader: React.FC = () => {
     if (e.key === "logout") {
       dispatch(logoutUser());
       navigate(APP_ROUTES.HOME);
+    }
+
+    if (e.key === "works") {
+      // navigate to role-based route
+      const roleName = user?.roleName ?? null;
+      const route = getRoleBasedRoute(roleName);
+      navigate(route);
     }
   };
 
@@ -185,7 +208,7 @@ const AppHeader: React.FC = () => {
                   borderColor: "var(--color-primary-dark)",
                 }}
               >
-                <Link to={APP_ROUTES.LOGIN}>Sign In</Link>
+                <Link to={APP_ROUTES.LOGIN}>{t('app.signIn')}</Link>
               </Button>
 
               <Button
@@ -195,11 +218,37 @@ const AppHeader: React.FC = () => {
                   borderColor: "var(--color-primary-dark)",
                 }}
               >
-                <Link to={APP_ROUTES.SIGN_UP}>Sign Up</Link>
+                <Link to={APP_ROUTES.SIGN_UP}>{t('app.signUp')}</Link>
               </Button>
             </>
           )}
         </Space>
+
+        <div className="ml-4">
+          {/* Language selector */}
+          <Dropdown
+            menu={{
+              items: languageMenuItems,
+              onClick: (e) => {
+                const lang = e.key as 'en' | 'vi';
+                i18n.changeLanguage(lang);
+                localStorage.setItem('lang', lang);
+              }
+            }}
+            placement="bottomRight"
+          >
+            <Button type="text" aria-label="language selector" style={{ marginTop: 20 }}>
+              {i18n.language === 'vi' ? (
+                <span className="flex items-center gap-1">
+                  <img src={VietnamFlag} alt="Vietnam flag" style={{ width: 18, height: 18 }} />
+                  VI
+                </span>
+              ) : (
+                <span>🌐 EN</span>
+              )}
+            </Button>
+          </Dropdown>
+        </div>
 
         <Button
           className="inline-flex md:!hidden"

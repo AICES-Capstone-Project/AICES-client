@@ -1,0 +1,98 @@
+{
+  "app": {
+    "menu": "Thực đơn",
+    "howItWorks": "Cách hoạt động",
+    "resources": "Tài nguyên",
+    "pricing": "Bảng giá",
+    "signIn": "Đăng nhập",
+    "signUp": "Đăng ký",
+    "loading": "Đang tải...",
+    "menuTitle": "Menu"
+  }
+  ,"footer": {
+    "callNow": "Gọi ngay:",
+    "address": "Đại học FPT, Đường D1, TP. Hồ Chí Minh",
+    "productTitle": "Sản phẩm",
+    "product": {
+      "howItWorks": "Cách hoạt động",
+      "noAts": "Không ATS? Không vấn đề!"
+    },
+    "legalTitle": "Pháp lý & Niềm tin",
+    "legal": {
+      "terms": "Điều khoản dịch vụ",
+      "privacy": "Chính sách bảo mật",
+      "security": "Bảo mật & Riêng tư"
+    },
+    "resourcesTitle": "Tài nguyên",
+    "resources": {
+      "blog": "Blog",
+      "helpCenter": "Trung tâm trợ giúp",
+      "contact": "Liên hệ"
+    },
+    "copyRight": "© 2025 AICES. All rights reserved."
+  }
+  ,"homepage": {
+    "banner": {
+      "title": "Tăng tốc lọc CV gấp 10 lần",
+      "highlight": "Lọc CV",
+      "subtitle": "Kết nối ATS và phân tích hàng trăm CV trong vài phút: Tiết kiệm thời gian, tuyển nhanh hơn và tăng độ chính xác",
+      "cta": "Đặt Demo"
+    },
+    "bannerSecond": {
+      "titlePrefix": "Tiết kiệm đến 40 giờ",
+      "titleSuffix": "mỗi tháng",
+      "description": "Xác định ngay lập tức ứng viên hàng đầu. Tạm biệt việc xem xét 90% ứng viên không phù hợp.",
+      "cta": "Bắt đầu tiết kiệm thời gian"
+    },
+    "benefits": {
+      "title": "Cải thiện quy trình tuyển dụng của bạn",
+      "subtitle": "Trải nghiệm sức mạnh của tuyển dụng dựa trên AI giúp tiết kiệm thời gian, giảm chi phí và nâng cao chất lượng tuyển dụng.",
+      "items": [
+        {
+          "title": "Giảm chi phí tuyển dụng",
+          "description": "Cắt giảm chi phí tuyển dụng lên đến 70% với sàng lọc tự động và khớp ứng viên thông minh.",
+          "stat": "70%",
+          "statLabel": "Giảm chi phí"
+        },
+        {
+          "title": "Rút ngắn thời gian tuyển dụng",
+          "description": "Sàng lọc hàng trăm CV trong vài phút thay vì vài ngày. Đẩy nhanh pipeline tuyển dụng.",
+          "stat": "10x",
+          "statLabel": "Nhanh hơn"
+        },
+        {
+          "title": "Cải thiện độ chính xác",
+          "description": "Phân tích bằng AI đảm bảo bạn không bỏ lỡ nhân tài hàng đầu. Giảm thiên vị và nâng cao chất lượng tuyển dụng.",
+          "stat": "95%",
+          "statLabel": "Độ chính xác"
+        }
+      ]
+    },
+    "compliance": {
+      "heading": "Xây dựng với Bảo mật và Quyền riêng tư là ưu tiên",
+      "sub": "Bảo vệ cấp doanh nghiệp đáp ứng tiêu chuẩn tuân thủ toàn cầu",
+      "features": [
+        "Mã hóa đầu cuối",
+        "Kiểm tra bảo mật định kỳ",
+        "Ẩn danh dữ liệu",
+        "Kiểm soát truy cập theo vai trò",
+        "Nhật ký kiểm toán và giám sát",
+        "Trung tâm dữ liệu an toàn"
+      ],
+      "securityTitle": "Tính năng bảo mật toàn diện",
+      "cta": "Tải Whitepaper Bảo mật"
+    },
+    "testimonials": {
+      "heading": "Được tin tưởng bởi",
+      "headingHighlight": "các công ty hàng đầu",
+      "sub": "Các chuyên gia nhân sự, nhà tuyển dụng và giám đốc sử dụng Brainner để tối ưu quy trình tuyển dụng"
+    },
+    "process": {
+      "steps": [
+        { "title": "Bước 1: Lập kế hoạch", "description": "Đây là bước đầu tiên của quy trình." },
+        { "title": "Bước 2: Thiết kế", "description": "Đây là bước thứ hai của quy trình." },
+        { "title": "Bước 3: Xây dựng", "description": "Đây là bước thứ ba của quy trình." }
+      ]
+    }
+  }
+}

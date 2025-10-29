@@ -47,33 +47,148 @@ button {
 }
 
 @theme {
-	--color-primary-dark: #052e16;    
-	--color-primary: #065f46;         
-	--color-primary-medium: #2f6c2b;   
-	--color-primary-light: #4d7c0f;   
+	--color-primary-dark: #052e16;
+	--color-primary: #065f46;
+	--color-primary-medium: #2f6c2b;
+	--color-primary-light: #4d7c0f;
 }
 
 
 /* ---------------TailwindCSS Customization --------------- */
 @layer components {
-		.custom-menu .ant-menu-item::after {
-		border-bottom: 2px solid transparent !important;
-		transition: border-color 0.3s ease;
+
+	/* =================== SIDEBAR MENU =================== */
+	.custom-menu.ant-menu-inline .ant-menu-item {
+		position: relative;
+		transition: all 0.3s ease;
+		padding-left: 20px !important;
+		/* khoảng trống cho vạch bên trái */
+		margin: 4px 8px !important;
+		border-radius: 6px !important;
 	}
 
-	.custom-menu .ant-menu-item:hover::after {
-		border-bottom: 2px solid var(--color-primary-light) !important;
+	/* Hover */
+	.custom-menu.ant-menu-inline .ant-menu-item:hover {
+		background-color: rgba(0, 0, 0, 0.02) !important;
 	}
 
-	.custom-menu .ant-menu-item-selected::after {
-		border-bottom: 2px solid var(--color-primary) !important;
+	/* Vạch dọc bên trái khi active */
+	.custom-menu.ant-menu-inline .ant-menu-item-selected::before {
+		content: "";
+		position: absolute;
+		left: 0;
+		top: 0;
+		height: 100%;
+		width: 3px;
+		background-color: var(--color-primary);
+		border-radius: 0 4px 4px 0;
 	}
 
-	.custom-menu .ant-menu-item-selected > a {
+	/* Không tô nền khi active */
+	.custom-menu.ant-menu-inline .ant-menu-item-selected {
+		background-color: transparent !important;
+	}
+
+	/* Màu chữ & icon khi active */
+	.custom-menu.ant-menu-inline .ant-menu-item-selected .ant-menu-item-icon,
+	.custom-menu.ant-menu-inline .ant-menu-item-selected .ant-menu-title-content a {
 		color: var(--color-primary) !important;
 		font-weight: 600;
 	}
+
+	/* Màu mặc định */
+	.custom-menu.ant-menu-inline .ant-menu-item .ant-menu-item-icon,
+	.custom-menu.ant-menu-inline .ant-menu-item .ant-menu-title-content a {
+		color: #555 !important;
+		transition: color 0.3s ease;
+	}
+
+	/* Hover màu chữ & icon */
+	.custom-menu.ant-menu-inline .ant-menu-item:hover .ant-menu-item-icon,
+	.custom-menu.ant-menu-inline .ant-menu-item:hover .ant-menu-title-content a {
+		color: var(--color-primary) !important;
+	}
+
+	/* =================== HEADER MENU =================== */
+	.custom-menu.ant-menu-horizontal {
+		border: none !important;
+		background: transparent !important;
+		height: 70px !important;
+		display: flex;
+		align-items: center;
+	}
+
+	/* Cấu hình chung */
+	.custom-menu.ant-menu-horizontal>.ant-menu-item {
+		padding: 0 20px !important;
+		margin: 12px 6px !important;
+		height: 46px !important;
+		line-height: 46px !important;
+		border-radius: 8px !important;
+		color: #000 !important;
+		background: transparent !important;
+		transition: all 0.3s ease;
+	}
+
+	/* Hover */
+	.custom-menu.ant-menu-horizontal>.ant-menu-item:hover {
+		background-color: color-mix(in srgb, var(--color-primary-light) 50%, transparent) !important;
+		color: #000 !important;
+		border-radius: 8px !important;
+	}
+
+	/* Active (giống hệt hover) */
+	.custom-menu.ant-menu-horizontal>.ant-menu-item-selected {
+		background-color: color-mix(in srgb, var(--color-primary-light) 50%, transparent) !important;
+		color: var(--color-primary-dark) !important;
+		font-weight: 600 !important;
+		border-radius: 8px !important;
+	}
+
+	/* Ẩn underline mặc định */
+	.custom-menu.ant-menu-horizontal>.ant-menu-item::after {
+		display: none !important;
+	}
+
+
+	.custom-menu.ant-menu-item,
+	.custom-menu.ant-menu-submenu {
+		border: none !important;
+		background: transparent !important;
+	}
+
+	/* =================== FORM COMPACT =================== */
+	.compact-form .ant-form-item {
+		margin-bottom: 12px !important;
+	}
+
+	/* =================== CUSTOM INPUT COLORS =================== */
+	.ant-input,
+	.ant-input-affix-wrapper,
+	.ant-input-textarea,
+	.ant-picker,
+	.ant-select-selector {
+		border-color: #d9d9d9 !important;
+		transition: all 0.25s ease;
+	}
+
+	.ant-input:hover,
+	.ant-input-affix-wrapper:hover,
+	.ant-input-textarea:hover,
+	.ant-picker:hover,
+	.ant-select-selector:hover {
+		border-color: var(--color-primary-light) !important;
+	}
 }
+
+/* --- ACTIVE HEADER ITEM FIX --- */
+.active-header-item {
+	color: var(--color-primary) !important;
+	border-bottom: 2px solid var(--color-primary) !important;
+	background: transparent !important;
+	font-weight: 600 !important;
+}
+
 
 @layer utilities {
 	.text-primary {

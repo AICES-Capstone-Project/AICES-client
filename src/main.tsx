@@ -10,8 +10,10 @@ import "@fontsource/inter/600.css"; // Semi-bold
 import "@fontsource/inter/700.css"; // Bold
 
 import "./assets/styles/globals.css";
+import "./i18n";
 
 import Loading from "./components/UI/Loading.tsx";
+import i18n from './i18n';
 import { router } from "./routes/index.tsx";
 import { Bounce, ToastContainer } from "react-toastify";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -22,7 +24,7 @@ createRoot(document.getElementById("root")!).render(
 		<Provider store={store}>
 			<Suspense
 				fallback={
-					<Loading fullScreen size="lg" variant="primary" text="Loading..." />
+					<Loading fullScreen size="lg" variant="primary" text={i18n.t('app.loading')} />
 				}
 			>
 				<GoogleOAuthProvider clientId={import.meta.env.VITE_AUTH_GOOGLE_ID}>

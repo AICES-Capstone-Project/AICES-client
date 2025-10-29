@@ -1,0 +1,98 @@
+{
+  "app": {
+    "menu": "Menu",
+    "howItWorks": "How It Works",
+    "resources": "Resources",
+    "pricing": "Pricing",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "loading": "Loading...",
+    "menuTitle": "Menu"
+  }
+  ,"footer": {
+    "callNow": "Call Now:",
+    "address": "FPT University, D1 Street, Ho Chi Minh City",
+    "productTitle": "Product",
+    "product": {
+      "howItWorks": "How it works",
+      "noAts": "No ATS? No Problem!"
+    },
+    "legalTitle": "Legal & Trust",
+    "legal": {
+      "terms": "Terms of Service",
+      "privacy": "Privacy Policy",
+      "security": "Security & Privacy"
+    },
+    "resourcesTitle": "Resources",
+    "resources": {
+      "blog": "Blog",
+      "helpCenter": "Help Center",
+      "contact": "Contact Us"
+    },
+    "copyRight": "© 2025 AICES. All rights reserved."
+  }
+  ,"homepage": {
+    "banner": {
+      "title": "10x Faster Resume Screening",
+      "highlight": "Resume Screening",
+      "subtitle": "Connect your ATS and analyze hundreds of resumes in minutes: Save Time, Hire Faster and Improve Accuracy",
+      "cta": "Book a Demo Now"
+    },
+    "bannerSecond": {
+      "titlePrefix": "Save up to 40 hours",
+      "titleSuffix": "per month",
+      "description": "Instantly identify top applicants. Say goodbye to the tedious task of reviewing the bottom 90% who aren’t a good fit for the role.",
+      "cta": "Start Saving Time"
+    },
+    "benefits": {
+      "title": "Transform Your Hiring Process",
+      "subtitle": "Experience the power of AI-driven recruitment that saves time, reduces costs, and improves hiring quality.",
+      "items": [
+        {
+          "title": "Reduce Hiring Costs",
+          "description": "Cut recruitment expenses by up to 70% with automated screening and intelligent candidate matching.",
+          "stat": "70%",
+          "statLabel": "Cost Reduction"
+        },
+        {
+          "title": "Decrease Time-to-Hire",
+          "description": "Screen hundreds of resumes in minutes instead of days. Accelerate your hiring pipeline dramatically.",
+          "stat": "10x",
+          "statLabel": "Faster"
+        },
+        {
+          "title": "Improve Screening Accuracy",
+          "description": "AI-powered analysis ensures you never miss top talent. Reduce bias and improve quality of hire.",
+          "stat": "95%",
+          "statLabel": "Accuracy"
+        }
+      ]
+    },
+    "compliance": {
+      "heading": "Built with Security and Privacy First",
+      "sub": "Enterprise-grade protection meeting global compliance standards",
+      "features": [
+        "End-to-end encryption",
+        "Regular security audits",
+        "Data anonymization",
+        "Role-based access control",
+        "Audit logs and monitoring",
+        "Secure data centers"
+      ],
+      "securityTitle": "Comprehensive Security Features",
+      "cta": "Download Security Whitepaper"
+    },
+    "testimonials": {
+      "heading": "Trusted by",
+      "headingHighlight": "Top Companies",
+      "sub": "HR professionals, hiring managers, and directors are using Brainner to streamline their recruitment processes"
+    },
+    "process": {
+      "steps": [
+        { "title": "Step 1: Plan", "description": "This is the first step of the process." },
+        { "title": "Step 2: Design", "description": "This is the second step of the process." },
+        { "title": "Step 3: Build", "description": "This is the third step of the process." }
+      ]
+    }
+  }
+}

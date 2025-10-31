@@ -20,6 +20,17 @@ export interface CompanyMember {
   isActive: boolean;
 }
 
+export interface CreateCompanyRequest {
+  name: string;
+  description: string;
+  address: string;
+  website: string;
+  taxCode: string;
+  logoFile: string;
+  documentFiles: boolean;
+  documentTypes: boolean;
+}
+
 export interface Job {
   jobId: number;
   companyId: number;

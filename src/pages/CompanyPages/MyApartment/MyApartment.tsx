@@ -4,12 +4,23 @@ import { useNavigate } from "react-router-dom";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import AvatarUploader from "../Settings/components/AvatarUploader";
 import { companyService } from "../../../services/companyService";
+import {
+  validateCompanyName,
+  validateWebsite,
+  validateAddress,
+  validateTaxCode,
+  validateDescription,
+  validateDocumentType,
+  validateFile,
+  validateLogoFile,
+} from "../../../utils/validations/company.validation";
 
 interface CompanyFormValues {
   name: string;
   description?: string;
   address?: string;
   website?: string;
+  taxCode?: string;
   documentFiles?: { file?: File }[];
   documentTypes?: string[];
 }
@@ -20,6 +31,18 @@ export default function CompanyCreate() {
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
+  // Handle logo file change with validation
+  const handleLogoChange = (file: File | null) => {
+    if (file) {
+      const validation = validateLogoFile(file);
+      if (!validation.isValid) {
+        message.error(validation.message);
+        return;
+      }
+    }
+    setLogoFile(file);
+  };
+
   const handleSubmit = async (values: any) => {
     setLoading(true);
     try {
@@ -29,6 +52,7 @@ export default function CompanyCreate() {
       formData.append("description", values.description || "");
       formData.append("address", values.address || "");
       formData.append("website", values.website || "");
+      formData.append("taxCode", values.taxCode || "");
 
       if (logoFile) {
         formData.append("logoFile", logoFile, logoFile.name);
@@ -93,7 +117,7 @@ export default function CompanyCreate() {
       }}
     >
       <div className="w-full">
-  <Form<CompanyFormValues> form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ documents: [{}] }}>
+        <Form<CompanyFormValues> form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ documents: [{}] }}>
           {/* === ROW 1: Logo - Name + Website === */}
           <Row gutter={32} align="stretch">
             {/* LEFT - LOGO */}
@@ -113,8 +137,8 @@ export default function CompanyCreate() {
                     {/* <span style={{ fontWeight: 500 }}> <span style={{ color: "#ff4d4f", marginLeft: 4 }}>*</span>Company logo</span> */}
                     <AvatarUploader
                       initialUrl="https://placehold.co/120x120?text=Logo"
-                      onFileChange={(file: File | null) => setLogoFile(file)}
-                      size={120}
+                      onFileChange={handleLogoChange}
+                      size={130}
                     />
                   </div>
                 </Form.Item>
@@ -128,7 +152,18 @@ export default function CompanyCreate() {
                   <Form.Item
                     name="name"
                     label="Company name"
-                    rules={[{ required: true, message: "Please enter the company name" }]}
+                    rules={[
+                      { required: true, message: "Please enter the company name" },
+                      {
+                        validator: (_, value) => {
+                          if (!value) return Promise.resolve();
+                          const validation = validateCompanyName(value);
+                          return validation.isValid 
+                            ? Promise.resolve() 
+                            : Promise.reject(new Error(validation.message));
+                        }
+                      }
+                    ]}
                     style={{ marginBottom: 12 }}
                   >
                     <Input placeholder="Enter company name" />
@@ -139,7 +174,18 @@ export default function CompanyCreate() {
                   <Form.Item
                     name="website"
                     label="Website"
-                    rules={[{ required: true, type: "url", message: "Please enter a valid URL" }]}
+                    rules={[
+                      { required: true, message: "Please enter a website URL" },
+                      {
+                        validator: (_, value) => {
+                          if (!value) return Promise.resolve();
+                          const validation = validateWebsite(value);
+                          return validation.isValid 
+                            ? Promise.resolve() 
+                            : Promise.reject(new Error(validation.message));
+                        }
+                      }
+                    ]}
                     style={{ marginBottom: 12 }}
                   >
                     <Input placeholder="https://example.com" />
@@ -147,15 +193,53 @@ export default function CompanyCreate() {
                 </Col>
               </Row>
 
-              {/* Address */}
-              <Form.Item
-                name="address"
-                label="Address"
-                rules={[{ required: true, message: "Please enter the company address" }]}
-                style={{ marginBottom: 12 }}
-              >
-                <Input placeholder="Enter company address" />
-              </Form.Item>
+              <Row gutter={16}>
+                <Col span={12}>
+                  {/* Address */}
+                  <Form.Item
+                    name="address"
+                    label="Address"
+                    rules={[
+                      { required: true, message: "Please enter the company address" },
+                      {
+                        validator: (_, value) => {
+                          if (!value) return Promise.resolve();
+                          const validation = validateAddress(value);
+                          return validation.isValid 
+                            ? Promise.resolve() 
+                            : Promise.reject(new Error(validation.message));
+                        }
+                      }
+                    ]}
+                    style={{ marginBottom: 12 }}
+                  >
+                    <Input placeholder="Enter company address" />
+                  </Form.Item>
+                </Col>
+
+                <Col span={12}>
+                  <Form.Item
+                    name="taxCode"
+                    label="Tax Code"
+                    rules={[
+                      { required: true, message: "Please enter the tax code" },
+                      {
+                        validator: (_, value) => {
+                          if (!value) return Promise.resolve();
+                          const validation = validateTaxCode(value);
+                          return validation.isValid 
+                            ? Promise.resolve() 
+                            : Promise.reject(new Error(validation.message));
+                        }
+                      }
+                    ]}
+                    style={{ marginBottom: 12 }}
+                  >
+                    <Input placeholder="Enter tax code (10 digits)" />
+                  </Form.Item>
+                </Col>
+              </Row>
+
             </Col>
           </Row>
 
@@ -237,10 +321,21 @@ export default function CompanyCreate() {
                             {...field}
                             name={[field.name, "type"]}
                             style={{ flex: 1, marginBottom: 0 }}
-                            rules={[{ required: true, message: "Please enter the document type" }]}
+                            rules={[
+                              { required: true, message: "Please enter the document type" },
+                              {
+                                validator: (_, value) => {
+                                  if (!value) return Promise.resolve();
+                                  const validation = validateDocumentType(value);
+                                  return validation.isValid 
+                                    ? Promise.resolve() 
+                                    : Promise.reject(new Error(validation.message));
+                                }
+                              }
+                            ]}
                           >
                             <Input
-                              placeholder="e.g.: Business license"
+                              placeholder="e.g.: Business license, Certificate of incorporation"
                               style={{
                                 height: 40,
                                 borderRadius: 6,
@@ -252,6 +347,7 @@ export default function CompanyCreate() {
                           <Form.Item style={{ flex: 1, marginBottom: 0 }}>
                             <input
                               type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
                               style={{
                                 display: "block",
                                 height: 40,
@@ -266,6 +362,14 @@ export default function CompanyCreate() {
                               onChange={(e) => {
                                 const file = e.target.files?.[0];
                                 if (file) {
+                                  // Validate file
+                                  const validation = validateFile(file);
+                                  if (!validation.isValid) {
+                                    message.error(validation.message);
+                                    e.target.value = ""; // Clear the input
+                                    return;
+                                  }
+
                                   // set this file into the form field for documents[index].file
                                   const fields = form.getFieldValue("documents") || [];
                                   fields[field.name] = { ...(fields[field.name] || {}), file };
@@ -306,26 +410,27 @@ export default function CompanyCreate() {
                           fontSize: 12,
                           color: "#666",
                           background: "#fff",
-                          padding: "4px 8px",
+                          padding: "6px 12px",
                           borderRadius: 6,
                           border: "1px dashed #ccc",
                           margin: "0 auto 10px",
                           lineHeight: 1.4,
-                          width: "60%",
-                          textAlign: "center",
+                          width: "80%",
+                          textAlign: "left",
                         }}
                       >
-                        💡 <b>Note:</b> Please upload the required company documents.
+                        💡 <b>Document Requirements:</b>
                         <ul
                           style={{
-                            margin: "4px auto 0",
-                            padding: 0,
-                            listStyle: "none",
-                            textAlign: "center",
+                            margin: "4px 0 0 0",
+                            padding: "0 0 0 16px",
+                            listStyle: "disc",
                           }}
                         >
-                          <li>Only <b>PDF</b> or <b>JPG/PNG</b> file formats are accepted.</li>
-                          <li> <b>Required:</b> at least <b>1 document type</b> must be provided.</li>
+                          <li><b>File format:</b> PDF, JPG, or PNG only</li>
+                          <li><b>File size:</b> Maximum 10MB per file</li>
+                          <li><b>Document types:</b> Business license, Certificate of incorporation, Tax registration, etc.</li>
+                          <li><b>Required:</b> At least 1 document must be provided</li>
                         </ul>
                       </div>
 
@@ -337,9 +442,28 @@ export default function CompanyCreate() {
 
 
             {/* Description */}
-            <Form.Item name="description" label="Description" required
-              rules={[{ required: true, message: "Please upload the required documents" }]}>
-              <Input.TextArea rows={2} placeholder="Short introduction about the company" />
+            <Form.Item 
+              name="description" 
+              label="Description" 
+              rules={[
+                { required: true, message: "Please enter company description" },
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    const validation = validateDescription(value);
+                    return validation.isValid 
+                      ? Promise.resolve() 
+                      : Promise.reject(new Error(validation.message));
+                  }
+                }
+              ]}
+            >
+              <Input.TextArea 
+                rows={2} 
+                placeholder="Short introduction about the company (minimum 20 characters)" 
+                showCount
+                maxLength={1000}
+              />
             </Form.Item>
 
             <div style={{ marginTop: 0, textAlign: "center" }}>

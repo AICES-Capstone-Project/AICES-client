@@ -162,63 +162,54 @@ export default function Setting() {
 
           <TabPane key="2">
             <div
-              className="flex items-center justify-center w-full !py-15"
+              className="flex items-center justify-center !w-full !py-10"
               style={{
-                backgroundColor: "#fff", 
+                backgroundColor: "#fff",
               }}
             >
-              <Card
-                bordered={false}
-                style={{
-                  width: "100%",
-                  maxWidth: 480,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-                  borderRadius: 12,
-                  padding: 24,
-                }}
+
+              <Form
+                form={formPassword}
+                layout="vertical"
+                onFinish={handleChangePassword}
+                className="w-full"
               >
-                <Form
-                  form={formPassword}
-                  layout="vertical"
-                  onFinish={handleChangePassword}
-                  className="w-full"
+                <Form.Item
+                  name="oldPassword"
+                  label="Current password"
+                  rules={[{ required: true, message: "Please enter your current password!" }]}
                 >
-                  <Form.Item
-                    name="oldPassword"
-                    label="Current password"
-                    rules={[{ required: true, message: "Please enter your current password!" }]}
-                  >
-                    <Input.Password placeholder="Enter current password" />
-                  </Form.Item>
+                  <Input.Password placeholder="Enter current password" />
+                </Form.Item>
 
-                  <Form.Item
-                    name="newPassword"
-                    label="New password"
-                    rules={[{ required: true, message: "Please enter a new password!" }]}
-                  >
-                    <Input.Password placeholder="Enter new password" />
-                  </Form.Item>
+                <Form.Item
+                  name="newPassword"
+                  label="New password"
+                  rules={[{ required: true, message: "Please enter a new password!" }]}
+                >
+                  <Input.Password placeholder="Enter new password" />
+                </Form.Item>
 
-                  <Form.Item
-                    name="confirmPassword"
-                    label="Confirm new password"
-                    rules={[{ required: true, message: "Please confirm your new password!" }]}
-                  >
-                    <Input.Password placeholder="Re-enter new password" />
-                  </Form.Item>
+                <Form.Item
+                  name="confirmPassword"
+                  label="Confirm new password"
+                  rules={[{ required: true, message: "Please confirm your new password!" }]}
+                >
+                  <Input.Password placeholder="Re-enter new password" />
+                </Form.Item>
 
-                  <Form.Item className="!mb-0">
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      loading={loading}
-                      className="w-full !bg-[var(--color-primary)] !hover:bg-[var(--color-primary-light)]"
-                    >
-                      Change password
-                    </Button>
-                  </Form.Item>
-                </Form>
-              </Card>
+                <Form.Item className="!mb-0">
+                  <Button
+                    type="primary"
+                    htmlType="submit"
+                    loading={loading}
+                    className="w-full !bg-[var(--color-primary)] !hover:bg-[var(--color-primary-light)]"
+                  >
+                    Change password
+                  </Button>
+                </Form.Item>
+              </Form>
+
             </div>
           </TabPane>
 

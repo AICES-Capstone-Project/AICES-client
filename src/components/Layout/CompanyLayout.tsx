@@ -11,14 +11,10 @@ import {
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo/logo_long.png";
-import { useAppDispatch } from "../../hooks/redux";
+import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { logoutUser } from "../../stores/slices/authSlice";
 import { APP_ROUTES, ROLES } from "../../services/config";
 import React from "react";
-import { useAppSelector } from "../../hooks/redux";
-
-// Prefer reading user from redux store (keeps shape consistent across the app)
-// Fallback: null
 
 const { Sider, Content } = Layout;
 
@@ -44,38 +40,41 @@ export default function CompanyLayout() {
 	const user = useAppSelector((s) => s.auth.user);
 	const userRole = user?.roleName ?? null;
 
+	const iconStyle = { color: "var(--color-primary-medium)", fontWeight: "bold" };
+
 	const items = [
 		{
 			key: APP_ROUTES.COMPANY_DASHBOARD,
-			icon: <LineChartOutlined />,
+			icon: <LineChartOutlined style={iconStyle} />,
 			label: <Link to={APP_ROUTES.COMPANY_DASHBOARD}>Dashboard</Link>,
 		},
 		{
 			key: APP_ROUTES.COMPANY_MY_APARTMENTS,
-			icon: <ApartmentOutlined />,
+			icon: <ApartmentOutlined style={iconStyle} />,
 			label: <Link to={APP_ROUTES.COMPANY_MY_APARTMENTS}>My Company</Link>,
 		},
-		// Only show Staffs if HR_Manager
 		...(userRole?.toLowerCase() === ROLES.Hr_Manager?.toLowerCase()
-			? [{
-				key: APP_ROUTES.COMPANY_STAFFS,
-				icon: <TeamOutlined />,
-				label: <Link to={APP_ROUTES.COMPANY_STAFFS}>Staffs</Link>,
-			}]
+			? [
+				{
+					key: APP_ROUTES.COMPANY_STAFFS,
+					icon: <TeamOutlined style={iconStyle} />,
+					label: <Link to={APP_ROUTES.COMPANY_STAFFS}>Staffs</Link>,
+				},
+			]
 			: []),
 		{
 			key: APP_ROUTES.COMPANY_JOBS,
-			icon: <AppstoreOutlined />,
+			icon: <AppstoreOutlined style={iconStyle} />,
 			label: <Link to={APP_ROUTES.COMPANY_JOBS}>Jobs</Link>,
 		},
 		{
 			key: APP_ROUTES.COMPANY_SETTINGS,
-			icon: <SettingOutlined />,
+			icon: <SettingOutlined style={iconStyle} />,
 			label: <Link to={APP_ROUTES.COMPANY_SETTINGS}>Settings</Link>,
 		},
 		{
 			key: "logout",
-			icon: <LogoutOutlined />,
+			icon: <LogoutOutlined style={iconStyle} />,
 			label: (
 				<a
 					onClick={(e) => {
@@ -100,9 +99,10 @@ export default function CompanyLayout() {
 				justifyContent: "center",
 				cursor: "pointer",
 				borderTop: "1px solid #f0f0f0",
-				color: collapsed ? "var(--color-primary-dark)" : "var(--color-primary-light)",
+				color: "var(--color-primary-dark)",
 				background: "#fafafa",
 				transition: "all 0.3s ease",
+				fontWeight: "bold",
 			}}
 		>
 			{collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
@@ -110,13 +110,13 @@ export default function CompanyLayout() {
 	);
 
 	return (
-		<Layout style={{ minHeight: "100vh" , paddingRight: "8px"}}>
+		<Layout style={{ minHeight: "100vh", paddingRight: "8px" }}>
 			<Sider
 				collapsible
 				collapsed={collapsed}
 				onCollapse={setCollapsed}
 				breakpoint="lg"
-trigger={CustomTrigger}
+				trigger={CustomTrigger}
 				style={{
 					position: "fixed",
 					left: 0,
@@ -125,7 +125,7 @@ trigger={CustomTrigger}
 					overflow: "hidden",
 					background: "#fff",
 					borderRight: "1px solid #f0f0f0",
-					width: collapsed ? "8%" : "15%",
+					width: collapsed ? "6%" : "15%",
 					transition: "width 200ms ease",
 					zIndex: 100,
 				}}
@@ -163,11 +163,22 @@ trigger={CustomTrigger}
 				/>
 			</Sider>
 
-			<Layout style={{ marginLeft: collapsed ? "8%" : "15%", flex: "1 1 auto" }}>
-				<Content>
+			<Layout
+				style={{
+					flex: "1 1 auto",
+					marginLeft: collapsed ? "6%" : "15%",
+					transition: "all 0.3s ease",
+				}}
+			>
+				<Content
+					style={{
+						transition: "all 0.3s ease",
+					}}
+				>
 					<Outlet />
 				</Content>
 			</Layout>
+
 		</Layout>
 	);
 }

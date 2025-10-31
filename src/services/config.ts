@@ -43,6 +43,7 @@ export const API_ENDPOINTS = {
 	// Company endpoints
 	COMPANY: {
 		CREATE: "/companies/self",
+		GET: "/companies/self",
 	},
 } as const;
 

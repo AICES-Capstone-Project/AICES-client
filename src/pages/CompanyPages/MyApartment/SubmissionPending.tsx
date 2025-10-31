@@ -14,9 +14,6 @@ export default function SubmissionPending() {
       </p>
       <p>If you need to make changes, you can return to the dashboard.</p>
       <div style={{ marginTop: 16 }}>
-        <Button type="primary" onClick={() => navigate(-1)} style={{ marginRight: 8 }}>
-          Back
-        </Button>
         <Button onClick={() => navigate("/")}>Go to homepage</Button>
       </div>
     </Card>

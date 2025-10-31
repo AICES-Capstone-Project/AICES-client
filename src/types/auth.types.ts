@@ -44,5 +44,8 @@ export interface ProfileResponse {
 	dateOfBirth?: string | null;
 	avatarUrl?: string | null;
 	roleName: string | null;
+	companyName?: string | null;
+	companyStatus?: string | null;
+	rejectionReason?: string | null;
 	isActive: boolean;
 }

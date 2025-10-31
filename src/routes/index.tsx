@@ -5,7 +5,7 @@ import UserProfileTest from "../pages/UserProfileTest";
 import { APP_ROUTES, ROLES } from "../services/config";
 import GitHubCallback from "../pages/Login/partials/GitHubCallback";
 import Setting from "../pages/CompanyPages/Settings/Setting";
-import MyApartment from "../pages/CompanyPages/MyApartment/MyApartment";
+import MyApartmentWrapper from "../pages/CompanyPages/MyApartment/MyApartmentWrapper";
 import CompanyList from "../pages/SystemPages/Company";
 import CompanyDetail from "../pages/SystemPages/Company/CompanyDetail";
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
@@ -135,7 +135,7 @@ export const router = createBrowserRouter([
 			{ path: APP_ROUTES.COMPANY_STAFFS, element: <CompanyStaffs /> },
 			{ path: APP_ROUTES.COMPANY_JOBS, element: <JobManagement /> },
 			{ path: APP_ROUTES.COMPANY_SETTINGS, element: <Setting /> },
-			{ path: APP_ROUTES.COMPANY_MY_APARTMENTS, element: <MyApartment /> },
+			{ path: APP_ROUTES.COMPANY_MY_APARTMENTS, element: <MyApartmentWrapper /> },
 			{
 				path: APP_ROUTES.COMPANY_PENDING_APPROVAL,
 				element: <SubmissionPending />,

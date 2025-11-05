@@ -93,8 +93,8 @@ export default function Setting() {
   return (
     <Card
       title={
-        <div className="flex items-center justify-between">
-          <span className="text-lg font-semibold">Settings</span>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+          <span style={{ fontWeight: 600 }}>Settings</span>
           {activeTab === "1" ? (
             <Button
               type="default"

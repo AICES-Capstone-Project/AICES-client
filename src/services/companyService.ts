@@ -1,7 +1,7 @@
 import { post, postForm, get } from "./api";
 import { API_ENDPOINTS } from "./config";
 import type { ApiResponse } from "../types/api.types";
-import type { CreateCompanyRequest } from "../types/company.types";
+import type { CreateCompanyRequest, CompanyMember } from "../types/company.types";
 
 interface CompanyData {
 	companyId: number;
@@ -27,5 +27,9 @@ export const companyService = {
 	// Get current user's company
 	getSelf: async (): Promise<ApiResponse<CompanyData>> => {
 		return await get<CompanyData>(API_ENDPOINTS.COMPANY.GET);
+	},
+	// Get company members
+	getMembers: async (): Promise<ApiResponse<CompanyMember[]>> => {
+		return await get<CompanyMember[]>(API_ENDPOINTS.COMPANY.GET_MEMBERS);
 	},
 };

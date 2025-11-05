@@ -12,12 +12,16 @@ export interface Company {
 }
 
 export interface CompanyMember {
+  comUserId: number;
   userId: number;
   fullName?: string | null;
   email: string;
-  roleName: string; // HR Manager / HR Recruiter / System Staff...
-  joinedAt: string; // ISO
+  roleName: string; // HR_Manager / HR_Recruiter / System_Staff...
+  avatarUrl?: string | null;
+  phoneNumber?: string | null;
+  joinStatus: string; // Approved / Pending / Rejected
   isActive: boolean;
+  createdAt: string; // ISO
 }
 
 export interface CreateCompanyRequest {

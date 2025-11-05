@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Spin, message, Modal } from "antd";
+import { Card, Row, Col, Spin, message, Modal, Button } from "antd";
 import { companyService } from "../../../services/companyService";
+import type { CompanyMember } from "../../../types/company.types";
+import { useAppSelector } from "../../../hooks/redux";
 
 interface CompanyData {
   companyId: number;
@@ -18,19 +20,41 @@ interface CompanyData {
 export default function CompanyView() {
   const [company, setCompany] = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [hrManager, setHrManager] = useState<CompanyMember | null>(null);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewType, setPreviewType] = useState<string>("");
+  const [editModalOpen, setEditModalOpen] = useState(false);
+
+  const { user } = useAppSelector((s) => s.auth);
+  const isHrRecruiter = (user?.roleName || "").toLowerCase() === "hr_recruiter";
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const resp = await companyService.getSelf();
-        if (resp?.status === "success" || resp?.status === "Success") {
-          setCompany(resp.data);
+        // Fetch company data
+        const companyResp = await companyService.getSelf();
+        if (companyResp?.status === "success" || companyResp?.status === "Success") {
+          setCompany(companyResp.data);
         } else {
           message.error("Failed to load company details");
         }
+
+        // Fetch company members to get HR Manager
+        try {
+          const membersResp = await companyService.getMembers();
+          if (membersResp?.status === "success" || membersResp?.status === "Success") {
+            // Find HR Manager from the members list
+            const hrMember = membersResp.data?.find(
+              (member: CompanyMember) => member.roleName === "HR_Manager"
+            );
+            setHrManager(hrMember || null);
+          }
+        } catch (memberError) {
+          console.error("Failed to fetch company members:", memberError);
+          // Don't show error message as this is not critical
+        }
+
       } catch (err) {
         console.error(err);
         message.error("Error fetching company details");
@@ -66,10 +90,21 @@ export default function CompanyView() {
   return (
     <>
       <Card
-        title={<div style={{ textAlign: "center", width: "100%" }}>Company Information</div>}
+        title={
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+            <span style={{ fontWeight: 600 }}>Company Information</span>
+            {!isHrRecruiter && (
+              <div>
+                <Button type="default" onClick={() => setEditModalOpen(true)} className="!bg-white !text-[var(--color-primary-dark)] !border !border-[var(--color-primary-dark)]">
+                  Edit Company Info
+                </Button>
+              </div>
+            )}
+          </div>
+        }
         style={{
           maxWidth: 1200,
-          margin: "20px auto",
+          margin: "12px auto",
           padding: "0 5px",
           borderRadius: 12,
           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
@@ -106,7 +141,12 @@ export default function CompanyView() {
               <b>Tax code:</b> <span>{company.taxCode || "N/A"}</span>
             </div>
             <div style={{ marginBottom: 8 }}>
-              <b>HR Manager:</b> <span>{"N/A"}</span>
+              <b>HR Manager:</b> <span>
+                {hrManager 
+                  ? (hrManager.fullName || hrManager.email) 
+                  : "N/A"
+                }
+              </span>
             </div>
             <div>
               <b>Description:</b> <span>{company.description || "N/A"}</span>
@@ -300,6 +340,26 @@ export default function CompanyView() {
         ) : (
           <p style={{ textAlign: "center", padding: 40 }}>No file to preview</p>
         )}
+      </Modal>
+
+      {/* Edit Company Info Modal (placeholder) */}
+      <Modal
+        open={editModalOpen}
+        title="Edit Company Info"
+        centered
+        onCancel={() => setEditModalOpen(false)}
+        onOk={() => {
+          // Placeholder save logic - replace with real update flow
+          message.success("Company info saved (placeholder)");
+          setEditModalOpen(false);
+        }}
+      >
+        <div style={{ minHeight: 120 }}>
+          <p style={{ marginBottom: 8 }}>This is a placeholder editor for company information.</p>
+          <p style={{ color: "#666", marginBottom: 0 }}>
+            Implement the edit form here (name, website, address, tax code, description, documents upload).
+          </p>
+        </div>
       </Modal>
 
     </>

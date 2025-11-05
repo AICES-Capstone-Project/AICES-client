@@ -337,3 +337,24 @@ button {
 		background-repeat: no-repeat;
 	}
 }
+
+/* Make Ant Design Card body padding consistent across the app */
+.ant-card-body {
+  padding: 12px !important;
+}
+
+/* Hide scrollbar for job table while keeping scroll behavior */
+.job-table .ant-table-body {
+	scrollbar-width: thin;
+	-ms-overflow-style: -ms-autohiding-scrollbar;
+}
+.job-table .ant-table-body::-webkit-scrollbar {
+	height: 8px;
+	width: 8px;
+}
+.job-table .ant-table-body::-webkit-scrollbar-thumb {
+	background: transparent; /* make thumb transparent */
+}
+.job-table .ant-table-body::-webkit-scrollbar-track {
+	background: transparent;
+}

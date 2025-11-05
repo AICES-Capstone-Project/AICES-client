@@ -44,6 +44,8 @@ export const API_ENDPOINTS = {
 	COMPANY: {
 		CREATE: "/companies/self",
 		GET: "/companies/self",
+		GET_MEMBERS: "/companies/self/members",
+		GET_JOBS: "/company/self/jobs/published",
 	},
 } as const;
 

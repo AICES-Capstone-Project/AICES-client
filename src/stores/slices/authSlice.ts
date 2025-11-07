@@ -1,10 +1,10 @@
 // authSlice.ts
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { authService } from "../../services/authService";
-import type { UserResponse } from "../../types/auth.types";
+import type { ProfileResponse } from "../../types/auth.types";
 import { toast } from "react-toastify";
 
-type User = UserResponse;
+type User = ProfileResponse;
 
 interface AuthState {
 	user: User | null;

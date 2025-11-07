@@ -26,7 +26,9 @@ const StaffManagement = () => {
     try {
       const response = await companyService.getMembers();
       if (response?.status === "Success" || response?.status === "success") {
-        const membersData = response.data || [];
+        const data = response.data;
+        // API might return an array directly or a paginated object with items
+        const membersData: CompanyMember[] = Array.isArray(data) ? data : (data?.items || []);
         setMembers(membersData);
         setFilteredMembers(membersData);
       } else {

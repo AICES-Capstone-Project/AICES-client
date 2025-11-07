@@ -30,40 +30,45 @@ export default function CompanyView() {
   const isHrRecruiter = (user?.roleName || "").toLowerCase() === "hr_recruiter";
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Fetch company data
-        const companyResp = await companyService.getSelf();
-        if (companyResp?.status === "success" || companyResp?.status === "Success") {
-          setCompany(companyResp.data);
-        } else {
-          message.error("Failed to load company details");
-        }
+  const fetchData = async () => {
+    try {
+      // 1️⃣ Fetch company data
+      const companyResp = await companyService.getSelf();
+      if (companyResp?.status === "success" || companyResp?.status === "Success") {
+        setCompany(companyResp.data);
 
-        // Fetch company members to get HR Manager
+        // 2️⃣ Fetch company members (sau khi có companyId)
         try {
-          const membersResp = await companyService.getMembers();
+          if (!companyResp.data) throw new Error('Company data missing');
+          const membersResp = await companyService.getMembers(companyResp.data.companyId);
           if (membersResp?.status === "success" || membersResp?.status === "Success") {
-            // Find HR Manager from the members list
-            const hrMember = membersResp.data?.find(
+            // API could return either an array or a paginated object { items: [...] }
+            const membersList: CompanyMember[] = Array.isArray(membersResp.data)
+              ? membersResp.data
+              : (membersResp.data && (membersResp.data as any).items) || [];
+
+            const hrMember = membersList.find(
               (member: CompanyMember) => member.roleName === "HR_Manager"
             );
             setHrManager(hrMember || null);
           }
         } catch (memberError) {
           console.error("Failed to fetch company members:", memberError);
-          // Don't show error message as this is not critical
         }
 
-      } catch (err) {
-        console.error(err);
-        message.error("Error fetching company details");
-      } finally {
-        setLoading(false);
+      } else {
+        message.error("Failed to load company details");
       }
-    };
-    fetchData();
-  }, []);
+    } catch (err) {
+      console.error(err);
+      message.error("Error fetching company details");
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchData();
+}, []);
+
 
   if (loading) {
     return (
@@ -142,8 +147,8 @@ export default function CompanyView() {
             </div>
             <div style={{ marginBottom: 8 }}>
               <b>HR Manager:</b> <span>
-                {hrManager 
-                  ? (hrManager.fullName || hrManager.email) 
+                {hrManager
+                  ? (hrManager.fullName || hrManager.email)
                   : "N/A"
                 }
               </span>

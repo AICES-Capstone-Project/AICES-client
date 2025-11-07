@@ -340,7 +340,7 @@ button {
 
 /* Make Ant Design Card body padding consistent across the app */
 .ant-card-body {
-  padding: 12px !important;
+	padding: 12px !important;
 }
 
 /* Hide scrollbar for job table while keeping scroll behavior */
@@ -348,13 +348,34 @@ button {
 	scrollbar-width: thin;
 	-ms-overflow-style: -ms-autohiding-scrollbar;
 }
+
 .job-table .ant-table-body::-webkit-scrollbar {
 	height: 8px;
 	width: 8px;
 }
+
 .job-table .ant-table-body::-webkit-scrollbar-thumb {
-	background: transparent; /* make thumb transparent */
+	background: transparent;
+	/* make thumb transparent */
 }
+
 .job-table .ant-table-body::-webkit-scrollbar-track {
 	background: transparent;
+}
+
+/* Smaller pending badge for the Job Management bell */
+.job-pending-badge .ant-badge-count {
+	min-width: 16px;
+	height: 16px;
+	padding: 0 4px;
+	font-size: 11px;
+	line-height: 16px;
+}
+
+.job-pending-badge .ant-badge-count::after {
+	display: none;
+}
+/* Remove extra margin under Ant Design Table pagination */
+.ant-table-pagination {
+  margin-bottom: 0 !important;
 }

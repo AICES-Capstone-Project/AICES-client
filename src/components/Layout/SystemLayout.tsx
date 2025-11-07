@@ -2,8 +2,6 @@ import { Layout, Menu, Button, Typography } from "antd";
 import {
 	DashboardOutlined,
 	TeamOutlined,
-	FileDoneOutlined,
-	AppstoreOutlined,
 	BarChartOutlined,
 	BellOutlined,
 	SettingOutlined,

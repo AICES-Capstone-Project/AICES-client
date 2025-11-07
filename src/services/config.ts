@@ -45,8 +45,23 @@ export const API_ENDPOINTS = {
 	COMPANY: {
 		CREATE: "/companies/self",
 		GET: "/companies/self",
-		GET_MEMBERS: "/companies/self/members",
-		GET_JOBS: "/company/self/jobs/published",
+		GET_BY_ID: (id: number) => `/companies/${id}`,
+		GET_MEMBERS: (id: number) => `/companies/${id}/members`,
+		// Public company list and join
+		LIST: "/companies",
+		JOIN: (id: number) => `/companies/${id}/join`,
+		GET_JOBS: (id: number) => `/companies/${id}/jobs`,
+		GET_JOBS_PUBLIC: "/company/self/jobs/published",
+		GET_JOBS_PENDING: "/company/self/jobs/pending",
+		GET_JOB: "/company/self/jobs",
+	},
+
+	// System endpoints (categories, skills, specializations)
+	SYSTEM: {
+		CATEGORIES: "/categories",
+		SKILLS: "/skills",
+		EMPLOYMENT_TYPES: "/employment-types",
+		// specializations endpoint will be used as /system/category/{id}/specializations
 	},
 } as const;
 

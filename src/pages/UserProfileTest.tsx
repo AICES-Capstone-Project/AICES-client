@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { authService } from "../services/authService"; // Import the real authService
+import type { ProfileResponse } from "../types/auth.types";
 
 export default function UserProfileTest() {
-	const [user, setUser] = useState(null);
+	const [user, setUser] = useState<ProfileResponse | null>(null);
 	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState(null);
+	const [error, setError] = useState<string | null>(null);
 
 	const handleGetCurrentUser = async () => {
 		setLoading(true);
@@ -17,13 +18,15 @@ export default function UserProfileTest() {
 
 			console.log("API Response:", response);
 
-			if (response.status === 200 && response.data) {
-				setUser(response.data);
+			// authService returns ApiResponse<ProfileResponse> with status string (e.g. "Success")
+			if (response.status === "Success" && response.data) {
+				setUser(response.data as ProfileResponse);
 			} else {
 				setError(response.message || "Failed to fetch user data");
 			}
-		} catch (err) {
-			setError(err.message || "An error occurred");
+		} catch (err: unknown) {
+			const msg = err && typeof err === "object" && "message" in err ? (err as any).message : String(err);
+			setError(msg || "An error occurred");
 			console.error("Error:", err);
 		} finally {
 			setLoading(false);

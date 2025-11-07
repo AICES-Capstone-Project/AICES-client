@@ -1,16 +1,16 @@
 import React from 'react';
-import { Drawer, List, Button, Tag, Empty } from 'antd';
+import { Drawer, List, Tag, Empty} from 'antd';
 import type { CompanyJob } from '../../../../services/jobService';
 
 type Props = {
   open: boolean;
   onClose: () => void;
   pendingJobs: CompanyJob[];
-  onApprove: (job: CompanyJob) => Promise<void>;
+  onApprove: (job: CompanyJob) => Promise<boolean>;
   onView: (job: CompanyJob) => void;
 };
 
-const PendingDrawer: React.FC<Props> = ({ open, onClose, pendingJobs, onApprove, onView }) => {
+const PendingDrawer: React.FC<Props> = ({ open, onClose, pendingJobs, onView }) => {
   return (
     <Drawer title={`Pending Jobs (${pendingJobs.length})`} open={open} onClose={onClose} width={420}>
       {pendingJobs.length === 0 ? (
@@ -25,12 +25,9 @@ const PendingDrawer: React.FC<Props> = ({ open, onClose, pendingJobs, onApprove,
                 <div style={{ fontSize: 12, color: '#666' }}>{job.categoryName || job.specializationName}</div>
               </div>
 
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                <Tag color="gold">Pending</Tag>
-                <Button type="primary" onClick={() => onApprove(job)} size="small">
-                  Approve
-                </Button>
-              </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <Tag color="gold">Pending</Tag>
+                </div>
             </List.Item>
           )}
         />

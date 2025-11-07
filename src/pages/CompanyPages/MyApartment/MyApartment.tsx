@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Input, Button, message, Card, Row, Col } from "antd";
+import { Form, Input, Button, message, Card, Row, Col, Modal, Select, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import AvatarUploader from "../Settings/components/AvatarUploader";
@@ -30,6 +30,12 @@ export default function CompanyCreate() {
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [form] = Form.useForm();
   const navigate = useNavigate();
+
+  // Join company modal state
+  const [joinModalOpen, setJoinModalOpen] = useState(false);
+  const [companies, setCompanies] = useState<any[]>([]);
+  const [companiesLoading, setCompaniesLoading] = useState(false);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
 
   // Handle logo file change with validation
   const handleLogoChange = (file: File | null) => {
@@ -102,9 +108,59 @@ export default function CompanyCreate() {
     }
   };
 
+  // Fetch companies for join modal
+  const fetchCompanies = async () => {
+    setCompaniesLoading(true);
+    try {
+      const resp = await companyService.getCompanies();
+      if (String(resp?.status).toLowerCase() === "success") {
+        setCompanies(resp.data || []);
+      } else {
+        setCompanies([]);
+      }
+    } catch (err) {
+      console.error(err);
+      setCompanies([]);
+    } finally {
+      setCompaniesLoading(false);
+    }
+  };
+
+  const handleOpenJoin = () => {
+    setJoinModalOpen(true);
+    fetchCompanies();
+  };
+
+  const handleConfirmJoin = async () => {
+    if (!selectedCompanyId) {
+      message.warning("Please select a company to join");
+      return;
+    }
+    try {
+      const resp = await companyService.joinCompany(selectedCompanyId);
+      if (String(resp?.status).toLowerCase() === "success") {
+        message.success("Join request submitted successfully");
+        setJoinModalOpen(false);
+      } else {
+        message.error(resp?.message || "Failed to submit join request");
+      }
+    } catch (err) {
+      console.error(err);
+      message.error("An error occurred while joining the company");
+    }
+  };
+
   return (
+    <>
     <Card
-      title={<div style={{ textAlign: "center", width: "100%" }}>Submit company account creation request</div>}
+      title={<div className="flex justify-between items-center w-full">
+        <span className="font-semibold">Submit company account creation request</span>
+        <div className="flex gap-2 items-center">
+          <Button type="primary" onClick={handleOpenJoin}>
+            Join your company
+          </Button>
+        </div>
+      </div>}
       style={{
         maxWidth: 1200,
         margin: "12px auto",
@@ -158,8 +214,8 @@ export default function CompanyCreate() {
                         validator: (_, value) => {
                           if (!value) return Promise.resolve();
                           const validation = validateCompanyName(value);
-                          return validation.isValid 
-                            ? Promise.resolve() 
+                          return validation.isValid
+                            ? Promise.resolve()
                             : Promise.reject(new Error(validation.message));
                         }
                       }
@@ -180,8 +236,8 @@ export default function CompanyCreate() {
                         validator: (_, value) => {
                           if (!value) return Promise.resolve();
                           const validation = validateWebsite(value);
-                          return validation.isValid 
-                            ? Promise.resolve() 
+                          return validation.isValid
+                            ? Promise.resolve()
                             : Promise.reject(new Error(validation.message));
                         }
                       }
@@ -205,8 +261,8 @@ export default function CompanyCreate() {
                         validator: (_, value) => {
                           if (!value) return Promise.resolve();
                           const validation = validateAddress(value);
-                          return validation.isValid 
-                            ? Promise.resolve() 
+                          return validation.isValid
+                            ? Promise.resolve()
                             : Promise.reject(new Error(validation.message));
                         }
                       }
@@ -227,8 +283,8 @@ export default function CompanyCreate() {
                         validator: (_, value) => {
                           if (!value) return Promise.resolve();
                           const validation = validateTaxCode(value);
-                          return validation.isValid 
-                            ? Promise.resolve() 
+                          return validation.isValid
+                            ? Promise.resolve()
                             : Promise.reject(new Error(validation.message));
                         }
                       }
@@ -327,8 +383,8 @@ export default function CompanyCreate() {
                                 validator: (_, value) => {
                                   if (!value) return Promise.resolve();
                                   const validation = validateDocumentType(value);
-                                  return validation.isValid 
-                                    ? Promise.resolve() 
+                                  return validation.isValid
+                                    ? Promise.resolve()
                                     : Promise.reject(new Error(validation.message));
                                 }
                               }
@@ -442,25 +498,25 @@ export default function CompanyCreate() {
 
 
             {/* Description */}
-            <Form.Item 
-              name="description" 
-              label="Description" 
+            <Form.Item
+              name="description"
+              label="Description"
               rules={[
                 { required: true, message: "Please enter company description" },
                 {
                   validator: (_, value) => {
                     if (!value) return Promise.resolve();
                     const validation = validateDescription(value);
-                    return validation.isValid 
-                      ? Promise.resolve() 
+                    return validation.isValid
+                      ? Promise.resolve()
                       : Promise.reject(new Error(validation.message));
                   }
                 }
               ]}
             >
-              <Input.TextArea 
-                rows={2} 
-                placeholder="Short introduction about the company (minimum 20 characters)" 
+              <Input.TextArea
+                rows={2}
+                placeholder="Short introduction about the company (minimum 20 characters)"
                 showCount
                 maxLength={1000}
               />
@@ -477,5 +533,27 @@ export default function CompanyCreate() {
         </Form>
       </div>
     </Card>
+    {/* Join Company Modal */}
+    <Modal
+      title="Join a Company"
+      open={joinModalOpen}
+      onCancel={() => setJoinModalOpen(false)}
+      onOk={handleConfirmJoin}
+      okText="Join"
+      cancelText="Cancel"
+    >
+      {companiesLoading ? (
+        <div style={{ textAlign: 'center' }}><Spin /></div>
+      ) : (
+        <Select
+          style={{ width: '100%' }}
+          placeholder="Select a company to join"
+          value={selectedCompanyId || undefined}
+          onChange={(val) => setSelectedCompanyId(Number(val))}
+          options={companies.map((c) => ({ label: c.name, value: c.companyId }))}
+        />
+      )}
+    </Modal>
+    </>
   );
 }

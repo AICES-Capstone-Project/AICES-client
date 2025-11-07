@@ -1,7 +1,9 @@
-import { Table, Space, Tooltip, Button, Tag } from "antd";
+import { Table, Space, Tooltip, Button, Tag, Popconfirm } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { CompanyJob } from "../../../../services/jobService";
+
+import { tagColorFor } from "../../../../utils/tagUtils";
 
 type Props = {
   jobs: CompanyJob[];
@@ -45,7 +47,9 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       key: "categoryName",
       width: "20%",
       align: "center",
-      render: (cat) => <Tag>{cat || "-"}</Tag>,
+      render: (cat) => (
+        <Tag color={tagColorFor(cat)}>{cat || "-"}</Tag>
+      ),
     },
     {
       title: "Specialization",
@@ -53,7 +57,12 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       key: "specializationName",
       width: "20%",
       align: "center",
-      render: (spec) => <Tag>{spec || "-"}</Tag>,
+      render: (spec, record) => {
+        // If category exists, use its color for specialization to match user's request
+        const category = (record as CompanyJob).categoryName;
+        const color = category ? tagColorFor(category) : tagColorFor(spec);
+        return <Tag color={color}>{spec || "-"}</Tag>;
+      },
     },
     {
       title: "Actions",
@@ -80,13 +89,19 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
             />
           </Tooltip>
           <Tooltip title="Remove Job">
-            <Button
-              type="text"
-              icon={<DeleteOutlined />}
-              size="small"
-              danger
-              onClick={() => onDelete(record)}
-            />
+            <Popconfirm
+              title="Are you sure to delete this job?"
+              onConfirm={() => onDelete(record)}
+              okText="Yes"
+              cancelText="No"
+            >
+              <Button
+                type="text"
+                icon={<DeleteOutlined />}
+                size="small"
+                danger
+              />
+            </Popconfirm>
           </Tooltip>
         </Space>
       ),
@@ -100,11 +115,16 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
         dataSource={jobs}
         loading={loading}
         rowKey="jobId"
-        pagination={{ pageSize: 10, showSizeChanger: true }}
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: true,
+          total: jobs.length,
+          showTotal: (total) => `Total ${total} jobs`,
+        }}
         style={{ width: "100%" }}
         tableLayout="fixed"
         className="job-table"
-        scroll={{ y: '57vh' }}
+        scroll={{ y: '59.5vh' }}
         rowClassName={(_, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
       />
     </div>

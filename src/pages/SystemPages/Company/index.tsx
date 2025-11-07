@@ -26,8 +26,10 @@ export default function CompanyList() {
     setLoading(true);
     const res = await companyService.getAll({ page, pageSize, search });
     if (res.status === "Success" && res.data) {
-      setCompanies(res.data.items);
-      setTotal(res.data.totalPages * pageSize);
+      setCompanies(res.data.items as Company[]);
+      // Prefer totalItems from API if provided, otherwise fall back to totalPages * pageSize or items length
+      const totalCount = (res.data as any).totalItems ?? ((res.data as any).totalPages ? (res.data as any).totalPages * pageSize : (res.data.items || []).length);
+      setTotal(totalCount);
     } else {
       message.error(res.message || "Failed to fetch companies");
     }
@@ -94,7 +96,23 @@ export default function CompanyList() {
   const openPreview = async (c: Company) => {
     setIsPreviewOpen(true);
     const res = await companyService.getById(c.companyId);
-    if (res.status === "Success" && res.data) setPreview(res.data);
+    if (res.status === "Success" && res.data) {
+      const cd = res.data as any;
+      // Map CompanyData to Company (frontend shape)
+      const mapped: Company = {
+        companyId: cd.companyId,
+        name: cd.name,
+        domain: cd.domain ?? cd.websiteUrl ?? null,
+        email: cd.email ?? null,
+        phone: cd.phone ?? null,
+        address: cd.address ?? null,
+        size: cd.size ?? null,
+        logoUrl: cd.logoUrl ?? null,
+        isActive: cd.isActive ?? false,
+        createdAt: cd.createdAt ?? new Date().toISOString(),
+      };
+      setPreview(mapped);
+    }
     else message.error(res.message || "Failed to load company");
   };
 

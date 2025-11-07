@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import {
-  Card, Tabs, Typography, Space, Tag, Table, Button, message,
-} from "antd";
+import { Card, Tabs, Typography, Space, Tag, Table, Button, message,} from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { companyService } from "../../../services/companyService";
 import type { Company, CompanyMember, Job } from "../../../types/company.types";
@@ -32,8 +30,21 @@ export default function CompanyDetail() {
   const loadCompany = async () => {
     setLoading(true);
     const res = await companyService.getById(id);
-    if (res.status === "Success" && res.data) setCompany(res.data);
-    else message.error(res.message || "Failed to load company");
+    if (res.status === "Success" && res.data) {
+      const d = res.data;
+      setCompany({
+        companyId: d.companyId,
+        name: d.name,
+        domain: (d as any).domain || null,
+        email: (d as any).email || null,
+        phone: (d as any).phone || null,
+        address: d.address || null,
+        size: (d as any).size || null,
+        logoUrl: d.logoUrl || null,
+        isActive: d.isActive ?? true,
+        createdAt: d.createdAt || new Date().toISOString(),
+      });
+    } else message.error(res.message || "Failed to load company");
     setLoading(false);
   };
 

@@ -14,7 +14,7 @@ const PlanCard: React.FC<Props> = ({ plan }) => {
 
   return (
     <Card
-      bordered={false}
+      variant={isPopular ? "outlined" : "borderless"}
       className={`rounded-2xl shadow-md transition-all duration-300 h-full flex flex-col justify-between ${isPopular
         ? "border-2 bg-white relative shadow-lg"
         : "bg-white hover:shadow-lg"

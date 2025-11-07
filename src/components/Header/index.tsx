@@ -272,7 +272,7 @@ const AppHeader: React.FC = () => {
         placement="right"
         onClose={() => setDrawerOpen(false)}
         open={drawerOpen}
-        bodyStyle={{ padding: 0 }}
+        styles={{ body: { padding: 0 } }}
       >
         <Menu
           mode="vertical"

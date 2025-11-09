@@ -73,10 +73,8 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
 
   useEffect(() => {
     if (!form) return;
-    if (!open) {
-      form.resetFields();
-      return;
-    }
+    // Only proceed when the drawer is open. Parent will reset the form when closing.
+    if (!open) return;
 
     if (job) {
       const base: any = {
@@ -88,7 +86,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
             const found = employmentTypes.find(
               (et: any) => et.name.toLowerCase() === String(t).toLowerCase()
             );
-            return found ? found.id : t;
+            return found ? found.employTypeId : t;
           })
           : [],
         skills: Array.isArray(job.skills)
@@ -97,7 +95,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
             const found = skills.find(
               (sk: any) => sk.name.toLowerCase() === String(s).toLowerCase()
             );
-            return found ? found.id : s;
+            return found ? found.skillId : s;
           })
           : [],
         criteria: Array.isArray((job as any).criteria)
@@ -130,17 +128,18 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
                 if (spec) base.specializationId = spec.specializationId;
               }
             } catch { }
-            setLoadingSpecs(false);
-            form.setFieldsValue(base);
+              setLoadingSpecs(false);
+              // schedule setting fields to next microtask so Form has time to mount and connect
+              Promise.resolve().then(() => form.setFieldsValue(base));
           })();
         } else {
-          form.setFieldsValue(base);
+          Promise.resolve().then(() => form.setFieldsValue(base));
         }
       } else {
         form.setFieldsValue(base);
       }
     } else {
-      form.resetFields();
+      Promise.resolve().then(() => form.resetFields());
     }
   }, [job, form, open, categories, skills, employmentTypes]);
 
@@ -201,31 +200,34 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
           {(fields, { add, remove }) => (
             <>
               <div style={{ marginBottom: 8, fontWeight: 600 }}>Criteria</div>
-              {fields.map((field) => (
-                <Space
-                  key={field.key}
-                  align="baseline"
-                  style={{ display: "flex", marginBottom: 8 }}
-                >
-                  <Form.Item
-                    {...field}
-                    name={[field.name, "name"]}
-                    rules={[{ required: true, message: "Please input criteria name" }]}
+              {fields.map((field) => {
+                const { key, ...restField } = field as any;
+                return (
+                  <Space
+                    key={key}
+                    align="baseline"
+                    style={{ display: "flex", marginBottom: 8 }}
                   >
-                    <Input placeholder="Criteria name" />
-                  </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[field.name, "name"]}
+                      rules={[{ required: true, message: "Please input criteria name" }]}
+                    >
+                      <Input placeholder="Criteria name" />
+                    </Form.Item>
 
-                  <Form.Item
-                    {...field}
-                    name={[field.name, "weight"]}
-                    rules={[{ required: true, message: "Please input weight (0-1)" }]}
-                  >
-                    <InputNumber min={0} max={1} step={0.1} placeholder="Weight" />
-                  </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[field.name, "weight"]}
+                      rules={[{ required: true, message: "Please input weight (0-1)" }]}
+                    >
+                      <InputNumber min={0} max={1} step={0.1} placeholder="Weight" />
+                    </Form.Item>
 
-                  <MinusCircleOutlined onClick={() => remove(field.name)} />
-                </Space>
-              ))}
+                    <MinusCircleOutlined onClick={() => remove(field.name)} />
+                  </Space>
+                );
+              })}
 
               <Form.Item>
                 <Button

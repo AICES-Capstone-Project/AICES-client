@@ -112,9 +112,27 @@ export default function CompanyCreate() {
   const fetchCompanies = async () => {
     setCompaniesLoading(true);
     try {
-      const resp = await companyService.getCompanies();
-      if (String(resp?.status).toLowerCase() === "success") {
-        setCompanies(resp.data || []);
+      // Try public companies endpoint first (no auth required)
+      const publicResp = await companyService.getPublicCompanies();
+      console.debug("[MyApartment] getPublicCompanies response:", publicResp);
+      if (publicResp?.status === "Success" && Array.isArray(publicResp.data)) {
+        setCompanies(publicResp.data || []);
+        return;
+      }
+
+      // Fallback to admin paginated endpoint
+      const resp = await companyService.getAll({ page: 1, pageSize: 1000 });
+      console.debug("[MyApartment] getAll response:", resp);
+      if (resp?.status === "Success" && resp.data && Array.isArray((resp.data as any).items)) {
+        setCompanies((resp.data as any).items || []);
+        return;
+      }
+
+      // Final fallback to older list endpoint
+      const fallback = await companyService.getCompanies();
+      console.debug("[MyApartment] getCompanies fallback response:", fallback);
+      if (fallback?.status === "Success" && Array.isArray(fallback.data)) {
+        setCompanies(fallback.data || []);
       } else {
         setCompanies([]);
       }

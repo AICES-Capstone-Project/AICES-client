@@ -17,14 +17,14 @@ const InviteDrawer: React.FC<Props> = ({ open, onClose, onSubmit, submitting }) 
       <Form form={form} layout="vertical" onFinish={(v) => { onSubmit(v); form.resetFields(); }}>
         <Form.Item
           name="email"
-          label="Staff Gmail"
+          label="Staff email"
           rules={[
             { required: true, message: "Please enter an email address" },
-            { type: "email", message: "Please enter a valid Gmail address" },
+            { type: "email", message: "Please enter a valid email address" },
             { pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/, message: "Only Gmail addresses are allowed" },
           ]}
         >
-          <Input size="large" prefix={<MailOutlined />} placeholder="Enter Gmail address (e.g. example@gmail.com)" />
+          <Input size="large" prefix={<MailOutlined />} placeholder="Enter email address (e.g. example@gmail.com)" />
         </Form.Item>
 
         <Button type="primary" htmlType="submit" icon={<SendOutlined />} loading={submitting} block>

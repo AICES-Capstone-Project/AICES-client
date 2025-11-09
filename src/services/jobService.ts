@@ -46,23 +46,23 @@ export const jobService = {
   
   // Create new job
   createJob: async (jobData: Partial<CompanyJob>): Promise<ApiResponse<CompanyJob>> => {
-    return await post<CompanyJob, Partial<CompanyJob>>(API_ENDPOINTS.COMPANY.GET_JOBS_PUBLIC, jobData);
+    return await post<CompanyJob, Partial<CompanyJob>>(API_ENDPOINTS.COMPANY.JOB, jobData);
   },
   
   // Update job by ID
   updateJob: async (jobId: number, jobData: Partial<CompanyJob>): Promise<ApiResponse<CompanyJob>> => {
     // The API expects the job fields directly in the request body (not wrapped in a `data` key)
-    return await patch<CompanyJob>(`${API_ENDPOINTS.COMPANY.GET_JOB}/${jobId}`, jobData as Record<string, unknown>);
+    return await patch<CompanyJob>(`${API_ENDPOINTS.COMPANY.JOB}/${jobId}`, jobData as Record<string, unknown>);
   },
 
   // Update job status (publish/unpublish)
   updateJobStatus: async (jobId: number, status: string): Promise<ApiResponse<CompanyJob>> => {
     // PUT /company/self/jobs/{id}/status with body { status: 'Published' }
-    return await put<CompanyJob, { status: string }>(`${API_ENDPOINTS.COMPANY.GET_JOB}/${jobId}/status`, { status });
+    return await put<CompanyJob, { status: string }>(`${API_ENDPOINTS.COMPANY.JOB}/${jobId}/status`, { status });
   },
   
   // Delete job by ID
   deleteJob: async (jobId: number): Promise<ApiResponse<null>> => {
-    return await remove<null>(`${API_ENDPOINTS.COMPANY.GET_JOB}/${jobId}`);
+    return await remove<null>(`${API_ENDPOINTS.COMPANY.JOB}/${jobId}`);
   },
 };

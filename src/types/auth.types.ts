@@ -46,6 +46,7 @@ export interface ProfileResponse {
 	roleName: string | null;
 	companyName?: string | null;
 	companyStatus?: string | null;
+	joinStatus?: string | null;
 	rejectionReason?: string | null;
 	isActive: boolean;
 }

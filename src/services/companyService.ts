@@ -1,4 +1,4 @@
-import { post, postForm, get } from "./api";
+import { post, postForm, get, put, patchForm } from "./api";
 import { API_ENDPOINTS } from "./config";
 import type { ApiResponse } from "../types/api.types";
 import type { CreateCompanyRequest } from "../types/company.types";
@@ -60,7 +60,10 @@ export const companyService = {
 	},
 
 	// Get public list of companies (for joining)
-	// Get public list of companies (for joining)
+	getPublicCompanies: async (): Promise<ApiResponse<CompanyData[]>> => {
+		return await get<CompanyData[]>(API_ENDPOINTS.COMPANY.PUBLIC);
+	},
+
 	getCompanies: async (): Promise<ApiResponse<CompanyData[]>> => {
 		return await get<CompanyData[]>(API_ENDPOINTS.COMPANY.LIST);
 	},
@@ -79,5 +82,20 @@ export const companyService = {
 	// Join a company by ID
 	joinCompany: async (companyId: number): Promise<ApiResponse<null>> => {
 		return await post<null, null>(API_ENDPOINTS.COMPANY.JOIN(companyId), null as any);
+	},
+
+	// Get pending join requests for current company
+	getJoinRequests: async (): Promise<ApiResponse<any[]>> => {
+		return await get<any[]>(`/companies/self/join-requests`);
+	},
+
+	// Update join request status for a user (approve/reject)
+	updateJoinRequestStatus: async (comUserId: number, joinStatus: string): Promise<ApiResponse<null>> => {
+		return await put<null, { joinStatus: string }>(`/companies/self/join-requests/${comUserId}/status`, { joinStatus });
+	},
+
+	// Update current company profile (supports FormData for file upload)
+	updateProfile: async (formData: FormData): Promise<ApiResponse<any>> => {
+		return await patchForm<any>(`/companies/self/profile`, formData);
 	},
 };

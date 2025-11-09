@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, Row, Col, Spin, message, Modal, Button } from "antd";
+import CompanyEditModal from "./components/CompanyEditModal";
 import { companyService } from "../../../services/companyService";
 import type { CompanyMember } from "../../../types/company.types";
 import { useAppSelector } from "../../../hooks/redux";
@@ -122,8 +123,8 @@ export default function CompanyView() {
               src={company.logoUrl || "https://placehold.co/200x200?text=Logo"}
               alt="Company Logo"
               style={{
-                width: 200,
-                height: 200,
+                width: 180,
+                height: 180,
                 objectFit: "cover",
                 borderRadius: "10%",
                 border: "1px solid #ddd",
@@ -165,7 +166,7 @@ export default function CompanyView() {
             border: "1px solid #e5e5e5",
             borderRadius: 8,
             padding: "16px 24px",
-            marginTop: 24,
+            marginTop: 12,
             background: "#fafafa",
             textAlign: "center",
           }}
@@ -185,7 +186,7 @@ export default function CompanyView() {
               style={{
                 maxWidth: 450,
                 margin: "0 auto",
-                textAlign: "left",
+                
               }}
             >
               <div
@@ -198,9 +199,9 @@ export default function CompanyView() {
                   marginBottom: 8,
                 }}
               >
-                <span style={{ width: "10%" }}>No</span>
-                <span style={{ width: "60%" }}>Document Type</span>
-                <span style={{ width: "30%", textAlign: "right" }}>Action</span>
+                <span style={{ width: "15%" }}>No</span>
+                <span style={{ width: "70%" }}>Document Type</span>
+                <span style={{ width: "15%"}}>Action</span>
               </div>
 
               {company.documents.map((doc, index) => (
@@ -217,16 +218,15 @@ export default function CompanyView() {
                         : "none",
                   }}
                 >
-                  <span style={{ width: "10%" }}>{index + 1}</span>
-                  <span style={{ width: "60%", fontWeight: 500 }}>
+                  <span style={{ width: "15%" }}>{index + 1}</span>
+                  <span style={{ width: "70%"}}>
                     {doc.documentType}
                   </span>
                   <a
                     style={{
-                      width: "30%",
-                      color: "#1677ff",
+                      width: "15%",
+                      color: "var(--color-primary-light)",
                       cursor: "pointer",
-                      textAlign: "right",
                     }}
                     onClick={() => handlePreview(doc.fileUrl, doc.documentType)}
                   >
@@ -241,7 +241,7 @@ export default function CompanyView() {
         </div>
       </Card>
 
-      {/* Popup (Modal preview) */}
+  {/* Popup (Modal preview) */}
       <Modal
         open={previewVisible}
         title={previewType || "Document preview"}
@@ -347,25 +347,13 @@ export default function CompanyView() {
         )}
       </Modal>
 
-      {/* Edit Company Info Modal (placeholder) */}
-      <Modal
+      {/* Edit Company Info Modal */}
+      <CompanyEditModal
         open={editModalOpen}
-        title="Edit Company Info"
-        centered
-        onCancel={() => setEditModalOpen(false)}
-        onOk={() => {
-          // Placeholder save logic - replace with real update flow
-          message.success("Company info saved (placeholder)");
-          setEditModalOpen(false);
-        }}
-      >
-        <div style={{ minHeight: 120 }}>
-          <p style={{ marginBottom: 8 }}>This is a placeholder editor for company information.</p>
-          <p style={{ color: "#666", marginBottom: 0 }}>
-            Implement the edit form here (name, website, address, tax code, description, documents upload).
-          </p>
-        </div>
-      </Modal>
+        onClose={() => setEditModalOpen(false)}
+        company={company}
+        onUpdated={(c) => setCompany(c)}
+      />
 
     </>
   );

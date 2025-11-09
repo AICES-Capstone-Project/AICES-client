@@ -60,7 +60,7 @@ export default function MyApartmentWrapper() {
         }}
       >
         <Spin spinning={true} tip="Loading...">
-          <div style={{ width: 100, height: 100 }} /> {/* vùng hiển thị tạm */}
+          <div style={{ width: 100, height: 100 }} />
         </Spin>
       </div>
     );
@@ -77,14 +77,19 @@ export default function MyApartmentWrapper() {
 
   // Logic render component theo trạng thái công ty
   const companyStatus = user?.companyStatus;
+  const joinStatus = user?.joinStatus;
   const rejectionReason = companyData?.rejectionReason || user?.rejectionReason;
+
+  // If the profile indicates a join request pending, show SubmissionPending
+  if (joinStatus && joinStatus.toLowerCase() === "pending") return <SubmissionPending />;
 
   if (companyStatus === "Approved") return <CompanyView />;
   if (companyStatus === "Pending") return <SubmissionPending />;
   if (companyStatus === "Rejected")
     return <CompanyRejected rejectionReason={rejectionReason} />;
-  if (!user?.companyName) return <MyApartment />;
 
-  // Fallback
+  // Only show MyApartment when user has no company and no active join request
+  if (!user?.companyName && !joinStatus) return <MyApartment />;
+
   return <SubmissionPending />;
 }

@@ -10,7 +10,7 @@ export default function SubmissionPending() {
       style={{ maxWidth: 800, margin: "40px auto", textAlign: "center" }}
     >
       <p>
-        Thank you — your company account request has been submitted. Please wait up to 24 hours for approval.
+        Thank you — your request has been submitted. Please wait up to 24 hours for approval.
       </p>
       <p>If you need to make changes, you can return to the dashboard.</p>
       <div style={{ marginTop: 16 }}>

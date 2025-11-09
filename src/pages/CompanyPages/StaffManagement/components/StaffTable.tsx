@@ -19,10 +19,6 @@ const StaffTable: React.FC<Props> = ({ members, loading, onView, onEdit, onDelet
         return "red";
       case "hr_recruiter":
         return "blue";
-      case "system_admin":
-        return "purple";
-      case "system_manager":
-        return "orange";
       default:
         return "default";
     }
@@ -73,14 +69,6 @@ const StaffTable: React.FC<Props> = ({ members, loading, onView, onEdit, onDelet
       render: (roleName) => (
         <Tag color={getRoleColor(roleName)}>{formatRoleName(roleName)}</Tag>
       ),
-    },
-    {
-      title: "Active",
-      dataIndex: "isActive",
-      key: "isActive",
-      align: "center",
-      width: 125,
-      render: (isActive) => <Tag color={isActive ? "green" : "red"}>{isActive ? "Active" : "Inactive"}</Tag>,
     },
     {
       title: "Actions",

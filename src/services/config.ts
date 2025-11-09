@@ -53,7 +53,9 @@ export const API_ENDPOINTS = {
 		GET_JOBS: (id: number) => `/companies/${id}/jobs`,
 		GET_JOBS_PUBLIC: "/company/self/jobs/published",
 		GET_JOBS_PENDING: "/company/self/jobs/pending",
-		GET_JOB: "/company/self/jobs",
+		JOB: "/company/self/jobs",
+		// Public companies list for join modal
+		PUBLIC: "/companies/public",
 	},
 
 	// System endpoints (categories, skills, specializations)

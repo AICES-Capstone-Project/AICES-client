@@ -22,9 +22,7 @@ export default function CompanyLayout() {
 	const [collapsed, setCollapsed] = React.useState(false);
 	const location = useLocation();
 
-	const selectedKey = location.pathname.startsWith(APP_ROUTES.COMPANY)
-		? location.pathname
-		: APP_ROUTES.COMPANY_DASHBOARD;
+	// selectedKey will be computed after we obtain the current user
 
 	const dispatch = useAppDispatch();
 	const navigate = useNavigate();
@@ -40,14 +38,23 @@ export default function CompanyLayout() {
 	const user = useAppSelector((s) => s.auth.user);
 	const userRole = user?.roleName ?? null;
 
+	const hasCompany = Boolean(user?.companyName);
+	const defaultCompanyRoute = hasCompany ? APP_ROUTES.COMPANY_DASHBOARD : APP_ROUTES.COMPANY_MY_APARTMENTS;
+	const selectedKey = location.pathname.startsWith(APP_ROUTES.COMPANY)
+		? location.pathname
+		: defaultCompanyRoute;
+
 	const iconStyle = { color: "var(--color-primary-medium)", fontWeight: "bold" };
 
 	const items = [
-		{
-			key: APP_ROUTES.COMPANY_DASHBOARD,
-			icon: <LineChartOutlined style={iconStyle} />,
-			label: <Link to={APP_ROUTES.COMPANY_DASHBOARD}>Dashboard</Link>,
-		},
+		// Dashboard only visible if user is associated with a company
+		...(hasCompany ? [
+			{
+				key: APP_ROUTES.COMPANY_DASHBOARD,
+				icon: <LineChartOutlined style={iconStyle} />,
+				label: <Link to={APP_ROUTES.COMPANY_DASHBOARD}>Dashboard</Link>,
+			},
+		] : []),
 		{
 			key: APP_ROUTES.COMPANY_MY_APARTMENTS,
 			icon: <ApartmentOutlined style={iconStyle} />,
@@ -62,11 +69,14 @@ export default function CompanyLayout() {
 				},
 			]
 			: []),
-		{
-			key: APP_ROUTES.COMPANY_JOBS,
-			icon: <AppstoreOutlined style={iconStyle} />,
-			label: <Link to={APP_ROUTES.COMPANY_JOBS}>Jobs</Link>,
-		},
+		// Jobs link only visible when user has a company
+		...(hasCompany ? [
+			{
+				key: APP_ROUTES.COMPANY_JOBS,
+				icon: <AppstoreOutlined style={iconStyle} />,
+				label: <Link to={APP_ROUTES.COMPANY_JOBS}>Jobs</Link>,
+			},
+		] : []),
 		{
 			key: APP_ROUTES.COMPANY_SETTINGS,
 			icon: <SettingOutlined style={iconStyle} />,

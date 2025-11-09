@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, message, Button, Badge, Form } from "antd";
-import { BellOutlined } from "@ant-design/icons";
+import { BellOutlined, PlusOutlined } from "@ant-design/icons";
 import { jobService } from "../../../services/jobService";
 import type { CompanyJob } from "../../../services/jobService";
 import { useAppSelector } from "../../../hooks/redux";
@@ -10,6 +10,7 @@ import JobSearchBar from "./components/JobSearchBar";
 import JobViewDrawer from "./components/JobViewDrawer";
 import PendingDrawer from "./components/PendingDrawer";
 import JobEditDrawer from "./components/JobEditDrawer";
+import JobCreateDrawer from "./components/JobCreateDrawer";
 
 const JobManagement = () => {
   const [jobs, setJobs] = useState<CompanyJob[]>([]);
@@ -25,6 +26,7 @@ const JobManagement = () => {
   const [viewingPending, setViewingPending] = useState(false);
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<CompanyJob | null>(null);
+  const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
 
@@ -33,6 +35,45 @@ const JobManagement = () => {
     setEditDrawerOpen(true);
   };
 
+const handleCreate = async (values: any) => {
+  console.log("📝 Form values gửi lên API:", values);
+  setSaving(true);
+  try {
+    const payload: any = { ...values };
+    if (Array.isArray(values.employmentTypes)) {
+      payload.employmentTypeIds = values.employmentTypes.map((v: any) => Number(v));
+      delete payload.employmentTypes;
+    }
+    if (Array.isArray(values.skills)) {
+      payload.skillIds = values.skills.map((v: any) => Number(v));
+      delete payload.skills;
+    }
+    if (Array.isArray(values.criteria)) {
+      payload.criteria = values.criteria.map((c: any) => ({ name: c.name, weight: Number(c.weight) }));
+    }
+
+    if (Array.isArray(payload.employmentTypeIds) && payload.employmentTypeIds.length === 0) delete payload.employmentTypeIds;
+    if (Array.isArray(payload.skillIds) && payload.skillIds.length === 0) delete payload.skillIds;
+    if (Array.isArray(payload.criteria) && payload.criteria.length === 0) delete payload.criteria;
+
+    const resp = await jobService.createJob(payload);
+    if (resp?.status && String(resp.status).toLowerCase() === "success") {
+      message.success("Job created successfully");
+      // don't force-close drawer here; let caller decide (to show 'Chờ duyệt' for recruiters)
+      fetchJobs();
+      fetchPendingJobs();
+      return true;
+    } else {
+      message.error(resp?.message || "Failed to create job");
+    }
+  } catch (err) {
+    console.error("❌ Lỗi khi gọi API create job:", err);
+    message.error("Error while creating job");
+  } finally {
+    setSaving(false);
+  }
+  return false;
+};
 
   const { user } = useAppSelector((s) => s.auth);
   const isHrManager =
@@ -184,15 +225,25 @@ const JobManagement = () => {
         <div className="flex justify-between items-center w-full">
           <span className="font-semibold">Job Management</span>
           <div className="flex gap-2 items-center">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => {
+                setCreateDrawerOpen(true);
+              }}
+            >
+              Create new Job
+            </Button>
             {isHrManager && (
               <Button
+                className="company-btn"
                 onClick={() => {
                   fetchPendingJobs();
                   setPendingDrawerOpen(true);
                 }}
               >
-                <Badge count={pendingCount} size="small" offset={[-2, 1]}>
-                  <BellOutlined className="text-[16px]" />
+                <Badge className="company-badge" count={pendingCount} size="small" offset={[-2, 1]}>
+                  <BellOutlined style={{ fontSize: 16, color: "var(--color-primary-medium) !important" }} />
                 </Badge>
                 <span className="ml-2">Pending Jobs</span>
               </Button>
@@ -248,6 +299,13 @@ const JobManagement = () => {
         job={editingJob}
         form={form}
         onSubmit={handleUpdate}
+        saving={saving}
+      />
+
+      <JobCreateDrawer
+        open={createDrawerOpen}
+        onClose={() => setCreateDrawerOpen(false)}
+        onSubmit={handleCreate}
         saving={saving}
       />
 

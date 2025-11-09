@@ -46,11 +46,11 @@ button {
 	cursor: pointer;
 }
 
-@theme {
-	--color-primary-dark: #052e16;
-	--color-primary: #065f46;
-	--color-primary-medium: #2f6c2b;
-	--color-primary-light: #4d7c0f;
+:root {
+  --color-primary-dark: #052e16;
+  --color-primary: #065f46;
+  --color-primary-medium: #2f6c2b;
+  --color-primary-light: #4d7c0f;
 }
 
 
@@ -197,6 +197,10 @@ button {
 
 	.text-primary-dark {
 		color: var(--color-primary-dark);
+	}
+
+	.text-primary-medium {
+		color: var(--color-primary-medium);
 	}
 
 	.text-primary-light {
@@ -378,4 +382,25 @@ button {
 /* Remove extra margin under Ant Design Table pagination */
 .ant-table-pagination {
   margin-bottom: 0 !important;
+}
+
+/* Pending Jobs button styling (override AntD defaults) */
+.company-btn.ant-btn {
+	background-color: white !important;
+	color: var(--color-primary-light) !important;
+	border: 1px solid var(--color-primary-light) !important;
+	transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.company-btn.ant-btn:hover,
+.company-btn.ant-btn:focus {
+	/* slightly tinted background on hover */
+	background-color: color-mix(in srgb, var(--color-primary-light) 12%, white) !important;
+	color: var(--color-primary-dark) !important;
+	border-color: var(--color-primary-light) !important;
+	
+}
+
+.company-btn .anticon {
+	color: inherit !important;
 }

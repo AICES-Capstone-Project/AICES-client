@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
-import { 
-  Card, 
-  Button, 
-  Input, 
-  message
+import {
+  Card,
+  Button,
+  Input,
+  message,
+  Badge,
 } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { PlusOutlined, SearchOutlined, BellOutlined } from "@ant-design/icons";
 import { companyService } from "../../../services/companyService";
 import type { CompanyMember } from "../../../types/company.types";
 import StaffTable from "./components/StaffTable";
 import InviteDrawer from "./components/InviteDrawer";
+import PendingMembersDrawer from "./components/PendingMembersDrawer";
 
 const { Search } = Input;
 
@@ -19,6 +21,9 @@ const StaffManagement = () => {
   const [loading, setLoading] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [sending, setSending] = useState(false);
+  const [pendingDrawerOpen, setPendingDrawerOpen] = useState(false);
+  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+
 
   // Fetch company members data
   const fetchMembers = async () => {
@@ -46,9 +51,27 @@ const StaffManagement = () => {
     fetchMembers();
   }, []);
 
-  // table and role helpers moved into StaffTable component
+  const fetchJoinRequests = async () => {
+    try {
+      const resp = await companyService.getJoinRequests();
+      if (resp?.status === "Success" || resp?.status === "success") {
+        setPendingRequests(resp.data || []);
+      } else {
+        setPendingRequests([]);
+        message.error("Failed to fetch pending members");
+      }
+    } catch (err) {
+      console.error("Error fetching join requests:", err);
+      setPendingRequests([]);
+      message.error("Error fetching pending members");
+    }
+  };
 
-  // Action handlers
+  // Load pending join requests when component mounts so badge count is available immediately
+  useEffect(() => {
+    fetchJoinRequests();
+  }, []);
+
   const handleView = (member: CompanyMember) => {
     message.info(`Viewing member: ${member.fullName || member.email}`);
   };
@@ -71,9 +94,32 @@ const StaffManagement = () => {
     }, 1000);
   };
 
+  const handleOpenPending = async () => {
+    setPendingDrawerOpen(true);
+    await fetchJoinRequests();
+  };
+
+  const handleApproveRequest = async (req: any) => {
+    if (!req?.comUserId) return;
+    try {
+      const resp = await companyService.updateJoinRequestStatus(req.comUserId, "Approved");
+      if (resp?.status === "Success" || resp?.status === "success") {
+        message.success("Member approved");
+        // refresh lists
+        fetchJoinRequests();
+        fetchMembers();
+      } else {
+        message.error("Failed to approve member");
+      }
+    } catch (err) {
+      console.error("Approve error:", err);
+      message.error("Error approving member");
+    }
+  };
+
   // Search handler
   const handleSearch = (value: string) => {
-    const filtered = members.filter(member => 
+    const filtered = members.filter(member =>
       (member.fullName?.toLowerCase().includes(value.toLowerCase())) ||
       (member.email?.toLowerCase().includes(value.toLowerCase())) ||
       (member.roleName?.toLowerCase().includes(value.toLowerCase()))
@@ -81,17 +127,25 @@ const StaffManagement = () => {
     setFilteredMembers(filtered);
   };
 
+  // use CSS utility class .text-primary-medium for icon color
+
   return (
     <Card
       title={<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
         <span style={{ fontWeight: 600 }}>Staff Management</span>
         <div>
-          <Button 
-            type="primary" 
+          <Button
+            type="primary"
             icon={<PlusOutlined />}
             onClick={() => setDrawerOpen(true)}
           >
             Invite New Staff
+          </Button>
+          <Button className="company-btn" style={{ marginLeft: 8 }} onClick={handleOpenPending}>
+            <Badge className="company-badge" count={pendingRequests.length} size="small" offset={[-2, 1]}>
+              <BellOutlined style={{ fontSize: 16, color: "var(--color-primary-medium) !important" }} />
+            </Badge>
+            <span className="ml-2">Pending Members</span>
           </Button>
         </div>
       </div>}
@@ -128,6 +182,12 @@ const StaffManagement = () => {
 
       {/* Invite Drawer */}
       <InviteDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} onSubmit={handleInviteSubmit} submitting={sending} />
+      <PendingMembersDrawer
+        open={pendingDrawerOpen}
+        onClose={() => setPendingDrawerOpen(false)}
+        requests={pendingRequests}
+        onApprove={async (r) => { await handleApproveRequest(r); }}
+      />
     </Card>
   );
 };

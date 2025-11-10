@@ -7,8 +7,14 @@ export interface Company {
   address?: string | null;
   size?: string | null; // e.g. "51-200"
   logoUrl?: string | null;
-  isActive: boolean;
-  createdAt: string; // ISO
+  isActive?: boolean;
+  createdAt?: string; // ISO
+
+    // ✅ thêm mới theo BE
+  websiteUrl?: string | null;
+  companyStatus?: "Approved" | "Pending" | "Rejected" | string | null;
+
+  
 }
 
 export interface CompanyMember {
@@ -20,15 +26,15 @@ export interface CompanyMember {
   avatarUrl?: string | null;
   phoneNumber?: string | null;
   joinStatus: string; // Approved / Pending / Rejected
-  isActive: boolean;
-  createdAt: string; // ISO
+  isActive?: boolean;
+  createdAt?: string; // ISO
 }
 
 export interface CreateCompanyRequest {
   name: string;
   description: string;
   address: string;
-  website: string;
+  websiteUrl: string;
   taxCode: string;
   logoFile: string;
   documentFiles: boolean;
@@ -64,4 +70,16 @@ export interface Paginated<T> {
   pageSize: number;
   totalPages: number;
   totalItems: number;
+}
+export interface CompaniesListData {
+  companies: Company[];
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export interface ApiEnvelope<T> {
+  status: string;  // "Success" | "Error" | ...
+  message: string;
+  data: T;
 }

@@ -1,6 +1,14 @@
 import { useEffect, useState } from "react";
 import {
-  Button, Card, Input, Modal, Space, Table, Tag, Typography, message,
+  Button,
+  Card,
+  Input,
+  Modal,
+  Space,
+  Table,
+  Tag,
+  Typography,
+  message,
 } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
@@ -16,28 +24,62 @@ export default function CompanyList() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [total, setTotal] = useState(0);
   const [keyword, setKeyword] = useState("");
-  const [pagination, setPagination] = useState<TablePaginationConfig>({ current: 1, pageSize: DEFAULT_PAGE_SIZE });
+  const [pagination, setPagination] = useState<TablePaginationConfig>({
+    current: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [preview, setPreview] = useState<Company | null>(null);
 
   const nav = useNavigate();
 
-  const fetchData = async (page = 1, pageSize = DEFAULT_PAGE_SIZE, search = "") => {
+  const fetchData = async (
+    page = 1,
+    pageSize = DEFAULT_PAGE_SIZE,
+    search = ""
+  ) => {
     setLoading(true);
-    const res = await companyService.getAll({ page, pageSize, search });
-    if (res.status === "Success" && res.data) {
-      setCompanies(res.data.items as Company[]);
-      // Prefer totalItems from API if provided, otherwise fall back to totalPages * pageSize or items length
-      const totalCount = (res.data as any).totalItems ?? ((res.data as any).totalPages ? (res.data as any).totalPages * pageSize : (res.data.items || []).length);
-      setTotal(totalCount);
-    } else {
-      message.error(res.message || "Failed to fetch companies");
-    }
-    setLoading(false);
-  };
+    try {
+      const res = await companyService.getAll({ page, pageSize, search });
+      if (res?.status === "Success" && res?.data) {
+        const d = res.data as any;
+        const list = (d.companies ?? []) as Company[];
+        setCompanies(list);
 
+        // total = totalPages * pageSize (nếu không có tổng tuyệt đối)
+        const totalCount = (
+          d.totalPages ? d.totalPages * (d.pageSize ?? pageSize) : list.length
+        ) as number;
+        setTotal(totalCount);
+
+        // cập nhật current page nếu BE trả về
+        if (d.currentPage || d.pageSize) {
+          setPagination((p) => {
+            const next = {
+              ...p,
+              current: d.currentPage ?? p.current,
+              pageSize: d.pageSize ?? p.pageSize,
+            };
+            return next.current === p.current && next.pageSize === p.pageSize
+              ? p
+              : next;
+          });
+        }
+      } else {
+        message.error(res?.message || "Failed to fetch companies");
+      }
+    } catch (err) {
+      message.error("Failed to fetch companies");
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE, keyword);
+    fetchData(
+      pagination.current || 1,
+      pagination.pageSize || DEFAULT_PAGE_SIZE,
+      keyword
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.current, pagination.pageSize]);
 
@@ -52,40 +94,106 @@ export default function CompanyList() {
     fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE, "");
   };
 
+  // === COLUMNS (đã khớp schema GET /api/companies) ===
   const columns: ColumnsType<Company> = [
     { title: "ID", dataIndex: "companyId", width: 80 },
+
     {
       title: "Company",
       dataIndex: "name",
       render: (v, r) => (
         <Space>
           {r.logoUrl ? (
-            <img src={r.logoUrl} alt="logo" style={{ width: 28, height: 28, borderRadius: 6, objectFit: "cover" }} />
+            <img
+              src={r.logoUrl}
+              alt="logo"
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 6,
+                objectFit: "cover",
+              }}
+            />
           ) : (
-            <div style={{ width: 28, height: 28, borderRadius: 6, background: "#f0f0f0" }} />
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 6,
+                background: "#f0f0f0",
+              }}
+            />
           )}
           <span>{v}</span>
         </Space>
       ),
     },
-    { title: "Domain", dataIndex: "domain", render: (v: string | null) => v || "—" },
-    { title: "Email", dataIndex: "email", render: (v: string | null) => v || "—" },
-    { title: "Phone", dataIndex: "phone", render: (v: string | null) => v || "—" },
-    { title: "Size", dataIndex: "size", width: 110, render: (v: string | null) => v || "—" },
+
+    // Website (schema: websiteUrl) – hiển thị host gọn gàng
     {
-      title: "Status",
-      dataIndex: "isActive",
-      width: 120,
-      render: (b: boolean) => (b ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>),
+      title: "Website",
+      // tránh lỗi type nếu Company type chưa có websiteUrl
+      render: (_, r: any) => {
+        const url = r.websiteUrl as string | undefined;
+        if (!url) return "—";
+        let host = "";
+        try {
+          host = new URL(url).hostname;
+        } catch {
+          host = url;
+        }
+        return (
+          <a href={url} target="_blank" rel="noreferrer">
+            {host}
+          </a>
+        );
+      },
     },
+
+    // Trạng thái duyệt (schema: companyStatus = Approved/Pending/Rejected)
+    {
+      title: "Company Status",
+      // dùng render để không phụ thuộc type
+      render: (_, r: any) => {
+        const s = r.companyStatus as string | undefined;
+        const color =
+          s === "Approved" ? "green" : s === "Pending" ? "gold" : "red";
+        return s ? <Tag color={color}>{s}</Tag> : "—";
+      },
+      width: 150,
+    },
+
+    // Kích hoạt (schema: isActive = boolean)
+    {
+      title: "Active",
+      dataIndex: "isActive",
+      width: 110,
+      render: (b?: boolean) =>
+        b ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
+    },
+
+    // Ngày tạo (schema: createdAt)
+    {
+      title: "Created",
+      // dùng render để không phụ thuộc type
+      render: (_, r: any) =>
+        r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
+      width: 170,
+    },
+
     {
       title: "Actions",
       key: "actions",
       width: 200,
       render: (_, record) => (
         <Space>
-          <Button icon={<EyeOutlined />} onClick={() => openPreview(record)}>Preview</Button>
-          <Button type="primary" onClick={() => nav(`/system/company/${record.companyId}`)}>
+          <Button icon={<EyeOutlined />} onClick={() => openPreview(record)}>
+            Preview
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => nav(`/system/company/${record.companyId}`)}
+          >
             Open
           </Button>
         </Space>
@@ -95,38 +203,58 @@ export default function CompanyList() {
 
   const openPreview = async (c: Company) => {
     setIsPreviewOpen(true);
-    const res = await companyService.getById(c.companyId);
-    if (res.status === "Success" && res.data) {
-      const cd = res.data as any;
-      // Map CompanyData to Company (frontend shape)
-      const mapped: Company = {
-        companyId: cd.companyId,
-        name: cd.name,
-        domain: cd.domain ?? cd.websiteUrl ?? null,
-        email: cd.email ?? null,
-        phone: cd.phone ?? null,
-        address: cd.address ?? null,
-        size: cd.size ?? null,
-        logoUrl: cd.logoUrl ?? null,
-        isActive: cd.isActive ?? false,
-        createdAt: cd.createdAt ?? new Date().toISOString(),
-      };
-      setPreview(mapped);
+    try {
+      const res = await companyService.getById(c.companyId);
+      if (res.status === "Success" && res.data) {
+        const cd = res.data as any;
+        const mapped: Company = {
+          companyId: cd.companyId,
+          name: cd.name,
+          address: cd.address ?? null,
+          logoUrl: cd.logoUrl ?? null,
+          websiteUrl: cd.websiteUrl ?? null,
+          companyStatus: cd.companyStatus ?? null,
+          isActive: cd.isActive ?? false,
+          createdAt: cd.createdAt ?? new Date().toISOString(),
+        };
+        setPreview(mapped);
+      } else {
+        message.error(res?.message || "Failed to load company");
+        setIsPreviewOpen(false); // 👈
+      }
+    } catch {
+      message.error("Failed to load company");
+      setIsPreviewOpen(false); // 👈
     }
-    else message.error(res.message || "Failed to load company");
   };
 
   return (
     <div>
-      <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
-        <Title level={4} style={{ margin: 0 }}>Company Management</Title>
-        <Button icon={<ReloadOutlined />} onClick={() => fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE, keyword)}>Refresh</Button>
+      <Space
+        align="center"
+        style={{ width: "100%", justifyContent: "space-between" }}
+      >
+        <Title level={4} style={{ margin: 0 }}>
+          Company Management
+        </Title>
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={() =>
+            fetchData(
+              pagination.current || 1,
+              pagination.pageSize || DEFAULT_PAGE_SIZE,
+              keyword
+            )
+          }
+        >
+          Refresh
+        </Button>
       </Space>
 
       <Card style={{ marginTop: 12 }}>
         <Space style={{ marginBottom: 16 }} wrap>
           <Input
-            placeholder="Search by company name or domain"
+            placeholder="Search by company name or website"
             allowClear
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
@@ -134,8 +262,12 @@ export default function CompanyList() {
             style={{ width: 320 }}
             prefix={<SearchOutlined />}
           />
-          <Button type="primary" onClick={onSearch}>Search</Button>
-          <Button onClick={onReset}>Reset</Button>
+          <Button type="primary" onClick={onSearch} loading={loading}>
+            Search
+          </Button>
+          <Button onClick={onReset} disabled={loading}>
+            Reset
+          </Button>
         </Space>
 
         <Table<Company>
@@ -156,7 +288,10 @@ export default function CompanyList() {
       <Modal
         open={isPreviewOpen}
         title="Company Preview"
-        onCancel={() => { setIsPreviewOpen(false); setPreview(null); }}
+        onCancel={() => {
+          setIsPreviewOpen(false);
+          setPreview(null);
+        }}
         footer={null}
         width={640}
       >
@@ -164,19 +299,76 @@ export default function CompanyList() {
           <Space direction="vertical" style={{ width: "100%" }} size="middle">
             <Space>
               {preview.logoUrl ? (
-                <img src={preview.logoUrl} alt="logo" style={{ width: 48, height: 48, borderRadius: 10, objectFit: "cover" }} />
+                <img
+                  src={preview.logoUrl}
+                  alt="logo"
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 10,
+                    objectFit: "cover",
+                  }}
+                />
               ) : null}
               <div>
-                <Title level={5} style={{ margin: 0 }}>{preview.name}</Title>
-                <Text type="secondary">{preview.domain || "—"}</Text>
+                <Title level={5} style={{ margin: 0 }}>
+                  {preview.name}
+                </Title>
+                {/* Website */}
+                {preview.websiteUrl ? (
+                  <a href={preview.websiteUrl} target="_blank" rel="noreferrer">
+                    {(() => {
+                      try {
+                        return new URL(preview.websiteUrl).hostname;
+                      } catch {
+                        return preview.websiteUrl;
+                      }
+                    })()}
+                  </a>
+                ) : (
+                  <Text type="secondary">—</Text>
+                )}
               </div>
             </Space>
-            <div><b>Email:</b> {preview.email || "—"}</div>
-            <div><b>Phone:</b> {preview.phone || "—"}</div>
-            <div><b>Address:</b> {preview.address || "—"}</div>
-            <div><b>Size:</b> {preview.size || "—"}</div>
-            <div><b>Status:</b> {preview.isActive ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>}</div>
-            <div><b>Created At:</b> {new Date(preview.createdAt).toLocaleString()}</div>
+
+            <div>
+              <b>Address:</b> {preview.address || "—"}
+            </div>
+
+            <div>
+              <b>Company Status:</b>{" "}
+              {preview.companyStatus ? (
+                <Tag
+                  color={
+                    preview.companyStatus === "Approved"
+                      ? "green"
+                      : preview.companyStatus === "Pending"
+                      ? "gold"
+                      : "red"
+                  }
+                >
+                  {preview.companyStatus}
+                </Tag>
+              ) : (
+                "—"
+              )}
+            </div>
+
+            <div>
+              <b>Active:</b>{" "}
+              {preview.isActive ? (
+                <Tag color="green">Active</Tag>
+              ) : (
+                <Tag color="red">Inactive</Tag>
+              )}
+            </div>
+
+            <div>
+              <b>Created At:</b>{" "}
+              {preview.createdAt
+                ? new Date(preview.createdAt).toLocaleString()
+                : "—"}
+            </div>
           </Space>
         ) : (
           <div>Loading...</div>

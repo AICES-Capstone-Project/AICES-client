@@ -597,7 +597,7 @@ const Dashboard: React.FC = () => {
             headStyle={{ borderBottom: "none" }}
           >
             <Space wrap>
-              <Button type="primary">Create Jobb</Button>
+              <Button type="primary">Create Job</Button>
               <Button>Invite Recruiter</Button>
               <Button>View Reports</Button>
               <Button>Manage Roles</Button>

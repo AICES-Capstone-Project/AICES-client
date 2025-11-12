@@ -1,6 +1,6 @@
 import React from "react";
-import { Table, Tag, Space, Tooltip, Button, Empty, Avatar } from "antd";
-import { EyeOutlined, EditOutlined, DeleteOutlined, UserOutlined } from "@ant-design/icons";
+import { Table, Tag, Space, Button, Empty, Avatar, Select, Modal } from "antd";
+import { UserOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { CompanyMember } from "../../../../types/company.types";
 
@@ -10,9 +10,10 @@ type Props = {
   onView: (m: CompanyMember) => void;
   onEdit: (m: CompanyMember) => void;
   onDelete: (m: CompanyMember) => void;
+  onChangeStatus?: (m: CompanyMember, status: string) => void;
 };
 
-const StaffTable: React.FC<Props> = ({ members, loading, onView, onEdit, onDelete }) => {
+const StaffTable: React.FC<Props> = ({ members, loading, onChangeStatus }) => {
   const getRoleColor = (roleName: string) => {
     switch (roleName?.toLowerCase()) {
       case "hr_manager":
@@ -71,22 +72,37 @@ const StaffTable: React.FC<Props> = ({ members, loading, onView, onEdit, onDelet
       ),
     },
     {
-      title: "Actions",
-      key: "actions",
-      width: 120,
+      title: "Status",
+      key: "status",
+      width: 180,
       fixed: "right",
       align: "center",
       render: (_, record) => (
         <Space size="small">
-          <Tooltip title="View Details">
-            <Button type="text" icon={<EyeOutlined />} size="small" onClick={() => onView(record)} />
-          </Tooltip>
-          <Tooltip title="Edit Member">
-            <Button type="text" icon={<EditOutlined />} size="small" onClick={() => onEdit(record)} />
-          </Tooltip>
-          <Tooltip title="Remove Member">
-            <Button type="text" icon={<DeleteOutlined />} size="small" danger onClick={() => onDelete(record)} />
-          </Tooltip>
+          {record.roleName?.toLowerCase() === "hr_manager" ? (
+            <Tag color={record.joinStatus === "Approved" ? "green" : record.joinStatus === "Rejected" ? "red" : "gold"}>
+              {record.joinStatus || "Approved"}
+            </Tag>
+          ) : (
+            <Select
+              value={record.joinStatus || "Pending"}
+              onChange={(val) => {
+                if (typeof val === "string" && typeof onChangeStatus === "function") {
+                  Modal.confirm({
+                    title: `Change status to ${val}?`,
+                    content: `Are you sure you want to set this member to ${val}?`,
+                    onOk: () => onChangeStatus(record, val),
+                  });
+                }
+              }}
+              options={[
+                { value: "Approved", label: "Approved" },
+                { value: "Rejected", label: "Rejected" },
+              ]}
+              size="small"
+              style={{ width: 120 }}
+            />
+          )}
         </Space>
       ),
     },

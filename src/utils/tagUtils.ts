@@ -1,11 +1,11 @@
 export const tagColors = [
   'magenta',
+  'green',
   'red',
   'volcano',
   'orange',
   'gold',
   'lime',
-  'green',
   'cyan',
   'blue',
   'geekblue',

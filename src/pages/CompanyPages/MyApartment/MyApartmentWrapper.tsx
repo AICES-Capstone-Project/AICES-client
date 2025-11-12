@@ -89,7 +89,7 @@ export default function MyApartmentWrapper() {
     return <CompanyRejected rejectionReason={rejectionReason} />;
 
   // Only show MyApartment when user has no company and no active join request
-  if (!user?.companyName && !joinStatus) return <MyApartment />;
+  if (!user?.companyName && !joinStatus || joinStatus === "NotApplied") return <MyApartment />;
 
   return <SubmissionPending />;
 }

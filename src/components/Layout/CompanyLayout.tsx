@@ -8,6 +8,8 @@ import {
 	MenuUnfoldOutlined,
 	MenuFoldOutlined,
 	ApartmentOutlined,
+	RobotOutlined,
+	StarOutlined
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo/logo_long.png";
@@ -76,7 +78,18 @@ export default function CompanyLayout() {
 				icon: <AppstoreOutlined style={iconStyle} />,
 				label: <Link to={APP_ROUTES.COMPANY_JOBS}>Jobs</Link>,
 			},
+			{
+				key: APP_ROUTES.COMPANY_AI_SCREENING,
+				icon: <RobotOutlined style={iconStyle} />,
+				label: <Link to={APP_ROUTES.COMPANY_AI_SCREENING}>AI CV Review</Link>,
+			},
+			{
+				key: APP_ROUTES.COMPANY_CLIENTS,
+				icon: <StarOutlined style={iconStyle} />,
+				label: <Link to={APP_ROUTES.COMPANY_CLIENTS}>Company Clients</Link>,
+			},
 		] : []),
+
 		{
 			key: APP_ROUTES.COMPANY_SETTINGS,
 			icon: <SettingOutlined style={iconStyle} />,

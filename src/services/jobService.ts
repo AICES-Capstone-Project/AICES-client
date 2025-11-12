@@ -14,6 +14,7 @@ export interface CompanyJob {
   employmentTypes?: any[];
   criteria?: any[];
   skills?: any[];
+  jobStatus?: string;
 }
 
 export interface JobsResponse {
@@ -64,5 +65,9 @@ export const jobService = {
   // Delete job by ID
   deleteJob: async (jobId: number): Promise<ApiResponse<null>> => {
     return await remove<null>(`${API_ENDPOINTS.COMPANY.JOB}/${jobId}`);
+  },
+
+  getPostedJobs:async (page = 1, pageSize = 10): Promise<ApiResponse<JobsResponse>> => {
+    return await get<JobsResponse>(`${API_ENDPOINTS.COMPANY.GET_JOBS_ME}?page=${page}&pageSize=${pageSize}`);
   },
 };

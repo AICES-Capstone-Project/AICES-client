@@ -84,6 +84,24 @@ const StaffManagement = () => {
     message.warning(`Remove member: ${member.fullName || member.email}`);
   };
 
+  const handleChangeStatus = async (member: CompanyMember, status: string) => {
+    if (!member?.comUserId) return;
+    try {
+      const resp = await companyService.updateJoinRequestStatus(member.comUserId, status);
+      if (resp?.status === "Success" || resp?.status === "success") {
+        message.success(`Member ${status.toLowerCase()} successfully`);
+        // refresh lists
+        fetchJoinRequests();
+        fetchMembers();
+      } else {
+        message.error(resp?.message || `Failed to ${status.toLowerCase()} member`);
+      }
+    } catch (err) {
+      console.error(`Error updating join status to ${status}:`, err);
+      message.error(`Error updating member status`);
+    }
+  };
+
   // Drawer form submission (mock)
   const handleInviteSubmit = async (values: { email: string }) => {
     setSending(true);
@@ -105,7 +123,6 @@ const StaffManagement = () => {
       const resp = await companyService.updateJoinRequestStatus(req.comUserId, "Approved");
       if (resp?.status === "Success" || resp?.status === "success") {
         message.success("Member approved");
-        // refresh lists
         fetchJoinRequests();
         fetchMembers();
       } else {
@@ -127,15 +144,13 @@ const StaffManagement = () => {
     setFilteredMembers(filtered);
   };
 
-  // use CSS utility class .text-primary-medium for icon color
-
   return (
     <Card
       title={<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
         <span style={{ fontWeight: 600 }}>Staff Management</span>
         <div>
           <Button
-            type="primary"
+            className="company-btn--filled"
             icon={<PlusOutlined />}
             onClick={() => setDrawerOpen(true)}
           >
@@ -177,6 +192,7 @@ const StaffManagement = () => {
           onView={handleView}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onChangeStatus={handleChangeStatus}
         />
       </div>
 

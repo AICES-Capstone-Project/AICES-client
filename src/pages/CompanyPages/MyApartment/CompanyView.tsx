@@ -101,7 +101,7 @@ export default function CompanyView() {
             <span style={{ fontWeight: 600 }}>Company Information</span>
             {!isHrRecruiter && (
               <div>
-                <Button type="default" onClick={() => setEditModalOpen(true)} className="!bg-white !text-[var(--color-primary-dark)] !border !border-[var(--color-primary-dark)]">
+                <Button className="company-btn" onClick={() => setEditModalOpen(true)}>
                   Edit Company Info
                 </Button>
               </div>

@@ -53,6 +53,7 @@ export const API_ENDPOINTS = {
 		GET_JOBS: (id: number) => `/companies/${id}/jobs`,
 		GET_JOBS_PUBLIC: "/company/self/jobs/published",
 		GET_JOBS_PENDING: "/company/self/jobs/pending",
+		GET_JOBS_ME: "/company/self/jobs/me",
 		JOB: "/company/self/jobs",
 		// Public companies list for join modal
 		PUBLIC: "/companies/public",
@@ -120,6 +121,8 @@ export const APP_ROUTES = {
 	COMPANY_SETTINGS: "/company/settings",
 	COMPANY_MY_APARTMENTS: "/company/my-apartments",
 	COMPANY_PENDING_APPROVAL: "/company/pending-approval",
+	COMPANY_AI_SCREENING: "/company/ai-screening",
+	COMPANY_CLIENTS: "/company/clients",
 } as const;
 
 export const ROLES = {

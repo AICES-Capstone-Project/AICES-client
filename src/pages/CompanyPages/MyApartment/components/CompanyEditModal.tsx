@@ -127,7 +127,7 @@ const CompanyEditModal: React.FC<Props> = ({ open, onClose, company, onUpdated }
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 12 }}>
           <Button onClick={onClose}>Cancel</Button>
-          <Button type="primary" onClick={handleSubmit} loading={saving}>Save</Button>
+          <Button className="company-btn--filled" onClick={handleSubmit} loading={saving}>Save</Button>
         </div>
       </Form>
     </Drawer>

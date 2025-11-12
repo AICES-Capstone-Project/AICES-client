@@ -25,14 +25,17 @@ const PendingMembersDrawer: React.FC<Props> = ({ open, onClose, requests, onAppr
       ) : (
         <List
           dataSource={requests}
-          renderItem={(r) => (
+          renderItem={(r, index) => (
             <List.Item key={r.comUserId} style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <div style={{ width: 30 }}>
+                {index + 1}.
+              </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 600 }}>{r.fullName || r.email}</div>
                 <div style={{ fontSize: 12, color: "#666" }}>{r.email}</div>
               </div>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <Button type="primary" onClick={() => onApprove(r)} size="small">
+                <Button className="company-btn--filled" onClick={() => onApprove(r)} size="small">
                   Approve
                 </Button>
               </div>

@@ -1,11 +1,5 @@
 import React from "react";
-import {
-  Layout,
-  Menu,
-  Button,
-  Typography,
-  ConfigProvider,
-} from "antd";
+import { Layout, Menu, Button, Typography, ConfigProvider } from "antd";
 import {
   DashboardOutlined,
   TeamOutlined,
@@ -31,8 +25,8 @@ const GOLD = {
   primary: "#F5C400",
   hover: "#E1B800",
   active: "#CFA800",
-  cream: "#FFFBE6",    // nền chọn/hover rất nhạt
-  cream2: "#FFF7D6",   // nền hover nhẹ hơn cho bảng/menu
+  cream: "#FFFBE6", // nền chọn/hover rất nhạt
+  cream2: "#FFF7D6", // nền hover nhẹ hơn cho bảng/menu
   border: "#FFE58F",
   textOnCream: "#614700",
   shadow: "rgba(245,196,0,0.18)",
@@ -60,34 +54,150 @@ export default function SystemLayout() {
     {
       key: APP_ROUTES.SYSTEM_COMPANY,
       icon: <ApartmentOutlined />,
-      label: <Link to={APP_ROUTES.SYSTEM_COMPANY}>Company</Link>,
+      label: <Link to={APP_ROUTES.SYSTEM_COMPANY}>Companies</Link>,
     },
+    // === SUBSCRIPTIONS ===
+    {
+      key: "subscriptions",
+      icon: <BarChartOutlined />,
+      label: "Subscriptions",
+      children: [
+        {
+          key: APP_ROUTES.SYSTEM_SUBSCRIPTIONS,
+          label: <Link to={APP_ROUTES.SYSTEM_SUBSCRIPTIONS}>Plans</Link>,
+        },
+        {
+          key: APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES,
+          label: (
+            <Link to={APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES}>
+              Subscribed Companies
+            </Link>
+          ),
+        },
+      ],
+    },
+    // === PAYMENTS ===
+    {
+      key: APP_ROUTES.SYSTEM_PAYMENTS,
+      icon: <FileDoneOutlined />,
+      label: <Link to={APP_ROUTES.SYSTEM_PAYMENTS}>Payments</Link>,
+    },
+
+    // === TAXONOMY (4 mục như screenflow) ===
+    {
+      key: "taxonomy",
+      icon: <PartitionOutlined />,
+      label: "Taxonomy Management",
+      children: [
+        {
+          key: APP_ROUTES.SYSTEM_CATEGORY,
+          label: <Link to={APP_ROUTES.SYSTEM_CATEGORY}>Categories</Link>,
+        },
+        {
+          key: APP_ROUTES.SYSTEM_SKILL,
+          label: <Link to={APP_ROUTES.SYSTEM_SKILL}>Skills</Link>,
+        },
+        {
+          key: APP_ROUTES.SYSTEM_SPECIALIZATION,
+          label: (
+            <Link to={APP_ROUTES.SYSTEM_SPECIALIZATION}>Specializations</Link>
+          ),
+        },
+        {
+          key: APP_ROUTES.SYSTEM_RECRUITMENT_TYPE,
+          label: (
+            <Link to={APP_ROUTES.SYSTEM_RECRUITMENT_TYPE}>
+              Recruitment Types
+            </Link>
+          ),
+        },
+      ],
+    },
+
+    // === CONTENT MANAGEMENT ===
+    {
+      key: "content",
+      icon: <AppstoreOutlined />,
+      label: "Content",
+      children: [
+        {
+          key: APP_ROUTES.SYSTEM_BANNERS,
+          label: <Link to={APP_ROUTES.SYSTEM_BANNERS}>Banners</Link>,
+        },
+        {
+          key: APP_ROUTES.SYSTEM_BLOGS,
+          label: <Link to={APP_ROUTES.SYSTEM_BLOGS}>Blogs</Link>,
+        },
+        {
+          key: APP_ROUTES.SYSTEM_TAGS,
+          label: <Link to={APP_ROUTES.SYSTEM_TAGS}>Tags</Link>,
+        },
+      ],
+    },
+
+    // === NOTIFICATIONS (template email + notification) ===
+    {
+      key: "notifications",
+      icon: <BellOutlined />,
+      label: "Notifications",
+      children: [
+        {
+          key: APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES,
+          label: (
+            <Link to={APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES}>
+              Notification Templates
+            </Link>
+          ),
+        },
+        {
+          key: APP_ROUTES.SYSTEM_EMAIL_TEMPLATES,
+          label: (
+            <Link to={APP_ROUTES.SYSTEM_EMAIL_TEMPLATES}>Email Templates</Link>
+          ),
+        },
+      ],
+    },
+
+    // === REPORTS ===
     {
       key: APP_ROUTES.SYSTEM_REPORTS,
-      icon: <BarChartOutlined />,
+      icon: <FileDoneOutlined />,
       label: <Link to={APP_ROUTES.SYSTEM_REPORTS}>Reports</Link>,
     },
+
+    // === SYSTEM SETTINGS ===
     {
-      key: APP_ROUTES.SYSTEM_EMPLOYMENT_TYPE,
-      icon: <PartitionOutlined />,
-      label: (
-        <Link to={APP_ROUTES.SYSTEM_EMPLOYMENT_TYPE}>Employment Type</Link>
-      ),
-    },
-    {
-      key: APP_ROUTES.SYSTEM_CATEGORY,
-      icon: <TagsOutlined />,
-      label: <Link to={APP_ROUTES.SYSTEM_CATEGORY}>Category</Link>,
-    },
-    {
-      key: APP_ROUTES.SYSTEM_NOTIFICATIONS,
-      icon: <BellOutlined />,
-      label: <Link to={APP_ROUTES.SYSTEM_NOTIFICATIONS}>Notifications</Link>,
-    },
-    {
-      key: APP_ROUTES.SYSTEM_SETTINGS,
+      key: "settings",
       icon: <SettingOutlined />,
-      label: <Link to={APP_ROUTES.SYSTEM_SETTINGS}>Settings</Link>,
+      label: "System Settings",
+      children: [
+        {
+          key: APP_ROUTES.SYSTEM_ROLES,
+          label: <Link to={APP_ROUTES.SYSTEM_ROLES}>Roles & Permissions</Link>,
+        },
+        {
+          key: APP_ROUTES.SYSTEM_AI_ENDPOINTS,
+          label: <Link to={APP_ROUTES.SYSTEM_AI_ENDPOINTS}>AI Endpoints</Link>,
+        },
+        {
+          key: APP_ROUTES.SYSTEM_FEATURE_FLAGS,
+          label: (
+            <Link to={APP_ROUTES.SYSTEM_FEATURE_FLAGS}>
+              Feature Flags & Limits
+            </Link>
+          ),
+        },
+        {
+          key: APP_ROUTES.SYSTEM_EMAIL_CONFIG,
+          label: (
+            <Link to={APP_ROUTES.SYSTEM_EMAIL_CONFIG}>Email Configuration</Link>
+          ),
+        },
+        {
+          key: APP_ROUTES.SYSTEM_API_KEYS,
+          label: <Link to={APP_ROUTES.SYSTEM_API_KEYS}>API Keys</Link>,
+        },
+      ],
     },
   ];
 
@@ -103,7 +213,7 @@ export default function SystemLayout() {
           controlOutline: "rgba(245,196,0,0.28)",
           controlItemBgActive: GOLD.cream,
         },
-        components: ({
+        components: {
           Menu: {
             itemSelectedBg: GOLD.cream,
             itemActiveBg: GOLD.cream,
@@ -150,7 +260,7 @@ export default function SystemLayout() {
             colorBgDefault: GOLD.cream,
             colorText: GOLD.textOnCream,
           },
-        } as any),
+        } as any,
       }}
     >
       {/* Global polish nằm trong 1 file bằng thẻ <style> */}

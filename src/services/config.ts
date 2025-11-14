@@ -145,10 +145,11 @@ export const APP_ROUTES = {
   SYSTEM_PAYMENT_DETAIL: "/system/payments/:paymentId",
 
   // Taxonomy
-  SYSTEM_CATEGORY: "/system/category",
-  SYSTEM_SKILL: "/system/skill",
-  SYSTEM_SPECIALIZATION: "/system/specialization",
-  SYSTEM_RECRUITMENT_TYPE: "/system/recruitment-type",
+  SYSTEM_TAXONOMY_CATEGORY: "/system/taxonomy/categories",
+  SYSTEM_TAXONOMY_SKILL: "/system/taxonomy/skills",
+  SYSTEM_TAXONOMY_SPECIALIZATION: "/system/taxonomy/specializations",
+  SYSTEM_TAXONOMY_RECRUITMENT_TYPE: "/system/taxonomy/recruitment-types",
+
   // Content
   SYSTEM_BANNERS: "/system/banners",
   SYSTEM_BANNER_DETAIL: "/system/banners/:bannerId",

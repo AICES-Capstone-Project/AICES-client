@@ -10,6 +10,7 @@ import CompanyList from "../pages/SystemPages/Company";
 import CompanyDetail from "../pages/SystemPages/Company/CompanyDetail";
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
 import ResumeDetail from "../pages/SystemPages/Company/ResumeDetail";
+import CategoryList from "../pages/SystemPages/Taxonomy/CategoryList";
 
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
@@ -128,6 +129,24 @@ export const router = createBrowserRouter([
         path: APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES,
         element: <SubscribedCompaniesPage />,
       },
+
+      //Taxonomy
+      {
+        path: APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY,
+        element: <CategoryList />,
+      },
+	  {
+		path: APP_ROUTES.SYSTEM_TAXONOMY_SKILL,
+		element: <div>Skill List Page - Coming Soon</div>,
+	  },
+	  {
+		path: APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION,
+		element: <div>Specialization List Page - Coming Soon</div>,	
+	  },
+	  {
+		path: APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE,
+		element: <div>Recruitment Type List Page - Coming Soon</div>,
+	  },
     ],
   },
 

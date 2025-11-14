@@ -90,23 +90,23 @@ export default function SystemLayout() {
       label: "Taxonomy Management",
       children: [
         {
-          key: APP_ROUTES.SYSTEM_CATEGORY,
-          label: <Link to={APP_ROUTES.SYSTEM_CATEGORY}>Categories</Link>,
+          key: APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY,
+          label: <Link to={APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY}>Categories</Link>,
         },
         {
-          key: APP_ROUTES.SYSTEM_SKILL,
-          label: <Link to={APP_ROUTES.SYSTEM_SKILL}>Skills</Link>,
+          key: APP_ROUTES.SYSTEM_TAXONOMY_SKILL,
+          label: <Link to={APP_ROUTES.SYSTEM_TAXONOMY_SKILL}>Skills</Link>,
         },
         {
-          key: APP_ROUTES.SYSTEM_SPECIALIZATION,
+          key: APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION,
           label: (
-            <Link to={APP_ROUTES.SYSTEM_SPECIALIZATION}>Specializations</Link>
+            <Link to={APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION}>Specializations</Link>
           ),
         },
         {
-          key: APP_ROUTES.SYSTEM_RECRUITMENT_TYPE,
+          key: APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE,
           label: (
-            <Link to={APP_ROUTES.SYSTEM_RECRUITMENT_TYPE}>
+            <Link to={APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE}>
               Recruitment Types
             </Link>
           ),

@@ -73,6 +73,11 @@ const RecruitmentTypeList = lazy(
   () => import("../pages/SystemPages/Taxonomy/RecruitmentTypeList")
 );
 
+//Content
+const BannerList = lazy(
+  () => import("../pages/SystemPages/Content/BannerList")
+);
+
 export const router = createBrowserRouter([
   /* ============== General Pages ==============*/
   {
@@ -155,11 +160,17 @@ export const router = createBrowserRouter([
       },
       {
         path: APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION,
-        element: <SpecializationList/>,
+        element: <SpecializationList />,
       },
       {
         path: APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE,
-        element: <RecruitmentTypeList/>,
+        element: <RecruitmentTypeList />,
+      },
+
+      //Content
+      {
+        path: APP_ROUTES.SYSTEM_CONTENT_BANNERS, // hoặc tên constant bạn đã đặt
+        element: <BannerList />,
       },
     ],
   },

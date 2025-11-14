@@ -65,9 +65,9 @@ const CategoryList = lazy(
 
 const SkillList = lazy(() => import("../pages/SystemPages/Taxonomy/SkillList"));
 
-// const SpecializationList = lazy(
-//   () => import("../pages/SystemPages/Taxonomy/SpecializationList")
-// );
+const SpecializationList = lazy(
+  () => import("../pages/SystemPages/Taxonomy/SpecializationList")
+);
 
 // const RecruitmentTypeList = lazy(
 //   () => import("../pages/SystemPages/Taxonomy/RecruitmentTypeList")
@@ -155,7 +155,7 @@ export const router = createBrowserRouter([
       },
       {
         path: APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION,
-        element: <div>Specialization List Page - Coming Soon</div>,
+        element: <SpecializationList/>,
       },
       {
         path: APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE,

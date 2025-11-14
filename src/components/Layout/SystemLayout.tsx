@@ -125,8 +125,8 @@ export default function SystemLayout() {
       label: "Content",
       children: [
         {
-          key: APP_ROUTES.SYSTEM_BANNERS,
-          label: <Link to={APP_ROUTES.SYSTEM_BANNERS}>Banners</Link>,
+          key: APP_ROUTES.SYSTEM_CONTENT_BANNERS,
+          label: <Link to={APP_ROUTES.SYSTEM_CONTENT_BANNERS}>Banners</Link>,
         },
         {
           key: APP_ROUTES.SYSTEM_BLOGS,

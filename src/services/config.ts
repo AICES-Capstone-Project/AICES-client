@@ -151,7 +151,7 @@ export const APP_ROUTES = {
   SYSTEM_TAXONOMY_RECRUITMENT_TYPE: "/system/taxonomy/recruitment-types",
 
   // Content
-  SYSTEM_BANNERS: "/system/banners",
+  SYSTEM_CONTENT_BANNERS: "/system/content/banners",
   SYSTEM_BANNER_DETAIL: "/system/banners/:bannerId",
   SYSTEM_BLOGS: "/system/blogs",
   SYSTEM_BLOG_DETAIL: "/system/blogs/:blogId",

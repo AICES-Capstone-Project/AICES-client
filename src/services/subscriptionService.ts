@@ -2,7 +2,10 @@
 
 import api from "./api";
 import { API_ENDPOINTS } from "./config";
-import type { ApiResponse, SubscriptionPlan } from "../types/subscription.types";
+import type {
+  ApiResponse,
+  SubscriptionPlan,
+} from "../types/subscription.types";
 
 export const subscriptionService = {
   // Lấy toàn bộ gói (bao gồm active + inactive)
@@ -12,7 +15,8 @@ export const subscriptionService = {
     );
 
     // BE trả dạng { status, message, data }
-    return res.data.data;
+    const list = res.data?.data;
+    return Array.isArray(list) ? list : []; // FIX THÊM
   },
 
   async getPublic(): Promise<SubscriptionPlan[]> {

@@ -66,6 +66,18 @@ export const API_ENDPOINTS = {
     EMPLOYMENT_TYPES: "/employment-types",
     // specializations endpoint will be used as /system/category/{id}/specializations
   },
+
+  // 💛 Subscription endpoints (Plans)
+  SUBSCRIPTION: {
+    PUBLIC_LIST: "/subscriptions/public",
+    PUBLIC_DETAIL: (id: number) => `/subscriptions/public/${id}`,
+
+    LIST: "/subscriptions", // GET all (kể cả inactive)
+    CREATE: "/subscriptions", // POST
+    GET_BY_ID: (id: number) => `/subscriptions/${id}`,
+    UPDATE: (id: number) => `/subscriptions/${id}`, // PATCH
+    DELETE: (id: number) => `/subscriptions/${id}`, // DELETE
+  },
 } as const;
 
 // App Routes Configuration

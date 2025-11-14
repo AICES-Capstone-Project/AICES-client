@@ -51,6 +51,9 @@ const SubmissionPending = lazy(
 /* ============== System Pages ==============*/
 const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
 const SystemAccounts = lazy(() => import("../pages/SystemPages/Accounts"));
+const PlansPage = lazy(
+  () => import("../pages/SystemPages/Subscriptions/PlansPage")
+);
 
 export const router = createBrowserRouter([
 	/* ============== General Pages ==============*/
@@ -113,6 +116,8 @@ export const router = createBrowserRouter([
 			{ index: true, element: <SystemDashboard /> },
 			{ path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
 			{ path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
+			{ path: APP_ROUTES.SYSTEM_SUBSCRIPTIONS, element: <PlansPage /> },
+
 			// {
 			// 	path: APP_ROUTES.SYSTEM_RECRUITMENT_APPROVAL,
 			// 	element: <SystemRecruitmentApproval />,

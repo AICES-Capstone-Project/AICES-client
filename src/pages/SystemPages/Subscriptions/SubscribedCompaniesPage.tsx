@@ -127,29 +127,32 @@ export default function SubscribedCompaniesPage() {
   }, [search]);
 
   const handleTableChange = (pag: TablePaginationConfig) => {
-  const current = pag.current ?? 1;
-  const size = pag.pageSize ?? 10;
+    const current = pag.current ?? 1;
+    const size = pag.pageSize ?? 10;
 
-  setPagination((prev) => ({
-    ...prev,
-    current,
-    pageSize: size,
-  }));
+    setPagination((prev) => ({
+      ...prev,
+      current,
+      pageSize: size,
+    }));
 
-  fetchData({
-    page: current,
-    pageSize: size,
-    search, // state search nếu bạn có
-  });
-};
-
+    fetchData({
+      page: current,
+      pageSize: size,
+      search, // state search nếu bạn có
+    });
+  };
 
   return (
     <Card>
       <Space
-        style={{ width: "100%", marginBottom: 16 }}
-        align="center"
-        justify="space-between"
+        style={{
+          width: "100%",
+          marginBottom: 16,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
       >
         <Title level={4} style={{ margin: 0 }}>
           Subscribed Companies

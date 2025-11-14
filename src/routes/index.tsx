@@ -10,7 +10,6 @@ import CompanyList from "../pages/SystemPages/Company";
 import CompanyDetail from "../pages/SystemPages/Company/CompanyDetail";
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
 import ResumeDetail from "../pages/SystemPages/Company/ResumeDetail";
-import CategoryList from "../pages/SystemPages/Taxonomy/CategoryList";
 
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
@@ -52,12 +51,27 @@ const SubmissionPending = lazy(
 /* ============== System Pages ==============*/
 const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
 const SystemAccounts = lazy(() => import("../pages/SystemPages/Accounts"));
+//Subscription Pages
 const PlansPage = lazy(
   () => import("../pages/SystemPages/Subscriptions/PlansPage")
 );
 const SubscribedCompaniesPage = lazy(
   () => import("../pages/SystemPages/Subscriptions/SubscribedCompaniesPage")
 );
+//Taxonomy Pages
+const CategoryList = lazy(
+  () => import("../pages/SystemPages/Taxonomy/CategoryList")
+);
+
+const SkillList = lazy(() => import("../pages/SystemPages/Taxonomy/SkillList"));
+
+// const SpecializationList = lazy(
+//   () => import("../pages/SystemPages/Taxonomy/SpecializationList")
+// );
+
+// const RecruitmentTypeList = lazy(
+//   () => import("../pages/SystemPages/Taxonomy/RecruitmentTypeList")
+// );
 
 export const router = createBrowserRouter([
   /* ============== General Pages ==============*/
@@ -135,18 +149,18 @@ export const router = createBrowserRouter([
         path: APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY,
         element: <CategoryList />,
       },
-	  {
-		path: APP_ROUTES.SYSTEM_TAXONOMY_SKILL,
-		element: <div>Skill List Page - Coming Soon</div>,
-	  },
-	  {
-		path: APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION,
-		element: <div>Specialization List Page - Coming Soon</div>,	
-	  },
-	  {
-		path: APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE,
-		element: <div>Recruitment Type List Page - Coming Soon</div>,
-	  },
+      {
+        path: APP_ROUTES.SYSTEM_TAXONOMY_SKILL,
+        element: <SkillList />,
+      },
+      {
+        path: APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION,
+        element: <div>Specialization List Page - Coming Soon</div>,
+      },
+      {
+        path: APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE,
+        element: <div>Recruitment Type List Page - Coming Soon</div>,
+      },
     ],
   },
 

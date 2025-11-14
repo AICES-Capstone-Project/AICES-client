@@ -91,7 +91,9 @@ export default function SystemLayout() {
       children: [
         {
           key: APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY,
-          label: <Link to={APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY}>Categories</Link>,
+          label: (
+            <Link to={APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY}>Categories</Link>
+          ),
         },
         {
           key: APP_ROUTES.SYSTEM_TAXONOMY_SKILL,
@@ -100,7 +102,9 @@ export default function SystemLayout() {
         {
           key: APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION,
           label: (
-            <Link to={APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION}>Specializations</Link>
+            <Link to={APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION}>
+              Specializations
+            </Link>
           ),
         },
         {

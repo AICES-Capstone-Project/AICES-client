@@ -78,6 +78,13 @@ export const API_ENDPOINTS = {
     UPDATE: (id: number) => `/subscriptions/${id}`, // PATCH
     DELETE: (id: number) => `/subscriptions/${id}`, // DELETE
   },
+  // Company subscriptions (Subscribed Companies)
+  COMPANY_SUBSCRIPTION: {
+    LIST: "/company-subscriptions",
+    GET_BY_ID: (id: number) => `/company-subscriptions/${id}`,
+    CREATE: "/company-subscriptions",
+    DELETE: (id: number) => `/company-subscriptions/${id}`,
+  },
 } as const;
 
 // App Routes Configuration

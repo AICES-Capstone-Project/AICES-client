@@ -38,7 +38,7 @@ export const API_ENDPOINTS = {
     CREATE: "/user",
     UPDATE: (id: number) => `/user/${id}`,
     DELETE: (id: number) => `/user/${id}`,
-    RESTORE: (id: number) => `/user/${id}/restore`,
+    UPDATE_STATUS: (id: number) => `/user/${id}/status`,
   },
 
   // Company endpoints

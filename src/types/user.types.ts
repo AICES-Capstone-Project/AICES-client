@@ -15,7 +15,7 @@ export interface User {
   avatarUrl: string;
   phoneNumber: string;
   loginProviders: LoginProvider[];
-  isActive: boolean;
+  userStatus: "Unverified" | "Verified" | "Locked";
   createdAt: string;
 }
 
@@ -34,13 +34,11 @@ export interface CreateUserRequest {
   password: string;
   roleId: number;
   fullName: string;
-  isActive: boolean;
 }
 
 export interface UpdateUserRequest {
   email: string;
   password?: string;   // 👈 optional
-  roleId: number;
+  roleName: string;
   fullName: string;
-  isActive: boolean;
 }

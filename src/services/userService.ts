@@ -12,7 +12,9 @@ import type PagingParams from "../types/paging.types";
 import { buildQuery } from "../utils/paging";
 
 export const userService = {
-  getAll: async (params?: PagingParams): Promise<ApiResponse<GetUsersResponse>> => {
+  getAll: async (
+    params?: PagingParams
+  ): Promise<ApiResponse<GetUsersResponse>> => {
     const url = `${API_ENDPOINTS.USER.GET_ALL}${buildQuery(params)}`;
     return await get<GetUsersResponse>(url);
   },
@@ -25,18 +27,21 @@ export const userService = {
     return await post<null, CreateUserRequest>(API_ENDPOINTS.USER.CREATE, data);
   },
 
-  update: async (id: number, data: UpdateUserRequest): Promise<ApiResponse<null>> => {
-    // Swagger là PATCH /api/user/{id}
+  update: async (
+    id: number,
+    data: UpdateUserRequest
+  ): Promise<ApiResponse<null>> => {
     return await patch<null>(API_ENDPOINTS.USER.UPDATE(id), data);
   },
 
-  // ✨ NEW: soft delete
-  remove: async (id: number): Promise<ApiResponse<null>> => {
-    return await remove<null>(API_ENDPOINTS.USER.DELETE(id));
+  updateStatus: async (
+    id: number,
+    status: "Verified" | "Unverified" | "Locked"
+  ): Promise<ApiResponse<null>> => {
+    return await put<null>(API_ENDPOINTS.USER.UPDATE_STATUS(id), { status });
   },
 
-  // ✨ NEW: restore
-  restore: async (id: number): Promise<ApiResponse<null>> => {
-    return await put<null>(API_ENDPOINTS.USER.RESTORE(id));
+  remove: async (id: number): Promise<ApiResponse<null>> => {
+    return await remove<null>(API_ENDPOINTS.USER.DELETE(id));
   },
 };

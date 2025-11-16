@@ -9,19 +9,18 @@ import {
   Tag,
   Form,
   Select,
-  Switch,
   message,
   Tooltip,
+  Popconfirm,
 } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import {
   PlusOutlined,
   EditOutlined,
-  DeleteOutlined,
   ReloadOutlined,
   SearchOutlined,
   EyeOutlined,
-  RollbackOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import { userService } from "../../../services/userService";
 import type {
@@ -100,11 +99,8 @@ export default function Accounts() {
           email: x.email ?? x.mail ?? "",
           fullName: x.fullName ?? x.fullname ?? x.name ?? "",
           roleName: x.roleName ?? x.role ?? x.role_name ?? "",
-          isActive:
-            x.isActive ??
-            x.active ??
-            (typeof x.status === "boolean" ? x.status : x.status === 1) ??
-            true,
+          userStatus: x.userStatus ?? "Unverified",
+
           address: x.address ?? "",
           dateOfBirth: x.dateOfBirth ?? x.dob ?? null,
           avatarUrl: x.avatarUrl ?? x.avatar ?? "",
@@ -153,53 +149,71 @@ export default function Accounts() {
       width: 160,
       render: (r: string) => <Tag>{r}</Tag>,
     },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      width: 120,
-      render: (active: boolean) =>
-        active ? (
-          <Tag color="blue">Active</Tag>
-        ) : (
-          <Tag color="red">Inactive</Tag>
-        ),
-    },
+
     {
       title: "Actions",
       key: "actions",
-      width: 260,
+      width: 320,
       render: (_, record) => (
         <Space>
+          {/* View */}
           <Tooltip title="View details">
             <Button icon={<EyeOutlined />} onClick={() => onViewDetail(record)}>
               View
             </Button>
           </Tooltip>
+
+          {/* Edit */}
           <Tooltip title="Edit user">
             <Button icon={<EditOutlined />} onClick={() => onEdit(record)}>
               Edit
             </Button>
           </Tooltip>
-          {record.isActive ? (
-            <Tooltip title="Delete (soft)">
-              <Button
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => onDelete(record)}
-              >
-                Delete
+
+          {/* Lock / Unlock */}
+          {record.userStatus !== "Locked" ? (
+            <Tooltip title="Lock user">
+              <Button danger onClick={() => onChangeStatus(record, "Locked")}>
+                Lock
               </Button>
             </Tooltip>
           ) : (
-            <Tooltip title="Restore user">
-              <Button
-                icon={<RollbackOutlined />}
-                onClick={() => onRestore(record)}
-              >
-                Restore
+            <Tooltip title="Unlock user">
+              <Button onClick={() => onChangeStatus(record, "Verified")}>
+                Unlock
               </Button>
             </Tooltip>
           )}
+
+          {/* Delete */}
+          <Popconfirm
+            title="Delete user"
+            description={`Are you sure you want to delete ${record.email}?`}
+            okText="Delete"
+            okButtonProps={{ danger: true }}
+            cancelText="Cancel"
+            onConfirm={async () => {
+              try {
+                console.log("[Users] deleting user", record.userId);
+                await userService.remove(record.userId); // 👈 chỉ cần gọi, không đụng res.status
+
+                message.success("User deleted");
+                fetchData(page, pageSize, keyword);
+              } catch (e: any) {
+                console.error("[Users] delete error =", e);
+                // Nếu BE trả message trong response
+                const apiMsg =
+                  e?.response?.data?.message ||
+                  e?.response?.data?.error ||
+                  e?.message;
+                message.error(apiMsg || "Delete failed");
+              }
+            }}
+          >
+            <Tooltip title="Delete user">
+              <Button icon={<DeleteOutlined />} danger />
+            </Tooltip>
+          </Popconfirm>
         </Space>
       ),
     },
@@ -238,12 +252,20 @@ export default function Accounts() {
   };
 
   const onViewDetail = async (user: User) => {
-    setLoadingDetail(true);
-    setIsDetailOpen(true);
-    const res = await userService.getById(user.userId);
-    if (res.status === "Success" && res.data) setDetailUser(res.data);
-    else message.error(res.message || "Failed to fetch user details");
-    setLoadingDetail(false);
+    try {
+      setLoadingDetail(true);
+      setIsDetailOpen(true);
+
+      const res = await userService.getById(user.userId);
+
+      if (res.status === "Success" && res.data) {
+        setDetailUser(res.data);
+      } else {
+        message.error(res.message || "Failed to fetch user details");
+      }
+    } finally {
+      setLoadingDetail(false);
+    }
   };
 
   const onEdit = (user: User) => {
@@ -252,8 +274,7 @@ export default function Accounts() {
       email: user.email,
       fullName: user.fullName || "",
       password: undefined, // để trống
-      roleId: roleNameToId(user.roleName),
-      isActive: user.isActive,
+      roleName: user.roleName,
     });
     setIsEditOpen(true);
   };
@@ -283,9 +304,10 @@ export default function Accounts() {
   const onDelete = (user: User) => {
     Modal.confirm({
       title: `Delete user ${user.email}?`,
-      content: "This will soft-delete the user.",
+      content: "This action cannot be undone (server may soft-delete).",
       okText: "Delete",
       okButtonProps: { danger: true },
+      cancelText: "Cancel",
       onOk: async () => {
         const res = await userService.remove(user.userId);
         if (res.status === "Success") {
@@ -298,20 +320,17 @@ export default function Accounts() {
     });
   };
 
-  const onRestore = (user: User) => {
-    Modal.confirm({
-      title: `Restore user ${user.email}?`,
-      okText: "Restore",
-      onOk: async () => {
-        const res = await userService.restore(user.userId);
-        if (res.status === "Success") {
-          message.success("User restored");
-          fetchData(page, pageSize, keyword);
-        } else {
-          message.error(res.message || "Restore failed");
-        }
-      },
-    });
+  const onChangeStatus = async (
+    user: User,
+    status: "Verified" | "Unverified" | "Locked"
+  ) => {
+    const res = await userService.updateStatus(user.userId, status);
+    if (res.status === "Success") {
+      message.success("Status updated");
+      fetchData(page, pageSize, keyword);
+    } else {
+      message.error(res.message || "Failed to update status");
+    }
   };
 
   return (
@@ -364,11 +383,7 @@ export default function Accounts() {
         okText="Create"
         destroyOnClose
       >
-        <Form
-          form={createForm}
-          layout="vertical"
-          initialValues={{ roleId: 1, isActive: true }}
-        >
+        <Form form={createForm} layout="vertical">
           <Form.Item
             name="email"
             label="Email"
@@ -390,11 +405,8 @@ export default function Accounts() {
           >
             <Input.Password />
           </Form.Item>
-          <Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
+          <Form.Item name="roleName" label="Role" rules={[{ required: true }]}>
             <Select options={roleOptions} />
-          </Form.Item>
-          <Form.Item name="isActive" label="Active" valuePropName="checked">
-            <Switch />
           </Form.Item>
         </Form>
       </Modal>
@@ -426,11 +438,8 @@ export default function Accounts() {
           <Form.Item name="password" label="Password (leave empty to keep)">
             <Input.Password />
           </Form.Item>
-          <Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
+          <Form.Item name="roleName" label="Role" rules={[{ required: true }]}>
             <Select options={roleOptions} />
-          </Form.Item>
-          <Form.Item name="isActive" label="Active" valuePropName="checked">
-            <Switch />
           </Form.Item>
         </Form>
       </Modal>
@@ -474,14 +483,7 @@ export default function Accounts() {
                 ? new Date(detailUser.dateOfBirth).toLocaleDateString()
                 : "—"}
             </div>
-            <div>
-              <strong>Status:</strong>{" "}
-              {detailUser.isActive ? (
-                <Tag color="green">Active</Tag>
-              ) : (
-                <Tag color="red">Inactive</Tag>
-              )}
-            </div>
+
             <div>
               <strong>Created At:</strong>{" "}
               {new Date(detailUser.createdAt).toLocaleString()}
@@ -524,26 +526,9 @@ export default function Accounts() {
 
 // ===== Helpers =====
 const roleOptions = [
-  { label: "System Admin", value: 1 },
-  { label: "System Manager", value: 2 },
-  { label: "System Staff", value: 3 },
-  { label: "HR Manager", value: 4 },
-  { label: "HR Recruiter", value: 5 },
+  { label: "System Admin", value: "System_Admin" },
+  { label: "System Manager", value: "System_Manager" },
+  { label: "System Staff", value: "System_Staff" },
+  { label: "HR Manager", value: "HR_Manager" },
+  { label: "HR Recruiter", value: "HR_Recruiter" },
 ];
-
-function roleNameToId(roleName: string): number {
-  switch (roleName) {
-    case "System_Admin":
-      return 1;
-    case "System_Manager":
-      return 2;
-    case "System_Staff":
-      return 3;
-    case "HR_Manager":
-      return 4;
-    case "HR_Recruiter":
-      return 5;
-    default:
-      return 5;
-  }
-}

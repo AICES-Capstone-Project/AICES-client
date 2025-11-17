@@ -9,12 +9,23 @@ import {
   Tag,
   Typography,
   message,
+  Form,
+  Popconfirm,
+  Upload,
 } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { EyeOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+  PlusOutlined,
+  DeleteOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { companyService } from "../../../services/companyService";
 import type { Company } from "../../../types/company.types";
+import type { UploadFile } from "antd/es/upload/interface";
 
 const { Title, Text } = Typography;
 const DEFAULT_PAGE_SIZE = 10;
@@ -36,7 +47,11 @@ export default function CompanyList() {
     null
   );
   const [rejectionReason, setRejectionReason] = useState("");
+  // === NEW: state cho Create company ===
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
+  // === NEW: form instance cho modal Create ===
+  const [form] = Form.useForm();
   const nav = useNavigate();
 
   // === NEW: hàm gọi API update status công ty ===
@@ -70,6 +85,65 @@ export default function CompanyList() {
       }
     } catch (e) {
       message.error("Failed to update company status");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleCreate = async () => {
+    try {
+      const values = await form.validateFields();
+
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append("Name", values.name);
+      if (values.description)
+        formData.append("Description", values.description);
+      if (values.address) formData.append("Address", values.address);
+      if (values.websiteUrl) formData.append("Website", values.websiteUrl);
+      if (values.taxCode) formData.append("TaxCode", values.taxCode);
+      
+      // === NEW: LogoFile (optional) ===
+      const logoList = values.logoFile as UploadFile[] | undefined;
+      if (logoList && logoList.length > 0) {
+        const logoFile = logoList[0].originFileObj as File;
+        if (logoFile) {
+          formData.append("LogoFile", logoFile);
+        }
+      }
+
+      // === NEW: xử lý document file & type ===
+      const fileList = values.documentFiles as UploadFile[] | undefined;
+      if (fileList && fileList.length > 0) {
+        const fileObj = fileList[0].originFileObj as File;
+        if (fileObj) {
+          // key đúng theo swagger: DocumentFiles (array)
+          formData.append("DocumentFiles", fileObj);
+        }
+      }
+
+      if (values.documentType) {
+        // key đúng theo swagger: DocumentTypes (array<string>)
+        formData.append("DocumentTypes", values.documentType);
+      }
+
+      const res = await companyService.createAdminForm(formData);
+
+      if (res.status === "Success") {
+        message.success("Company created successfully");
+        setIsCreateOpen(false);
+        form.resetFields();
+        await fetchData(
+          pagination.current || 1,
+          pagination.pageSize || DEFAULT_PAGE_SIZE,
+          keyword
+        );
+      } else {
+        message.error(res?.message || "Failed to create company");
+      }
+    } catch (err: any) {
+      if (err?.errorFields) return; // lỗi validate form thì thôi
+      message.error("Failed to create company");
     } finally {
       setLoading(false);
     }
@@ -259,6 +333,38 @@ export default function CompanyList() {
           >
             Reject
           </Button>
+          {/* === NEW: Delete company === */}
+          <Popconfirm
+            title="Delete company?"
+            description="Are you sure you want to delete this company?"
+            okText="Delete"
+            okType="danger"
+            cancelText="Cancel"
+            onConfirm={async () => {
+              setLoading(true);
+              try {
+                const res = await companyService.deleteCompany(
+                  record.companyId
+                );
+                if (res.status === "Success") {
+                  message.success("Company deleted successfully");
+                  await fetchData(
+                    pagination.current || 1,
+                    pagination.pageSize || DEFAULT_PAGE_SIZE,
+                    keyword
+                  );
+                } else {
+                  message.error(res?.message || "Failed to delete company");
+                }
+              } catch {
+                message.error("Failed to delete company");
+              } finally {
+                setLoading(false);
+              }
+            }}
+          >
+            <Button size="small" danger icon={<DeleteOutlined />} />
+          </Popconfirm>
         </Space>
       ),
     },
@@ -300,18 +406,32 @@ export default function CompanyList() {
         <Title level={4} style={{ margin: 0 }}>
           Company Management
         </Title>
-        <Button
-          icon={<ReloadOutlined />}
-          onClick={() =>
-            fetchData(
-              pagination.current || 1,
-              pagination.pageSize || DEFAULT_PAGE_SIZE,
-              keyword
-            )
-          }
-        >
-          Refresh
-        </Button>
+        <Space>
+          {/* === NEW: nút Add Company === */}
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              form.resetFields();
+              setIsCreateOpen(true);
+            }}
+          >
+            Add Company
+          </Button>
+
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={() =>
+              fetchData(
+                pagination.current || 1,
+                pagination.pageSize || DEFAULT_PAGE_SIZE,
+                keyword
+              )
+            }
+          >
+            Refresh
+          </Button>
+        </Space>
       </Space>
 
       <Card style={{ marginTop: 12 }}>
@@ -476,6 +596,79 @@ export default function CompanyList() {
           onChange={(e) => setRejectionReason(e.target.value)}
           placeholder="Nhập lý do từ chối công ty này..."
         />
+      </Modal>
+      {/* === NEW: Modal Create Company === */}
+      <Modal
+        open={isCreateOpen}
+        title="Create Company"
+        onCancel={() => setIsCreateOpen(false)}
+        onOk={handleCreate}
+        confirmLoading={loading}
+      >
+        {/* CHỖ NÀY PHẢI THÊM form={form} */}
+        <Form form={form} layout="vertical">
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[{ required: true, message: "Please input company name" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item label="Description" name="description">
+            <Input.TextArea rows={3} />
+          </Form.Item>
+
+          <Form.Item label="Address" name="address">
+            <Input />
+          </Form.Item>
+
+          <Form.Item label="Website" name="websiteUrl">
+            <Input placeholder="https://example.com" />
+          </Form.Item>
+
+          <Form.Item label="Tax Code" name="taxCode">
+            <Input />
+          </Form.Item>
+          {/* === NEW: Logo file (optional) === */}
+          <Form.Item
+            label="Logo"
+            name="logoFile"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
+          >
+            <Upload beforeUpload={() => false} maxCount={1} accept="image/*">
+              <Button icon={<UploadOutlined />}>Select logo</Button>
+            </Upload>
+          </Form.Item>
+
+          {/* === NEW: Document file (bắt buộc) === */}
+          <Form.Item
+            label="Document File"
+            name="documentFiles"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
+            rules={[
+              {
+                required: true,
+                message: "Please upload at least one document file",
+              },
+            ]}
+          >
+            <Upload beforeUpload={() => false} maxCount={1}>
+              <Button>Select file</Button>
+            </Upload>
+          </Form.Item>
+
+          {/* === NEW: Document type (bắt buộc) === */}
+          <Form.Item
+            label="Document Type"
+            name="documentType"
+            rules={[{ required: true, message: "Please input document type" }]}
+          >
+            <Input placeholder="e.g. BusinessLicense" />
+          </Form.Item>
+        </Form>
       </Modal>
     </div>
   );

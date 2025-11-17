@@ -1,4 +1,4 @@
-import { post, postForm, get, put, patchForm } from "./api";
+import { post, postForm, get, put, patchForm, remove } from "./api";
 import { API_ENDPOINTS } from "./config";
 import type { ApiResponse } from "../types/api.types";
 import type { CreateCompanyRequest } from "../types/company.types";
@@ -28,6 +28,11 @@ export const companyService = {
   // Send multipart/form-data (for logo and document files)
   createForm: async (formData: FormData): Promise<ApiResponse<null>> => {
     return await postForm<null>(API_ENDPOINTS.COMPANY.CREATE, formData);
+  },
+  // === NEW: Create company as System Admin (POST /api/companies) ===
+  createAdminForm: async (formData: FormData): Promise<ApiResponse<null>> => {
+    // dùng đường dẫn thẳng giống swagger
+    return await postForm<null>("/companies", formData);
   },
   // Get current user's company
   getSelf: async (): Promise<ApiResponse<CompanyData>> => {
@@ -163,7 +168,9 @@ export const companyService = {
   updateProfile: async (formData: FormData): Promise<ApiResponse<any>> => {
     return await patchForm<any>(`/companies/self/profile`, formData);
   },
-
+  deleteCompany: async (id: number): Promise<ApiResponse<null>> => {
+    return await remove<null>(`/companies/${id}`);
+  },
   updateStatus: async (
     id: number,
     payload: {

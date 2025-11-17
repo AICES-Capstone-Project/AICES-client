@@ -212,7 +212,7 @@ export const router = createBrowserRouter([
 
   // Manager
   {
-    path: "/system_manager", // hoặc APP_ROUTES.SYSTEM_MANAGER nếu bạn đã tạo constant đó
+    path: APP_ROUTES.SYSTEM_MANAGER,
     element: (
       <ProtectedRoute allowedRoles={[ROLES.System_Manager]}>
         <SystemManagerLayout />
@@ -223,7 +223,7 @@ export const router = createBrowserRouter([
 
   // Staff
   {
-    path: "/system_staff", // hoặc APP_ROUTES.SYSTEM_STAFF
+    path: APP_ROUTES.SYSTEM_STAFF,
     element: (
       <ProtectedRoute allowedRoles={[ROLES.System_Staff]}>
         <SystemStaffLayout />

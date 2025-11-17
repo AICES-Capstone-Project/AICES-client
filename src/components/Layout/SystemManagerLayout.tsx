@@ -31,7 +31,7 @@ const GOLD = {
   shadow: "rgba(245,196,0,0.18)",
 };
 
-const BASE_PATH = "/system_manager";
+const BASE_PATH = APP_ROUTES.SYSTEM_MANAGER;
 
 const toManagerPath = (systemRoute: string) =>
   systemRoute.replace(APP_ROUTES.SYSTEM, BASE_PATH);

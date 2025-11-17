@@ -32,7 +32,7 @@ const GOLD = {
 };
 
 // Base cho System_Staff
-const BASE_PATH = "/system_staff";
+const BASE_PATH = APP_ROUTES.SYSTEM_STAFF;
 
 const toStaffPath = (systemRoute: string) =>
   systemRoute.replace(APP_ROUTES.SYSTEM, BASE_PATH);

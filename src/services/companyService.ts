@@ -163,4 +163,14 @@ export const companyService = {
   updateProfile: async (formData: FormData): Promise<ApiResponse<any>> => {
     return await patchForm<any>(`/companies/self/profile`, formData);
   },
+
+  updateStatus: async (
+    id: number,
+    payload: {
+      status: "Approved" | "Rejected" | "Pending";
+      rejectionReason?: string | null;
+    }
+  ): Promise<ApiResponse<null>> => {
+    return await put<null, typeof payload>(`/companies/${id}/status`, payload);
+  },
 };

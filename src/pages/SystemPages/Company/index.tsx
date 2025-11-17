@@ -31,7 +31,49 @@ export default function CompanyList() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [preview, setPreview] = useState<Company | null>(null);
 
+  // === NEW: state cho chức năng Reject công ty ===
+  const [rejectingCompany, setRejectingCompany] = useState<Company | null>(
+    null
+  );
+  const [rejectionReason, setRejectionReason] = useState("");
+
   const nav = useNavigate();
+
+  // === NEW: hàm gọi API update status công ty ===
+  // Lưu ý: bạn cần tạo hàm companyService.updateStatus(id, body) bên service nếu chưa có
+  const updateCompanyStatus = async (
+    companyId: number,
+    status: "Approved" | "Rejected",
+    reason?: string
+  ) => {
+    setLoading(true);
+    try {
+      const res = await companyService.updateStatus(companyId, {
+        status,
+        rejectionReason: status === "Rejected" ? reason || "" : null,
+      });
+
+      if (res?.status === "Success") {
+        message.success(
+          status === "Approved"
+            ? "Company approved successfully"
+            : "Company rejected successfully"
+        );
+        // refresh lại list theo trang hiện tại & keyword hiện tại
+        await fetchData(
+          pagination.current || 1,
+          pagination.pageSize || DEFAULT_PAGE_SIZE,
+          keyword
+        );
+      } else {
+        message.error(res?.message || "Failed to update company status");
+      }
+    } catch (e) {
+      message.error("Failed to update company status");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchData = async (
     page = 1,
@@ -184,7 +226,7 @@ export default function CompanyList() {
     {
       title: "Actions",
       key: "actions",
-      width: 200,
+      width: 260,
       render: (_, record) => (
         <Space>
           <Button icon={<EyeOutlined />} onClick={() => openPreview(record)}>
@@ -195,6 +237,27 @@ export default function CompanyList() {
             onClick={() => nav(`/system/company/${record.companyId}`)}
           >
             Open
+          </Button>
+
+          {/* === NEW: nút Approve / Reject === */}
+          <Button
+            size="small"
+            disabled={record.companyStatus === "Approved"}
+            onClick={() => updateCompanyStatus(record.companyId, "Approved")}
+          >
+            Approve
+          </Button>
+
+          <Button
+            size="small"
+            danger
+            disabled={record.companyStatus === "Rejected"}
+            onClick={() => {
+              setRejectingCompany(record);
+              setRejectionReason("");
+            }}
+          >
+            Reject
           </Button>
         </Space>
       ),
@@ -373,6 +436,46 @@ export default function CompanyList() {
         ) : (
           <div>Loading...</div>
         )}
+      </Modal>
+      {/* === NEW: Modal nhập lý do Reject === */}
+      <Modal
+        open={!!rejectingCompany}
+        title={
+          rejectingCompany
+            ? `Reject company #${rejectingCompany.companyId}`
+            : "Reject company"
+        }
+        onCancel={() => {
+          setRejectingCompany(null);
+          setRejectionReason("");
+        }}
+        onOk={async () => {
+          if (!rejectionReason.trim()) {
+            message.warning("Please input rejection reason");
+            return;
+          }
+          if (!rejectingCompany) return;
+
+          await updateCompanyStatus(
+            rejectingCompany.companyId,
+            "Rejected",
+            rejectionReason
+          );
+
+          setRejectingCompany(null);
+          setRejectionReason("");
+        }}
+        confirmLoading={loading}
+      >
+        <div style={{ marginBottom: 8 }}>
+          <b>Rejection reason</b>
+        </div>
+        <Input.TextArea
+          rows={4}
+          value={rejectionReason}
+          onChange={(e) => setRejectionReason(e.target.value)}
+          placeholder="Nhập lý do từ chối công ty này..."
+        />
       </Modal>
     </div>
   );

@@ -13,8 +13,10 @@ import {
   PartitionOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  PoweroffOutlined,
 } from "@ant-design/icons";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+
 import { APP_ROUTES } from "../../services/config";
 
 const { Sider, Content, Header } = Layout;
@@ -35,6 +37,7 @@ const GOLD = {
 export default function SystemLayout() {
   const [collapsed, setCollapsed] = React.useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const selectedKey = location.pathname.startsWith(APP_ROUTES.SYSTEM)
     ? location.pathname
@@ -204,6 +207,13 @@ export default function SystemLayout() {
       ],
     },
   ];
+  const handleLogout = () => {
+    // tuỳ app bạn dùng key gì để lưu token
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    navigate("/login"); // hoặc APP_ROUTES.LOGIN nếu bạn có
+  };
 
   return (
     <ConfigProvider
@@ -330,6 +340,7 @@ export default function SystemLayout() {
           breakpoint="lg"
           width={240}
           className="aices-sider"
+          style={{ display: "flex", flexDirection: "column" }}
         >
           <div
             style={{
@@ -350,8 +361,24 @@ export default function SystemLayout() {
             mode="inline"
             selectedKeys={[selectedKey]}
             items={items}
-            style={{ height: "100%" }}
+            style={{ flex: 1 }}
           />
+
+          {/* Nút Logout ở đáy sidebar */}
+          <div style={{ padding: 16, borderTop: "1px solid #f0f0f0" }}>
+            <Button
+              type="text"
+              onClick={handleLogout}
+              icon={<PoweroffOutlined />}
+              style={{
+                width: "100%",
+                textAlign: "left",
+                color: GOLD.primary,
+              }}
+            >
+              Logout
+            </Button>
+          </div>
         </Sider>
 
         <Layout>

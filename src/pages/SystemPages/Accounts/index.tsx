@@ -237,7 +237,16 @@ export default function Accounts() {
   const onCreate = async () => {
     try {
       const values = await createForm.validateFields();
-      const res = await userService.create(values);
+
+      const payload: CreateUserRequest = {
+        email: values.email,
+        fullName: values.fullName,
+        password: values.password,
+        roleId: values.roleId, // 👈 quan trọng
+      };
+
+      const res = await userService.create(payload);
+
       if (res.status === "Success") {
         message.success("User created");
         setIsCreateOpen(false);
@@ -271,9 +280,7 @@ export default function Accounts() {
   const onEdit = (user: User) => {
     setEditingUser(user);
     editForm.setFieldsValue({
-      email: user.email,
       fullName: user.fullName || "",
-      password: undefined, // để trống
       roleName: user.roleName,
     });
     setIsEditOpen(true);
@@ -281,13 +288,19 @@ export default function Accounts() {
 
   const onUpdate = async () => {
     if (!editingUser) return;
+
     try {
-      const values = await editForm.validateFields();
-      // Nếu password rỗng → bỏ field đi
-      const payload: UpdateUserRequest = { ...values };
-      if (!payload.password) delete (payload as any).password;
+      const values = await editForm.validateFields(); // { fullName, roleName }
+
+      const payload: UpdateUserRequest = {
+        email: editingUser.email, // 👈 giữ nguyên email cũ
+        fullName: values.fullName,
+        roleName: values.roleName,
+        // không gửi password
+      };
 
       const res = await userService.update(editingUser.userId, payload);
+
       if (res.status === "Success") {
         message.success("User updated");
         setIsEditOpen(false);
@@ -296,28 +309,14 @@ export default function Accounts() {
       } else {
         message.error(res.message || "Update failed");
       }
-    } catch {
-      message.error("Could not update user. Please check the form inputs.");
-    }
-  };
+    } catch (e: any) {
+      const apiMsg =
+        e?.response?.data?.message || e?.response?.data?.error || e?.message;
 
-  const onDelete = (user: User) => {
-    Modal.confirm({
-      title: `Delete user ${user.email}?`,
-      content: "This action cannot be undone (server may soft-delete).",
-      okText: "Delete",
-      okButtonProps: { danger: true },
-      cancelText: "Cancel",
-      onOk: async () => {
-        const res = await userService.remove(user.userId);
-        if (res.status === "Success") {
-          message.success("User deleted");
-          fetchData(page, pageSize, keyword);
-        } else {
-          message.error(res.message || "Delete failed");
-        }
-      },
-    });
+      message.error(
+        apiMsg || "Could not update user. Please check the form inputs."
+      );
+    }
   };
 
   const onChangeStatus = async (
@@ -405,7 +404,7 @@ export default function Accounts() {
           >
             <Input.Password />
           </Form.Item>
-          <Form.Item name="roleName" label="Role" rules={[{ required: true }]}>
+          <Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
             <Select options={roleOptions} />
           </Form.Item>
         </Form>
@@ -422,22 +421,13 @@ export default function Accounts() {
       >
         <Form form={editForm} layout="vertical">
           <Form.Item
-            name="email"
-            label="Email"
-            rules={[{ required: true, type: "email" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
             name="fullName"
             label="Full name"
             rules={[{ required: true }]}
           >
             <Input />
           </Form.Item>
-          <Form.Item name="password" label="Password (leave empty to keep)">
-            <Input.Password />
-          </Form.Item>
+
           <Form.Item name="roleName" label="Role" rules={[{ required: true }]}>
             <Select options={roleOptions} />
           </Form.Item>
@@ -526,9 +516,9 @@ export default function Accounts() {
 
 // ===== Helpers =====
 const roleOptions = [
-  { label: "System Admin", value: "System_Admin" },
-  { label: "System Manager", value: "System_Manager" },
-  { label: "System Staff", value: "System_Staff" },
-  { label: "HR Manager", value: "HR_Manager" },
-  { label: "HR Recruiter", value: "HR_Recruiter" },
+  { label: "System Admin", value: 1 },
+  { label: "System Manager", value: 2 },
+  { label: "System Staff", value: 3 },
+  { label: "HR Manager", value: 4 },
+  { label: "HR Recruiter", value: 5 },
 ];

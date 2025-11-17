@@ -16,7 +16,15 @@ const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
 /* ============== Layouts ==============*/
 const MainLayout = lazy(() => import("../components/Layout/MainLayout"));
-const SystemLayout = lazy(() => import("../components/Layout/SystemLayout"));
+const SystemAdminLayout = lazy(
+  () => import("../components/Layout/SystemAdminLayout")
+);
+const SystemManagerLayout = lazy(
+  () => import("../components/Layout/SystemManagerLayout")
+);
+const SystemStaffLayout = lazy(
+  () => import("../components/Layout/SystemStaffLayout")
+);
 const CompanyLayout = lazy(() => import("../components/Layout/CompanyLayout"));
 const ProfileLayout = lazy(() => import("../components/Layout/ProfileLayout"));
 
@@ -78,6 +86,51 @@ const BannerList = lazy(
   () => import("../pages/SystemPages/Content/BannerList")
 );
 
+// ===== System children routes dùng chung cho Admin / Manager / Staff =====
+const systemChildren = [
+  { index: true, element: <SystemDashboard /> },
+  { path: "dashboard", element: <SystemDashboard /> },
+
+  // User management
+  { path: "users", element: <SystemAccounts /> },
+
+  // Subscription plans
+  { path: "subscriptions", element: <PlansPage /> },
+
+  // Subscribed companies
+  {
+    path: "subscriptions/companies",
+    element: <SubscribedCompaniesPage />,
+  },
+
+  // Taxonomy
+  { path: "taxonomy/categories", element: <CategoryList /> },
+  { path: "taxonomy/skills", element: <SkillList /> },
+  {
+    path: "taxonomy/specializations",
+    element: <SpecializationList />,
+  },
+  {
+    path: "taxonomy/recruitment-types",
+    element: <RecruitmentTypeList />,
+  },
+
+  // Content
+  {
+    path: "content/banners",
+    element: <BannerList />,
+  },
+
+  // Company detail pages (System xem & quản lý company)
+  { path: "company", element: <CompanyList /> },
+  { path: "company/:companyId", element: <CompanyDetail /> },
+  { path: "company/:companyId/jobs/:jobId", element: <JobDetail /> },
+  {
+    path: "company/:companyId/jobs/:jobId/resumes/:resumeId",
+    element: <ResumeDetail />,
+  },
+];
+
 export const router = createBrowserRouter([
   /* ============== General Pages ==============*/
   {
@@ -121,60 +174,6 @@ export const router = createBrowserRouter([
   { path: APP_ROUTES.AUTH_CALLBACK, element: <GitHubCallback /> },
   { path: APP_ROUTES.TEST, element: <UserProfileTest /> },
 
-  /* ============== System Pages ==============*/
-  {
-    path: APP_ROUTES.SYSTEM,
-    element: (
-      <ProtectedRoute
-        allowedRoles={[
-          ROLES.System_Admin,
-          ROLES.System_Manager,
-          ROLES.System_Staff,
-        ]}
-      >
-        <SystemLayout />
-      </ProtectedRoute>
-    ),
-    children: [
-      { index: true, element: <SystemDashboard /> },
-      { path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
-      { path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
-
-      // Subscription plans
-      { path: APP_ROUTES.SYSTEM_SUBSCRIPTIONS, element: <PlansPage /> },
-
-      // Subscribed companies
-      {
-        path: APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES,
-        element: <SubscribedCompaniesPage />,
-      },
-
-      //Taxonomy
-      {
-        path: APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY,
-        element: <CategoryList />,
-      },
-      {
-        path: APP_ROUTES.SYSTEM_TAXONOMY_SKILL,
-        element: <SkillList />,
-      },
-      {
-        path: APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION,
-        element: <SpecializationList />,
-      },
-      {
-        path: APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE,
-        element: <RecruitmentTypeList />,
-      },
-
-      //Content
-      {
-        path: APP_ROUTES.SYSTEM_CONTENT_BANNERS, // hoặc tên constant bạn đã đặt
-        element: <BannerList />,
-      },
-    ],
-  },
-
   /* ============== Comapany Pages ==============*/
   {
     path: APP_ROUTES.COMPANY,
@@ -200,31 +199,37 @@ export const router = createBrowserRouter([
     ],
   },
   /* ============== System Pages ==============*/
+  // Admin
   {
-    path: APP_ROUTES.SYSTEM,
+    path: APP_ROUTES.SYSTEM, // "/system"
     element: (
-      <ProtectedRoute
-        allowedRoles={[
-          ROLES.System_Admin,
-          ROLES.System_Manager,
-          ROLES.System_Staff,
-        ]}
-      >
-        <SystemLayout />
+      <ProtectedRoute allowedRoles={[ROLES.System_Admin]}>
+        <SystemAdminLayout />
       </ProtectedRoute>
     ),
-    children: [
-      { index: true, element: <SystemDashboard /> },
-      { path: APP_ROUTES.SYSTEM_DASHBOARD, element: <SystemDashboard /> },
-      { path: APP_ROUTES.SYSTEM_USERS, element: <SystemAccounts /> },
-      { path: "company", element: <CompanyList /> },
-      { path: "company/:companyId", element: <CompanyDetail /> },
-      { path: "company/:companyId/jobs/:jobId", element: <JobDetail /> },
-      {
-        path: "company/:companyId/jobs/:jobId/resumes/:resumeId",
-        element: <ResumeDetail />,
-      },
-    ],
+    children: systemChildren,
+  },
+
+  // Manager
+  {
+    path: "/system_manager", // hoặc APP_ROUTES.SYSTEM_MANAGER nếu bạn đã tạo constant đó
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.System_Manager]}>
+        <SystemManagerLayout />
+      </ProtectedRoute>
+    ),
+    children: systemChildren,
+  },
+
+  // Staff
+  {
+    path: "/system_staff", // hoặc APP_ROUTES.SYSTEM_STAFF
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.System_Staff]}>
+        <SystemStaffLayout />
+      </ProtectedRoute>
+    ),
+    children: systemChildren,
   },
 
   /* ============== Error Pages ==============*/

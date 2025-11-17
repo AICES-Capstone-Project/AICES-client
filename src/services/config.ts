@@ -111,6 +111,16 @@ export const APP_ROUTES = {
   PROFILE_NOTIFICATION: "/profile/notification",
   PROFILE_SECURITY: "/profile/security",
 
+
+  // System base routes per role
+  SYSTEM_ADMIN: "/system",
+  SYSTEM_MANAGER: "/system_manager",
+  SYSTEM_STAFF: "/system_staff",
+
+   // Optional: dashboard riêng cho Manager / Staff cho đẹp
+  SYSTEM_MANAGER_DASHBOARD: "/system_manager/dashboard",
+  SYSTEM_STAFF_DASHBOARD: "/system_staff/dashboard",
+  
   // System routes
   SYSTEM: "/system",
   SYSTEM_DASHBOARD: "/system/dashboard",

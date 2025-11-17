@@ -10,9 +10,9 @@ export const getRoleBasedRoute = (roleName: string | null): string => {
 		case "system_admin":
 			return APP_ROUTES.SYSTEM;
 		case "system_manager":
-			return APP_ROUTES.SYSTEM;
+			return APP_ROUTES.SYSTEM_MANAGER_DASHBOARD;  
 		case "system_staff":
-			return APP_ROUTES.SYSTEM;
+			return APP_ROUTES.SYSTEM_STAFF_DASHBOARD;
 		case "hr_manager":
 			return APP_ROUTES.COMPANY;
 		case "hr_recruiter":

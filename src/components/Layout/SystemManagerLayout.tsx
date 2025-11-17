@@ -2,12 +2,10 @@ import React from "react";
 import { Layout, Menu, Button, Typography, ConfigProvider } from "antd";
 import {
   DashboardOutlined,
-  TeamOutlined,
   FileDoneOutlined,
   AppstoreOutlined,
   BarChartOutlined,
   BellOutlined,
-  SettingOutlined,
   ApartmentOutlined,
   TagsOutlined,
   PartitionOutlined,
@@ -22,264 +20,178 @@ import { APP_ROUTES } from "../../services/config";
 const { Sider, Content, Header } = Layout;
 const { Title } = Typography;
 
-// ===== Gold Accent Palette (dịu mắt trên nền trắng) =====
 const GOLD = {
   primary: "#F5C400",
   hover: "#E1B800",
   active: "#CFA800",
-  cream: "#FFFBE6", // nền chọn/hover rất nhạt
-  cream2: "#FFF7D6", // nền hover nhẹ hơn cho bảng/menu
+  cream: "#FFFBE6",
+  cream2: "#FFF7D6",
   border: "#FFE58F",
   textOnCream: "#614700",
   shadow: "rgba(245,196,0,0.18)",
 };
 
-export default function SystemLayout() {
+const BASE_PATH = "/system_manager";
+
+const toManagerPath = (systemRoute: string) =>
+  systemRoute.replace(APP_ROUTES.SYSTEM, BASE_PATH);
+
+export default function SystemManagerLayout() {
   const [collapsed, setCollapsed] = React.useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 🔹 NEW: lấy role hiện tại từ localStorage
-  const rawUser = localStorage.getItem("user");
-  const currentUser = rawUser ? JSON.parse(rawUser) : null;
-  const roleName: string | undefined = currentUser?.roleName;
-
-  // 🔹 NEW: base path cho từng role
-  const basePath =
-    roleName === "System_Manager"
-      ? "/system_manager"
-      : roleName === "System_Staff"
-      ? "/system_staff"
-      : APP_ROUTES.SYSTEM; // mặc định admin = "/system"
-
-  // 🔹 NEW: helper đổi /system/... → /system_manager/... /system_staff/...
-  const withBase = (path: string) => {
-    if (!path) return path;
-    if (path.startsWith(APP_ROUTES.SYSTEM)) {
-      return path.replace(APP_ROUTES.SYSTEM, basePath);
-    }
-    return path;
-  };
-
-  // 🔹 NEW: xác định đang đứng trong bất kỳ system-path nào
-  const isSystemPath =
-    location.pathname.startsWith(APP_ROUTES.SYSTEM) ||
-    location.pathname.startsWith("/system_manager") ||
-    location.pathname.startsWith("/system_staff");
-
-  // 🔹 NEW: selectedKey = full path hiện tại hoặc dashboard theo role
-  const selectedKey = isSystemPath
+  const selectedKey = location.pathname.startsWith(BASE_PATH)
     ? location.pathname
-    : withBase(APP_ROUTES.SYSTEM_DASHBOARD);
+    : toManagerPath(APP_ROUTES.SYSTEM_DASHBOARD);
 
-  // 🔹 NEW: define menu items kèm roles, rồi filter theo roleName
-  const rawItems = [
+  const items = [
     {
-      key: withBase(APP_ROUTES.SYSTEM_DASHBOARD),
+      key: toManagerPath(APP_ROUTES.SYSTEM_DASHBOARD),
       icon: <DashboardOutlined />,
-      label: <Link to={withBase(APP_ROUTES.SYSTEM_DASHBOARD)}>Dashboard</Link>,
-      roles: ["System_Admin", "System_Manager", "System_Staff"],
+      label: (
+        <Link to={toManagerPath(APP_ROUTES.SYSTEM_DASHBOARD)}>Dashboard</Link>
+      ),
     },
     {
-      key: withBase(APP_ROUTES.SYSTEM_USERS),
-      icon: <TeamOutlined />,
-      label: <Link to={withBase(APP_ROUTES.SYSTEM_USERS)}>Users</Link>,
-      roles: ["System_Admin"], // chỉ Admin
-    },
-    {
-      key: withBase(APP_ROUTES.SYSTEM_COMPANY),
+      key: toManagerPath(APP_ROUTES.SYSTEM_COMPANY),
       icon: <ApartmentOutlined />,
-      label: <Link to={withBase(APP_ROUTES.SYSTEM_COMPANY)}>Companies</Link>,
-      roles: ["System_Admin", "System_Manager", "System_Staff"],
+      label: (
+        <Link to={toManagerPath(APP_ROUTES.SYSTEM_COMPANY)}>Companies</Link>
+      ),
     },
-    // === SUBSCRIPTIONS ===
+    // Subscriptions (Plans + Subscribed companies)
     {
       key: "subscriptions",
       icon: <BarChartOutlined />,
       label: "Subscriptions",
-      roles: ["System_Admin", "System_Manager", "System_Staff"],
       children: [
         {
-          key: withBase(APP_ROUTES.SYSTEM_SUBSCRIPTIONS),
+          key: toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS),
           label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_SUBSCRIPTIONS)}>Plans</Link>
+            <Link to={toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS)}>
+              Plans
+            </Link>
           ),
         },
         {
-          key: withBase(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES),
+          key: toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES),
           label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES)}>
+            <Link
+              to={toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES)}
+            >
               Subscribed Companies
             </Link>
           ),
         },
       ],
     },
-    // === PAYMENTS ===
+    // Payments
     {
-      key: withBase(APP_ROUTES.SYSTEM_PAYMENTS),
+      key: toManagerPath(APP_ROUTES.SYSTEM_PAYMENTS),
       icon: <FileDoneOutlined />,
-      label: <Link to={withBase(APP_ROUTES.SYSTEM_PAYMENTS)}>Payments</Link>,
-      roles: ["System_Admin", "System_Manager", "System_Staff"],
+      label: (
+        <Link to={toManagerPath(APP_ROUTES.SYSTEM_PAYMENTS)}>Payments</Link>
+      ),
     },
-
-    // === TAXONOMY (4 mục như screenflow) ===
+    // Taxonomy
     {
       key: "taxonomy",
       icon: <PartitionOutlined />,
       label: "Taxonomy Management",
-      roles: ["System_Admin", "System_Manager", "System_Staff"],
       children: [
         {
-          key: withBase(APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY),
+          key: toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY),
           label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY)}>
+            <Link to={toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY)}>
               Categories
             </Link>
           ),
         },
         {
-          key: withBase(APP_ROUTES.SYSTEM_TAXONOMY_SKILL),
+          key: toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_SKILL),
           label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_TAXONOMY_SKILL)}>Skills</Link>
+            <Link to={toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_SKILL)}>
+              Skills
+            </Link>
           ),
         },
         {
-          key: withBase(APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION),
+          key: toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION),
           label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION)}>
+            <Link
+              to={toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION)}
+            >
               Specializations
             </Link>
           ),
         },
         {
-          key: withBase(APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE),
+          key: toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE),
           label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE)}>
+            <Link
+              to={toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE)}
+            >
               Recruitment Types
             </Link>
           ),
         },
       ],
     },
-
-    // === CONTENT MANAGEMENT ===
+    // Content: Blogs + Tags (không có Banners)
     {
       key: "content",
       icon: <AppstoreOutlined />,
       label: "Content",
-      roles: ["System_Admin", "System_Manager", "System_Staff"],
       children: [
         {
-          key: withBase(APP_ROUTES.SYSTEM_CONTENT_BANNERS),
+          key: toManagerPath(APP_ROUTES.SYSTEM_BLOGS),
           label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_CONTENT_BANNERS)}>
-              Banners
-            </Link>
+            <Link to={toManagerPath(APP_ROUTES.SYSTEM_BLOGS)}>Blogs</Link>
           ),
-          // Banners: chỉ Admin nếu muốn:
-          // roles: ["System_Admin"],
         },
         {
-          key: withBase(APP_ROUTES.SYSTEM_BLOGS),
-          label: <Link to={withBase(APP_ROUTES.SYSTEM_BLOGS)}>Blogs</Link>,
-        },
-        {
-          key: withBase(APP_ROUTES.SYSTEM_TAGS),
+          key: toManagerPath(APP_ROUTES.SYSTEM_TAGS),
           icon: <TagsOutlined />,
-          label: <Link to={withBase(APP_ROUTES.SYSTEM_TAGS)}>Tags</Link>,
+          label: <Link to={toManagerPath(APP_ROUTES.SYSTEM_TAGS)}>Tags</Link>,
         },
       ],
     },
-
-    // === NOTIFICATIONS (template email + notification) ===
+    // Notifications
     {
       key: "notifications",
       icon: <BellOutlined />,
       label: "Notifications",
-      roles: ["System_Admin", "System_Manager", "System_Staff"],
       children: [
         {
-          key: withBase(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES),
+          key: toManagerPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES),
           label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}>
+            <Link
+              to={toManagerPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}
+            >
               Notification Templates
             </Link>
           ),
         },
         {
-          key: withBase(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES),
+          key: toManagerPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES),
           label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES)}>
+            <Link to={toManagerPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES)}>
               Email Templates
             </Link>
           ),
         },
       ],
     },
-
-    // === REPORTS ===
+    // Reports
     {
-      key: withBase(APP_ROUTES.SYSTEM_REPORTS),
+      key: toManagerPath(APP_ROUTES.SYSTEM_REPORTS),
       icon: <FileDoneOutlined />,
-      label: <Link to={withBase(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>,
-      roles: ["System_Admin", "System_Manager", "System_Staff"],
-    },
-
-    // === SYSTEM SETTINGS ===
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "System Settings",
-      roles: ["System_Admin"], // chỉ Admin có cấu hình hệ thống
-      children: [
-        {
-          key: withBase(APP_ROUTES.SYSTEM_ROLES),
-          label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_ROLES)}>
-              Roles & Permissions
-            </Link>
-          ),
-        },
-        {
-          key: withBase(APP_ROUTES.SYSTEM_AI_ENDPOINTS),
-          label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_AI_ENDPOINTS)}>
-              AI Endpoints
-            </Link>
-          ),
-        },
-        {
-          key: withBase(APP_ROUTES.SYSTEM_FEATURE_FLAGS),
-          label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_FEATURE_FLAGS)}>
-              Feature Flags & Limits
-            </Link>
-          ),
-        },
-        {
-          key: withBase(APP_ROUTES.SYSTEM_EMAIL_CONFIG),
-          label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_EMAIL_CONFIG)}>
-              Email Configuration
-            </Link>
-          ),
-        },
-        {
-          key: withBase(APP_ROUTES.SYSTEM_API_KEYS),
-          label: (
-            <Link to={withBase(APP_ROUTES.SYSTEM_API_KEYS)}>API Keys</Link>
-          ),
-        },
-      ],
+      label: (
+        <Link to={toManagerPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>
+      ),
     },
   ];
-
-  // 🔹 NEW: filter menu theo roleName (ẩn item không có quyền)
-  const items = rawItems.filter(
-    (item: any) =>
-      !item.roles || !roleName || item.roles.includes(roleName)
-  );
 
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
@@ -287,14 +199,6 @@ export default function SystemLayout() {
     localStorage.removeItem("user");
     navigate("/login");
   };
-
-  // 🔹 NEW: label brand theo role
-  const brandLabel =
-    roleName === "System_Manager"
-      ? "System Manager"
-      : roleName === "System_Staff"
-      ? "System Staff"
-      : "System Admin";
 
   return (
     <ConfigProvider
@@ -358,15 +262,12 @@ export default function SystemLayout() {
         } as any,
       }}
     >
-      {/* Global polish nằm trong 1 file bằng thẻ <style> */}
       <style>{`
-        /* Header dùng gradient rất nhẹ + shadow vàng mềm */
         .aices-header {
           background: linear-gradient(90deg, #FFFFFF, ${GOLD.cream});
           border-bottom: 1px solid #f0f0f0;
           box-shadow: 0 2px 10px ${GOLD.shadow};
         }
-        /* Sidebar viền phải dịu + hover mượt */
         .aices-sider {
           background: #fff !important;
           border-right: 1px solid #f0f0f0 !important;
@@ -376,10 +277,9 @@ export default function SystemLayout() {
           background: linear-gradient(90deg, ${GOLD.primary}, ${GOLD.hover});
           -webkit-background-clip: text;
           background-clip: text;
-          color: transparent; /* gradient text */
+          color: transparent;
           text-shadow: 0 1px 0 rgba(0,0,0,0.04);
         }
-        /* Menu hover mượt */
         .ant-menu-item {
           transition: background-color .18s ease, transform .12s ease;
           border-radius: 8px !important;
@@ -388,15 +288,12 @@ export default function SystemLayout() {
           background: ${GOLD.cream};
           transform: translateX(2px);
         }
-        /* Nút text hover có nền vàng siêu nhạt */
         .ant-btn-text:hover {
           background: ${GOLD.cream};
         }
-        /* Bảng: hover rõ nhưng không chói */
         .ant-table-tbody > tr.ant-table-row:hover > td {
           background: ${GOLD.cream2} !important;
         }
-        /* Scrollbar vàng nhạt */
         *::-webkit-scrollbar { width: 10px; height: 10px; }
         *::-webkit-scrollbar-track { background: #ffffff; }
         *::-webkit-scrollbar-thumb {
@@ -405,7 +302,6 @@ export default function SystemLayout() {
           border: 2px solid #ffffff;
         }
         *::-webkit-scrollbar-thumb:hover { background: ${GOLD.hover}; }
-        /* Focus ring dịu mắt cho điều khiển có focus */
         .ant-input:focus, .ant-input-focused,
         .ant-select-focused .ant-select-selector,
         .ant-picker-focused, .ant-btn:focus-visible {
@@ -435,7 +331,7 @@ export default function SystemLayout() {
             }}
             className="aices-brand"
           >
-            {collapsed ? "S" : "System Admin"}
+            {collapsed ? "S" : "System Manager"}
           </div>
 
           <Menu
@@ -445,7 +341,6 @@ export default function SystemLayout() {
             style={{ flex: 1 }}
           />
 
-          {/* Nút Logout ở đáy sidebar */}
           <div style={{ padding: 16, borderTop: "1px solid #f0f0f0" }}>
             <Button
               type="text"

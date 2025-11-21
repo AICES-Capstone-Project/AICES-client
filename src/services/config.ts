@@ -85,6 +85,17 @@ export const API_ENDPOINTS = {
     CREATE: "/company-subscriptions",
     DELETE: (id: number) => `/company-subscriptions/${id}`,
   },
+
+  // Resume endpoints
+  RESUME: {
+    UPLOAD: "/api/resume/upload",
+    BY_JOB: "/company/self/jobs",
+  },
+
+  // Subscriptions endpoints
+  SUBSCRIPTIONS: {
+    GET_ALL: "/api/subscriptions",
+  },
 } as const;
 
 // App Routes Configuration
@@ -172,6 +183,7 @@ export const APP_ROUTES = {
   COMPANY_MY_APARTMENTS: "/company/my-apartments",
   COMPANY_PENDING_APPROVAL: "/company/pending-approval",
   COMPANY_AI_SCREENING: "/company/ai-screening",
+  COMPANY_AI_SCREENING_RESUMES: "/company/ai-screening/:jobId/resumes",
   COMPANY_CLIENTS: "/company/clients",
 } as const;
 

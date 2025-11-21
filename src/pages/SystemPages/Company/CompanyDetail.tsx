@@ -130,7 +130,7 @@ export default function CompanyDetail() {
               <Tag color="blue">Size: {company.size || "—"}</Tag>
               <Tag color={company.isActive ? "green" : "red"}>{company.isActive ? "Active" : "Inactive"}</Tag>
             </Space>
-            <Text type="secondary">Created: {new Date(company.createdAt).toLocaleString()}</Text>
+            {/* <Text type="secondary">Created: {new Date(company.createdAt).toLocaleString()}</Text> */}
           </Space>
         )}
       </Card>

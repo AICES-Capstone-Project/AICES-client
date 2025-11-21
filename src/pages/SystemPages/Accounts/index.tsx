@@ -192,23 +192,7 @@ export default function Accounts() {
             okText="Delete"
             okButtonProps={{ danger: true }}
             cancelText="Cancel"
-            onConfirm={async () => {
-              try {
-                console.log("[Users] deleting user", record.userId);
-                await userService.remove(record.userId); // 👈 chỉ cần gọi, không đụng res.status
-
-                message.success("User deleted");
-                fetchData(page, pageSize, keyword);
-              } catch (e: any) {
-                console.error("[Users] delete error =", e);
-                // Nếu BE trả message trong response
-                const apiMsg =
-                  e?.response?.data?.message ||
-                  e?.response?.data?.error ||
-                  e?.message;
-                message.error(apiMsg || "Delete failed");
-              }
-            }}
+            onConfirm={() => onDelete(record)}
           >
             <Tooltip title="Delete user">
               <Button icon={<DeleteOutlined />} danger />
@@ -301,23 +285,20 @@ export default function Accounts() {
     }
   };
 
-  const onDelete = (user: User) => {
-    Modal.confirm({
-      title: `Delete user ${user.email}?`,
-      content: "This action cannot be undone (server may soft-delete).",
-      okText: "Delete",
-      okButtonProps: { danger: true },
-      cancelText: "Cancel",
-      onOk: async () => {
-        const res = await userService.remove(user.userId);
-        if (res.status === "Success") {
-          message.success("User deleted");
-          fetchData(page, pageSize, keyword);
-        } else {
-          message.error(res.message || "Delete failed");
-        }
-      },
-    });
+  const onDelete = async (user: User) => {
+    try {
+      console.log("[Users] deleting user", user.userId);
+      await userService.remove(user.userId);
+      message.success("User deleted");
+      fetchData(page, pageSize, keyword);
+    } catch (e: any) {
+      console.error("[Users] delete error =", e);
+      const apiMsg =
+        e?.response?.data?.message ||
+        e?.response?.data?.error ||
+        e?.message;
+      message.error(apiMsg || "Delete failed");
+    }
   };
 
   const onChangeStatus = async (

@@ -47,6 +47,15 @@ const JobManagement = lazy(
 const SubmissionPending = lazy(
   () => import("../pages/CompanyPages/MyApartment/SubmissionPending")
 );
+const AIScreening = lazy(
+  () => import("../pages/CompanyPages/AIScreening/AIScreening")
+);
+const ResumeList = lazy(
+  () => import("../pages/CompanyPages/AIScreening/component/ResumeList")
+);
+const CompanyClients = lazy(
+  () => import("../pages/CompanyPages/CompanyClients/CompanyClients")
+);
 
 /* ============== System Pages ==============*/
 const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
@@ -196,6 +205,18 @@ export const router = createBrowserRouter([
       {
         path: APP_ROUTES.COMPANY_PENDING_APPROVAL,
         element: <SubmissionPending />,
+      },
+      {
+        path: APP_ROUTES.COMPANY_AI_SCREENING,
+        element: <AIScreening />,
+      },
+      {
+        path: APP_ROUTES.COMPANY_AI_SCREENING_RESUMES,
+        element: <ResumeList />,
+      },
+      {
+        path: APP_ROUTES.COMPANY_CLIENTS,
+        element: <CompanyClients />,
       },
     ],
   },

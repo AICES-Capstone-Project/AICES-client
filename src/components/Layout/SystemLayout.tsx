@@ -9,7 +9,6 @@ import {
   BellOutlined,
   SettingOutlined,
   ApartmentOutlined,
-  TagsOutlined,
   PartitionOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,

@@ -86,7 +86,7 @@ export default function CompanyLayout() {
 			{
 				key: APP_ROUTES.COMPANY_CLIENTS,
 				icon: <StarOutlined style={iconStyle} />,
-				label: <Link to={APP_ROUTES.COMPANY_CLIENTS}>Company Clients</Link>,
+				label: <Link to={APP_ROUTES.COMPANY_CLIENTS}>Subscription Plans</Link>,
 			},
 		] : []),
 

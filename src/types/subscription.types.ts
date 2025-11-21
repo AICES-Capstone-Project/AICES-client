@@ -1,31 +1,24 @@
 // src/types/subscription.types.ts
 
-export interface SubscriptionPlan {
-  id: number;                  // xuất hiện trong response
-  name: string;
-  description?: string | null;
-  price: number;
-  durationDays: number;        // từ swagger
-  limit: string;               // ví dụ: "Up to 50 jobs" hoặc "Unlimited"
-
-  createdAt?: string;
-}
-
 export interface ApiResponse<T> {
-  status: string;   // "success"
-  message: string;  // "All subscriptions retrieved successfully"
+  status: string; // "success"
+  message: string; // "All subscriptions retrieved successfully"
   data: T;
 }
 
+export interface SubscriptionListData {
+  subscriptions: SubscriptionPlan[];
+}
 // ========== Subscription Plans ==========
 export interface SubscriptionPlan {
-  id: number;
+  subscriptionId: number; 
   name: string;
   description?: string | null;
   price: number;
   durationDays: number;
   limit: string;
   isActive: boolean;
+  createdAt?: string;
 }
 
 // ================= Company Subscriptions =================
@@ -49,4 +42,3 @@ export interface CompanySubscriptionListData {
   pageSize: number;
   totalItems: number;
 }
-

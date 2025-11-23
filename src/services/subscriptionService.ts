@@ -10,13 +10,13 @@ import type {
 export const subscriptionService = {
   // Lấy toàn bộ gói (bao gồm active + inactive)
   async getAll(): Promise<SubscriptionPlan[]> {
-    const res = await api.get<ApiResponse<SubscriptionPlan[]>>(
+    const res = await api.get<ApiResponse<any>>(
       API_ENDPOINTS.SUBSCRIPTION.LIST
     );
 
-    // BE trả dạng { status, message, data }
-    const list = res.data?.data;
-    return Array.isArray(list) ? list : []; // FIX THÊM
+    // BE trả dạng { status, message, data: { subscriptions: [...] } }
+    const subscriptions = res.data?.data?.subscriptions;
+    return Array.isArray(subscriptions) ? subscriptions : [];
   },
 
   async getPublic(): Promise<SubscriptionPlan[]> {

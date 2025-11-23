@@ -84,9 +84,9 @@ export default function CompanyLayout() {
 				label: <Link to={APP_ROUTES.COMPANY_AI_SCREENING}>AI CV Review</Link>,
 			},
 			{
-				key: APP_ROUTES.COMPANY_CLIENTS,
+				key: APP_ROUTES.COMPANY_SUBSCRIPTIONS,
 				icon: <StarOutlined style={iconStyle} />,
-				label: <Link to={APP_ROUTES.COMPANY_CLIENTS}>Subscription Plans</Link>,
+				label: <Link to={APP_ROUTES.COMPANY_SUBSCRIPTIONS}>Subscription Plans</Link>,
 			},
 		] : []),
 

@@ -61,8 +61,8 @@ const AIScreening = lazy(
 const ResumeList = lazy(
   () => import("../pages/CompanyPages/AIScreening/component/ResumeList")
 );
-const CompanyClients = lazy(
-  () => import("../pages/CompanyPages/CompanyClients/CompanyClients")
+const CompanySubscription = lazy(
+  () => import("../pages/CompanyPages/CompanyClients/CompanySubscription")
 );
 
 /* ============== System Pages ==============*/
@@ -94,6 +94,7 @@ const RecruitmentTypeList = lazy(
 const BannerList = lazy(
   () => import("../pages/SystemPages/Content/BannerList")
 );
+const PaymentSuccess = lazy(() => import("../pages/PaymentSuccess"));
 
 // ===== System children routes dùng chung cho Admin / Manager / Staff =====
 const systemChildren = [
@@ -182,6 +183,7 @@ export const router = createBrowserRouter([
   { path: APP_ROUTES.RESET_PASSWORD, element: <ResetPassword /> },
   { path: APP_ROUTES.AUTH_CALLBACK, element: <GitHubCallback /> },
   { path: APP_ROUTES.TEST, element: <UserProfileTest /> },
+  { path: "/payment/success", element: <PaymentSuccess /> },
 
   /* ============== Comapany Pages ==============*/
   {
@@ -214,8 +216,8 @@ export const router = createBrowserRouter([
         element: <ResumeList />,
       },
       {
-        path: APP_ROUTES.COMPANY_CLIENTS,
-        element: <CompanyClients />,
+        path: APP_ROUTES.COMPANY_SUBSCRIPTIONS,
+        element: <CompanySubscription />,
       },
     ],
   },

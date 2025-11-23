@@ -194,7 +194,7 @@ export const APP_ROUTES = {
   COMPANY_PENDING_APPROVAL: "/company/pending-approval",
   COMPANY_AI_SCREENING: "/company/ai-screening",
   COMPANY_AI_SCREENING_RESUMES: "/company/ai-screening/:jobId/resumes",
-  COMPANY_CLIENTS: "/company/clients",
+  COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
 } as const;
 
 export const ROLES = {

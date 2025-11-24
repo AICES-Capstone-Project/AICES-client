@@ -62,7 +62,10 @@ const ResumeList = lazy(
   () => import("../pages/CompanyPages/AIScreening/component/ResumeList")
 );
 const CompanySubscription = lazy(
-  () => import("../pages/CompanyPages/CompanyClients/CompanySubscription")
+  () => import("../pages/CompanyPages/CompanySubsriptions/CompanySubscription")
+);
+const MySubscription = lazy(
+  () => import("../pages/CompanyPages/CompanySubsriptions/components/MySubscription")
 );
 
 /* ============== System Pages ==============*/
@@ -94,7 +97,7 @@ const RecruitmentTypeList = lazy(
 const BannerList = lazy(
   () => import("../pages/SystemPages/Content/BannerList")
 );
-const PaymentSuccess = lazy(() => import("../pages/PaymentSuccess"));
+const PaymentSuccess = lazy(() => import("../pages/CompanyPages/CompanySubsriptions/components/PaymentSuccess"));
 
 // ===== System children routes dùng chung cho Admin / Manager / Staff =====
 const systemChildren = [
@@ -218,6 +221,10 @@ export const router = createBrowserRouter([
       {
         path: APP_ROUTES.COMPANY_SUBSCRIPTIONS,
         element: <CompanySubscription />,
+      },
+      {
+        path: APP_ROUTES.COMPANY_MY_SUBSCRIPTIONS,
+        element: <MySubscription />,
       },
     ],
   },

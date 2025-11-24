@@ -42,7 +42,7 @@ export default function PaymentSuccess() {
               key="subscription" 
               className="company-btn--filled" 
               size="large"
-              onClick={() => navigate("/company/subscriptions")}
+              onClick={() => navigate("/company/my-subscription")}
             >
               View My Subscription
             </Button>,
@@ -50,7 +50,7 @@ export default function PaymentSuccess() {
               key="dashboard" 
               className="company-btn" 
               size="large"
-              onClick={() => navigate("/company/jobs")}
+              onClick={() => navigate("/company/dashboard")}
             >
               Go to Dashboard
             </Button>

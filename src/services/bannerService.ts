@@ -1,22 +1,19 @@
 import api from "./api";
 
 export const bannerService = {
-  getAll: (params: any) =>
-    api.get("/banner-configs", { params }),
+	getAll: (params: any) => api.get("/public/banner-configs", { params }),
 
-  getById: (id: number) =>
-    api.get(`/banner-configs/${id}`),
+	getById: (id: number) => api.get(`/public/banner-configs/${id}`),
 
-  create: (formData: FormData) =>
-    api.post("/banner-configs", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
+	create: (formData: FormData) =>
+		api.post("/system/banner-configs", formData, {
+			headers: { "Content-Type": "multipart/form-data" },
+		}),
 
-  update: (id: number, formData: FormData) =>
-    api.patch(`/banner-configs/${id}`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
+	update: (id: number, formData: FormData) =>
+		api.patch(`/system/banner-configs/${id}`, formData, {
+			headers: { "Content-Type": "multipart/form-data" },
+		}),
 
-  delete: (id: number) =>
-    api.delete(`/banner-configs/${id}`)
+	delete: (id: number) => api.delete(`/system/banner-configs/${id}`),
 };

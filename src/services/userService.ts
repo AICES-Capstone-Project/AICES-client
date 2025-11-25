@@ -19,8 +19,8 @@ export const userService = {
     return await get<GetUsersResponse>(url);
   },
 
-  getById: async (id: number): Promise<ApiResponse<GetUserByIdResponse>> => {
-    return await get<GetUserByIdResponse>(API_ENDPOINTS.USER.GET_BY_ID(id));
+  getById: async (userId: number): Promise<ApiResponse<GetUserByIdResponse>> => {
+    return await get<GetUserByIdResponse>(API_ENDPOINTS.USER.GET_BY_ID(userId));
   },
 
   create: async (data: CreateUserRequest): Promise<ApiResponse<null>> => {
@@ -28,20 +28,20 @@ export const userService = {
   },
 
   update: async (
-    id: number,
+    userId: number,
     data: UpdateUserRequest
   ): Promise<ApiResponse<null>> => {
-    return await patch<null>(API_ENDPOINTS.USER.UPDATE(id), data);
+    return await patch<null>(API_ENDPOINTS.USER.UPDATE(userId), data);
   },
 
   updateStatus: async (
-    id: number,
+    userId: number,
     status: "Verified" | "Unverified" | "Locked"
   ): Promise<ApiResponse<null>> => {
-    return await put<null>(API_ENDPOINTS.USER.UPDATE_STATUS(id), { status });
+    return await put<null>(API_ENDPOINTS.USER.UPDATE_STATUS(userId), { status });
   },
 
-  remove: async (id: number): Promise<ApiResponse<null>> => {
-    return await remove<null>(API_ENDPOINTS.USER.DELETE(id));
+  remove: async (userId: number): Promise<ApiResponse<null>> => {
+    return await remove<null>(API_ENDPOINTS.USER.DELETE(userId));
   },
 };

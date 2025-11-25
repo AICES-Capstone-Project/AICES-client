@@ -29,7 +29,7 @@ export const companySubscriptionService = {
     params: CompanySubscriptionQuery = {}
   ): Promise<CompanySubscriptionListData> {
     const res = await api.get<ApiResponse<CompanySubscriptionListData>>(
-      API_ENDPOINTS.COMPANY_SUBSCRIPTION.LIST,
+      API_ENDPOINTS.COMPANY_SUBSCRIPTION.SYSTEM_GET,
       { params }
     );
 
@@ -38,9 +38,9 @@ export const companySubscriptionService = {
   },
 
   // GET /api/company-subscriptions/{id}
-  async getById(id: number): Promise<CompanySubscription> {
+  async getById(companySubscriptionId: number): Promise<CompanySubscription> {
     const res = await api.get<ApiResponse<CompanySubscription>>(
-      API_ENDPOINTS.COMPANY_SUBSCRIPTION.GET_BY_ID(id)
+      API_ENDPOINTS.COMPANY_SUBSCRIPTION.SYSTEM_GET_BY_ID(companySubscriptionId)
     );
     return res.data.data;
   },
@@ -48,16 +48,16 @@ export const companySubscriptionService = {
   // POST /api/company-subscriptions
   async create(payload: CreateCompanySubscriptionPayload) {
     const res = await api.post<ApiResponse<CompanySubscription>>(
-      API_ENDPOINTS.COMPANY_SUBSCRIPTION.CREATE,
+      API_ENDPOINTS.COMPANY_SUBSCRIPTION.SYSTEM_CREATE,
       payload
     );
     return res.data.data;
   },
 
   // DELETE /api/company-subscriptions/{id}
-  async delete(id: number) {
+  async delete(companySubscriptionId: number) {
     const res = await api.delete<ApiResponse<null>>(
-      API_ENDPOINTS.COMPANY_SUBSCRIPTION.DELETE(id)
+      API_ENDPOINTS.COMPANY_SUBSCRIPTION.SYSTEM_DELETE(companySubscriptionId)
     );
     return res.data.data;
   },

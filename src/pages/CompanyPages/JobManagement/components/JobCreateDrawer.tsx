@@ -2,6 +2,7 @@ import { Drawer, Form, Input, Button, Space, InputNumber, Select, Typography } f
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { systemService } from "../../../../services/systemService";
+import { categoryService } from "../../../../services/categoryService";
 import { useAppSelector } from "../../../../hooks/redux";
 import { ROLES } from "../../../../services/config";
 
@@ -30,8 +31,6 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
     if (open) setSavedAndPending(false);
   }, [open]);
 
-  // If savedAndPending becomes true for a recruiter, show the message briefly
-  // then close the drawer and reset the form.
   useEffect(() => {
     if (!isRecruiter || !savedAndPending) return;
     const t = setTimeout(() => {
@@ -55,17 +54,37 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
       setLoadingSkills(true);
       setLoadingEmployment(true);
       try {
-        const [catsResp, skillsResp, empResp] = await Promise.all([
-          systemService.getCategories(),
+        console.log("🔄 Starting to fetch categories...");
+        const catsResp = await categoryService.getAll({ page: 1, pageSize: 100 });
+        console.log("📦 Full Categories API response:", JSON.stringify(catsResp, null, 2));
+        console.log("📊 Categories data field:", catsResp?.data);
+        console.log("📋 Type of data:", typeof catsResp?.data, Array.isArray(catsResp?.data));
+        
+        const [skillsResp, empResp] = await Promise.all([
           systemService.getSkills(),
           systemService.getEmploymentTypes(),
         ]);
+        
         if (!mounted) return;
-        setCategories((catsResp?.data as any)?.categories ?? []);
+        
+        // Extract categories array from response
+        let categoriesData: any[] = [];
+        if (catsResp?.data) {
+          if (Array.isArray(catsResp.data)) {
+            categoriesData = catsResp.data;
+          } else if (catsResp.data.categories && Array.isArray(catsResp.data.categories)) {
+            categoriesData = catsResp.data.categories;
+          }
+        }
+        console.log("✅ Final extracted categories:", categoriesData);
+        console.log("📝 Categories count:", categoriesData.length);
+        
+        setCategories(categoriesData);
         setSkills(skillsResp?.data || []);
         setEmploymentTypes(empResp?.data || []);
-      } catch {
-        // ignore
+      } catch (error) {
+        console.error("❌ Error loading categories:", error);
+        setCategories([]);
       } finally {
         setLoadingCats(false);
         setLoadingSkills(false);
@@ -86,7 +105,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
     }
     setLoadingSpecs(true);
     try {
-      const resp = await systemService.getSpecializations(categoryId);
+      const resp = await categoryService.getSpecializations(categoryId);
       setSpecializations(resp?.data || []);
     } catch {
       setSpecializations([]);

@@ -21,13 +21,13 @@ export default function JobDetail() {
   const [resumesPg, setResumesPg] = useState<TablePaginationConfig>({ current: 1, pageSize: DEFAULT_PAGE_SIZE });
 
   const loadJob = async () => {
-    const res = await companyService.getJobDetail(cid, jid);
+    const res = await companyService.getJobDetail(jid);
     if (res.status === "Success" && res.data) setJob(res.data);
     else message.error(res.message || "Failed to load job");
   };
 
   const loadResumes = async () => {
-    const res = await companyService.getResumes(cid, jid, { page: resumesPg.current, pageSize: resumesPg.pageSize });
+    const res = await companyService.getResumes(jid, { page: resumesPg.current, pageSize: resumesPg.pageSize });
     if (res.status === "Success" && res.data) {
       setResumes(res.data.items);
       setResumesTotal(res.data.totalPages * (resumesPg.pageSize || DEFAULT_PAGE_SIZE));

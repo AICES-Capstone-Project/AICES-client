@@ -21,13 +21,13 @@ interface CompanyData {
 export const companyService = {
   create: async (data: CreateCompanyRequest): Promise<ApiResponse<null>> => {
     return await post<null, CreateCompanyRequest>(
-      API_ENDPOINTS.COMPANY.CREATE,
+      API_ENDPOINTS.COMPANY.COMPANY_CREATE,
       data
     );
   },
   // Send multipart/form-data (for logo and document files)
   createForm: async (formData: FormData): Promise<ApiResponse<null>> => {
-    return await postForm<null>(API_ENDPOINTS.COMPANY.CREATE, formData);
+    return await postForm<null>(API_ENDPOINTS.COMPANY.COMPANY_GET_PROFILE, formData);
   },
   // === NEW: Create company as System Admin (POST /api/companies) ===
   createAdminForm: async (formData: FormData): Promise<ApiResponse<null>> => {
@@ -36,7 +36,7 @@ export const companyService = {
   },
   // Get current user's company
   getSelf: async (): Promise<ApiResponse<CompanyData>> => {
-    return await get<CompanyData>(API_ENDPOINTS.COMPANY.GET);
+    return await get<CompanyData>(API_ENDPOINTS.COMPANY.COMPANY_GET_PROFILE);
   },
   // Get company members (paged)
   getMembers: async (
@@ -48,27 +48,26 @@ export const companyService = {
       : "";
     if (companyId) {
       return await get<any>(
-        `${API_ENDPOINTS.COMPANY.GET_MEMBERS(companyId)}${q}`
+        `${API_ENDPOINTS.COMPANY_USER.SYSTEM_GET_MEMBERS(companyId)}${q}`
       );
     }
     // fallback to current user's company members endpoint
-    return await get<any>(`/companies/self/members${q}`);
+    return await get<any>(API_ENDPOINTS.COMPANY_USER.COMPANY_GET_MEMBERS);
   },
 
   getById: async (companyId: number) => {
-    return await get<CompanyData>(API_ENDPOINTS.COMPANY.GET_BY_ID(companyId));
+    return await get<CompanyData>(API_ENDPOINTS.COMPANY.PUBLIC_GET_BY_ID(companyId));
   },
 
   // Get job detail for a company
-  getJobDetail: async (companyId: number, jobId: number) => {
+  getJobDetail: async (jobId: number) => {
     return await get<any>(
-      `${API_ENDPOINTS.COMPANY.GET_JOBS(companyId)}/${jobId}`
+      API_ENDPOINTS.JOB.COMPANY_PUBLISHED_BY_ID(jobId)
     );
   },
 
   // Get resumes for a job
   getResumes: async (
-    companyId: number,
     jobId: number,
     params?: { page?: number; pageSize?: number }
   ): Promise<ApiResponse<{ items: any[]; totalPages: number }>> => {
@@ -76,29 +75,26 @@ export const companyService = {
       ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}`
       : "";
     return await get<{ items: any[]; totalPages: number }>(
-      `${API_ENDPOINTS.COMPANY.GET_JOBS(companyId)}/${jobId}/resumes${q}`
+      `${API_ENDPOINTS.RESUME.COMPANY_GET(jobId)}${q}`
     );
   },
 
   getResumeDetail: async (
-    companyId: number,
     jobId: number,
     resumeId: number
   ): Promise<ApiResponse<any>> => {
     return await get<any>(
-      `${API_ENDPOINTS.COMPANY.GET_JOBS(
-        companyId
-      )}/${jobId}/resumes/${resumeId}`
+      API_ENDPOINTS.RESUME.COMPANY_GET_BY_ID(jobId, resumeId)
     );
   },
 
   // Get public list of companies (for joining)
   getPublicCompanies: async (): Promise<ApiResponse<CompanyData[]>> => {
-    return await get<CompanyData[]>(API_ENDPOINTS.COMPANY.PUBLIC);
+    return await get<CompanyData[]>(API_ENDPOINTS.COMPANY.PUBLIC_GET);
   },
 
   getCompanies: async (): Promise<ApiResponse<CompanyData[]>> => {
-    return await get<CompanyData[]>(API_ENDPOINTS.COMPANY.LIST);
+    return await get<CompanyData[]>(API_ENDPOINTS.COMPANY.SYSTEM_GET);
   },
 
   // Get paginated companies (for admin listing)
@@ -125,7 +121,7 @@ export const companyService = {
       totalPages: number;
       currentPage: number;
       pageSize: number;
-    }>(`${API_ENDPOINTS.COMPANY.LIST}${q}`);
+    }>(`${API_ENDPOINTS.COMPANY.SYSTEM_GET}${q}`);
   },
 
   getJobs: async (
@@ -136,21 +132,21 @@ export const companyService = {
       ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}`
       : "";
     return await get<{ items: any[]; totalPages: number }>(
-      `${API_ENDPOINTS.COMPANY.GET_JOBS(companyId)}${q}`
+      `${API_ENDPOINTS.JOB.SYSTEM_GET(companyId)}${q}`
     );
   },
 
   // Join a company by ID
   joinCompany: async (companyId: number): Promise<ApiResponse<null>> => {
     return await post<null, null>(
-      API_ENDPOINTS.COMPANY.JOIN(companyId),
+      API_ENDPOINTS.COMPANY_USER.COMPANY_SEND_JOIN_REQUEST(companyId),
       null as any
     );
   },
 
   // Get pending join requests for current company
   getJoinRequests: async (): Promise<ApiResponse<any[]>> => {
-    return await get<any[]>(`/companies/self/join-requests`);
+    return await get<any[]>(API_ENDPOINTS.COMPANY_USER.COMPANY_GET_PENDING_JOIN_REQUESTS);
   },
 
   // Update join request status for a user (approve/reject)
@@ -159,25 +155,26 @@ export const companyService = {
     joinStatus: string
   ): Promise<ApiResponse<null>> => {
     return await put<null, { joinStatus: string }>(
-      `/companies/self/join-requests/${comUserId}/status`,
+      API_ENDPOINTS.COMPANY_USER.COMPANY_UPDATE_JOIN_REQUEST_STATUS(comUserId),
       { joinStatus }
     );
   },
 
   // Update current company profile (supports FormData for file upload)
   updateProfile: async (formData: FormData): Promise<ApiResponse<any>> => {
-    return await patchForm<any>(`/companies/self/profile`, formData);
+    return await patchForm<any>(API_ENDPOINTS.COMPANY.COMPANY_UPDATE_PROFILE, formData);
   },
-  deleteCompany: async (id: number): Promise<ApiResponse<null>> => {
-    return await remove<null>(`/companies/${id}`);
+
+  deleteCompany: async (companyId: number): Promise<ApiResponse<null>> => {
+    return await remove<null>(API_ENDPOINTS.COMPANY.SYSTEM_DELETE(companyId));
   },
   updateStatus: async (
-    id: number,
+    companyId: number,
     payload: {
       status: "Approved" | "Rejected" | "Pending";
       rejectionReason?: string | null;
     }
   ): Promise<ApiResponse<null>> => {
-    return await put<null, typeof payload>(`/companies/${id}/status`, payload);
+    return await put<null, typeof payload>(API_ENDPOINTS.COMPANY.SYSTEM_STATUS(companyId), payload);
   },
 };

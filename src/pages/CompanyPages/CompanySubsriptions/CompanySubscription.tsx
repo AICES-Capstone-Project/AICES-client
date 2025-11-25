@@ -4,7 +4,6 @@ import { SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 import { subscriptionService } from "../../../services/subscriptionService";
-import { paymentService } from "../../../services/paymentService";
 import SubscriptionDrawer from "./components/SubscriptionDrawer";
 
 interface SubscriptionPlan {
@@ -96,7 +95,7 @@ const CompanyClients: React.FC = () => {
   const handleUpgrade = async (plan: SubscriptionPlan) => {
     setUpgradingId(plan.subscriptionId);
     try {
-      const response = await paymentService.createCheckoutSession(plan.subscriptionId);
+      const response = await subscriptionService.createCheckoutSession(plan.subscriptionId);
 
       if (response.status === "Success" && response.data?.url) {
         // Navigate to payment URL

@@ -84,7 +84,7 @@ const Dashboard = () => {
 				// Load all data in parallel
 				await Promise.all([
 					loadJobStats(cId),
-					loadCVStats(cId),
+					loadCVStats(),
 					loadTopCVs(cId),
 				]);
 			}
@@ -135,7 +135,7 @@ const Dashboard = () => {
 		}
 	};
 
-	const loadCVStats = async (cId: number) => {
+	const loadCVStats = async () => {
 		try {
 			// Get all jobs first
 			const jobsResp = await jobService.getCompanyJobs(1, 100);
@@ -145,24 +145,21 @@ const Dashboard = () => {
 			let allResumes: any[] = [];
 
 			// Fetch resumes for each job
-			for (const job of jobs.slice(0, 10)) {
-				// Limit to first 10 jobs to avoid too many requests
-				try {
-					const resumesResp = await companyService.getResumes(
-						cId,
-						job.jobId,
-						{ page: 1, pageSize: 100 }
-					);
-					if (resumesResp.status === "Success" && resumesResp.data?.items) {
-						allResumes = [...allResumes, ...resumesResp.data.items];
-					}
-				} catch (err) {
-					// Skip if no resumes for this job
-					console.log(`No resumes for job ${job.jobId}`);
+		for (const job of jobs.slice(0, 10)) {
+			// Limit to first 10 jobs to avoid too many requests
+			try {
+				const resumesResp = await companyService.getResumes(
+					job.jobId,
+					{ page: 1, pageSize: 100 }
+				);
+				if (resumesResp.status === "Success" && resumesResp.data?.items) {
+					allResumes = [...allResumes, ...resumesResp.data.items];
 				}
+			} catch (err) {
+				// Skip if no resumes for this job
+				console.log(`No resumes for job ${job.jobId}`);
 			}
-
-			// Calculate CV stats based on dates
+		}			// Calculate CV stats based on dates
 			const now = new Date();
 			const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 			const weekAgo = new Date(today);
@@ -220,7 +217,7 @@ const Dashboard = () => {
 		}
 	};
 
-	const loadTopCVs = async (cId: number) => {
+	const loadTopCVs = async (_cId: number) => {
 		try {
 			// Get all jobs
 			const jobsResp = await jobService.getCompanyJobs(1, 100);
@@ -233,7 +230,6 @@ const Dashboard = () => {
 			for (const job of jobs.slice(0, 10)) {
 				try {
 					const resumesResp = await companyService.getResumes(
-						cId,
 						job.jobId,
 						{ page: 1, pageSize: 100 }
 					);

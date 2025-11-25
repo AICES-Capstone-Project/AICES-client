@@ -98,21 +98,20 @@ export const API_ENDPOINTS = {
 	// Category endpoints
 	CATEGORY: {
 		//------------------------------- PUBLIC -----------------------------------------
-		PUBLIC_GET: "/api/public/categories",
+		PUBLIC_GET: "/public/categories",
 		PUBLIC_GET_BY_ID: (categoryId: number) =>
-			`/api/public/categories/${categoryId}`,
+			`/public/categories/${categoryId}`,
 		PUBLIC_GET_SPECIALIZATIONS: (categoryId: number) =>
-			`/api/public/categories/${categoryId}/specializations`,
-
+			`/public/categories/${categoryId}/specializations`,
 		//------------------------------- SYSTEM -----------------------------------------
-		SYSTEM_GET: "/api/system/categories",
+		SYSTEM_GET: "/system/categories",
 		SYSTEM_GET_BY_ID: (categoryId: number) =>
-			`/api/system/categories/${categoryId}`,
-		SYSTEM_CREATE: "/api/system/categories",
+			`/system/categories/${categoryId}`,
+		SYSTEM_CREATE: "/system/categories",
 		SYSTEM_UPDATE: (categoryId: number) =>
-			`/api/system/categories/${categoryId}`,
+			`/system/categories/${categoryId}`,
 		SYSTEM_DELETE: (categoryId: number) =>
-			`/api/system/categories/${categoryId}`,
+			`/system/categories/${categoryId}`,
 	},
 
 	// Specialization endpoints

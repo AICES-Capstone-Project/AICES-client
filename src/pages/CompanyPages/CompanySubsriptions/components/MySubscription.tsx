@@ -4,7 +4,7 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import SubscriptionStatsCard from "./SubscriptionStatsCard";
 import SubscriptionDetailsSection from "./SubscriptionDetailsSection";
-import { paymentService } from "../../../../services/paymentService";
+import { subscriptionService } from "../../../../services/subscriptionService";
 
 const MySubscription: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const MySubscription: React.FC = () => {
   const loadCurrentSubscription = async () => {
     setLoading(true);
     try {
-      const response = await paymentService.getCurrentSubscription();
+      const response = await subscriptionService.getCurrentSubscription();
       if (response.status === "Success" && response.data) {
         const data = response.data;
 
@@ -54,7 +54,7 @@ const MySubscription: React.FC = () => {
     setConfirmVisible(false);
     setCancelling(true);
     try {
-      const response = await paymentService.cancelSubscription();
+      const response = await subscriptionService.cancelSubscription();
       if (response.status === "Success") {
         message.success("Your subscription has been cancelled");
         navigate("/company/subscriptions");

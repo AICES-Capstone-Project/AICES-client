@@ -1,36 +1,42 @@
-import api from "./api";
+import { get, post, patch, remove } from "./api";
+import { API_ENDPOINTS } from "./config";
+import type { ApiResponse } from "../types/api.types";
 import type { Category, CategoryListResponse } from "../types/category.types";
+import type PagingParams from "../types/paging.types";
+import { buildQuery } from "../utils/paging";
+
+interface CategoryRequest {
+	name: string;
+}
 
 export const categoryService = {
-	// GET /categories?page=1&pageSize=10
-	getAll(page = 1, pageSize = 10) {
-		return api.get<{ data: CategoryListResponse }>(
-			`/public/categories?page=${page}&pageSize=${pageSize}`
-		);
+	getAll: async (
+		params?: PagingParams
+	): Promise<ApiResponse<CategoryListResponse>> => {
+		const url = `${API_ENDPOINTS.CATEGORY.PUBLIC_GET}${buildQuery(params)}`;
+		return await get<CategoryListResponse>(url);
 	},
 
-	// GET /categories/{id}
-	getById(id: number) {
-		return api.get<{ data: Category }>(`/public/categories/${id}`);
+	getById: async (categoryId: number): Promise<ApiResponse<Category>> => {
+		return await get<Category>(API_ENDPOINTS.CATEGORY.PUBLIC_GET_BY_ID(categoryId));
 	},
 
-	// POST /categories
-	create(data: { name: string }) {
-		return api.post(`/system/categories`, data);
+	create: async (data: CategoryRequest): Promise<ApiResponse<null>> => {
+		return await post<null, CategoryRequest>(API_ENDPOINTS.CATEGORY.SYSTEM_CREATE, data);
 	},
 
-	// PATCH /categories/{id}
-	update(id: number, data: { name: string }) {
-		return api.patch(`/system/categories/${id}`, data);
+	update: async (
+		categoryId: number,
+		data: CategoryRequest
+	): Promise<ApiResponse<null>> => {
+		return await patch<null>(API_ENDPOINTS.CATEGORY.SYSTEM_UPDATE(categoryId), data);
 	},
 
-	// DELETE /categories/{id}
-	delete(id: number) {
-		return api.delete(`/system/categories/${id}`);
+	remove: async (categoryId: number): Promise<ApiResponse<null>> => {
+		return await remove<null>(API_ENDPOINTS.CATEGORY.SYSTEM_DELETE(categoryId));
 	},
 
-	// GET /categories/{id}/specializations
-	getSpecializations(id: number) {
-		return api.get<{ data: any[] }>(`/public/categories/${id}/specializations`);
+	getSpecializations: async (categoryId: number): Promise<ApiResponse<any[]>> => {
+		return await get<any[]>(API_ENDPOINTS.CATEGORY.PUBLIC_GET_SPECIALIZATIONS(categoryId));
 	},
 };

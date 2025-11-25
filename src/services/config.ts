@@ -168,9 +168,10 @@ export const API_ENDPOINTS = {
 	// Job endpoints
 	JOB: {
 		//------------------------------- SYSTEM -----------------------------------------
-		// System xem tất cả job
-		SYSTEM_GET: "/system/jobs",
-		SYSTEM_GET_BY_ID: (jobId: number) => `/system/jobs/${jobId}`,
+		// System xem job trong 1 công ty
+		SYSTEM_GET: (companyId: number) => `/system/company/${companyId}/jobs`,
+		SYSTEM_GET_BY_ID: (companyId: number, jobId: number) =>
+			`/system/company/${companyId}/jobs/${jobId}`,
 
 		//------------------------------- COMPANY -----------------------------------------
 		// Company xem các job đã đăng trong company

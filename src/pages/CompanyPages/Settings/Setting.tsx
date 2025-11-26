@@ -78,8 +78,13 @@ export default function Setting() {
 
     try {
       setLoading(true);
-      message.success("Password change (demo) successful!");
-      formPassword.resetFields();
+      const resp = await profileService.changePassword(values.oldPassword, values.newPassword);
+      if (resp.status === "Success") {
+        message.success(resp.message || "Password has been reset successfully.");
+        formPassword.resetFields();
+      } else {
+        message.error(resp.message || "Password change failed!");
+      }
     } catch {
       message.error("Password change failed!");
     } finally {
@@ -97,17 +102,15 @@ export default function Setting() {
           <span style={{ fontWeight: 600 }}>Settings</span>
           {activeTab === "1" ? (
             <Button
-              type="default"
+              className="company-btn"
               onClick={() => setActiveTab("2")}
-              className="!bg-white !text-[var(--color-primary-dark)] !border !border-[var(--color-primary-dark)] hover:!bg-[var(--color-primary-light)] hover:!text-white"
             >
               Change Password
             </Button>
           ) : (
             <Button
-              type="default"
+              className="company-btn"
               onClick={() => setActiveTab("1")}
-              className="!bg-white !text-[var(--color-primary-dark)] !border !border-[var(--color-primary-dark)] hover:!bg-[var(--color-primary-light)] hover:!text-white"
             >
               Personal Info
             </Button>
@@ -198,12 +201,11 @@ export default function Setting() {
                   <Input.Password placeholder="Re-enter new password" />
                 </Form.Item>
 
-                <Form.Item className="!mb-0">
+                <Form.Item className="!mb-0 text-center">
                   <Button
-                    type="primary"
+                    className="company-btn--filled"
                     htmlType="submit"
                     loading={loading}
-                    className="w-full !bg-[var(--color-primary)] !hover:bg-[var(--color-primary-light)]"
                   >
                     Change password
                   </Button>

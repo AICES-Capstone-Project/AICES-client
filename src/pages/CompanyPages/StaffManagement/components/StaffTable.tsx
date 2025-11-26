@@ -1,6 +1,7 @@
 import React from "react";
-import { Table, Tag, Space, Button, Empty, Avatar, Select, Modal } from "antd";
+import { Table, Tag, Space, Button, Empty, Avatar, Modal, message } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import { companyService } from "../../../../services/companyService";
 import type { ColumnsType } from "antd/es/table";
 import type { CompanyMember } from "../../../../types/company.types";
 
@@ -13,7 +14,7 @@ type Props = {
   onChangeStatus?: (m: CompanyMember, status: string) => void;
 };
 
-const StaffTable: React.FC<Props> = ({ members, loading, onChangeStatus }) => {
+const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
   const getRoleColor = (roleName: string) => {
     switch (roleName?.toLowerCase()) {
       case "hr_manager":
@@ -84,24 +85,44 @@ const StaffTable: React.FC<Props> = ({ members, loading, onChangeStatus }) => {
               {record.joinStatus || "Approved"}
             </Tag>
           ) : (
-            <Select
-              value={record.joinStatus || "Pending"}
-              onChange={(val) => {
-                if (typeof val === "string" && typeof onChangeStatus === "function") {
-                  Modal.confirm({
-                    title: `Change status to ${val}?`,
-                    content: `Are you sure you want to set this member to ${val}?`,
-                    onOk: () => onChangeStatus(record, val),
-                  });
-                }
-              }}
-              options={[
-                { value: "Approved", label: "Approved" },
-                { value: "Rejected", label: "Rejected" },
-              ]}
+            <Button
               size="small"
-              style={{ width: 120 }}
-            />
+              className="company-btn--filled"
+              onClick={() => {
+                Modal.confirm({
+                  title: "Remove Member",
+                  content: `Are you sure you want to remove ${record.fullName || record.email} from the company?`,
+                  okText: "Remove",
+                  okButtonProps: { danger: true },
+                  onOk: async () => {
+                    try {
+                      const res = await companyService.deleteMember(record.comUserId);
+                      if (String(res?.status).toLowerCase() === "success") {
+                        Modal.destroyAll();
+                        message.success("Member removed successfully");
+                        if (typeof onDelete === "function") onDelete(record);
+                        setTimeout(() => {
+                          try {
+                            window.location.reload();
+                          } catch (e) {
+                            // ignore
+                          }
+                        }, 900);
+                      } else {
+                        Modal.destroyAll();
+                        Modal.error({ title: "Failed", content: res?.message || "Failed to remove member" });
+                      }
+                    } catch (err) {
+                      console.error(err);
+                      Modal.destroyAll();
+                      Modal.error({ title: "Error", content: "An error occurred while removing member" });
+                    }
+                  },
+                });
+              }}
+            >
+              Remove
+            </Button>
           )}
         </Space>
       ),

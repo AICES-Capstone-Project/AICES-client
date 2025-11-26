@@ -239,6 +239,9 @@ export const API_ENDPOINTS = {
 
 		// HR_Recruiter hủy yêu cầu tham gia company đã gửi
 		COMPANY_CANCEL_JOIN_REQUEST: "/companies/join-request/cancel",
+
+		// HR_Manager xóa account Recruiter ra khỏi công ty
+		COMPANY_DELETE_MEMBER: (comUserId: number) => `/companies/members/${comUserId}`,
 	},
 
 	// Company Subscription endpoints

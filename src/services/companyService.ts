@@ -160,6 +160,11 @@ export const companyService = {
     );
   },
 
+  // Delete a member from company (HR_Manager)
+  deleteMember: async (comUserId: number): Promise<ApiResponse<null>> => {
+    return await remove<null>(API_ENDPOINTS.COMPANY_USER.COMPANY_DELETE_MEMBER(comUserId));
+  },
+
   // Update current company profile (supports FormData for file upload)
   updateProfile: async (formData: FormData): Promise<ApiResponse<any>> => {
     return await patchForm<any>(API_ENDPOINTS.COMPANY.COMPANY_UPDATE_PROFILE, formData);

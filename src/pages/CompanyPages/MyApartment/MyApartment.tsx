@@ -193,7 +193,7 @@ export default function CompanyCreate() {
         title={<div className="flex justify-between items-center w-full">
           <span className="font-semibold">Submit company account creation request</span>
           <div className="flex gap-2 items-center">
-            <Button className="company-btn--filled" onClick={handleOpenJoin}>
+            <Button className="company-btn" onClick={handleOpenJoin}>
               Join your company
             </Button>
           </div>
@@ -575,9 +575,14 @@ export default function CompanyCreate() {
         title="Join a Company"
         open={joinModalOpen}
         onCancel={() => setJoinModalOpen(false)}
-        onOk={handleConfirmJoin}
-        okText="Join"
-        cancelText="Cancel"
+        footer={[
+          <Button key="cancel" className="company-btn" onClick={() => setJoinModalOpen(false)}>
+            Cancel
+          </Button>,
+          <Button key="join" className="company-btn--filled" onClick={handleConfirmJoin}>
+            Join
+          </Button>
+        ]}
       >
         {companiesLoading ? (
           <div style={{ textAlign: 'center' }}><Spin /></div>

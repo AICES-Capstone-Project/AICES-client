@@ -197,7 +197,7 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <CompanyDashboard /> },
+      { index: true, element: <Setting /> },
       { path: APP_ROUTES.COMPANY_DASHBOARD, element: <CompanyDashboard /> },
       { path: APP_ROUTES.COMPANY_STAFFS, element: <CompanyStaffs /> },
       { path: APP_ROUTES.COMPANY_JOBS, element: <JobManagement /> },

@@ -15,7 +15,7 @@ export default function ResumeDetail() {
   const [resume, setResume] = useState<Resume | null>(null);
 
   const load = async () => {
-    const res = await companyService.getResumeDetail(cid, jid, rid);
+    const res = await companyService.getResumeDetail(cid, jid,);
     if (res.status === "Success" && res.data) setResume(res.data);
     else message.error(res.message || "Failed to load resume");
   };

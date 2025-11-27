@@ -55,17 +55,30 @@ export default function SpecializationList() {
     try {
       setLoading(true);
 
-      const response = await specializationService.getSpecializations({
+      const response = await specializationService.getSpecializationsSystem({
         page,
         pageSize,
         keyword: keyword || undefined,
       });
 
-      const { data } = response.data;
-      const list = data?.specializations ?? [];
+      const payload = response.data?.data;
+
+
+      if (!payload) {
+        setSpecializations([]);
+        setPagination((prev) => ({
+          ...prev,
+          current: page,
+          pageSize,
+          total: 0,
+        }));
+        return;
+      }
+
+      const list = payload.specializations ?? [];
       const total =
-        typeof data?.totalCount === "number"
-          ? data.totalCount
+        typeof payload.totalCount === "number"
+          ? payload.totalCount
           : list.length;
 
       setSpecializations(list);
@@ -79,8 +92,7 @@ export default function SpecializationList() {
       // eslint-disable-next-line no-console
       console.error("Failed to fetch specializations", error);
       const msg =
-        error?.response?.data?.message ||
-        "Failed to fetch specializations.";
+        error?.response?.data?.message || "Failed to fetch specializations.";
       message.error(msg);
     } finally {
       setLoading(false);
@@ -133,8 +145,7 @@ export default function SpecializationList() {
       // eslint-disable-next-line no-console
       console.error("Failed to delete specialization", error);
       const msg =
-        error?.response?.data?.message ||
-        "Failed to delete specialization.";
+        error?.response?.data?.message || "Failed to delete specialization.";
       message.error(msg);
     } finally {
       setLoading(false);
@@ -176,8 +187,7 @@ export default function SpecializationList() {
       // eslint-disable-next-line no-console
       console.error("Failed to save specialization", error);
       const msg =
-        error?.response?.data?.message ||
-        "Failed to save specialization.";
+        error?.response?.data?.message || "Failed to save specialization.";
       message.error(msg);
     } finally {
       setLoading(false);
@@ -268,7 +278,11 @@ export default function SpecializationList() {
   return (
     <Card>
       <Space
-        style={{ marginBottom: 16, width: "100%", justifyContent: "space-between" }}
+        style={{
+          marginBottom: 16,
+          width: "100%",
+          justifyContent: "space-between",
+        }}
       >
         <div>
           <Title level={4} style={{ marginBottom: 0 }}>
@@ -351,7 +365,10 @@ export default function SpecializationList() {
               { type: "number", min: 1, message: "Category ID must be > 0" },
             ]}
           >
-            <InputNumber style={{ width: "100%" }} placeholder="Enter category ID" />
+            <InputNumber
+              style={{ width: "100%" }}
+              placeholder="Enter category ID"
+            />
           </Form.Item>
         </Form>
       </Modal>

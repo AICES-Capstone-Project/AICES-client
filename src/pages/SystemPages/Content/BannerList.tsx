@@ -43,7 +43,7 @@ export default function BannerList() {
     try {
       setLoading(true);
 
-      const res = await bannerService.getAll({
+      const res = await bannerService.getAllSystem({
         page: pagination.current,
         pageSize: pagination.pageSize,
         keyword: keyword || undefined,

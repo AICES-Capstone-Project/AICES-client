@@ -5,7 +5,8 @@ import {
   companySubscriptionService,
   type CompanySubscriptionQuery,
 } from "../../../services/companySubscriptionService";
-import type { CompanySubscription } from "../../../types/subscription.types";
+import type { CompanySubscription } from "../../../types/companySubscription.types";
+
 
 const { Title, Text } = Typography;
 const { Search } = Input;

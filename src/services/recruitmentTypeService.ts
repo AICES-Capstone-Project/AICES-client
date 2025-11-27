@@ -1,7 +1,9 @@
 // src/services/recruitmentTypeService.ts
 
 import api from "./api";
+import { API_ENDPOINTS } from "./config";
 import type { RecruitmentType } from "../types/recruitmentType.types";
+import type { ApiResponse } from "../types/api.types";
 
 export interface RecruitmentTypeQuery {
   page?: number;
@@ -24,15 +26,23 @@ function mapEmploymentType(item: any): RecruitmentType {
   };
 }
 
-const BASE = "/employment-types";
+// Base URL theo API_ENDPOINTS mới
+const PUBLIC_BASE = API_ENDPOINTS.EMPLOYMENT_TYPE.PUBLIC_GET;        // /public/employment-types
+const SYSTEM_BASE = API_ENDPOINTS.EMPLOYMENT_TYPE.SYSTEM_CREATE;     // /system/employment-types
 
 export const recruitmentTypeService = {
-  async getAll(params: RecruitmentTypeQuery = {}): Promise<RecruitmentTypeListResult> {
-    const res = await api.get(BASE, { params });
+  // ================== GET (PUBLIC) ==================
+  // BE chỉ có PUBLIC_GET, nên list & detail vẫn dùng public
+  async getAll(
+    params: RecruitmentTypeQuery = {}
+  ): Promise<RecruitmentTypeListResult> {
+    const res = await api.get<ApiResponse<any>>(PUBLIC_BASE, { params });
 
     const payload = res.data?.data;
 
-    // BE hiện tại trả mảng đơn thuần: data: [ ... ]
+    // BE có thể trả:
+    // - data: [ ... ]
+    // - hoặc data: { items: [...], total: number }
     const list = Array.isArray(payload)
       ? payload
       : Array.isArray(payload?.items)
@@ -51,20 +61,27 @@ export const recruitmentTypeService = {
   },
 
   async getById(id: number): Promise<RecruitmentType> {
-    const res = await api.get(`${BASE}/${id}`);
+    const res = await api.get<ApiResponse<any>>(
+      API_ENDPOINTS.EMPLOYMENT_TYPE.PUBLIC_GET_BY_ID(id)
+    );
     const item = res.data?.data;
     return mapEmploymentType(item);
   },
 
+  // ================== CRUD (SYSTEM) ==================
+
   async create(data: { name: string }): Promise<void> {
-    await api.post(BASE, data);
+    // POST /system/employment-types
+    await api.post(SYSTEM_BASE, data);
   },
 
   async update(id: number, data: { name: string }): Promise<void> {
-    await api.patch(`${BASE}/${id}`, data);
+    // PATCH /system/employment-types/{id}
+    await api.patch(API_ENDPOINTS.EMPLOYMENT_TYPE.SYSTEM_UPDATE(id), data);
   },
 
   async remove(id: number): Promise<void> {
-    await api.delete(`${BASE}/${id}`);
+    // DELETE /system/employment-types/{id}
+    await api.delete(API_ENDPOINTS.EMPLOYMENT_TYPE.SYSTEM_DELETE(id));
   },
 };

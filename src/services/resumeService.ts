@@ -17,12 +17,19 @@ export const resumeService = {
     const q = params
       ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}`
       : "";
-    return await get<Paginated<Resume>>(`${API_ENDPOINTS.RESUME.COMPANY_GET(jobId)}${q}`);
+    return await get<Paginated<Resume>>(
+      `${API_ENDPOINTS.RESUME.COMPANY_GET(jobId)}${q}`
+    );
   },
 
   // Get resume detail by id (for a job)
-  getById: async (jobId: number, resumeId: number): Promise<ApiResponse<Resume>> => {
-    return await get<Resume>(API_ENDPOINTS.RESUME.COMPANY_GET_BY_ID(jobId, resumeId));
+  getById: async (
+    jobId: number,
+    resumeId: number
+  ): Promise<ApiResponse<Resume>> => {
+    return await get<Resume>(
+      API_ENDPOINTS.RESUME.COMPANY_GET_BY_ID(jobId, resumeId)
+    );
   },
 
   // Retry analysis / reprocess a resume
@@ -33,6 +40,28 @@ export const resumeService = {
   // Delete a resume
   delete: async (resumeId: number): Promise<ApiResponse<null>> => {
     return await remove<null>(API_ENDPOINTS.RESUME.COMPANY_DELETE(resumeId));
+  },
+  // 🔹 System Admin: xem resumes theo job
+  getSystemResumes: async (
+    jobId: number,
+    params?: { page?: number; pageSize?: number }
+  ): Promise<ApiResponse<Paginated<Resume>>> => {
+    const q = params
+      ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}`
+      : "";
+    return await get<Paginated<Resume>>(
+      `${API_ENDPOINTS.RESUME.COMPANY_GET(jobId)}${q}`
+    );
+  },
+
+  // 🔹 System Admin: xem chi tiết 1 resume trong job
+  getSystemResumeById: async (
+    jobId: number,
+    resumeId: number
+  ): Promise<ApiResponse<Resume>> => {
+    return await get<Resume>(
+      API_ENDPOINTS.RESUME.COMPANY_GET_BY_ID(jobId, resumeId)
+    );
   },
 };
 

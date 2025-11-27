@@ -1,6 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card, Tabs, Typography, Space, Tag, Table, Button, message,} from "antd";
+import {
+  Card,
+  Tabs,
+  Typography,
+  Space,
+  Tag,
+  Table,
+  Button,
+  message,
+} from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { companyService } from "../../../services/companyService";
 import type { Company, CompanyMember, Job } from "../../../types/company.types";
@@ -20,16 +29,22 @@ export default function CompanyDetail() {
   // Members
   const [members, setMembers] = useState<CompanyMember[]>([]);
   const [membersTotal, setMembersTotal] = useState(0);
-  const [membersPg, setMembersPg] = useState<TablePaginationConfig>({ current: 1, pageSize: DEFAULT_PAGE_SIZE });
+  const [membersPg, setMembersPg] = useState<TablePaginationConfig>({
+    current: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
 
   // Jobs
   const [jobs, setJobs] = useState<Job[]>([]);
   const [jobsTotal, setJobsTotal] = useState(0);
-  const [jobsPg, setJobsPg] = useState<TablePaginationConfig>({ current: 1, pageSize: DEFAULT_PAGE_SIZE });
+  const [jobsPg, setJobsPg] = useState<TablePaginationConfig>({
+    current: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+  });
 
   const loadCompany = async () => {
     setLoading(true);
-    const res = await companyService.getById(id);
+    const res = await companyService.getSystemCompanyById(id); // dùng /system/companies/{id}
     if (res.status === "Success" && res.data) {
       const d = res.data;
       setCompany({
@@ -49,59 +64,114 @@ export default function CompanyDetail() {
   };
 
   const loadMembers = async () => {
-    const res = await companyService.getMembers(id, { page: membersPg.current, pageSize: membersPg.pageSize });
+    const res = await companyService.getMembers(id, {
+      page: membersPg.current,
+      pageSize: membersPg.pageSize,
+    });
     if (res.status === "Success" && res.data) {
       setMembers(res.data.items);
-      setMembersTotal(res.data.totalPages * (membersPg.pageSize || DEFAULT_PAGE_SIZE));
+      setMembersTotal(
+        res.data.totalPages * (membersPg.pageSize || DEFAULT_PAGE_SIZE)
+      );
     }
   };
 
   const loadJobs = async () => {
-    const res = await companyService.getJobs(id, { page: jobsPg.current, pageSize: jobsPg.pageSize });
+    const res = await companyService.getJobs(id, {
+      page: jobsPg.current,
+      pageSize: jobsPg.pageSize,
+    });
     if (res.status === "Success" && res.data) {
       setJobs(res.data.items);
-      setJobsTotal(res.data.totalPages * (jobsPg.pageSize || DEFAULT_PAGE_SIZE));
+      setJobsTotal(
+        res.data.totalPages * (jobsPg.pageSize || DEFAULT_PAGE_SIZE)
+      );
     }
   };
 
-  useEffect(() => { loadCompany(); }, [id]);
-  useEffect(() => { loadMembers(); /* eslint-disable-next-line */ }, [membersPg.current, membersPg.pageSize]);
-  useEffect(() => { loadJobs(); /* eslint-disable-next-line */ }, [jobsPg.current, jobsPg.pageSize]);
+  useEffect(() => {
+    loadCompany();
+  }, [id]);
+  useEffect(() => {
+    loadMembers(); /* eslint-disable-next-line */
+  }, [membersPg.current, membersPg.pageSize]);
+  useEffect(() => {
+    loadJobs(); /* eslint-disable-next-line */
+  }, [jobsPg.current, jobsPg.pageSize]);
 
   const memberCols: ColumnsType<CompanyMember> = [
     { title: "User ID", dataIndex: "userId", width: 90 },
-    { title: "Name", dataIndex: "fullName", render: (v: string | null) => v || "—" },
+    {
+      title: "Name",
+      dataIndex: "fullName",
+      render: (v: string | null) => v || "—",
+    },
     { title: "Email", dataIndex: "email" },
     { title: "Role", dataIndex: "roleName", width: 160 },
     {
       title: "Status",
       dataIndex: "isActive",
       width: 120,
-      render: (b: boolean) => (b ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>),
+      render: (b: boolean) =>
+        b ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
     },
-    { title: "Joined At", dataIndex: "joinedAt", width: 200, render: (v: string) => new Date(v).toLocaleString() },
+    {
+      title: "Joined At",
+      dataIndex: "joinedAt",
+      width: 200,
+      render: (v: string) => new Date(v).toLocaleString(),
+    },
   ];
 
   const jobCols: ColumnsType<Job> = [
     { title: "Job ID", dataIndex: "jobId", width: 90 },
     { title: "Title", dataIndex: "title" },
-    { title: "Department", dataIndex: "department", width: 140, render: (v: string | null) => v || "—" },
-    { title: "Location", dataIndex: "location", width: 160, render: (v: string | null) => v || "—" },
+    {
+      title: "Department",
+      dataIndex: "department",
+      width: 140,
+      render: (v: string | null) => v || "—",
+    },
+    {
+      title: "Location",
+      dataIndex: "location",
+      width: 160,
+      render: (v: string | null) => v || "—",
+    },
     {
       title: "Status",
       dataIndex: "status",
       width: 120,
       render: (s: Job["status"]) =>
-        s === "Open" ? <Tag color="green">Open</Tag> : s === "Draft" ? <Tag color="gold">Draft</Tag> : <Tag color="red">Closed</Tag>,
+        s === "Open" ? (
+          <Tag color="green">Open</Tag>
+        ) : s === "Draft" ? (
+          <Tag color="gold">Draft</Tag>
+        ) : (
+          <Tag color="red">Closed</Tag>
+        ),
     },
-    { title: "Openings", dataIndex: "openings", width: 110, render: (v?: number) => v ?? "—" },
-    { title: "Updated", dataIndex: "updatedAt", width: 200, render: (v: string) => new Date(v).toLocaleString() },
+    {
+      title: "Openings",
+      dataIndex: "openings",
+      width: 110,
+      render: (v?: number) => v ?? "—",
+    },
+    {
+      title: "Updated",
+      dataIndex: "updatedAt",
+      width: 200,
+      render: (v: string) => new Date(v).toLocaleString(),
+    },
     {
       title: "Actions",
       key: "actions",
       width: 120,
       render: (_, r) => (
-        <Button icon={<EyeOutlined />} onClick={() => nav(`/system/company/${id}/jobs/${r.jobId}`)}>
+        <Button
+          icon={<EyeOutlined />}
+          onClick={() => nav(`/system/company/${id}/jobs/${r.jobId}`)}
+        >
           View
         </Button>
       ),
@@ -110,17 +180,35 @@ export default function CompanyDetail() {
 
   return (
     <div>
-      <Space align="center" style={{ width: "100%", justifyContent: "space-between" }}>
-        <Title level={4} style={{ margin: 0 }}>Company Detail</Title>
+      <Space
+        align="center"
+        style={{ width: "100%", justifyContent: "space-between" }}
+      >
+        <Title level={4} style={{ margin: 0 }}>
+          Company Detail
+        </Title>
       </Space>
 
       <Card loading={loading} style={{ marginTop: 12 }}>
         {company && (
           <Space direction="vertical" style={{ width: "100%" }} size="middle">
             <Space align="center">
-              {company.logoUrl ? <img src={company.logoUrl} alt="logo" style={{ width: 48, height: 48, borderRadius: 10, objectFit: "cover" }} /> : null}
+              {company.logoUrl ? (
+                <img
+                  src={company.logoUrl}
+                  alt="logo"
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: 10,
+                    objectFit: "cover",
+                  }}
+                />
+              ) : null}
               <div>
-                <Title level={5} style={{ margin: 0 }}>{company.name}</Title>
+                <Title level={5} style={{ margin: 0 }}>
+                  {company.name}
+                </Title>
                 <Text type="secondary">{company.domain || "—"}</Text>
               </div>
             </Space>
@@ -128,7 +216,9 @@ export default function CompanyDetail() {
               <Tag color="blue">Email: {company.email || "—"}</Tag>
               <Tag color="blue">Phone: {company.phone || "—"}</Tag>
               <Tag color="blue">Size: {company.size || "—"}</Tag>
-              <Tag color={company.isActive ? "green" : "red"}>{company.isActive ? "Active" : "Inactive"}</Tag>
+              <Tag color={company.isActive ? "green" : "red"}>
+                {company.isActive ? "Active" : "Inactive"}
+              </Tag>
             </Space>
             {/* <Text type="secondary">Created: {new Date(company.createdAt).toLocaleString()}</Text> */}
           </Space>
@@ -143,7 +233,9 @@ export default function CompanyDetail() {
             label: "Overview",
             children: (
               <Card>
-                <Text type="secondary">General information of the company.</Text>
+                <Text type="secondary">
+                  General information of the company.
+                </Text>
               </Card>
             ),
           },

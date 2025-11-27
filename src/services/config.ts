@@ -108,10 +108,8 @@ export const API_ENDPOINTS = {
 		SYSTEM_GET_BY_ID: (categoryId: number) =>
 			`/system/categories/${categoryId}`,
 		SYSTEM_CREATE: "/system/categories",
-		SYSTEM_UPDATE: (categoryId: number) =>
-			`/system/categories/${categoryId}`,
-		SYSTEM_DELETE: (categoryId: number) =>
-			`/system/categories/${categoryId}`,
+		SYSTEM_UPDATE: (categoryId: number) => `/system/categories/${categoryId}`,
+		SYSTEM_DELETE: (categoryId: number) => `/system/categories/${categoryId}`,
 	},
 
 	// Specialization endpoints
@@ -241,7 +239,8 @@ export const API_ENDPOINTS = {
 		COMPANY_CANCEL_JOIN_REQUEST: "/companies/join-request/cancel",
 
 		// HR_Manager xóa account Recruiter ra khỏi công ty
-		COMPANY_DELETE_MEMBER: (comUserId: number) => `/companies/members/${comUserId}`,
+		COMPANY_DELETE_MEMBER: (comUserId: number) =>
+			`/companies/members/${comUserId}`,
 	},
 
 	// Company Subscription endpoints
@@ -270,7 +269,12 @@ export const API_ENDPOINTS = {
 		COMPANY_CHECKOUT: "/payments/checkout",
 
 		// HR_Manager xem lịch sử thanh toán của company
-		COMPANY_HISTORY: "/payments/history",
+		COMPANY_GET: "/payments",
+		COMPANY_GET_BY_ID: (paymentId: number) => `/payments/${paymentId}`,
+
+		// Get Stripe session by sessionId
+		COMPANY_GET_SESSION: (sessionId: string) =>
+			`/payments/stripe/session?sessionId=${sessionId}`,
 	},
 
 	RESUME: {

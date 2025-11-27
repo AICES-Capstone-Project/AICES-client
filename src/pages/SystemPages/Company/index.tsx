@@ -102,7 +102,7 @@ export default function CompanyList() {
       if (values.address) formData.append("Address", values.address);
       if (values.websiteUrl) formData.append("Website", values.websiteUrl);
       if (values.taxCode) formData.append("TaxCode", values.taxCode);
-      
+
       // === NEW: LogoFile (optional) ===
       const logoList = values.logoFile as UploadFile[] | undefined;
       if (logoList && logoList.length > 0) {
@@ -373,7 +373,8 @@ export default function CompanyList() {
   const openPreview = async (c: Company) => {
     setIsPreviewOpen(true);
     try {
-      const res = await companyService.getById(c.companyId);
+      const res = await companyService.getSystemCompanyById(c.companyId);
+
       if (res.status === "Success" && res.data) {
         const cd = res.data as any;
         const mapped: Company = {

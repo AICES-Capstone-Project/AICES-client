@@ -27,13 +27,16 @@ export const companyService = {
   },
   // Send multipart/form-data (for logo and document files)
   createForm: async (formData: FormData): Promise<ApiResponse<null>> => {
-    return await postForm<null>(API_ENDPOINTS.COMPANY.COMPANY_GET_PROFILE, formData);
+    return await postForm<null>(
+      API_ENDPOINTS.COMPANY.COMPANY_GET_PROFILE,
+      formData
+    );
   },
   // === NEW: Create company as System Admin (POST /api/companies) ===
   createAdminForm: async (formData: FormData): Promise<ApiResponse<null>> => {
-    // dùng đường dẫn thẳng giống swagger
-    return await postForm<null>("/companies", formData);
+    return await postForm<null>(API_ENDPOINTS.COMPANY.SYSTEM_CREATE, formData);
   },
+
   // Get current user's company
   getSelf: async (): Promise<ApiResponse<CompanyData>> => {
     return await get<CompanyData>(API_ENDPOINTS.COMPANY.COMPANY_GET_PROFILE);
@@ -56,14 +59,14 @@ export const companyService = {
   },
 
   getById: async (companyId: number) => {
-    return await get<CompanyData>(API_ENDPOINTS.COMPANY.PUBLIC_GET_BY_ID(companyId));
+    return await get<CompanyData>(
+      API_ENDPOINTS.COMPANY.PUBLIC_GET_BY_ID(companyId)
+    );
   },
 
   // Get job detail for a company
   getJobDetail: async (jobId: number) => {
-    return await get<any>(
-      API_ENDPOINTS.JOB.COMPANY_PUBLISHED_BY_ID(jobId)
-    );
+    return await get<any>(API_ENDPOINTS.JOB.COMPANY_PUBLISHED_BY_ID(jobId));
   },
 
   // Get resumes for a job
@@ -146,7 +149,9 @@ export const companyService = {
 
   // Get pending join requests for current company
   getJoinRequests: async (): Promise<ApiResponse<any[]>> => {
-    return await get<any[]>(API_ENDPOINTS.COMPANY_USER.COMPANY_GET_PENDING_JOIN_REQUESTS);
+    return await get<any[]>(
+      API_ENDPOINTS.COMPANY_USER.COMPANY_GET_PENDING_JOIN_REQUESTS
+    );
   },
 
   // Update join request status for a user (approve/reject)
@@ -162,12 +167,17 @@ export const companyService = {
 
   // Delete a member from company (HR_Manager)
   deleteMember: async (comUserId: number): Promise<ApiResponse<null>> => {
-    return await remove<null>(API_ENDPOINTS.COMPANY_USER.COMPANY_DELETE_MEMBER(comUserId));
+    return await remove<null>(
+      API_ENDPOINTS.COMPANY_USER.COMPANY_DELETE_MEMBER(comUserId)
+    );
   },
 
   // Update current company profile (supports FormData for file upload)
   updateProfile: async (formData: FormData): Promise<ApiResponse<any>> => {
-    return await patchForm<any>(API_ENDPOINTS.COMPANY.COMPANY_UPDATE_PROFILE, formData);
+    return await patchForm<any>(
+      API_ENDPOINTS.COMPANY.COMPANY_UPDATE_PROFILE,
+      formData
+    );
   },
 
   deleteCompany: async (companyId: number): Promise<ApiResponse<null>> => {
@@ -180,6 +190,16 @@ export const companyService = {
       rejectionReason?: string | null;
     }
   ): Promise<ApiResponse<null>> => {
-    return await put<null, typeof payload>(API_ENDPOINTS.COMPANY.SYSTEM_STATUS(companyId), payload);
+    return await put<null, typeof payload>(
+      API_ENDPOINTS.COMPANY.SYSTEM_STATUS(companyId),
+      payload
+    );
+  },
+
+  // 🔹 System Admin: lấy chi tiết company qua /system/companies/{id}
+  getSystemCompanyById: async (companyId: number) => {
+    return await get<CompanyData>(
+      API_ENDPOINTS.COMPANY.SYSTEM_GET_BY_ID(companyId)
+    );
   },
 };

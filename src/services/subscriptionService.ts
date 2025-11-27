@@ -1,5 +1,6 @@
 // src/services/subscriptionService.ts
 import api from "./api";
+import { get, post } from "./api";
 import { API_ENDPOINTS } from "./config";
 import type {
   ApiResponse,
@@ -19,28 +20,36 @@ interface CurrentSubscription {
   subscriptionStatus: string;
 }
 
-// Base URL cho từng nhóm
-const PUBLIC_BASE = API_ENDPOINTS.SUBSCRIPTION.PUBLIC_GET; // /public/subscriptions
-const SYSTEM_BASE = API_ENDPOINTS.SUBSCRIPTION.SYSTEM_GET; // /system/subscriptions
-
 export const subscriptionService = {
-  // ============================================================
-  // 🟦 SYSTEM (System Admin)
-  // ============================================================
-
+  // ================== SYSTEM ADMIN ==================
+  // Lấy toàn bộ gói (bao gồm active + inactive) cho System
   async getAll(): Promise<SubscriptionPlan[]> {
-    const res = await api.get<ApiResponse<SubscriptionListData>>(SYSTEM_BASE);
-    const list = res.data?.data?.subscriptions;
-    return Array.isArray(list) ? list : [];
+    const res = await api.get<ApiResponse<SubscriptionListData>>(
+      API_ENDPOINTS.SUBSCRIPTION.SYSTEM_GET // 🔥 ĐÃ ĐỔI TỪ PUBLIC_GET -> SYSTEM_GET
+    );
+
+    // BE trả dạng { status, message, data: { subscriptions: [...] } }
+    const subscriptions = res.data?.data?.subscriptions;
+    return Array.isArray(subscriptions) ? subscriptions : [];
   },
 
-  async getByIdSystem(subscriptionId: number): Promise<SubscriptionPlan> {
+  // ================== PUBLIC (company xem để chọn) ==================
+  async getPublic(): Promise<SubscriptionPlan[]> {
+    const res = await api.get<ApiResponse<SubscriptionListData>>(
+      API_ENDPOINTS.SUBSCRIPTION.PUBLIC_GET
+    );
+    const list = res.data?.data?.subscriptions;
+    return Array.isArray(list) ? list.filter((x) => x.isActive) : [];
+  },
+
+  async getById(subscriptionId: number): Promise<SubscriptionPlan> {
     const res = await api.get<ApiResponse<SubscriptionPlan>>(
-      API_ENDPOINTS.SUBSCRIPTION.SYSTEM_GET_BY_ID(subscriptionId)
+      API_ENDPOINTS.SUBSCRIPTION.PUBLIC_GET_BY_ID(subscriptionId)
     );
     return res.data.data;
   },
 
+  // ================== SYSTEM CRUD PLAN ==================
   async create(payload: Partial<SubscriptionPlan>) {
     const res = await api.post<ApiResponse<SubscriptionPlan>>(
       API_ENDPOINTS.SUBSCRIPTION.SYSTEM_CREATE,
@@ -74,45 +83,24 @@ export const subscriptionService = {
     return res.data.data;
   },
 
-  // ============================================================
-  // 🟩 PUBLIC (Company xem danh sách gói)
-  // ============================================================
-
-  async getPublic(): Promise<SubscriptionPlan[]> {
-    const res = await api.get<ApiResponse<SubscriptionListData>>(PUBLIC_BASE);
-    const list = res.data?.data?.subscriptions;
-    return Array.isArray(list) ? list.filter((x) => x.isActive) : [];
-  },
-
-  async getById(subscriptionId: number): Promise<SubscriptionPlan> {
-    const res = await api.get<ApiResponse<SubscriptionPlan>>(
-      API_ENDPOINTS.SUBSCRIPTION.PUBLIC_GET_BY_ID(subscriptionId)
-    );
-    return res.data.data;
-  },
-
-  // ============================================================
-  // 🟨 COMPANY (Current subscription, Checkout, Cancel)
-  // ============================================================
-
+  // ================== COMPANY (KHÔNG ĐỤNG – GIỮ NGUYÊN) ==================
   async createCheckoutSession(subscriptionId: number) {
-    return await api.post(API_ENDPOINTS.PAYMENT.COMPANY_CHECKOUT, {
-      subscriptionId,
-    });
+    return await post<{ url: string }, { subscriptionId: number }>(
+      API_ENDPOINTS.PAYMENT.COMPANY_CHECKOUT,
+      { subscriptionId }
+    );
   },
 
   async getCurrentSubscription() {
-    const res = await api.get<ApiResponse<CurrentSubscription>>(
+    return await get<CurrentSubscription>(
       API_ENDPOINTS.COMPANY_SUBSCRIPTION.COMPANY_CURRENT
     );
-    return res.data.data;
   },
 
   async cancelSubscription() {
-    const res = await api.post<ApiResponse<null>>(
+    return await post<void, {}>(
       API_ENDPOINTS.COMPANY_SUBSCRIPTION.COMPANY_CANCEL,
       {}
     );
-    return res.data.data;
   },
 };

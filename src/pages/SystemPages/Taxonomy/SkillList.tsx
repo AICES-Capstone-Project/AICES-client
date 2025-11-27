@@ -59,17 +59,19 @@ export default function SkillList() {
   ) => {
     setLoading(true);
     try {
-      const response = await skillService.getSkills({
+      const response = await skillService.getSkillsSystem({
         page,
         pageSize,
         keyword: currentKeyword || undefined,
       });
 
-      const apiData = response.data;
-      const list = apiData?.data ?? [];
+      const data = response.data;
+
+      // Ép về đúng Skill[] một cách an toàn
+      const list: Skill[] = Array.isArray(data) ? data : [];
 
       setSkills(list);
-      setTotal(Array.isArray(list) ? list.length : 0);
+      setTotal(list.length);
 
       setPagination((prev) => ({
         ...prev,
@@ -129,12 +131,12 @@ export default function SkillList() {
     setSubmitting(true);
     try {
       if (editingSkill) {
-        await skillService.updateSkill(editingSkill.skillId, {
+        await skillService.updateSkillSystem(editingSkill.skillId, {
           name: values.name.trim(),
         });
         message.success("Skill updated successfully.");
       } else {
-        await skillService.createSkill({
+        await skillService.createSkillSystem({
           name: values.name.trim(),
         });
         message.success("Skill created successfully.");
@@ -159,7 +161,7 @@ export default function SkillList() {
   const handleDelete = async (id: number) => {
     setLoading(true);
     try {
-      await skillService.deleteSkill(id);
+      await skillService.deleteSkillSystem(id);
       message.success("Skill deleted successfully.");
       fetchSkills(
         pagination.current || 1,
@@ -211,10 +213,7 @@ export default function SkillList() {
       width: 200,
       render: (_, record) => (
         <Space>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => openEditModal(record)}
-          >
+          <Button icon={<EditOutlined />} onClick={() => openEditModal(record)}>
             Edit
           </Button>
           <Popconfirm

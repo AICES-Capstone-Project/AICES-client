@@ -41,8 +41,26 @@ export default function CategoryList() {
   const fetchData = async (page = 1, pageSize = 10) => {
     try {
       setLoading(true);
-      const res = await categoryService.getAll(page, pageSize);
-      const payload = res.data.data;
+
+      const res = await categoryService.getAllSystem({
+        page,
+        pageSize,
+        // keyword, // nếu sau này muốn search server-side thì bật
+      });
+
+      const payload = res.data;
+
+      // res.data có thể null → check trước
+      if (!payload) {
+        setCategories([]);
+        setPagination((prev) => ({
+          ...prev,
+          current: page,
+          pageSize,
+          total: 0,
+        }));
+        return;
+      }
 
       setCategories(payload.categories);
       setPagination({
@@ -90,7 +108,8 @@ export default function CategoryList() {
       cancelText: "No",
       onOk: async () => {
         try {
-          await categoryService.delete(record.categoryId);
+          await categoryService.remove(record.categoryId);
+
           message.success("Category deactivated successfully");
           fetchData(pagination.current || 1, pagination.pageSize || 10);
         } catch (err: any) {

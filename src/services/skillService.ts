@@ -10,31 +10,59 @@ export interface SkillListParams {
   keyword?: string;
 }
 
-const SKILL_BASE_URL = "/skills";
+const PUBLIC_SKILL_BASE_URL = "/public/skills";
+const SYSTEM_SKILL_BASE_URL = "/system/skills";
 
 export const skillService = {
+  // ---------- PUBLIC (GIỮ CHO FE KHÁC XÀI) ----------
   getSkills(params?: SkillListParams) {
-    return api.get<ApiResponse<Skill[]>>(SKILL_BASE_URL, {
+    return api.get<ApiResponse<Skill[]>>(PUBLIC_SKILL_BASE_URL, {
       params,
     });
   },
 
   getSkillById(id: number) {
-    return api.get<ApiResponse<Skill>>(`${SKILL_BASE_URL}/${id}`);
+    return api.get<ApiResponse<Skill>>(`${PUBLIC_SKILL_BASE_URL}/${id}`);
   },
 
   createSkill(payload: { name: string }) {
-    return api.post<ApiResponse<Skill>>(SKILL_BASE_URL, payload);
+    return api.post<ApiResponse<Skill>>(PUBLIC_SKILL_BASE_URL, payload);
   },
 
   updateSkill(id: number, payload: { name: string }) {
     return api.patch<ApiResponse<Skill>>(
-      `${SKILL_BASE_URL}/${id}`,
+      `${PUBLIC_SKILL_BASE_URL}/${id}`,
       payload
     );
   },
 
   deleteSkill(id: number) {
-    return api.delete<ApiResponse<null>>(`${SKILL_BASE_URL}/${id}`);
+    return api.delete<ApiResponse<null>>(`${PUBLIC_SKILL_BASE_URL}/${id}`);
+  },
+
+  // ---------- SYSTEM (CHO SYSTEM ADMIN / TAXONOMY) ----------
+  getSkillsSystem(params?: SkillListParams) {
+    return api.get<ApiResponse<Skill[]>>(SYSTEM_SKILL_BASE_URL, {
+      params,
+    });
+  },
+
+  getSkillByIdSystem(id: number) {
+    return api.get<ApiResponse<Skill>>(`${SYSTEM_SKILL_BASE_URL}/${id}`);
+  },
+
+  createSkillSystem(payload: { name: string }) {
+    return api.post<ApiResponse<Skill>>(SYSTEM_SKILL_BASE_URL, payload);
+  },
+
+  updateSkillSystem(id: number, payload: { name: string }) {
+    return api.patch<ApiResponse<Skill>>(
+      `${SYSTEM_SKILL_BASE_URL}/${id}`,
+      payload
+    );
+  },
+
+  deleteSkillSystem(id: number) {
+    return api.delete<ApiResponse<null>>(`${SYSTEM_SKILL_BASE_URL}/${id}`);
   },
 };

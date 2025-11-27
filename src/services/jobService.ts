@@ -58,8 +58,8 @@ export const jobService = {
 
   // Update job status (publish/unpublish)
   updateJobStatus: async (jobId: number, status: string): Promise<ApiResponse<CompanyJob>> => {
-    // PUT /company/self/jobs/{id}/status with body { status: 'Published' }
-    return await put<CompanyJob, { status: string }>(`${API_ENDPOINTS.JOB.COMPANY_UPDATE_STATUS(jobId)}/status`, { status });
+    // PUT /jobs/{id}/status with body { status: 'Published' }
+    return await put<CompanyJob, { status: string }>(API_ENDPOINTS.JOB.COMPANY_UPDATE_STATUS(jobId), { status });
   },
   
   // Delete job by ID

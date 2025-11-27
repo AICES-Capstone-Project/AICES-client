@@ -3,7 +3,7 @@ import { Card, Table, Tag, Button, Drawer, Space, message, Upload } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeftOutlined, InboxOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import { postForm } from "../../../../services/api";
+import resumeService from "../../../../services/resumeService";
 
 interface Resume {
   resumeId: number;
@@ -59,20 +59,25 @@ const ResumeList: React.FC = () => {
   const loadResumes = async () => {
     setLoading(true);
     try {
-      const axios = (await import("axios")).default;
-      const token = localStorage.getItem("access_token");
-      const baseURL = import.meta.env.VITE_PUBLIC_API_URL || "http://localhost:7220/api";
-      const cleanBaseURL = baseURL.replace(/\/api$/, "");
+      console.debug("[ResumeList] calling resumeService.getByJob", { jobId });
+      const resp = await resumeService.getByJob(Number(jobId));
+      console.debug("[ResumeList] resumeService.getByJob response", resp);
 
-      const response = await axios.get(`${cleanBaseURL}/company/self/jobs/${jobId}/resumes`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.data.status === "Success" && response.data.data) {
-        const resumeList = Array.isArray(response.data.data) ? response.data.data : [];
-        const sortedList = resumeList.sort((a: Resume, b: Resume) => a.resumeId - b.resumeId);
+      if (resp?.status?.toLowerCase() === "success" && resp.data) {
+        const raw = Array.isArray(resp.data) ? resp.data : resp.data.items || [];
+        const resumeList = (Array.isArray(raw) ? raw : []) as any[];
+        const mapped: Resume[] = resumeList.map((r) => ({
+          resumeId: r.resumeId,
+          fullName: r.fullName || r.candidateName || "Unknown",
+          status: r.status || r.stage || "Processing",
+          totalResumeScore: r.totalResumeScore ?? null,
+          email: r.email,
+          phoneNumber: r.phone || r.phoneNumber,
+          fileUrl: r.fileUrl,
+          aiExplanation: r.aiExplanation,
+          scoreDetails: r.scoreDetails,
+        }));
+        const sortedList = mapped.slice().sort((a, b) => a.resumeId - b.resumeId);
         setResumes(sortedList);
       }
     } catch (e) {
@@ -86,19 +91,11 @@ const ResumeList: React.FC = () => {
   const loadResumeDetail = async (resumeId: number) => {
     setLoadingDetail(true);
     try {
-      const axios = (await import("axios")).default;
-      const token = localStorage.getItem("access_token");
-      const baseURL = import.meta.env.VITE_PUBLIC_API_URL || "http://localhost:7220/api";
-      const cleanBaseURL = baseURL.replace(/\/api$/, "");
-
-      const response = await axios.get(`${cleanBaseURL}/company/self/jobs/${jobId}/resumes/${resumeId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (response.data.status === "Success" && response.data.data) {
-        setSelectedResume(response.data.data);
+      console.debug("[ResumeList] calling resumeService.getById", { jobId, resumeId });
+      const resp = await resumeService.getById(Number(jobId), resumeId);
+      console.debug("[ResumeList] resumeService.getById response", resp);
+      if (resp?.status?.toLowerCase() === "success" && resp.data) {
+        setSelectedResume(resp.data as unknown as Resume);
       }
     } catch (e) {
       console.error("Failed to load resume detail:", e);
@@ -115,14 +112,22 @@ const ResumeList: React.FC = () => {
       const formData = new FormData();
       formData.append("JobId", jobId);
       formData.append("File", file);
-      const response = await postForm("resume/upload", formData);
-      if (response.status === "Success") {
+      console.debug("[ResumeList] Upload formData entries:");
+      for (const pair of formData.entries()) {
+        console.debug(pair[0], pair[1]);
+      }
+
+      console.debug("[ResumeList] calling resumeService.uploadToJob");
+      const resp = await resumeService.uploadToJob(formData);
+      console.debug("[ResumeList] uploadToJob response", resp);
+      if (resp?.status?.toLowerCase() === "success") {
         message.success(`Uploaded ${file.name} successfully!`);
         await loadResumes();
       } else {
-        message.error(response.message || "Upload failed");
+        message.error(resp?.message || "Upload failed");
       }
     } catch (e: any) {
+      console.error("Upload error:", e);
       message.error(e?.message || "Upload failed");
     } finally {
       setUploading(false);

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Button, Upload, Drawer, message } from "antd";
+import { Card, Table, Button, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { InboxOutlined } from "@ant-design/icons";
+// Upload icons removed while upload is disabled
 import { useNavigate } from "react-router-dom";
 import { jobService } from "../../../services/jobService";
-import { postForm } from "../../../services/api";
+// postForm import removed while upload is disabled
 
 interface JobRow {
   jobId: number;
@@ -17,9 +17,11 @@ const AIScreening: React.FC = () => {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<JobRow[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(false);
-  const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
-  const [activeJob, setActiveJob] = useState<JobRow | null>(null);
-  const [uploading, setUploading] = useState(false);
+  // Upload UI temporarily disabled
+  // const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
+  // Upload state removed while upload is disabled
+  // const [activeJob, setActiveJob] = useState<JobRow | null>(null);
+  // const [uploading, setUploading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
@@ -46,36 +48,37 @@ const AIScreening: React.FC = () => {
     load();
   }, []);
 
-  const openUploadDrawer = (job: JobRow) => {
-    setActiveJob(job);
-    setUploadDrawerOpen(true);
-  };
+  // Upload functions commented out while upload is disabled
+  // const openUploadDrawer = (job: JobRow) => {
+  //   setActiveJob(job);
+  //   setUploadDrawerOpen(true);
+  // };
 
-  const closeUploadDrawer = () => {
-    setUploadDrawerOpen(false);
-    setActiveJob(null);
-  };
+  // const closeUploadDrawer = () => {
+  //   setUploadDrawerOpen(false);
+  //   setActiveJob(null);
+  // };
 
-  const handleUpload = async (file: File) => {
-    if (!activeJob) return false;
-    setUploading(true);
-    try {
-      const formData = new FormData();
-      formData.append("JobId", activeJob.jobId.toString());
-      formData.append("File", file);
-      const response = await postForm("resume/upload", formData);
-      if (response.status === "Success") {
-        message.success(`Uploaded ${file.name} successfully!`);
-      } else {
-        message.error(response.message || "Upload failed");
-      }
-    } catch (e: any) {
-      message.error(e?.message || "Upload failed");
-    } finally {
-      setUploading(false);
-    }
-    return false;
-  };
+  // const handleUpload = async (file: File) => {
+  //   if (!activeJob) return false;
+  //   setUploading(true);
+  //   try {
+  //     const formData = new FormData();
+  //     formData.append("JobId", activeJob.jobId.toString());
+  //     formData.append("File", file);
+  //     const response = await postForm("resume/upload", formData);
+  //     if (response.status === "Success") {
+  //       message.success(`Uploaded ${file.name} successfully!`);
+  //     } else {
+  //       message.error(response.message || "Upload failed");
+  //     }
+  //   } catch (e: any) {
+  //     message.error(e?.message || "Upload failed");
+  //   } finally {
+  //     setUploading(false);
+  //   }
+  //   return false;
+  // };
 
   const columns: ColumnsType<JobRow> = [
     {
@@ -99,9 +102,10 @@ const AIScreening: React.FC = () => {
           <Button className="company-btn--filled" onClick={() => navigate(`/company/ai-screening/${row.jobId}/resumes`)}>
             List Resumes
           </Button>
-          <Button className="company-btn" onClick={() => openUploadDrawer(row)}>
+          {/* Upload disabled: to re-enable, uncomment openUploadDrawer + Upload Drawer */}
+          {/* <Button className="company-btn" onClick={() => openUploadDrawer(row)}>
             Upload CV
-          </Button>
+          </Button> */}
         </div>
       ),
     },
@@ -140,6 +144,8 @@ const AIScreening: React.FC = () => {
         />
       </Card>
 
+      {/* Upload Drawer disabled. To restore, uncomment related state and handlers above. */}
+      {/*
       <Drawer
       title={activeJob ? `Upload CV - ${activeJob.title}` : "Upload CV"}
       width={500}
@@ -164,6 +170,7 @@ const AIScreening: React.FC = () => {
         </Upload.Dragger>
       )}
       </Drawer>
+      */}
     </>
   );
 };

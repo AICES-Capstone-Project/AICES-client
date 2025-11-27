@@ -215,14 +215,24 @@ const JobManagement = () => {
   const handleApprove = async (job: CompanyJob) => {
     try {
       const resp = await jobService.updateJobStatus(job.jobId, "Published");
-      if (resp?.status?.toLowerCase() === "success") {
+      if (resp?.status && String(resp.status).toLowerCase() === "success") {
         fetchPendingJobs();
         fetchJobs();
         message.success("Job approved successfully");
         return true;
       }
-    } catch {
-      // fall-through
+      // If server returned a message, show it
+      if (resp?.message) {
+        console.error("Approve failed - server message:", resp.message, resp);
+        message.error(resp.message);
+        return false;
+      }
+      console.error("Approve failed - unexpected response:", resp);
+    } catch (err: any) {
+      // Try to extract useful info from axios-like error
+      console.error("Approve request error:", err);
+      const serverMsg = err?.response?.data?.message || err?.message || (err && String(err));
+      if (serverMsg) message.error(serverMsg);
     }
     message.error("Failed to approve job");
     return false;

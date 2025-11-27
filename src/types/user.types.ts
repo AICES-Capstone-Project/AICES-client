@@ -39,6 +39,6 @@ export interface CreateUserRequest {
 export interface UpdateUserRequest {
   email: string;
   password?: string;   // 👈 optional
-  roleName: string;
+  roleId: string;
   fullName: string;
 }

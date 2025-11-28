@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Button, Space, message, Input, Modal } from "antd";
+import { Card, Table, Button, Space, Input, Modal } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 import { subscriptionService } from "../../../services/subscriptionService";
 import { paymentService } from "../../../services/paymentService";
 import SubscriptionDrawer from "./components/SubscriptionDrawer";
+import { toastError } from "../../../components/UI/Toast";
 
 interface SubscriptionPlan {
   subscriptionId: number;
@@ -56,7 +57,7 @@ const CompanyClients: React.FC = () => {
       setFilteredSubscriptions(mappedPlans);
     } catch (error) {
       console.error("Failed to load subscriptions:", error);
-      message.error("Failed to load subscriptions");
+      toastError("Failed to load subscriptions");
     } finally {
       setLoading(false);
     }
@@ -89,7 +90,7 @@ const CompanyClients: React.FC = () => {
       setViewDrawerOpen(true);
     } catch (error) {
       console.error("Failed to load subscription details:", error);
-      message.error("Failed to load subscription details");
+      toastError("Failed to load subscription details");
     }
   };
 

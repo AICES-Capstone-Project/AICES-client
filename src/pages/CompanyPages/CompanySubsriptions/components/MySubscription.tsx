@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, message, Spin, Modal } from "antd";
+import { Card, Button, Spin, Modal } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import SubscriptionStatsCard from "./SubscriptionStatsCard";
 import SubscriptionDetailsSection from "./SubscriptionDetailsSection";
 import { companySubscriptionService } from "../../../../services/companySubscriptionService";
+import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 
 const MySubscription: React.FC = () => {
   const navigate = useNavigate();
@@ -57,14 +58,14 @@ const MySubscription: React.FC = () => {
     try {
       const response = await companySubscriptionService.cancelSubscription();
       if (response.status === "Success") {
-        message.success("Your subscription has been cancelled");
+        toastSuccess("Subscription cancelled", "Your subscription has been cancelled");
         navigate("/company/subscriptions");
       } else {
-        message.error(response.message || "Failed to cancel subscription");
+        toastError("Cancel subscription failed", response.message);
       }
     } catch (error: any) {
       console.error("Failed to cancel subscription:", error);
-      message.error(error?.response?.data?.message || "Failed to cancel subscription");
+      toastError("Cancel subscription failed", error?.response?.data?.message || error?.message);
     } finally {
       setCancelling(false);
     }

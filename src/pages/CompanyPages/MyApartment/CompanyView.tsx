@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Spin, message, Modal, Button } from "antd";
+import { Card, Row, Col, Spin, Modal, Button } from "antd";
 import CompanyEditModal from "./components/CompanyEditModal";
 import { companyService } from "../../../services/companyService";
 import type { CompanyMember } from "../../../types/company.types";
 import { useAppSelector } from "../../../hooks/redux";
+import { toastError } from "../../../components/UI/Toast";
 
 interface CompanyData {
   companyId: number;
@@ -58,11 +59,11 @@ export default function CompanyView() {
         }
 
       } else {
-        message.error("Failed to load company details");
+        toastError("Failed to load company details");
       }
     } catch (err) {
       console.error(err);
-      message.error("Error fetching company details");
+      toastError("Error fetching company details");
     } finally {
       setLoading(false);
     }

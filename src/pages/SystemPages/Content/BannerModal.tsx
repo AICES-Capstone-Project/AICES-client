@@ -1,8 +1,9 @@
 import { useEffect } from "react";
-import { Button, Form, Input, Modal, Upload, message } from "antd";
+import { Button, Form, Input, Modal, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { bannerService } from "../../../services/bannerService";
 import type { BannerConfig } from "../../../types/banner.types";
+import { toastError, toastSuccess } from "../../../components/UI/Toast";
 
 interface BannerModalProps {
   open: boolean;
@@ -43,10 +44,10 @@ export default function BannerModal({
 
       if (editData) {
         await bannerService.update(editData.id, fd);
-        message.success("Updated banner successfully");
+        toastSuccess("Banner updated");
       } else {
         await bannerService.create(fd);
-        message.success("Created banner successfully");
+        toastSuccess("Banner created");
       }
 
       fetchData();
@@ -54,7 +55,7 @@ export default function BannerModal({
     } catch (error) {
       // nếu user bấm cancel form.validateFields sẽ throw, khỏi show lỗi
       if ((error as any)?.errorFields) return;
-      message.error("Something went wrong");
+      toastError("Something went wrong");
     }
   };
 

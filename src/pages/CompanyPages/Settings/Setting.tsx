@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Tabs, Form, Input, Button, message, Card, Spin } from "antd";
+import { Tabs, Form, Input, Button, Card, Spin } from "antd";
 import dayjs from "dayjs";
 import { useAppDispatch, useAppSelector } from "../../../hooks/redux";
 import { fetchUser } from "../../../stores/slices/authSlice";
@@ -70,7 +70,7 @@ export default function Setting() {
 
   const handleChangePassword = async (values: any) => {
     if (values.newPassword !== values.confirmPassword) {
-      message.error("New password and confirmation do not match!");
+      toastError("Change password failed", "New password and confirmation do not match!");
       return;
     }
 
@@ -78,13 +78,13 @@ export default function Setting() {
       setLoading(true);
       const resp = await profileService.changePassword(values.oldPassword, values.newPassword);
       if (resp.status === "Success") {
-        message.success(resp.message || "Password has been reset successfully.");
+        toastSuccess("Password updated", resp.message || "Password has been reset successfully.");
         formPassword.resetFields();
       } else {
-        message.error(resp.message || "Password change failed!");
+        toastError("Password change failed", resp.message);
       }
     } catch {
-      message.error("Password change failed!");
+      toastError("Password change failed");
     } finally {
       setLoading(false);
     }

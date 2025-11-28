@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Card, Space, Tag, Typography, message } from "antd";
+import { Card, Space, Tag, Typography } from "antd";
 import { resumeService } from "../../../services/resumeService";
 import type { Resume } from "../../../types/company.types";
+import { toastError } from "../../../components/UI/Toast";
 
 const { Title, Text } = Typography;
 
@@ -17,7 +18,7 @@ export default function ResumeDetail() {
   const load = async () => {
   const res = await resumeService.getSystemResumeById(jid, rid);
   if (res.status === "Success" && res.data) setResume(res.data);
-  else message.error(res.message || "Failed to load resume");
+  else toastError("Failed to load resume", res.message);
 };
 
 

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Card, Input, Space, Table, Tag, Typography, message } from "antd";
+import { Card, Input, Space, Table, Tag, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import {
   companySubscriptionService,
   type CompanySubscriptionQuery,
 } from "../../../services/companySubscriptionService";
 import type { CompanySubscription } from "../../../types/companySubscription.types";
+import { toastError } from "../../../components/UI/Toast";
 
 
 const { Title, Text } = Typography;
@@ -116,7 +117,7 @@ export default function SubscribedCompaniesPage() {
       });
     } catch (error) {
       console.error(error);
-      message.error("Failed to load subscribed companies");
+      toastError("Failed to load subscribed companies");
     } finally {
       setLoading(false);
     }

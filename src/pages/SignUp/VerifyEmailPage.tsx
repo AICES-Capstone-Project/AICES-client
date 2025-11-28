@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
-import { toast } from "react-toastify";
 import { APP_ROUTES } from "../../services/config";
+import { toastError, toastSuccess } from "../../components/UI/Toast";
 
 const VerifyEmailPage = () => {
 	const [loading, setLoading] = useState(true);
@@ -28,7 +28,7 @@ const VerifyEmailPage = () => {
 
 			const res = await authService.verifyEmail(token);
 			if (res.status === "Success") {
-				toast.success(res.message);
+				toastSuccess("Email verified", res.message);
 				setMessage("✅ Email verified successfully! Redirecting to login...");
 				setLoading(false);
 
@@ -42,7 +42,7 @@ const VerifyEmailPage = () => {
 					});
 				}, 1000);
 			} else {
-				toast.error(res.message || "Verification failed");
+				toastError("Verification failed", res.message);
 				setMessage("❌ Verification failed. Please try again.");
 				setLoading(false);
 			}

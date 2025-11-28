@@ -1,6 +1,7 @@
-import { Drawer, Descriptions, Tag, Button, message } from "antd";
+import { Drawer, Descriptions, Tag, Button } from "antd";
 import type { CompanyJob } from "../../../../services/jobService";
 import { tagColorFor } from "../../../../utils/tagUtils";
+import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 
 type Props = {
   open: boolean;
@@ -16,15 +17,15 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
     try {
       const success = await onApprove(job);
       if (success) {
-        message.success("Job approved successfully. Closing in 5 seconds...");
+        toastSuccess("Job approved successfully", "Closing in 5 seconds...");
         setTimeout(() => {
           onClose();
         }, 5000);
       } else {
-        message.error("Failed to approve job");
+        toastError("Failed to approve job");
       }
     } catch (error) {
-      message.error("An error occurred while approving the job");
+      toastError("An error occurred while approving the job");
     }
   };
 

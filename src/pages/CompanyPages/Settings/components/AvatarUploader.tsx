@@ -1,7 +1,8 @@
-import { Upload, Button, message } from "antd";
+import { Upload, Button } from "antd";
 import type { UploadProps } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
+import { toastInfo } from "../../../../components/UI/Toast";
 
 type Props = {
   initialUrl?: string | null;
@@ -25,7 +26,7 @@ export default function AvatarUploader({ initialUrl, onFileChange, size = 100 }:
 
         // ⚠️ Cảnh báo nhưng KHÔNG chặn upload
         if (Math.abs(ratio - 1) > 0.1) {
-          message.info("📸 Tip: A 1:1 ratio image looks best in the profile view.");
+          toastInfo("Avatar tip", "A 1:1 ratio image looks best in the profile view.");
         }
 
         // ✅ Hiển thị preview

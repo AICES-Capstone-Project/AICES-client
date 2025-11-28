@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Drawer, Button, message, Modal } from "antd";
+import { Drawer, Button, Modal } from "antd";
 import SubscriptionStatsCard from "./SubscriptionStatsCard";
 import SubscriptionDetailsSection from "./SubscriptionDetailsSection";
 import { companySubscriptionService } from "../../../../services/companySubscriptionService";
+import { toastError } from "../../../../components/UI/Toast";
 
 interface CurrentSubscriptionModalProps {
   visible: boolean;
@@ -46,11 +47,11 @@ const CurrentSubscriptionModal: React.FC<CurrentSubscriptionModalProps> = ({
           if (response.status === "Success") {
             onCancelled?.();
           } else {
-            message.error(response.message || "Failed to cancel subscription");
+            toastError("Cancel subscription failed", response.message);
           }
         } catch (error: any) {
           console.error("Failed to cancel subscription:", error);
-          message.error(error?.response?.data?.message || "Failed to cancel subscription");
+          toastError("Cancel subscription failed", error?.response?.data?.message || error?.message);
         } finally {
           setCancelling(false);
         }

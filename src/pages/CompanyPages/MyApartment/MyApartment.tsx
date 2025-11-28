@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Input, Button, message, Card, Row, Col, Modal, Select, Spin } from "antd";
+import { Form, Input, Button, Card, Row, Col, Modal, Select, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import AvatarUploader from "../Settings/components/AvatarUploader";
@@ -14,6 +14,7 @@ import {
   validateFile,
   validateLogoFile,
 } from "../../../utils/validations/company.validation";
+import { toastError, toastSuccess, toastWarning } from "../../../components/UI/Toast";
 
 interface CompanyFormValues {
   name: string;
@@ -42,7 +43,7 @@ export default function CompanyCreate() {
     if (file) {
       const validation = validateLogoFile(file);
       if (!validation.isValid) {
-        message.error(validation.message);
+        toastError("Invalid logo", validation.message);
         return;
       }
     }
@@ -55,7 +56,7 @@ export default function CompanyCreate() {
       // Quick client-side check: ensure we have an access token
       const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
       if (!token) {
-        message.error("You must be logged in to submit a company request. Please login first.");
+        toastError("Authentication required", "You must be logged in to submit a company request. Please login first.");
         setLoading(false);
         navigate("/login");
         return;
@@ -78,7 +79,7 @@ export default function CompanyCreate() {
       // Validate at least one document with both type and file
       const validDocs = documents.filter((d: any) => d?.type && d?.file instanceof File);
       if (validDocs.length === 0) {
-        message.error("Please provide at least one document with type and file.");
+        toastError("Missing documents", "Please provide at least one document with type and file.");
         setLoading(false);
         return;
       }
@@ -105,22 +106,22 @@ export default function CompanyCreate() {
       // Handle HTTP status codes returned by request wrapper (it may return numeric status)
       const statusStr = String(resp?.status || "").toLowerCase();
       if (statusStr === "401" || statusStr === "403" || statusStr.includes("unauthor")) {
-        message.error("You are not authorized to perform this action. Please login or contact support.");
+        toastError("Unauthorized", "You are not authorized to perform this action. Please login or contact support.");
         // force redirect to login to refresh credentials
         navigate("/login");
         return;
       }
 
       if (String(resp?.status).toLowerCase() === "success") {
-        message.success("Company account creation request submitted successfully.");
+        toastSuccess("Company request submitted", "Company account creation request submitted successfully.");
         // Navigate to pending approval screen
         navigate("/company/pending-approval");
       } else {
-        message.error(resp?.message || "Failed to submit request.");
+        toastError("Failed to submit request", resp?.message);
       }
     } catch (err) {
       console.error(err);
-      message.error("An error occurred while submitting the request.");
+      toastError("An error occurred while submitting the request.");
     } finally {
       setLoading(false);
     }
@@ -169,21 +170,21 @@ export default function CompanyCreate() {
 
   const handleConfirmJoin = async () => {
     if (!selectedCompanyId) {
-      message.warning("Please select a company to join");
+      toastWarning("Please select a company to join");
       return;
     }
     try {
       const resp = await companyService.joinCompany(selectedCompanyId);
       if (String(resp?.status).toLowerCase() === "success") {
-        message.success("Join request submitted successfully");
+        toastSuccess("Join request submitted successfully");
         setJoinModalOpen(false);
         navigate("/company/pending-approval"); 
       } else {
-        message.error(resp?.message || "Failed to submit join request");
+        toastError("Failed to submit join request", resp?.message);
       }
     } catch (err) {
       console.error(err);
-      message.error("An error occurred while joining the company");
+      toastError("An error occurred while joining the company");
     }
   };
 
@@ -458,7 +459,7 @@ export default function CompanyCreate() {
                                     // Validate file
                                     const validation = validateFile(file);
                                     if (!validation.isValid) {
-                                      message.error(validation.message);
+                                      toastError("Invalid document", validation.message);
                                       e.target.value = ""; // Clear the input
                                       return;
                                     }
@@ -467,7 +468,7 @@ export default function CompanyCreate() {
                                     const fields = form.getFieldValue("documents") || [];
                                     fields[field.name] = { ...(fields[field.name] || {}), file };
                                     form.setFieldsValue({ documents: fields });
-                                    message.success(`Selected: ${file.name}`);
+                                    toastSuccess("Document selected", `Selected: ${file.name}`);
                                   }
                                 }}
                               />

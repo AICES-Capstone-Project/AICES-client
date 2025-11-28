@@ -8,7 +8,6 @@ import {
   Table,
   Tag,
   Typography,
-  message,
   Form,
   Popconfirm,
   Upload,
@@ -26,6 +25,7 @@ import { useNavigate } from "react-router-dom";
 import { companyService } from "../../../services/companyService";
 import type { Company } from "../../../types/company.types";
 import type { UploadFile } from "antd/es/upload/interface";
+import { toastError, toastSuccess, toastWarning } from "../../../components/UI/Toast";
 
 const { Title, Text } = Typography;
 const DEFAULT_PAGE_SIZE = 10;
@@ -69,7 +69,7 @@ export default function CompanyList() {
       });
 
       if (res?.status === "Success") {
-        message.success(
+        toastSuccess(
           status === "Approved"
             ? "Company approved successfully"
             : "Company rejected successfully"
@@ -81,10 +81,10 @@ export default function CompanyList() {
           keyword
         );
       } else {
-        message.error(res?.message || "Failed to update company status");
+        toastError("Failed to update company status", res?.message);
       }
     } catch (e) {
-      message.error("Failed to update company status");
+      toastError("Failed to update company status");
     } finally {
       setLoading(false);
     }
@@ -130,7 +130,7 @@ export default function CompanyList() {
       const res = await companyService.createAdminForm(formData);
 
       if (res.status === "Success") {
-        message.success("Company created successfully");
+        toastSuccess("Company created successfully");
         setIsCreateOpen(false);
         form.resetFields();
         await fetchData(
@@ -139,11 +139,11 @@ export default function CompanyList() {
           keyword
         );
       } else {
-        message.error(res?.message || "Failed to create company");
+        toastError("Failed to create company", res?.message);
       }
     } catch (err: any) {
       if (err?.errorFields) return; // lỗi validate form thì thôi
-      message.error("Failed to create company");
+      toastError("Failed to create company");
     } finally {
       setLoading(false);
     }
@@ -182,10 +182,10 @@ export default function CompanyList() {
           });
         }
       } else {
-        message.error(res?.message || "Failed to fetch companies");
+        toastError("Failed to fetch companies", res?.message);
       }
     } catch (err) {
-      message.error("Failed to fetch companies");
+      toastError("Failed to fetch companies");
     } finally {
       setLoading(false);
     }
@@ -347,17 +347,17 @@ export default function CompanyList() {
                   record.companyId
                 );
                 if (res.status === "Success") {
-                  message.success("Company deleted successfully");
+                  toastSuccess("Company deleted successfully");
                   await fetchData(
                     pagination.current || 1,
                     pagination.pageSize || DEFAULT_PAGE_SIZE,
                     keyword
                   );
                 } else {
-                  message.error(res?.message || "Failed to delete company");
+                  toastError("Failed to delete company", res?.message);
                 }
               } catch {
-                message.error("Failed to delete company");
+                toastError("Failed to delete company");
               } finally {
                 setLoading(false);
               }
@@ -389,11 +389,11 @@ export default function CompanyList() {
         };
         setPreview(mapped);
       } else {
-        message.error(res?.message || "Failed to load company");
+        toastError("Failed to load company", res?.message);
         setIsPreviewOpen(false); // 👈
       }
     } catch {
-      message.error("Failed to load company");
+      toastError("Failed to load company");
       setIsPreviewOpen(false); // 👈
     }
   };
@@ -572,7 +572,7 @@ export default function CompanyList() {
         }}
         onOk={async () => {
           if (!rejectionReason.trim()) {
-            message.warning("Please input rejection reason");
+            toastWarning("Please input rejection reason");
             return;
           }
           if (!rejectingCompany) return;

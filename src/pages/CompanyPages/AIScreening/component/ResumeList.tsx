@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Tag, Button, Drawer, Space, message, Upload } from "antd";
+import { Card, Table, Tag, Button, Drawer, Space, Upload } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeftOutlined, InboxOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import resumeService from "../../../../services/resumeService";
+import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 
 interface Resume {
   resumeId: number;
@@ -82,7 +83,7 @@ const ResumeList: React.FC = () => {
       }
     } catch (e) {
       console.error("Failed to load resumes:", e);
-      message.error("Không thể tải danh sách CV");
+      toastError("Không thể tải danh sách CV");
     } finally {
       setLoading(false);
     }
@@ -99,7 +100,7 @@ const ResumeList: React.FC = () => {
       }
     } catch (e) {
       console.error("Failed to load resume detail:", e);
-      message.error("Không thể tải chi tiết CV");
+      toastError("Không thể tải chi tiết CV");
     } finally {
       setLoadingDetail(false);
     }
@@ -121,14 +122,14 @@ const ResumeList: React.FC = () => {
       const resp = await resumeService.uploadToJob(formData);
       console.debug("[ResumeList] uploadToJob response", resp);
       if (resp?.status?.toLowerCase() === "success") {
-        message.success(`Uploaded ${file.name} successfully!`);
+        toastSuccess("Upload thành công", `Uploaded ${file.name} successfully!`);
         await loadResumes();
       } else {
-        message.error(resp?.message || "Upload failed");
+        toastError("Upload failed", resp?.message);
       }
     } catch (e: any) {
       console.error("Upload error:", e);
-      message.error(e?.message || "Upload failed");
+      toastError("Upload failed", e?.message);
     } finally {
       setUploading(false);
     }

@@ -3,7 +3,6 @@ import {
   Card,
   Button,
   Input,
-  message,
   Badge,
 } from "antd";
 import { PlusOutlined, SearchOutlined, BellOutlined } from "@ant-design/icons";
@@ -12,6 +11,7 @@ import type { CompanyMember } from "../../../types/company.types";
 import StaffTable from "./components/StaffTable";
 import InviteDrawer from "./components/InviteDrawer";
 import PendingMembersDrawer from "./components/PendingMembersDrawer";
+import { toastError, toastInfo, toastSuccess, toastWarning } from "../../../components/UI/Toast";
 
 const { Search } = Input;
 
@@ -37,11 +37,11 @@ const StaffManagement = () => {
         setMembers(membersData);
         setFilteredMembers(membersData);
       } else {
-        message.error("Failed to fetch staff members");
+        toastError("Failed to fetch staff members");
       }
     } catch (error) {
       console.error("Error fetching staff members:", error);
-      message.error("Error fetching staff members");
+      toastError("Error fetching staff members");
     } finally {
       setLoading(false);
     }
@@ -58,12 +58,12 @@ const StaffManagement = () => {
         setPendingRequests(resp.data || []);
       } else {
         setPendingRequests([]);
-        message.error("Failed to fetch pending members");
+        toastError("Failed to fetch pending members");
       }
     } catch (err) {
       console.error("Error fetching join requests:", err);
       setPendingRequests([]);
-      message.error("Error fetching pending members");
+      toastError("Error fetching pending members");
     }
   };
 
@@ -73,15 +73,15 @@ const StaffManagement = () => {
   }, []);
 
   const handleView = (member: CompanyMember) => {
-    message.info(`Viewing member: ${member.fullName || member.email}`);
+    toastInfo("Viewing member", member.fullName || member.email);
   };
 
   const handleEdit = (member: CompanyMember) => {
-    message.info(`Editing member: ${member.fullName || member.email}`);
+    toastInfo("Editing member", member.fullName || member.email);
   };
 
   const handleDelete = (member: CompanyMember) => {
-    message.warning(`Remove member: ${member.fullName || member.email}`);
+    toastWarning("Remove member", member.fullName || member.email);
   };
 
   const handleChangeStatus = async (member: CompanyMember, status: string) => {
@@ -89,16 +89,16 @@ const StaffManagement = () => {
     try {
       const resp = await companyService.updateJoinRequestStatus(member.comUserId, status);
       if (resp?.status === "Success" || resp?.status === "success") {
-        message.success(`Member ${status.toLowerCase()} successfully`);
+        toastSuccess(`Member ${status.toLowerCase()} successfully`);
         // refresh lists
         fetchJoinRequests();
         fetchMembers();
       } else {
-        message.error(resp?.message || `Failed to ${status.toLowerCase()} member`);
+        toastError(`Failed to ${status.toLowerCase()} member`, resp?.message);
       }
     } catch (err) {
       console.error(`Error updating join status to ${status}:`, err);
-      message.error(`Error updating member status`);
+      toastError(`Error updating member status`);
     }
   };
 
@@ -106,7 +106,7 @@ const StaffManagement = () => {
   const handleInviteSubmit = async (values: { email: string }) => {
     setSending(true);
     setTimeout(() => {
-      message.success(`Invitation sent to ${values.email}`);
+      toastSuccess(`Invitation sent to ${values.email}`);
       setSending(false);
       setDrawerOpen(false);
     }, 1000);
@@ -122,15 +122,15 @@ const StaffManagement = () => {
     try {
       const resp = await companyService.updateJoinRequestStatus(req.comUserId, "Approved");
       if (resp?.status === "Success" || resp?.status === "success") {
-        message.success("Member approved");
+        toastSuccess("Member approved");
         fetchJoinRequests();
         fetchMembers();
       } else {
-        message.error("Failed to approve member");
+        toastError("Failed to approve member");
       }
     } catch (err) {
       console.error("Approve error:", err);
-      message.error("Error approving member");
+      toastError("Error approving member");
     }
   };
 

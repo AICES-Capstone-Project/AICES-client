@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Drawer, Form, Input, Upload, Button, message } from "antd";
+import { Drawer, Form, Input, Upload, Button } from "antd";
 import { companyService } from "../../../../services/companyService";
+import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 
 type CompanyData = {
   companyId: number;
@@ -56,18 +57,18 @@ const CompanyEditModal: React.FC<Props> = ({ open, onClose, company, onUpdated }
       setSaving(true);
       const resp = await companyService.updateProfile(fd);
       if (resp?.status === "Success" || resp?.status === "success") {
-        message.success("Company profile updated");
+        toastSuccess("Company profile updated");
         const refreshed = await companyService.getSelf();
         if (refreshed?.status === "Success" || refreshed?.status === "success") {
           onUpdated && onUpdated(refreshed.data as CompanyData);
         }
         onClose();
       } else {
-        message.error(resp?.message || "Failed to update profile");
+        toastError("Failed to update profile", resp?.message);
       }
     } catch (err: any) {
       console.error("Update profile error:", err);
-      if (!err.errorFields) message.error("Error updating profile");
+      if (!err.errorFields) toastError("Error updating profile");
     } finally {
       setSaving(false);
     }

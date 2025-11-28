@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Button, message } from "antd";
+import { Card, Table, Button } from "antd";
 import type { ColumnsType } from "antd/es/table";
 // Upload icons removed while upload is disabled
 import { useNavigate } from "react-router-dom";
 import { jobService } from "../../../services/jobService";
+import { toastError } from "../../../components/UI/Toast";
 // postForm import removed while upload is disabled
 
 interface JobRow {
@@ -40,7 +41,7 @@ const AIScreening: React.FC = () => {
           setJobs(mapped);
         }
       } catch (e) {
-        message.error("Failed to load jobs");
+        toastError("Failed to load jobs");
       } finally {
         setLoadingJobs(false);
       }

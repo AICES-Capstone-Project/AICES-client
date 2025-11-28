@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, message, Button, Badge, Form } from "antd";
+import { Card, Button, Badge, Form } from "antd";
 import { BellOutlined, PlusOutlined, HistoryOutlined } from "@ant-design/icons";
 import { jobService } from "../../../services/jobService";
 import type { CompanyJob } from "../../../services/jobService";
@@ -11,6 +11,7 @@ import JobViewDrawer from "./components/JobViewDrawer";
 import PendingDrawer from "./components/PendingDrawer";
 import JobEditDrawer from "./components/JobEditDrawer";
 import JobCreateDrawer from "./components/JobCreateDrawer";
+import { toastError, toastSuccess } from "../../../components/UI/Toast";
 import PostedJobsDrawer from "./components/JobPostedDrawer";
 
 const JobManagement = () => {
@@ -61,17 +62,17 @@ const JobManagement = () => {
 
       const resp = await jobService.createJob(payload);
       if (resp?.status && String(resp.status).toLowerCase() === "success") {
-        message.success("Job created successfully");
+        toastSuccess("Job created successfully");
         // don't force-close drawer here; let caller decide (to show 'Chờ duyệt' for recruiters)
         fetchJobs();
         fetchPendingJobs();
         return true;
       } else {
-        message.error(resp?.message || "Failed to create job");
+        toastError("Failed to create job", resp?.message);
       }
     } catch (err) {
       console.error("❌ Lỗi khi gọi API create job:", err);
-      message.error("Error while creating job");
+      toastError("Error while creating job");
     } finally {
       setSaving(false);
     }
@@ -97,7 +98,7 @@ const JobManagement = () => {
         setFilteredJobs(sorted);
       }
     } catch (err) {
-      message.error("Failed to fetch jobs");
+      toastError("Failed to fetch jobs");
     } finally {
       setLoading(false);
     }
@@ -191,7 +192,7 @@ const JobManagement = () => {
       console.log("🔍 API response:", resp); // <-- thêm dòng này
 
       if (resp.status && typeof resp.status === "string" && resp.status.toLowerCase() === "success") {
-        message.success("Job updated successfully!");
+        toastSuccess("Job updated successfully!");
         // close and reset
         setEditDrawerOpen(false);
         setEditingJob(null);
@@ -200,12 +201,12 @@ const JobManagement = () => {
         fetchPendingJobs();
       } else {
         console.error("❌ API error:", resp);
-        message.error(resp?.message || "Failed to update job");
+        toastError("Failed to update job", resp?.message);
       }
 
     } catch (err) {
       console.error("❌ Error updating job:", err);
-      message.error("Error while updating job");
+      toastError("Error while updating job");
     } finally {
       setSaving(false);
     }
@@ -218,13 +219,13 @@ const JobManagement = () => {
       if (resp?.status && String(resp.status).toLowerCase() === "success") {
         fetchPendingJobs();
         fetchJobs();
-        message.success("Job approved successfully");
+        toastSuccess("Job approved successfully");
         return true;
       }
       // If server returned a message, show it
       if (resp?.message) {
         console.error("Approve failed - server message:", resp.message, resp);
-        message.error(resp.message);
+        toastError("Failed to approve job", resp.message);
         return false;
       }
       console.error("Approve failed - unexpected response:", resp);
@@ -232,9 +233,9 @@ const JobManagement = () => {
       // Try to extract useful info from axios-like error
       console.error("Approve request error:", err);
       const serverMsg = err?.response?.data?.message || err?.message || (err && String(err));
-      if (serverMsg) message.error(serverMsg);
+      if (serverMsg) toastError("Failed to approve job", serverMsg);
     }
-    message.error("Failed to approve job");
+    toastError("Failed to approve job");
     return false;
   };
 
@@ -255,14 +256,14 @@ const JobManagement = () => {
     try {
       const resp = await jobService.deleteJob(job.jobId);
       if (resp?.status?.toLowerCase() === "success") {
-        message.success("Job deleted");
+        toastSuccess("Job deleted");
         fetchJobs();
         fetchPendingJobs();
       } else {
-        message.error("Failed to delete job");
+        toastError("Failed to delete job");
       }
     } catch {
-      message.error("Failed to delete job");
+      toastError("Failed to delete job");
     }
   };
 

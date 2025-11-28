@@ -11,8 +11,9 @@ export const subscriptionService = {
   // ================== SYSTEM ADMIN ==================
   // Lấy toàn bộ gói (bao gồm active + inactive) cho System
   async getAll(): Promise<SubscriptionPlan[]> {
+    // ✅ Dùng PUBLIC_GET để load list (BE đã confirm luôn)
     const res = await api.get<ApiResponse<SubscriptionListData>>(
-      API_ENDPOINTS.SUBSCRIPTION.SYSTEM_GET // 🔥 ĐÃ ĐỔI TỪ PUBLIC_GET -> SYSTEM_GET
+      API_ENDPOINTS.SUBSCRIPTION.PUBLIC_GET
     );
 
     // BE trả dạng { status, message, data: { subscriptions: [...] } }
@@ -69,5 +70,4 @@ export const subscriptionService = {
     );
     return res.data.data;
   },
-
 };

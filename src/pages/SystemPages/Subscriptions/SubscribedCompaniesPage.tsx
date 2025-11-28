@@ -1,6 +1,9 @@
+// src/pages/SystemPages/Subscriptions/SubscribedCompaniesPage.tsx
+
 import { useEffect, useState } from "react";
-import { Card, Input, Space, Table, Tag, Typography } from "antd";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
+import { Card, Space } from "antd";
+import type { TablePaginationConfig } from "antd/es/table";
+
 import {
   companySubscriptionService,
   type CompanySubscriptionQuery,
@@ -8,9 +11,8 @@ import {
 import type { CompanySubscription } from "../../../types/companySubscription.types";
 import { toastError } from "../../../components/UI/Toast";
 
-
-const { Title, Text } = Typography;
-const { Search } = Input;
+import SubscribedCompaniesToolbar from "./components/subscribed-companies/SubscribedCompaniesToolbar";
+import SubscribedCompaniesTable from "./components/subscribed-companies/SubscribedCompaniesTable";
 
 export default function SubscribedCompaniesPage() {
   const [loading, setLoading] = useState(false);
@@ -23,85 +25,19 @@ export default function SubscribedCompaniesPage() {
 
   const [search, setSearch] = useState("");
 
-  const columns: ColumnsType<CompanySubscription> = [
-    {
-      title: "ID",
-      dataIndex: "comSubId",
-      width: 80,
-    },
-    {
-      title: "Company",
-      dataIndex: "companyName",
-      render: (value, record) => (
-        <div>
-          <Text strong>{value}</Text>
-          <div style={{ fontSize: 12, color: "#8c8c8c" }}>
-            Company ID: {record.companyId}
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Subscription",
-      dataIndex: "subscriptionName",
-      render: (value, record) => (
-        <div>
-          <Text strong>{value}</Text>
-          <div style={{ fontSize: 12, color: "#8c8c8c" }}>
-            Plan ID: {record.subscriptionId}
-          </div>
-        </div>
-      ),
-    },
-    {
-      title: "Start – End",
-      key: "duration",
-      render: (_, record) => {
-        const start = new Date(record.startDate).toLocaleDateString();
-        const end = new Date(record.endDate).toLocaleDateString();
-        return (
-          <div>
-            <Text>
-              {start} → {end}
-            </Text>
-            <div style={{ fontSize: 12, color: "#8c8c8c" }}>
-              Created: {new Date(record.createdAt).toLocaleDateString()}
-            </div>
-          </div>
-        );
-      },
-    },
-    {
-      title: "Status",
-      dataIndex: "subscriptionStatus",
-      width: 130,
-      render: (status) => {
-        const lower = String(status).toLowerCase();
-        let color: "green" | "gold" | "default" | "red" = "default";
-
-        if (lower === "active") color = "green";
-        else if (lower === "pending") color = "gold";
-        else if (lower === "expired" || lower === "cancelled") color = "red";
-
-        return <Tag color={color}>{status}</Tag>;
-      },
-    },
-  ];
-
   const fetchData = async (params?: CompanySubscriptionQuery) => {
     try {
       setLoading(true);
 
-      // GỘP params với default đảm bảo không undefined
       const safeParams: CompanySubscriptionQuery = {
-        page: params?.page ?? 1,
-        pageSize: params?.pageSize ?? 10,
-        search: params?.search ?? "",
+        page: params?.page ?? (pagination.current ?? 1),
+        pageSize: params?.pageSize ?? (pagination.pageSize ?? 10),
+        search: params?.search ?? search ?? "",
       };
 
       const res = await companySubscriptionService.getList(safeParams);
 
-      // Giả sử BE trả về:
+      // BE trả:
       // {
       //   companySubscriptions: CompanySubscription[];
       //   page: number;
@@ -123,8 +59,9 @@ export default function SubscribedCompaniesPage() {
     }
   };
 
+  // Khi search đổi thì load lại page 1
   useEffect(() => {
-    fetchData();
+    fetchData({ page: 1, pageSize: pagination.pageSize ?? 10, search });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [search]);
 
@@ -141,44 +78,30 @@ export default function SubscribedCompaniesPage() {
     fetchData({
       page: current,
       pageSize: size,
-      search, // state search nếu bạn có
     });
+  };
+
+  const handleSearch = (value: string) => {
+    setPagination((prev) => ({ ...prev, current: 1 }));
+    setSearch(value.trim());
   };
 
   return (
     <Card>
       <Space
-        style={{
-          width: "100%",
-          marginBottom: 16,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
+        direction="vertical"
+        style={{ width: "100%" }}
+        size={16}
       >
-        <Title level={4} style={{ margin: 0 }}>
-          Subscribed Companies
-        </Title>
+        <SubscribedCompaniesToolbar onSearch={handleSearch} />
 
-        <Search
-          allowClear
-          placeholder="Search by company or plan..."
-          style={{ width: 260 }}
-          onSearch={(value) => {
-            setPagination((prev) => ({ ...prev, current: 1 }));
-            setSearch(value.trim());
-          }}
+        <SubscribedCompaniesTable
+          loading={loading}
+          data={data}
+          pagination={pagination}
+          onChange={handleTableChange}
         />
       </Space>
-
-      <Table
-        rowKey="comSubId"
-        loading={loading}
-        columns={columns}
-        dataSource={data}
-        pagination={pagination}
-        onChange={handleTableChange}
-      />
     </Card>
   );
 }

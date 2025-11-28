@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Drawer, Button, message, Modal } from "antd";
 import SubscriptionStatsCard from "./SubscriptionStatsCard";
 import SubscriptionDetailsSection from "./SubscriptionDetailsSection";
-import { subscriptionService } from "../../../../services/subscriptionService";
+import { companySubscriptionService } from "../../../../services/companySubscriptionService";
 
 interface CurrentSubscriptionModalProps {
   visible: boolean;
@@ -42,7 +42,7 @@ const CurrentSubscriptionModal: React.FC<CurrentSubscriptionModalProps> = ({
       onOk: async () => {
         setCancelling(true);
         try {
-          const response = await subscriptionService.cancelSubscription();
+          const response = await companySubscriptionService.cancelSubscription();
           if (response.status === "Success") {
             onCancelled?.();
           } else {

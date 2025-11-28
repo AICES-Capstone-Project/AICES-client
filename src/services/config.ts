@@ -24,6 +24,7 @@ export const API_ENDPOINTS = {
 		LOGOUT: "/auth/logout",
 		REQUEST_PASSWORD_RESET: "/auth/request-password-reset",
 		RESET_PASSWORD: "/auth/reset-password",
+		CHANGE_PASSWORD: "/auth/change-password",
 	},
 
 	// Profile endpoints
@@ -398,6 +399,7 @@ export const APP_ROUTES = {
 	COMPANY_AI_SCREENING_RESUMES: "/company/ai-screening/:jobId/resumes",
 	COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
 	COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
+	COMPANY_PAYMENT_HISTORY: "/company/payment-history",
 } as const;
 
 export const ROLES = {

@@ -1,24 +1,11 @@
 // src/services/subscriptionService.ts
 import api from "./api";
-import { get, post } from "./api";
 import { API_ENDPOINTS } from "./config";
 import type {
   ApiResponse,
   SubscriptionPlan,
   SubscriptionListData,
 } from "../types/subscription.types";
-
-interface CurrentSubscription {
-  subscriptionName: string;
-  description: string;
-  price: number;
-  durationDays: number;
-  resumeLimit: number;
-  hoursLimit: number;
-  startDate: string;
-  endDate: string;
-  subscriptionStatus: string;
-}
 
 export const subscriptionService = {
   // ================== SYSTEM ADMIN ==================
@@ -39,7 +26,7 @@ export const subscriptionService = {
       API_ENDPOINTS.SUBSCRIPTION.PUBLIC_GET
     );
     const list = res.data?.data?.subscriptions;
-    return Array.isArray(list) ? list.filter((x) => x.isActive) : [];
+    return Array.isArray(list) ? list : [];
   },
 
   async getById(subscriptionId: number): Promise<SubscriptionPlan> {
@@ -83,24 +70,4 @@ export const subscriptionService = {
     return res.data.data;
   },
 
-  // ================== COMPANY (KHÔNG ĐỤNG – GIỮ NGUYÊN) ==================
-  async createCheckoutSession(subscriptionId: number) {
-    return await post<{ url: string }, { subscriptionId: number }>(
-      API_ENDPOINTS.PAYMENT.COMPANY_CHECKOUT,
-      { subscriptionId }
-    );
-  },
-
-  async getCurrentSubscription() {
-    return await get<CurrentSubscription>(
-      API_ENDPOINTS.COMPANY_SUBSCRIPTION.COMPANY_CURRENT
-    );
-  },
-
-  async cancelSubscription() {
-    return await post<void, {}>(
-      API_ENDPOINTS.COMPANY_SUBSCRIPTION.COMPANY_CANCEL,
-      {}
-    );
-  },
 };

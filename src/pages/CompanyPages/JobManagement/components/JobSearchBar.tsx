@@ -1,7 +1,5 @@
-import { Input } from "antd";
+import { Input, Space } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
-
-const { Search } = Input;
 
 type Props = {
   onSearch: (v: string) => void;
@@ -9,16 +7,17 @@ type Props = {
 
 const JobSearchBar = ({ onSearch }: Props) => {
   return (
-    <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", marginBottom: 12 }}>
-      <Search
-        placeholder="Search by title, category, specialization or description..."
-        allowClear
-        enterButton={<SearchOutlined />}
-        size="large"
-        style={{ width: 480 }}
-        onSearch={onSearch}
-      />
-    </div>
+    <Space style={{ marginBottom: 16, width: "100%" }} direction="vertical">
+      <Space wrap>
+        <Input
+          placeholder="Search by title, category or specialization"
+          prefix={<SearchOutlined />}
+          style={{ width: 400 }}
+          onChange={(e) => onSearch(e.target.value)}
+          allowClear
+        />
+      </Space>
+    </Space>
   );
 };
 

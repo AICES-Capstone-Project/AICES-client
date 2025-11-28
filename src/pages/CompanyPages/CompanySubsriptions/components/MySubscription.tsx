@@ -4,7 +4,7 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import SubscriptionStatsCard from "./SubscriptionStatsCard";
 import SubscriptionDetailsSection from "./SubscriptionDetailsSection";
-import { subscriptionService } from "../../../../services/subscriptionService";
+import { companySubscriptionService } from "../../../../services/companySubscriptionService";
 
 const MySubscription: React.FC = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const MySubscription: React.FC = () => {
   const loadCurrentSubscription = async () => {
     setLoading(true);
     try {
-      const response = await subscriptionService.getCurrentSubscription();
+      const response = await companySubscriptionService.getCurrentSubscription();
       if (response.status === "Success" && response.data) {
         const data = response.data;
 
@@ -36,11 +36,12 @@ const MySubscription: React.FC = () => {
           durationDays: data.durationDays,
         });
       } else {
-        message.error(response.message || "Failed to load current subscription");
+        // No active subscription - silently handle
+        console.log("No active subscription found");
       }
     } catch (error) {
       console.error("Failed to load current subscription:", error);
-      message.error("Failed to load current subscription");
+      // Silently handle error - no message shown
     } finally {
       setLoading(false);
     }
@@ -54,7 +55,7 @@ const MySubscription: React.FC = () => {
     setConfirmVisible(false);
     setCancelling(true);
     try {
-      const response = await subscriptionService.cancelSubscription();
+      const response = await companySubscriptionService.cancelSubscription();
       if (response.status === "Success") {
         message.success("Your subscription has been cancelled");
         navigate("/company/subscriptions");

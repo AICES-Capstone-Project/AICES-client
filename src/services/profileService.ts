@@ -1,4 +1,4 @@
-import { patchForm, post } from "./api";
+import { patchForm, put } from "./api";
 import { API_ENDPOINTS } from "./config";
 import type { ApiResponse } from "../types/api.types";
 import type { UpdateProfileResponse } from "../types/profile.types";
@@ -14,12 +14,12 @@ export const profileService = {
 	},
 
 	changePassword: async (
-		token: string,
+		oldPassword: string,
 		newPassword: string
 	): Promise<ApiResponse<null>> => {
-		return await post<null>(API_ENDPOINTS.AUTH.RESET_PASSWORD, {
-			token,
-			newPassword,
-		});
+		return await put<null, { oldPassword: string; newPassword: string }>(
+			API_ENDPOINTS.AUTH.CHANGE_PASSWORD,
+			{ oldPassword, newPassword }
+		);
 	},
 };

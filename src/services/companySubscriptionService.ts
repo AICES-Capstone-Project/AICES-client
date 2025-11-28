@@ -1,8 +1,9 @@
 // src/services/companySubscriptionService.ts
 import api from "./api";
+import { get, post } from "./api";
 import { API_ENDPOINTS } from "./config";
 
-import type { ApiResponse } from "../types/subscription.types";
+import type { ApiResponse } from "../types/api.types";
 import type {
   CompanySubscription,
   CompanySubscriptionListData,
@@ -22,6 +23,18 @@ export type CompanySubscriptionQuery = {
   search?: string;
 };
 
+interface CurrentSubscription {
+  subscriptionName: string;
+  description: string;
+  price: number;
+  durationDays: number;
+  resumeLimit: number;
+  hoursLimit: number;
+  startDate: string;
+  endDate: string;
+  subscriptionStatus: string;
+}
+
 export const companySubscriptionService = {
   // GET list: /system/company-subscriptions
   async getList(
@@ -31,7 +44,7 @@ export const companySubscriptionService = {
       API_ENDPOINTS.COMPANY_SUBSCRIPTION.SYSTEM_GET,
       { params }
     );
-    return res.data.data;
+    return res.data.data!;
   },
 
   // GET by id: /system/company-subscriptions/{id}
@@ -41,7 +54,7 @@ export const companySubscriptionService = {
         companySubscriptionId
       )
     );
-    return res.data.data;
+    return res.data.data!;
   },
 
   // CREATE
@@ -59,5 +72,19 @@ export const companySubscriptionService = {
       API_ENDPOINTS.COMPANY_SUBSCRIPTION.SYSTEM_DELETE(companySubscriptionId)
     );
     return res.data.data;
+  },
+
+  // ================== COMPANY SUBSCRIPTION METHODS ==================
+  async getCurrentSubscription(): Promise<ApiResponse<CurrentSubscription>> {
+    return await get<CurrentSubscription>(
+      API_ENDPOINTS.COMPANY_SUBSCRIPTION.COMPANY_CURRENT
+    );
+  },
+
+  async cancelSubscription(): Promise<ApiResponse<void>> {
+    return await post<void, {}>(
+      API_ENDPOINTS.COMPANY_SUBSCRIPTION.COMPANY_CANCEL,
+      {}
+    );
   },
 };

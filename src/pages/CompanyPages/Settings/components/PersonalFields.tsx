@@ -112,7 +112,7 @@ export default function PersonalFields() {
             format="DD/MM/YYYY"
             className="w-full"
             placeholder="Select your birthday"
-            popupStyle={{ maxHeight: '300px' }}
+            popupClassName="max-h-[300px]"
             disabledDate={(current) =>
               current &&
               (current > dayjs().endOf("day") ||

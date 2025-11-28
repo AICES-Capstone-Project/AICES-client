@@ -4,6 +4,7 @@ import { SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 import { subscriptionService } from "../../../services/subscriptionService";
+import { paymentService } from "../../../services/paymentService";
 import SubscriptionDrawer from "./components/SubscriptionDrawer";
 
 interface SubscriptionPlan {
@@ -36,7 +37,7 @@ const CompanyClients: React.FC = () => {
   const loadClients = async () => {
     setLoading(true);
     try {
-      const data = await subscriptionService.getAll();
+      const data = await subscriptionService.getPublic();
 
       // Map API response to SubscriptionPlan interface
       const mappedPlans: SubscriptionPlan[] = data.map((sub: any) => ({
@@ -95,7 +96,7 @@ const CompanyClients: React.FC = () => {
   const handleUpgrade = async (plan: SubscriptionPlan) => {
     setUpgradingId(plan.subscriptionId);
     try {
-      const response = await subscriptionService.createCheckoutSession(plan.subscriptionId);
+      const response = await paymentService.createCheckoutSession(plan.subscriptionId);
 
       if (response.status === "Success" && response.data?.url) {
         // Navigate to payment URL
@@ -182,6 +183,9 @@ const CompanyClients: React.FC = () => {
       }}
       extra={
         <Space>
+          <Button className="company-btn" onClick={() => navigate("/company/payment-history")}>
+            Payment History
+          </Button>
           <Button className="company-btn--filled" onClick={handleViewMySubscription}>
             View My Subscription
           </Button>

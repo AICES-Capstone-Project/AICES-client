@@ -9,8 +9,6 @@ import PersonalFields from "./components/PersonalFields";
 import AvatarUploader from "./components/AvatarUploader";
 import SaveActions from "./components/SaveActions";
 
-const { TabPane } = Tabs;
-
 export default function Setting() {
   const [formProfile] = Form.useForm();
   const [formPassword] = Form.useForm();
@@ -126,96 +124,106 @@ export default function Setting() {
       }}
     >
       <div className="w-full">
-        <Tabs activeKey={activeTab} onChange={setActiveTab} size="large" tabBarStyle={{ display: "none" }}>
-          <TabPane key="1">
-            <Form form={formProfile} onFinish={handleSaveProfile}>
-              <div className="flex gap-6">
-                {/* Avatar */}
-                <div className="w-[30%] flex items-center justify-center">
-                  <Form.Item
-                    name="AvatarFile"
-                    valuePropName="fileList"
-                    getValueFromEvent={(file: File | null) => (file ? [file] : [])}
-                    className="!mb-0"
+        <Tabs 
+          activeKey={activeTab} 
+          onChange={setActiveTab} 
+          size="large" 
+          tabBarStyle={{ display: "none" }}
+          items={[
+            {
+              key: "1",
+              label: "Personal Info",
+              children: (
+                <Form form={formProfile} onFinish={handleSaveProfile}>
+                  <div className="flex gap-6">
+                    {/* Avatar */}
+                    <div className="w-[30%] flex items-center justify-center">
+                      <Form.Item
+                        name="AvatarFile"
+                        valuePropName="fileList"
+                        getValueFromEvent={(file: File | null) => (file ? [file] : [])}
+                        className="!mb-0"
+                      >
+                        <AvatarUploader
+                          initialUrl={user.avatarUrl}
+                          onFileChange={(file) =>
+                            formProfile.setFieldsValue({ AvatarFile: file ? [file] : [] })
+                          }
+                          size={320}
+                        />
+                      </Form.Item>
+                    </div>
+
+                    {/* Thông tin cá nhân */}
+                    <div className="w-[70%] flex flex-col justify-center">
+                      <PersonalFields />
+                    </div>
+                  </div>
+
+                  {/* Nút Save */}
+                  <div className="flex justify-center mt-6">
+                    <div className="w-full max-w-md">
+                      <SaveActions saving={saving} className="w-full" />
+                    </div>
+                  </div>
+                </Form>
+              ),
+            },
+            {
+              key: "2",
+              label: "Change Password",
+              children: (
+                <div
+                  className="flex items-center justify-center !w-full !py-10"
+                  style={{
+                    backgroundColor: "#fff",
+                  }}
+                >
+                  <Form
+                    form={formPassword}
+                    layout="vertical"
+                    onFinish={handleChangePassword}
+                    className="w-full"
                   >
-                    <AvatarUploader
-                      initialUrl={user.avatarUrl}
-                      onFileChange={(file) =>
-                        formProfile.setFieldsValue({ AvatarFile: file ? [file] : [] })
-                      }
-                      size={320}
-                    />
-                  </Form.Item>
+                    <Form.Item
+                      name="oldPassword"
+                      label="Current password"
+                      rules={[{ required: true, message: "Please enter your current password!" }]}
+                    >
+                      <Input.Password/>
+                    </Form.Item>
+
+                    <Form.Item
+                      name="newPassword"
+                      label="New password"
+                      rules={[{ required: true, message: "Please enter a new password!" }]}
+                    >
+                      <Input.Password/>
+                    </Form.Item>
+
+                    <Form.Item
+                      name="confirmPassword"
+                      label="Confirm new password"
+                      rules={[{ required: true, message: "Please confirm your new password!" }]}
+                    >
+                      <Input.Password/>
+                    </Form.Item>
+
+                    <Form.Item className="!mb-0 text-center">
+                      <Button
+                        className="company-btn--filled"
+                        htmlType="submit"
+                        loading={loading}
+                      >
+                        Change password
+                      </Button>
+                    </Form.Item>
+                  </Form>
                 </div>
-
-                {/* Thông tin cá nhân */}
-                <div className="w-[70%] flex flex-col justify-center">
-                  <PersonalFields />
-                </div>
-              </div>
-
-              {/* Nút Save */}
-              <div className="flex justify-center mt-6">
-                <div className="w-full max-w-md">
-                  <SaveActions saving={saving} className="w-full" />
-                </div>
-              </div>
-            </Form>
-          </TabPane>
-
-          <TabPane key="2">
-            <div
-              className="flex items-center justify-center !w-full !py-10"
-              style={{
-                backgroundColor: "#fff",
-              }}
-            >
-
-              <Form
-                form={formPassword}
-                layout="vertical"
-                onFinish={handleChangePassword}
-                className="w-full"
-              >
-                <Form.Item
-                  name="oldPassword"
-                  label="Current password"
-                  rules={[{ required: true, message: "Please enter your current password!" }]}
-                >
-                  <Input.Password placeholder="Enter current password" />
-                </Form.Item>
-
-                <Form.Item
-                  name="newPassword"
-                  label="New password"
-                  rules={[{ required: true, message: "Please enter a new password!" }]}
-                >
-                  <Input.Password placeholder="Enter new password" />
-                </Form.Item>
-
-                <Form.Item
-                  name="confirmPassword"
-                  label="Confirm new password"
-                  rules={[{ required: true, message: "Please confirm your new password!" }]}
-                >
-                  <Input.Password placeholder="Re-enter new password" />
-                </Form.Item>
-
-                <Form.Item className="!mb-0 text-center">
-                  <Button
-                    className="company-btn--filled"
-                    htmlType="submit"
-                    loading={loading}
-                  >
-                    Change password
-                  </Button>
-                </Form.Item>
-              </Form>
-
-            </div>
-          </TabPane>
-
-        </Tabs>
+              ),
+            },
+          ]}
+        />
       </div>
     </Card>
   );

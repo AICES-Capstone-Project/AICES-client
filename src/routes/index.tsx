@@ -71,6 +71,12 @@ const MySubscription = lazy(
 			"../pages/CompanyPages/CompanySubsriptions/components/MySubscription"
 		)
 );
+const PaymentHistory = lazy(
+	() =>
+		import(
+			"../pages/CompanyPages/CompanySubsriptions/components/PaymentHistory"
+		)
+);
 
 /* ============== System Pages ==============*/
 const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
@@ -235,6 +241,10 @@ export const router = createBrowserRouter([
 			{
 				path: APP_ROUTES.COMPANY_MY_SUBSCRIPTIONS,
 				element: <MySubscription />,
+			},
+			{
+				path: APP_ROUTES.COMPANY_PAYMENT_HISTORY,
+				element: <PaymentHistory />,
 			},
 		],
 	},

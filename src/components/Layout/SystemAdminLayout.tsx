@@ -156,9 +156,7 @@ export default function SystemAdminLayout() {
         {
           key: APP_ROUTES.SYSTEM_EMAIL_TEMPLATES,
           label: (
-            <Link to={APP_ROUTES.SYSTEM_EMAIL_TEMPLATES}>
-              Email Templates
-            </Link>
+            <Link to={APP_ROUTES.SYSTEM_EMAIL_TEMPLATES}>Email Templates</Link>
           ),
         },
       ],
@@ -194,9 +192,7 @@ export default function SystemAdminLayout() {
         {
           key: APP_ROUTES.SYSTEM_EMAIL_CONFIG,
           label: (
-            <Link to={APP_ROUTES.SYSTEM_EMAIL_CONFIG}>
-              Email Configuration
-            </Link>
+            <Link to={APP_ROUTES.SYSTEM_EMAIL_CONFIG}>Email Configuration</Link>
           ),
         },
         {
@@ -331,7 +327,15 @@ export default function SystemAdminLayout() {
           breakpoint="lg"
           width={240}
           className="aices-sider"
-          style={{ display: "flex", flexDirection: "column" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            position: "fixed",
+            left: 0,
+            top: 0,
+            height: "100vh",
+            zIndex: 100,
+          }}
         >
           <div
             style={{
@@ -371,13 +375,22 @@ export default function SystemAdminLayout() {
           </div>
         </Sider>
 
-        <Layout>
+        <Layout
+          style={{
+            marginLeft: collapsed ? 80 : 240, // 80 = width sider khi collapsed
+            minHeight: "100vh",
+            overflow: "hidden",
+          }}
+        >
           <Header
             className="aices-header"
             style={{
               display: "flex",
               alignItems: "center",
               gap: 12,
+              position: "sticky",
+              top: 0,
+              zIndex: 90,
             }}
           >
             <Button
@@ -391,7 +404,13 @@ export default function SystemAdminLayout() {
             </Title>
           </Header>
 
-          <Content style={{ padding: 24 }}>
+          <Content
+            style={{
+              padding: 24,
+              height: "calc(100vh - 64px)", // 64 = height header
+              overflowY: "auto",
+            }}
+          >
             <Outlet />
           </Content>
         </Layout>

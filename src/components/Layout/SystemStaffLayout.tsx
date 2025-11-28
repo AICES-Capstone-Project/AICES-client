@@ -60,9 +60,7 @@ export default function SystemStaffLayout() {
     {
       key: toStaffPath(APP_ROUTES.SYSTEM_COMPANY),
       icon: <ApartmentOutlined />,
-      label: (
-        <Link to={toStaffPath(APP_ROUTES.SYSTEM_COMPANY)}>Companies</Link>
-      ),
+      label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_COMPANY)}>Companies</Link>,
     },
     // Subscriptions (Plans + Subscribed companies)
     {
@@ -73,17 +71,13 @@ export default function SystemStaffLayout() {
         {
           key: toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS),
           label: (
-            <Link to={toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS)}>
-              Plans
-            </Link>
+            <Link to={toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS)}>Plans</Link>
           ),
         },
         {
           key: toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES),
           label: (
-            <Link
-              to={toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES)}
-            >
+            <Link to={toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES)}>
               Subscribed Companies
             </Link>
           ),
@@ -94,9 +88,7 @@ export default function SystemStaffLayout() {
     {
       key: toStaffPath(APP_ROUTES.SYSTEM_PAYMENTS),
       icon: <FileDoneOutlined />,
-      label: (
-        <Link to={toStaffPath(APP_ROUTES.SYSTEM_PAYMENTS)}>Payments</Link>
-      ),
+      label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_PAYMENTS)}>Payments</Link>,
     },
     // Taxonomy CRUD (Category, Skill, RecruitmentType, Specialization)
     {
@@ -131,9 +123,7 @@ export default function SystemStaffLayout() {
         {
           key: toStaffPath(APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE),
           label: (
-            <Link
-              to={toStaffPath(APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE)}
-            >
+            <Link to={toStaffPath(APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE)}>
               Recruitment Types
             </Link>
           ),
@@ -166,9 +156,7 @@ export default function SystemStaffLayout() {
         {
           key: toStaffPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES),
           label: (
-            <Link
-              to={toStaffPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}
-            >
+            <Link to={toStaffPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}>
               Notification Templates
             </Link>
           ),
@@ -187,9 +175,7 @@ export default function SystemStaffLayout() {
     {
       key: toStaffPath(APP_ROUTES.SYSTEM_REPORTS),
       icon: <FileDoneOutlined />,
-      label: (
-        <Link to={toStaffPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>
-      ),
+      label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>,
     },
   ];
 
@@ -317,7 +303,15 @@ export default function SystemStaffLayout() {
           breakpoint="lg"
           width={240}
           className="aices-sider"
-          style={{ display: "flex", flexDirection: "column" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            position: "fixed",
+            left: 0,
+            top: 0,
+            height: "100vh",
+            zIndex: 100,
+          }}
         >
           <div
             style={{
@@ -357,13 +351,22 @@ export default function SystemStaffLayout() {
           </div>
         </Sider>
 
-        <Layout>
+        <Layout
+          style={{
+            marginLeft: collapsed ? 80 : 240, // 80 = width khi collapse
+            minHeight: "100vh",
+            overflow: "hidden",
+          }}
+        >
           <Header
             className="aices-header"
             style={{
               display: "flex",
               alignItems: "center",
               gap: 12,
+              position: "sticky",
+              top: 0,
+              zIndex: 90,
             }}
           >
             <Button
@@ -377,7 +380,13 @@ export default function SystemStaffLayout() {
             </Title>
           </Header>
 
-          <Content style={{ padding: 24 }}>
+          <Content
+            style={{
+              padding: 24,
+              height: "calc(100vh - 64px)", // 64 = chiều cao header
+              overflowY: "auto",
+            }}
+          >
             <Outlet />
           </Content>
         </Layout>

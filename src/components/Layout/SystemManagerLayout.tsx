@@ -77,9 +77,7 @@ export default function SystemManagerLayout() {
         {
           key: toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES),
           label: (
-            <Link
-              to={toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES)}
-            >
+            <Link to={toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES)}>
               Subscribed Companies
             </Link>
           ),
@@ -119,9 +117,7 @@ export default function SystemManagerLayout() {
         {
           key: toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION),
           label: (
-            <Link
-              to={toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION)}
-            >
+            <Link to={toManagerPath(APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION)}>
               Specializations
             </Link>
           ),
@@ -146,9 +142,7 @@ export default function SystemManagerLayout() {
       children: [
         {
           key: toManagerPath(APP_ROUTES.SYSTEM_BLOGS),
-          label: (
-            <Link to={toManagerPath(APP_ROUTES.SYSTEM_BLOGS)}>Blogs</Link>
-          ),
+          label: <Link to={toManagerPath(APP_ROUTES.SYSTEM_BLOGS)}>Blogs</Link>,
         },
         {
           key: toManagerPath(APP_ROUTES.SYSTEM_TAGS),
@@ -166,9 +160,7 @@ export default function SystemManagerLayout() {
         {
           key: toManagerPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES),
           label: (
-            <Link
-              to={toManagerPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}
-            >
+            <Link to={toManagerPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}>
               Notification Templates
             </Link>
           ),
@@ -187,9 +179,7 @@ export default function SystemManagerLayout() {
     {
       key: toManagerPath(APP_ROUTES.SYSTEM_REPORTS),
       icon: <FileDoneOutlined />,
-      label: (
-        <Link to={toManagerPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>
-      ),
+      label: <Link to={toManagerPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>,
     },
   ];
 
@@ -317,7 +307,15 @@ export default function SystemManagerLayout() {
           breakpoint="lg"
           width={240}
           className="aices-sider"
-          style={{ display: "flex", flexDirection: "column" }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            position: "fixed",
+            left: 0,
+            top: 0,
+            height: "100vh",
+            zIndex: 100,
+          }}
         >
           <div
             style={{
@@ -357,13 +355,22 @@ export default function SystemManagerLayout() {
           </div>
         </Sider>
 
-        <Layout>
+        <Layout
+          style={{
+            marginLeft: collapsed ? 80 : 240, // 80 = width khi collapse
+            minHeight: "100vh",
+            overflow: "hidden",
+          }}
+        >
           <Header
             className="aices-header"
             style={{
               display: "flex",
               alignItems: "center",
               gap: 12,
+              position: "sticky",
+              top: 0,
+              zIndex: 90,
             }}
           >
             <Button
@@ -377,7 +384,13 @@ export default function SystemManagerLayout() {
             </Title>
           </Header>
 
-          <Content style={{ padding: 24 }}>
+          <Content
+            style={{
+              padding: 24,
+              height: "calc(100vh - 64px)", // 64 = chiều cao header
+              overflowY: "auto",
+            }}
+          >
             <Outlet />
           </Content>
         </Layout>

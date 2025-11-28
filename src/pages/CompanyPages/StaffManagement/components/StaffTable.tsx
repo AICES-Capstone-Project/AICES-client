@@ -141,9 +141,7 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
       scroll={{ x: 1000 }}
       locale={{
         emptyText: (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No staff members found">
-            <Button type="primary">Invite Your First Staff Member</Button>
-          </Empty>
+          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No staff members found" />
         ),
       }}
       rowClassName={(_, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}

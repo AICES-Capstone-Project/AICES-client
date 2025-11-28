@@ -1,211 +1,274 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  Button,
-  Input,
-  Badge,
-} from "antd";
+import { Card, Button, Input, Badge } from "antd";
 import { PlusOutlined, SearchOutlined, BellOutlined } from "@ant-design/icons";
 import { companyService } from "../../../services/companyService";
 import type { CompanyMember } from "../../../types/company.types";
 import StaffTable from "./components/StaffTable";
 import InviteDrawer from "./components/InviteDrawer";
 import PendingMembersDrawer from "./components/PendingMembersDrawer";
-import { toastError, toastInfo, toastSuccess, toastWarning } from "../../../components/UI/Toast";
+import { useAppSelector } from "../../../hooks/redux";
+import { ROLES } from "../../../services/config";
+import {
+	toastError,
+	toastInfo,
+	toastSuccess,
+	toastWarning,
+} from "../../../components/UI/Toast";
 
 const { Search } = Input;
 
 const StaffManagement = () => {
-  const [members, setMembers] = useState<CompanyMember[]>([]);
-  const [filteredMembers, setFilteredMembers] = useState<CompanyMember[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [sending, setSending] = useState(false);
-  const [pendingDrawerOpen, setPendingDrawerOpen] = useState(false);
-  const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+	const [members, setMembers] = useState<CompanyMember[]>([]);
+	const [filteredMembers, setFilteredMembers] = useState<CompanyMember[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [drawerOpen, setDrawerOpen] = useState(false);
+	const [sending, setSending] = useState(false);
+	const [pendingDrawerOpen, setPendingDrawerOpen] = useState(false);
+	const [pendingRequests, setPendingRequests] = useState<any[]>([]);
 
+	const auth = useAppSelector((state) => state.auth);
+	const user = auth?.user;
+	const isHrManager =
+		(user?.roleName || "").toLowerCase() ===
+		(ROLES.Hr_Manager || "").toLowerCase();
 
-  // Fetch company members data
-  const fetchMembers = async () => {
-    setLoading(true);
-    try {
-      const response = await companyService.getMembers();
-      if (response?.status === "Success" || response?.status === "success") {
-        const data = response.data;
-        // API might return an array directly or a paginated object with items
-        const membersData: CompanyMember[] = Array.isArray(data) ? data : (data?.items || []);
-        setMembers(membersData);
-        setFilteredMembers(membersData);
-      } else {
-        toastError("Failed to fetch staff members");
-      }
-    } catch (error) {
-      console.error("Error fetching staff members:", error);
-      toastError("Error fetching staff members");
-    } finally {
-      setLoading(false);
-    }
-  };
+	// Fetch company members data
+	const fetchMembers = async () => {
+		setLoading(true);
+		try {
+			const response = await companyService.getMembers();
+			if (response?.status === "Success" || response?.status === "success") {
+				const data = response.data;
+				// API might return an array directly or a paginated object with items
+				const membersData: CompanyMember[] = Array.isArray(data)
+					? data
+					: data?.items || [];
+				setMembers(membersData);
+				setFilteredMembers(membersData);
+			} else {
+				toastError("Failed to fetch staff members");
+			}
+		} catch (error) {
+			console.error("Error fetching staff members:", error);
+			toastError("Error fetching staff members");
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  useEffect(() => {
-    fetchMembers();
-  }, []);
+	useEffect(() => {
+		fetchMembers();
+	}, []);
 
-  const fetchJoinRequests = async () => {
-    try {
-      const resp = await companyService.getJoinRequests();
-      if (resp?.status === "Success" || resp?.status === "success") {
-        setPendingRequests(resp.data || []);
-      } else {
-        setPendingRequests([]);
-        toastError("Failed to fetch pending members");
-      }
-    } catch (err) {
-      console.error("Error fetching join requests:", err);
-      setPendingRequests([]);
-      toastError("Error fetching pending members");
-    }
-  };
+	const fetchJoinRequests = async () => {
+		// Only HR_Manager can fetch join requests
+		if (!isHrManager) {
+			setPendingRequests([]);
+			return;
+		}
 
-  // Load pending join requests when component mounts so badge count is available immediately
-  useEffect(() => {
-    fetchJoinRequests();
-  }, []);
+		try {
+			const resp = await companyService.getJoinRequests();
+			if (resp?.status === "Success" || resp?.status === "success") {
+				setPendingRequests(resp.data || []);
+			} else {
+				setPendingRequests([]);
+				toastError("Failed to fetch pending members");
+			}
+		} catch (err) {
+			console.error("Error fetching join requests:", err);
+			setPendingRequests([]);
+			toastError("Error fetching pending members");
+		}
+	};
 
-  const handleView = (member: CompanyMember) => {
-    toastInfo("Viewing member", member.fullName || member.email);
-  };
+	// Load pending join requests when component mounts so badge count is available immediately
+	useEffect(() => {
+		if (isHrManager) {
+			fetchJoinRequests();
+		}
+	}, [isHrManager]);
 
-  const handleEdit = (member: CompanyMember) => {
-    toastInfo("Editing member", member.fullName || member.email);
-  };
+	const handleView = (member: CompanyMember) => {
+		toastInfo("Viewing member", member.fullName || member.email);
+	};
 
-  const handleDelete = (member: CompanyMember) => {
-    toastWarning("Remove member", member.fullName || member.email);
-  };
+	const handleEdit = (member: CompanyMember) => {
+		toastInfo("Editing member", member.fullName || member.email);
+	};
 
-  const handleChangeStatus = async (member: CompanyMember, status: string) => {
-    if (!member?.comUserId) return;
-    try {
-      const resp = await companyService.updateJoinRequestStatus(member.comUserId, status);
-      if (resp?.status === "Success" || resp?.status === "success") {
-        toastSuccess(`Member ${status.toLowerCase()} successfully`);
-        // refresh lists
-        fetchJoinRequests();
-        fetchMembers();
-      } else {
-        toastError(`Failed to ${status.toLowerCase()} member`, resp?.message);
-      }
-    } catch (err) {
-      console.error(`Error updating join status to ${status}:`, err);
-      toastError(`Error updating member status`);
-    }
-  };
+	const handleDelete = (member: CompanyMember) => {
+		toastWarning("Remove member", member.fullName || member.email);
+	};
 
-  // Drawer form submission (mock)
-  const handleInviteSubmit = async (values: { email: string }) => {
-    setSending(true);
-    setTimeout(() => {
-      toastSuccess(`Invitation sent to ${values.email}`);
-      setSending(false);
-      setDrawerOpen(false);
-    }, 1000);
-  };
+	const handleChangeStatus = async (member: CompanyMember, status: string) => {
+		if (!member?.comUserId) return;
+		try {
+			const resp = await companyService.updateJoinRequestStatus(
+				member.comUserId,
+				status
+			);
+			if (resp?.status === "Success" || resp?.status === "success") {
+				toastSuccess(`Member ${status.toLowerCase()} successfully`);
+				// refresh lists
+				fetchJoinRequests();
+				fetchMembers();
+			} else {
+				toastError(`Failed to ${status.toLowerCase()} member`, resp?.message);
+			}
+		} catch (err) {
+			console.error(`Error updating join status to ${status}:`, err);
+			toastError(`Error updating member status`);
+		}
+	};
 
-  const handleOpenPending = async () => {
-    setPendingDrawerOpen(true);
-    await fetchJoinRequests();
-  };
+	// Drawer form submission (mock)
+	const handleInviteSubmit = async (values: { email: string }) => {
+		setSending(true);
+		setTimeout(() => {
+			toastSuccess(`Invitation sent to ${values.email}`);
+			setSending(false);
+			setDrawerOpen(false);
+		}, 1000);
+	};
 
-  const handleApproveRequest = async (req: any) => {
-    if (!req?.comUserId) return;
-    try {
-      const resp = await companyService.updateJoinRequestStatus(req.comUserId, "Approved");
-      if (resp?.status === "Success" || resp?.status === "success") {
-        toastSuccess("Member approved");
-        fetchJoinRequests();
-        fetchMembers();
-      } else {
-        toastError("Failed to approve member");
-      }
-    } catch (err) {
-      console.error("Approve error:", err);
-      toastError("Error approving member");
-    }
-  };
+	const handleOpenPending = async () => {
+		setPendingDrawerOpen(true);
+		await fetchJoinRequests();
+	};
 
-  // Search handler
-  const handleSearch = (value: string) => {
-    const filtered = members.filter(member =>
-      (member.fullName?.toLowerCase().includes(value.toLowerCase())) ||
-      (member.email?.toLowerCase().includes(value.toLowerCase())) ||
-      (member.roleName?.toLowerCase().includes(value.toLowerCase()))
-    );
-    setFilteredMembers(filtered);
-  };
+	const handleApproveRequest = async (req: any) => {
+		if (!req?.comUserId) return;
+		try {
+			const resp = await companyService.updateJoinRequestStatus(
+				req.comUserId,
+				"Approved"
+			);
+			if (resp?.status === "Success" || resp?.status === "success") {
+				toastSuccess("Member approved");
+				fetchJoinRequests();
+				fetchMembers();
+			} else {
+				toastError("Failed to approve member");
+			}
+		} catch (err) {
+			console.error("Approve error:", err);
+			toastError("Error approving member");
+		}
+	};
 
-  return (
-    <Card
-      title={<div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-        <span style={{ fontWeight: 600 }}>Staff Management</span>
-        <div>
-          <Button
-            className="company-btn--filled"
-            icon={<PlusOutlined />}
-            onClick={() => setDrawerOpen(true)}
-          >
-            Invite New Staff
-          </Button>
-          <Button className="company-btn" style={{ marginLeft: 8 }} onClick={handleOpenPending}>
-            <Badge className="company-badge" count={pendingRequests.length} size="small" offset={[-2, 1]}>
-              <BellOutlined style={{ fontSize: 16, color: "var(--color-primary-medium) !important" }} />
-            </Badge>
-            <span className="ml-2">Pending Members</span>
-          </Button>
-        </div>
-      </div>}
-      style={{
-        maxWidth: 1200,
-        margin: "12px auto",
-        padding: "0 5px",
-        borderRadius: 12,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-      }}
-    >
-      <div className="w-full">
-        {/* Header Section */}
-        <div style={{ display: "flex", justifyContent: "flex-start", alignItems: "center", marginBottom: 24 }}>
-          <Search
-            placeholder="Search by name, email, or role..."
-            allowClear
-            enterButton={<SearchOutlined />}
-            size="large"
-            style={{ width: 400 }}
-            onSearch={handleSearch}
-          />
-        </div>
+	// Search handler
+	const handleSearch = (value: string) => {
+		const filtered = members.filter(
+			(member) =>
+				member.fullName?.toLowerCase().includes(value.toLowerCase()) ||
+				member.email?.toLowerCase().includes(value.toLowerCase()) ||
+				member.roleName?.toLowerCase().includes(value.toLowerCase())
+		);
+		setFilteredMembers(filtered);
+	};
 
-        {/* Staff Table */}
-        <StaffTable
-          members={filteredMembers}
-          loading={loading}
-          onView={handleView}
-          onEdit={handleEdit}
-          onDelete={handleDelete}
-          onChangeStatus={handleChangeStatus}
-        />
-      </div>
+	return (
+		<Card
+			title={
+				<div
+					style={{
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "space-between",
+						width: "100%",
+					}}
+				>
+					<span style={{ fontWeight: 600 }}>Staff Management</span>
+					<div>
+						<Button
+							className="company-btn--filled"
+							icon={<PlusOutlined />}
+							onClick={() => setDrawerOpen(true)}
+						>
+							Invite New Staff
+						</Button>
+						{isHrManager && (
+							<Button
+								className="company-btn"
+								style={{ marginLeft: 8 }}
+								onClick={handleOpenPending}
+							>
+								<Badge
+									className="company-badge"
+									count={pendingRequests.length}
+									size="small"
+									offset={[-2, 1]}
+								>
+									<BellOutlined
+										style={{
+											fontSize: 16,
+											color: "var(--color-primary-medium) !important",
+										}}
+									/>
+								</Badge>
+								<span className="ml-2">Pending Members</span>
+							</Button>
+						)}
+					</div>
+				</div>
+			}
+			style={{
+				maxWidth: 1200,
+				margin: "12px auto",
+				padding: "0 5px",
+				borderRadius: 12,
+				boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+			}}
+		>
+			<div className="w-full">
+				{/* Header Section */}
+				<div
+					style={{
+						display: "flex",
+						justifyContent: "flex-start",
+						alignItems: "center",
+						marginBottom: 24,
+					}}
+				>
+					<Search
+						placeholder="Search by name, email, or role..."
+						allowClear
+						enterButton={<SearchOutlined />}
+						size="large"
+						style={{ width: 400 }}
+						onSearch={handleSearch}
+					/>
+				</div>
 
-      {/* Invite Drawer */}
-      <InviteDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} onSubmit={handleInviteSubmit} submitting={sending} />
-      <PendingMembersDrawer
-        open={pendingDrawerOpen}
-        onClose={() => setPendingDrawerOpen(false)}
-        requests={pendingRequests}
-        onApprove={async (r) => { await handleApproveRequest(r); }}
-      />
-    </Card>
-  );
+				{/* Staff Table */}
+				<StaffTable
+					members={filteredMembers}
+					loading={loading}
+					onView={handleView}
+					onEdit={handleEdit}
+					onDelete={handleDelete}
+					onChangeStatus={handleChangeStatus}
+				/>
+			</div>
+
+			{/* Invite Drawer */}
+			<InviteDrawer
+				open={drawerOpen}
+				onClose={() => setDrawerOpen(false)}
+				onSubmit={handleInviteSubmit}
+				submitting={sending}
+			/>
+			<PendingMembersDrawer
+				open={pendingDrawerOpen}
+				onClose={() => setPendingDrawerOpen(false)}
+				requests={pendingRequests}
+				onApprove={async (r) => {
+					await handleApproveRequest(r);
+				}}
+			/>
+		</Card>
+	);
 };
 
 export default StaffManagement;

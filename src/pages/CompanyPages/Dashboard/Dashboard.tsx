@@ -51,6 +51,17 @@ interface TopCV {
 }
 
 const Dashboard = () => {
+	const containerStyle: React.CSSProperties = {
+		maxWidth: 1200,
+		margin: "0 auto",
+		padding: "24px",
+	};
+
+	const cardStyleCommon: React.CSSProperties = {
+		borderRadius: 12,
+		boxShadow: "0 6px 18px rgba(13,38,59,0.06)",
+		overflow: "hidden",
+	};
 	const [loading, setLoading] = useState(true);
 	const [stats, setStats] = useState<DashboardStats>({
 		activeJobs: 0,
@@ -78,7 +89,7 @@ const Dashboard = () => {
 
 			// Get company info to get companyId
 			const companyResp = await companyService.getSelf();
-			if (companyResp.status === "Success" && companyResp.data) {
+			if (String(companyResp?.status || '').toLowerCase() === "success" && companyResp.data) {
 				const cId = companyResp.data.companyId;
 
 				// Load all data in parallel
@@ -105,7 +116,7 @@ const Dashboard = () => {
 			let newCount = 0;
 			let totalCount = 0;
 
-			if (publishedResp.status === "Success" && publishedResp.data?.jobs) {
+			if (String(publishedResp?.status || '').toLowerCase() === "success" && publishedResp.data?.jobs) {
 				const publishedJobs = publishedResp.data.jobs;
 				totalCount += publishedJobs.length;
 				activeCount = publishedJobs.filter(
@@ -120,7 +131,7 @@ const Dashboard = () => {
 				).length;
 			}
 
-			if (pendingResp.status === "Success" && pendingResp.data?.jobs) {
+			if (String(pendingResp?.status || '').toLowerCase() === "success" && pendingResp.data?.jobs) {
 				totalCount += pendingResp.data.jobs.length;
 			}
 
@@ -139,7 +150,7 @@ const Dashboard = () => {
 		try {
 			// Get all jobs first
 			const jobsResp = await jobService.getCompanyJobs(1, 100);
-			if (jobsResp.status !== "Success" || !jobsResp.data?.jobs) return;
+			if (String(jobsResp?.status || '').toLowerCase() !== "success" || !jobsResp.data?.jobs) return;
 
 			const jobs = jobsResp.data.jobs;
 			let allResumes: any[] = [];
@@ -152,7 +163,7 @@ const Dashboard = () => {
 					job.jobId,
 					{ page: 1, pageSize: 100 }
 				);
-				if (resumesResp.status === "Success" && resumesResp.data?.items) {
+				if (String(resumesResp?.status || '').toLowerCase() === "success" && resumesResp.data?.items) {
 					allResumes = [...allResumes, ...resumesResp.data.items];
 				}
 			} catch (err) {
@@ -221,7 +232,7 @@ const Dashboard = () => {
 		try {
 			// Get all jobs
 			const jobsResp = await jobService.getCompanyJobs(1, 100);
-			if (jobsResp.status !== "Success" || !jobsResp.data?.jobs) return;
+			if (String(jobsResp?.status || '').toLowerCase() !== "success" || !jobsResp.data?.jobs) return;
 
 			const jobs = jobsResp.data.jobs;
 			let allResumesWithDetails: TopCV[] = [];
@@ -233,7 +244,7 @@ const Dashboard = () => {
 						job.jobId,
 						{ page: 1, pageSize: 100 }
 					);
-					if (resumesResp.status === "Success" && resumesResp.data?.items) {
+					if (String(resumesResp?.status || '').toLowerCase() === "success" && resumesResp.data?.items) {
 						const resumes = resumesResp.data.items;
 						resumes.forEach((resume: any) => {
 							if (resume.totalResumeScore != null) {
@@ -363,93 +374,65 @@ const Dashboard = () => {
 	}
 
 	return (
-		<div className="p-6 bg-gray-100 min-h-screen">
-			<h1 className="text-3xl font-bold mb-6 text-gray-900">Company Dashboard</h1>
+		<div style={containerStyle}>
+			<h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 16, color: "#111827" }}>Company Dashboard</h1>
 
 			{/* Job Statistics */}
 			<Row gutter={[16, 16]} className="mb-4">
 				<Col xs={24} sm={12} lg={8}>
-					<Card className="rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-green-600">
-						<Statistic
-							title="Active Jobs"
-							value={stats.activeJobs}
-							prefix={<FundOutlined />}
-							valueStyle={{ color: "#3f8600" }}
-						/>
-					</Card>
+					<Card style={{ ...cardStyleCommon, borderLeft: "4px solid #16a34a" }} bodyStyle={{ padding: 20 }}>
+							<Statistic
+								title="Active Jobs"
+								value={stats.activeJobs}
+								prefix={<FundOutlined />}
+								valueStyle={{ color: "#16a34a", fontWeight: 700 }}
+							/>
+						</Card>
 				</Col>
 				<Col xs={24} sm={12} lg={8}>
-					<Card className="rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-green-500">
-						<Statistic
-							title="New Jobs Created"
-							value={stats.newJobs}
-							prefix={<FundOutlined />}
-							valueStyle={{ color: "#1890ff" }}
-						/>
-					</Card>
+						<Card style={{ ...cardStyleCommon, borderLeft: "4px solid #0ea5e9" }} bodyStyle={{ padding: 20 }}>
+							<Statistic
+								title="New Jobs (7d)"
+								value={stats.newJobs}
+								prefix={<FundOutlined />}
+								valueStyle={{ color: "#0ea5e9", fontWeight: 700 }}
+							/>
+						</Card>
 				</Col>
 				<Col xs={24} sm={12} lg={8}>
-					<Card className="rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-blue-500">
-						<Statistic
-							title="Total Jobs"
-							value={stats.totalJobs}
-							prefix={<FundOutlined />}
-							valueStyle={{ color: "#722ed1" }}
-						/>
-					</Card>
+						<Card style={{ ...cardStyleCommon, borderLeft: "4px solid #6d28d9" }} bodyStyle={{ padding: 20 }}>
+							<Statistic
+								title="Total Jobs"
+								value={stats.totalJobs}
+								prefix={<FundOutlined />}
+								valueStyle={{ color: "#6d28d9", fontWeight: 700 }}
+							/>
+						</Card>
 				</Col>
 			</Row>
 
 			{/* CV Statistics */}
 			<h2 className="text-xl font-semibold mt-8 mb-4 text-gray-800 flex items-center gap-2">CV Upload Statistics</h2>
 			<Row gutter={[16, 16]} className="mb-4">
-				<Col xs={24} sm={12} lg={6}>
-					<Card className="rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-orange-500">
-						<Statistic
-							title="CVs Today"
-							value={stats.cvsToday}
-							prefix={<FileTextOutlined />}
-							valueStyle={{ color: "#fa8c16" }}
-						/>
+				{[
+				  { title: 'CVs Today', value: stats.cvsToday, color: '#f97316', border: '#fb923c' },
+				  { title: 'CVs This Week', value: stats.cvsThisWeek, color: '#06b6d4', border: '#06b6d4' },
+				  { title: 'CVs This Month', value: stats.cvsThisMonth, color: '#7c3aed', border: '#7c3aed' },
+				  { title: 'Total CVs', value: stats.cvsTotal, color: '#ec4899', border: '#ec4899' },
+				].map((kpi, i) => (
+				  <Col key={i} xs={24} sm={12} lg={6}>
+					<Card style={{ ...cardStyleCommon, borderLeft: `4px solid ${kpi.border}` }} bodyStyle={{ padding: 20 }}>
+					  <Statistic title={kpi.title} value={kpi.value} prefix={<FileTextOutlined />} valueStyle={{ color: kpi.color, fontWeight: 700 }} />
 					</Card>
-				</Col>
-				<Col xs={24} sm={12} lg={6}>
-					<Card className="rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-cyan-500">
-						<Statistic
-							title="CVs This Week"
-							value={stats.cvsThisWeek}
-							prefix={<FileTextOutlined />}
-							valueStyle={{ color: "#13c2c2" }}
-						/>
-					</Card>
-				</Col>
-				<Col xs={24} sm={12} lg={6}>
-					<Card className="rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-purple-600">
-						<Statistic
-							title="CVs This Month"
-							value={stats.cvsThisMonth}
-							prefix={<FileTextOutlined />}
-							valueStyle={{ color: "#722ed1" }}
-						/>
-					</Card>
-				</Col>
-				<Col xs={24} sm={12} lg={6}>
-					<Card className="rounded-xl shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1 border-l-4 border-pink-600">
-						<Statistic
-							title="Total CVs"
-							value={stats.cvsTotal}
-							prefix={<FileTextOutlined />}
-							valueStyle={{ color: "#eb2f96" }}
-						/>
-					</Card>
-				</Col>
+				  </Col>
+				))}
 			</Row>
 
 			{/* Charts Section */}
 			<Row gutter={[16, 16]} className="mb-4">
 				{/* Job Statistics Chart */}
 				<Col xs={24} lg={8}>
-					<Card className="rounded-xl shadow-md" title="Job Statistics">
+					<Card style={{ ...cardStyleCommon }} title="Job Statistics">
 						<ResponsiveContainer width="100%" height={250}>
 							<BarChart data={jobStatsChartData}>
 								<CartesianGrid strokeDasharray="3 3" />
@@ -464,7 +447,7 @@ const Dashboard = () => {
 
 				{/* CV Upload Trend */}
 				<Col xs={24} lg={8}>
-					<Card className="rounded-xl shadow-md" title="CV Upload Trend">
+					<Card style={{ ...cardStyleCommon }} title="CV Upload Trend">
 						<ResponsiveContainer width="100%" height={250}>
 							<LineChart data={cvStatsChartData}>
 								<CartesianGrid strokeDasharray="3 3" />
@@ -486,7 +469,7 @@ const Dashboard = () => {
 
 				{/* AI Screening Status */}
 				<Col xs={24} lg={8}>
-					<Card className="rounded-xl shadow-md" title="AI Screening Status">
+					<Card style={{ ...cardStyleCommon }} title="AI Screening Status">
 						<ResponsiveContainer width="100%" height={250}>
 							<PieChart>
 								<Pie
@@ -513,7 +496,7 @@ const Dashboard = () => {
 			{/* Score Distribution & Category Distribution */}
 			<Row gutter={[16, 16]} className="mb-4">
 				<Col xs={24} lg={12}>
-					<Card className="rounded-xl shadow-md" title="Score Distribution">
+					<Card style={{ ...cardStyleCommon }} title="Score Distribution">
 						<ResponsiveContainer width="100%" height={300}>
 							<PieChart>
 								<Pie
@@ -539,7 +522,7 @@ const Dashboard = () => {
 
 				{categoryDistribution.length > 0 && (
 					<Col xs={24} lg={12}>
-						<Card className="rounded-xl shadow-md" title="Top CVs by Category">
+						<Card style={{ ...cardStyleCommon }} title="Top CVs by Category">
 							<ResponsiveContainer width="100%" height={300}>
 								<BarChart data={categoryDistribution}>
 									<CartesianGrid strokeDasharray="3 3" />
@@ -558,14 +541,10 @@ const Dashboard = () => {
 			<h2 className="text-xl font-semibold mt-8 mb-4 text-gray-800 flex items-center gap-2">
 				<TrophyOutlined /> Top CVs by Score
 			</h2>
-			<Card className="rounded-xl shadow-md mb-6">
+			<Card style={{ ...cardStyleCommon, marginBottom: 16 }}>
 				{topCVs.length > 0 ? (
 					<>
-						<Tabs
-							defaultActiveKey="all"
-							onChange={(key) => setTopCVsFilter(key)}
-							tabBarStyle={{ marginBottom: 16 }}
-						>
+						<Tabs defaultActiveKey="all" onChange={(key) => setTopCVsFilter(key)} tabBarStyle={{ marginBottom: 12 }}>
 							<TabPane tab="All Categories" key="all" />
 							{uniqueCategories.map((category) => (
 								<TabPane tab={category} key={category} />
@@ -575,12 +554,9 @@ const Dashboard = () => {
 							columns={topCVsColumns}
 							dataSource={getFilteredTopCVs()}
 							rowKey="resumeId"
-							pagination={{
-								pageSize: 20,
-								showSizeChanger: true,
-								showTotal: (total) => `Total ${total} CVs`,
-							}}
-							scroll={{ x: 800 }}
+							size="middle"
+							pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Total ${total} CVs` }}
+							// remove forced horizontal scroll so table fits container
 						/>
 					</>
 				) : (

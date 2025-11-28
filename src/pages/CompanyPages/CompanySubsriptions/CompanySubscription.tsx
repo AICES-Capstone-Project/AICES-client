@@ -49,7 +49,7 @@ const CompanyClients: React.FC = () => {
         price: `${sub.price.toLocaleString()} VND`,
         status: sub.isActive ? "Active" : "Inactive",
         durationDays: sub.durationDays,
-        hoursLimit: sub.hoursLimit,
+        hoursLimit: sub.hoursLimit,   
         createdAt: sub.createdAt,
       }));
 

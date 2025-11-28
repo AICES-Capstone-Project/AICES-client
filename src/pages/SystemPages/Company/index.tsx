@@ -1,61 +1,118 @@
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  Input,
-  Modal,
-  Space,
-  Table,
-  Tag,
-  Typography,
-  Form,
-  Popconfirm,
-  Upload,
-} from "antd";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import {
-  EyeOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-  PlusOutlined,
-  DeleteOutlined,
-  UploadOutlined,
-} from "@ant-design/icons";
+import { Card, Form } from "antd";
+import type { TablePaginationConfig } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
+
 import { companyService } from "../../../services/companyService";
 import type { Company } from "../../../types/company.types";
 import type { UploadFile } from "antd/es/upload/interface";
-import { toastError, toastSuccess, toastWarning } from "../../../components/UI/Toast";
+import {
+  toastError,
+  toastSuccess,
+  toastWarning,
+} from "../../../components/UI/Toast";
 
-const { Title, Text } = Typography;
+import CompanyToolbar from "./components/CompanyToolbar";
+import CompanySearchBar from "./components/CompanySearchBar";
+import CompanyTable from "./components/CompanyTable";
+import CompanyPreviewModal from "./components/CompanyPreviewModal";
+import RejectCompanyModal from "./components/RejectCompanyModal";
+import CreateCompanyModal from "./components/CreateCompanyModal";
+
 const DEFAULT_PAGE_SIZE = 10;
 
 export default function CompanyList() {
   const [loading, setLoading] = useState(false);
+
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [allCompanies, setAllCompanies] = useState<Company[]>([]);
+
   const [total, setTotal] = useState(0);
   const [keyword, setKeyword] = useState("");
+
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: DEFAULT_PAGE_SIZE,
   });
+
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [preview, setPreview] = useState<Company | null>(null);
 
-  // === NEW: state cho chức năng Reject công ty ===
   const [rejectingCompany, setRejectingCompany] = useState<Company | null>(
     null
   );
   const [rejectionReason, setRejectionReason] = useState("");
-  // === NEW: state cho Create company ===
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  // === NEW: form instance cho modal Create ===
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [form] = Form.useForm();
+
   const nav = useNavigate();
 
-  // === NEW: hàm gọi API update status công ty ===
-  // Lưu ý: bạn cần tạo hàm companyService.updateStatus(id, body) bên service nếu chưa có
+  // ================== CORE HELPERS ==================
+  const applyFilterAndPaging = (
+    source: Company[],
+    kw: string,
+    page: number,
+    pageSize: number
+  ) => {
+    const keywordLower = kw.trim().toLowerCase();
+
+    const filtered = keywordLower
+      ? source.filter((c) => {
+          const name = (c.name || "").toLowerCase();
+          const website = (c.websiteUrl || "").toLowerCase();
+          return name.includes(keywordLower) || website.includes(keywordLower);
+        })
+      : source;
+
+    const start = (page - 1) * pageSize;
+    const end = start + pageSize;
+
+    setTotal(filtered.length);
+    setCompanies(filtered.slice(start, end));
+    setPagination((p) => ({
+      ...p,
+      current: page,
+      pageSize,
+    }));
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await companyService.getAll({
+        page: 1,
+        pageSize: 1000, // lấy nhiều 1 chút để admin search thoải mái
+      });
+
+      if (res?.status === "Success" && res?.data) {
+        const d = res.data as any;
+        const list = (d.companies ?? []) as Company[];
+
+        setAllCompanies(list);
+
+        applyFilterAndPaging(
+          list,
+          keyword,
+          1,
+          pagination.pageSize || DEFAULT_PAGE_SIZE
+        );
+      } else {
+        toastError("Failed to fetch companies", res?.message);
+      }
+    } catch (err) {
+      toastError("Failed to fetch companies");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ================== ACTION HANDLERS ==================
   const updateCompanyStatus = async (
     companyId: number,
     status: "Approved" | "Rejected",
@@ -74,12 +131,7 @@ export default function CompanyList() {
             ? "Company approved successfully"
             : "Company rejected successfully"
         );
-        // refresh lại list theo trang hiện tại & keyword hiện tại
-        await fetchData(
-          pagination.current || 1,
-          pagination.pageSize || DEFAULT_PAGE_SIZE,
-          keyword
-        );
+        await fetchData();
       } else {
         toastError("Failed to update company status", res?.message);
       }
@@ -89,6 +141,7 @@ export default function CompanyList() {
       setLoading(false);
     }
   };
+
   const handleCreate = async () => {
     try {
       const values = await form.validateFields();
@@ -103,7 +156,6 @@ export default function CompanyList() {
       if (values.websiteUrl) formData.append("Website", values.websiteUrl);
       if (values.taxCode) formData.append("TaxCode", values.taxCode);
 
-      // === NEW: LogoFile (optional) ===
       const logoList = values.logoFile as UploadFile[] | undefined;
       if (logoList && logoList.length > 0) {
         const logoFile = logoList[0].originFileObj as File;
@@ -112,18 +164,15 @@ export default function CompanyList() {
         }
       }
 
-      // === NEW: xử lý document file & type ===
       const fileList = values.documentFiles as UploadFile[] | undefined;
       if (fileList && fileList.length > 0) {
         const fileObj = fileList[0].originFileObj as File;
         if (fileObj) {
-          // key đúng theo swagger: DocumentFiles (array)
           formData.append("DocumentFiles", fileObj);
         }
       }
 
       if (values.documentType) {
-        // key đúng theo swagger: DocumentTypes (array<string>)
         formData.append("DocumentTypes", values.documentType);
       }
 
@@ -133,242 +182,17 @@ export default function CompanyList() {
         toastSuccess("Company created successfully");
         setIsCreateOpen(false);
         form.resetFields();
-        await fetchData(
-          pagination.current || 1,
-          pagination.pageSize || DEFAULT_PAGE_SIZE,
-          keyword
-        );
+        await fetchData();
       } else {
         toastError("Failed to create company", res?.message);
       }
     } catch (err: any) {
-      if (err?.errorFields) return; // lỗi validate form thì thôi
+      if (err?.errorFields) return;
       toastError("Failed to create company");
     } finally {
       setLoading(false);
     }
   };
-
-  const fetchData = async (
-    page = 1,
-    pageSize = DEFAULT_PAGE_SIZE,
-    search = ""
-  ) => {
-    setLoading(true);
-    try {
-      const res = await companyService.getAll({ page, pageSize, search });
-      if (res?.status === "Success" && res?.data) {
-        const d = res.data as any;
-        const list = (d.companies ?? []) as Company[];
-        setCompanies(list);
-
-        // total = totalPages * pageSize (nếu không có tổng tuyệt đối)
-        const totalCount = (
-          d.totalPages ? d.totalPages * (d.pageSize ?? pageSize) : list.length
-        ) as number;
-        setTotal(totalCount);
-
-        // cập nhật current page nếu BE trả về
-        if (d.currentPage || d.pageSize) {
-          setPagination((p) => {
-            const next = {
-              ...p,
-              current: d.currentPage ?? p.current,
-              pageSize: d.pageSize ?? p.pageSize,
-            };
-            return next.current === p.current && next.pageSize === p.pageSize
-              ? p
-              : next;
-          });
-        }
-      } else {
-        toastError("Failed to fetch companies", res?.message);
-      }
-    } catch (err) {
-      toastError("Failed to fetch companies");
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    fetchData(
-      pagination.current || 1,
-      pagination.pageSize || DEFAULT_PAGE_SIZE,
-      keyword
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.current, pagination.pageSize]);
-
-  const onSearch = () => {
-    setPagination((p) => ({ ...p, current: 1 }));
-    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE, keyword);
-  };
-
-  const onReset = () => {
-    setKeyword("");
-    setPagination((p) => ({ ...p, current: 1 }));
-    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE, "");
-  };
-
-  // === COLUMNS (đã khớp schema GET /api/companies) ===
-  const columns: ColumnsType<Company> = [
-    { title: "ID", dataIndex: "companyId", width: 80 },
-
-    {
-      title: "Company",
-      dataIndex: "name",
-      render: (v, r) => (
-        <Space>
-          {r.logoUrl ? (
-            <img
-              src={r.logoUrl}
-              alt="logo"
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 6,
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 6,
-                background: "#f0f0f0",
-              }}
-            />
-          )}
-          <span>{v}</span>
-        </Space>
-      ),
-    },
-
-    // Website (schema: websiteUrl) – hiển thị host gọn gàng
-    {
-      title: "Website",
-      // tránh lỗi type nếu Company type chưa có websiteUrl
-      render: (_, r: any) => {
-        const url = r.websiteUrl as string | undefined;
-        if (!url) return "—";
-        let host = "";
-        try {
-          host = new URL(url).hostname;
-        } catch {
-          host = url;
-        }
-        return (
-          <a href={url} target="_blank" rel="noreferrer">
-            {host}
-          </a>
-        );
-      },
-    },
-
-    // Trạng thái duyệt (schema: companyStatus = Approved/Pending/Rejected)
-    {
-      title: "Company Status",
-      // dùng render để không phụ thuộc type
-      render: (_, r: any) => {
-        const s = r.companyStatus as string | undefined;
-        const color =
-          s === "Approved" ? "green" : s === "Pending" ? "gold" : "red";
-        return s ? <Tag color={color}>{s}</Tag> : "—";
-      },
-      width: 150,
-    },
-
-    // Kích hoạt (schema: isActive = boolean)
-    {
-      title: "Active",
-      dataIndex: "isActive",
-      width: 110,
-      render: (b?: boolean) =>
-        b ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
-    },
-
-    // Ngày tạo (schema: createdAt)
-    {
-      title: "Created",
-      // dùng render để không phụ thuộc type
-      render: (_, r: any) =>
-        r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
-      width: 170,
-    },
-
-    {
-      title: "Actions",
-      key: "actions",
-      width: 260,
-      render: (_, record) => (
-        <Space>
-          <Button icon={<EyeOutlined />} onClick={() => openPreview(record)}>
-            Preview
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => nav(`/system/company/${record.companyId}`)}
-          >
-            Open
-          </Button>
-
-          {/* === NEW: nút Approve / Reject === */}
-          <Button
-            size="small"
-            disabled={record.companyStatus === "Approved"}
-            onClick={() => updateCompanyStatus(record.companyId, "Approved")}
-          >
-            Approve
-          </Button>
-
-          <Button
-            size="small"
-            danger
-            disabled={record.companyStatus === "Rejected"}
-            onClick={() => {
-              setRejectingCompany(record);
-              setRejectionReason("");
-            }}
-          >
-            Reject
-          </Button>
-          {/* === NEW: Delete company === */}
-          <Popconfirm
-            title="Delete company?"
-            description="Are you sure you want to delete this company?"
-            okText="Delete"
-            okType="danger"
-            cancelText="Cancel"
-            onConfirm={async () => {
-              setLoading(true);
-              try {
-                const res = await companyService.deleteCompany(
-                  record.companyId
-                );
-                if (res.status === "Success") {
-                  toastSuccess("Company deleted successfully");
-                  await fetchData(
-                    pagination.current || 1,
-                    pagination.pageSize || DEFAULT_PAGE_SIZE,
-                    keyword
-                  );
-                } else {
-                  toastError("Failed to delete company", res?.message);
-                }
-              } catch {
-                toastError("Failed to delete company");
-              } finally {
-                setLoading(false);
-              }
-            }}
-          >
-            <Button size="small" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
 
   const openPreview = async (c: Company) => {
     setIsPreviewOpen(true);
@@ -390,287 +214,134 @@ export default function CompanyList() {
         setPreview(mapped);
       } else {
         toastError("Failed to load company", res?.message);
-        setIsPreviewOpen(false); // 👈
+        setIsPreviewOpen(false);
       }
     } catch {
       toastError("Failed to load company");
-      setIsPreviewOpen(false); // 👈
+      setIsPreviewOpen(false);
     }
+  };
+
+  const handleDeleteCompany = async (companyId: number) => {
+    setLoading(true);
+    try {
+      const res = await companyService.deleteCompany(companyId);
+      if (res.status === "Success") {
+        toastSuccess("Company deleted successfully");
+        await fetchData();
+      } else {
+        toastError("Failed to delete company", res?.message);
+      }
+    } catch {
+      toastError("Failed to delete company");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmReject = async () => {
+    if (!rejectionReason.trim()) {
+      toastWarning("Please input rejection reason");
+      return;
+    }
+    if (!rejectingCompany) return;
+
+    await updateCompanyStatus(
+      rejectingCompany.companyId,
+      "Rejected",
+      rejectionReason
+    );
+
+    setRejectingCompany(null);
+    setRejectionReason("");
+  };
+
+  const handleApprove = (companyId: number) => {
+    updateCompanyStatus(companyId, "Approved");
+  };
+
+  const handleOpenDetail = (companyId: number) => {
+    nav(`/system/company/${companyId}`);
+  };
+
+  const handleChangeTable = (p: TablePaginationConfig) => {
+    const page = p.current || 1;
+    const pageSize = p.pageSize || DEFAULT_PAGE_SIZE;
+    setPagination(p);
+    applyFilterAndPaging(allCompanies, keyword, page, pageSize);
   };
 
   return (
     <div>
-      <Space
-        align="center"
-        style={{ width: "100%", justifyContent: "space-between" }}
-      >
-        <Title level={4} style={{ margin: 0 }}>
-          Company Management
-        </Title>
-        <Space>
-          {/* === NEW: nút Add Company === */}
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => {
-              form.resetFields();
-              setIsCreateOpen(true);
-            }}
-          >
-            Add Company
-          </Button>
-
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={() =>
-              fetchData(
-                pagination.current || 1,
-                pagination.pageSize || DEFAULT_PAGE_SIZE,
-                keyword
-              )
-            }
-          >
-            Refresh
-          </Button>
-        </Space>
-      </Space>
+      <CompanyToolbar
+        loading={loading}
+        onAdd={() => {
+          form.resetFields();
+          setIsCreateOpen(true);
+        }}
+        onRefresh={fetchData}
+      />
 
       <Card style={{ marginTop: 12 }}>
-        <Space style={{ marginBottom: 16 }} wrap>
-          <Input
-            placeholder="Search by company name or website"
-            allowClear
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onPressEnter={onSearch}
-            style={{ width: 320 }}
-            prefix={<SearchOutlined />}
-          />
-          <Button type="primary" onClick={onSearch} loading={loading}>
-            Search
-          </Button>
-          <Button onClick={onReset} disabled={loading}>
-            Reset
-          </Button>
-        </Space>
-
-        <Table<Company>
-          rowKey="companyId"
+        <CompanySearchBar
+          keyword={keyword}
+          setKeyword={setKeyword}
           loading={loading}
-          dataSource={companies}
-          columns={columns}
-          pagination={{
-            current: pagination.current,
-            pageSize: pagination.pageSize,
-            total,
-            showSizeChanger: true,
+          allCompanies={allCompanies}
+          pagination={pagination}
+          defaultPageSize={DEFAULT_PAGE_SIZE}
+          applyFilterAndPaging={applyFilterAndPaging}
+        />
+
+        <CompanyTable
+          loading={loading}
+          companies={companies}
+          pagination={pagination}
+          total={total}
+          keyword={keyword}
+          allCompanies={allCompanies}
+          defaultPageSize={DEFAULT_PAGE_SIZE}
+          onChangePagination={handleChangeTable}
+          onOpenPreview={openPreview}
+          onOpenDetail={handleOpenDetail}
+          onApprove={handleApprove}
+          onOpenReject={(c) => {
+            setRejectingCompany(c);
+            setRejectionReason("");
           }}
-          onChange={(p) => setPagination(p)}
+          onDelete={handleDeleteCompany}
         />
       </Card>
 
-      <Modal
+      <CompanyPreviewModal
         open={isPreviewOpen}
-        title="Company Preview"
-        onCancel={() => {
+        company={preview}
+        onClose={() => {
           setIsPreviewOpen(false);
           setPreview(null);
         }}
-        footer={null}
-        width={640}
-      >
-        {preview ? (
-          <Space direction="vertical" style={{ width: "100%" }} size="middle">
-            <Space>
-              {preview.logoUrl ? (
-                <img
-                  src={preview.logoUrl}
-                  alt="logo"
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 10,
-                    objectFit: "cover",
-                  }}
-                />
-              ) : null}
-              <div>
-                <Title level={5} style={{ margin: 0 }}>
-                  {preview.name}
-                </Title>
-                {/* Website */}
-                {preview.websiteUrl ? (
-                  <a href={preview.websiteUrl} target="_blank" rel="noreferrer">
-                    {(() => {
-                      try {
-                        return new URL(preview.websiteUrl).hostname;
-                      } catch {
-                        return preview.websiteUrl;
-                      }
-                    })()}
-                  </a>
-                ) : (
-                  <Text type="secondary">—</Text>
-                )}
-              </div>
-            </Space>
+      />
 
-            <div>
-              <b>Address:</b> {preview.address || "—"}
-            </div>
-
-            <div>
-              <b>Company Status:</b>{" "}
-              {preview.companyStatus ? (
-                <Tag
-                  color={
-                    preview.companyStatus === "Approved"
-                      ? "green"
-                      : preview.companyStatus === "Pending"
-                      ? "gold"
-                      : "red"
-                  }
-                >
-                  {preview.companyStatus}
-                </Tag>
-              ) : (
-                "—"
-              )}
-            </div>
-
-            <div>
-              <b>Active:</b>{" "}
-              {preview.isActive ? (
-                <Tag color="green">Active</Tag>
-              ) : (
-                <Tag color="red">Inactive</Tag>
-              )}
-            </div>
-
-            <div>
-              <b>Created At:</b>{" "}
-              {preview.createdAt
-                ? new Date(preview.createdAt).toLocaleString()
-                : "—"}
-            </div>
-          </Space>
-        ) : (
-          <div>Loading...</div>
-        )}
-      </Modal>
-      {/* === NEW: Modal nhập lý do Reject === */}
-      <Modal
+      <RejectCompanyModal
         open={!!rejectingCompany}
-        title={
-          rejectingCompany
-            ? `Reject company #${rejectingCompany.companyId}`
-            : "Reject company"
-        }
+        loading={loading}
+        company={rejectingCompany}
+        reason={rejectionReason}
+        onReasonChange={setRejectionReason}
         onCancel={() => {
           setRejectingCompany(null);
           setRejectionReason("");
         }}
-        onOk={async () => {
-          if (!rejectionReason.trim()) {
-            toastWarning("Please input rejection reason");
-            return;
-          }
-          if (!rejectingCompany) return;
+        onConfirm={handleConfirmReject}
+      />
 
-          await updateCompanyStatus(
-            rejectingCompany.companyId,
-            "Rejected",
-            rejectionReason
-          );
-
-          setRejectingCompany(null);
-          setRejectionReason("");
-        }}
-        confirmLoading={loading}
-      >
-        <div style={{ marginBottom: 8 }}>
-          <b>Rejection reason</b>
-        </div>
-        <Input.TextArea
-          rows={4}
-          value={rejectionReason}
-          onChange={(e) => setRejectionReason(e.target.value)}
-          placeholder="Nhập lý do từ chối công ty này..."
-        />
-      </Modal>
-      {/* === NEW: Modal Create Company === */}
-      <Modal
+      <CreateCompanyModal
         open={isCreateOpen}
-        title="Create Company"
+        loading={loading}
+        form={form}
         onCancel={() => setIsCreateOpen(false)}
-        onOk={handleCreate}
-        confirmLoading={loading}
-      >
-        {/* CHỖ NÀY PHẢI THÊM form={form} */}
-        <Form form={form} layout="vertical">
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[{ required: true, message: "Please input company name" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item label="Description" name="description">
-            <Input.TextArea rows={3} />
-          </Form.Item>
-
-          <Form.Item label="Address" name="address">
-            <Input />
-          </Form.Item>
-
-          <Form.Item label="Website" name="websiteUrl">
-            <Input placeholder="https://example.com" />
-          </Form.Item>
-
-          <Form.Item label="Tax Code" name="taxCode">
-            <Input />
-          </Form.Item>
-          {/* === NEW: Logo file (optional) === */}
-          <Form.Item
-            label="Logo"
-            name="logoFile"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
-          >
-            <Upload beforeUpload={() => false} maxCount={1} accept="image/*">
-              <Button icon={<UploadOutlined />}>Select logo</Button>
-            </Upload>
-          </Form.Item>
-
-          {/* === NEW: Document file (bắt buộc) === */}
-          <Form.Item
-            label="Document File"
-            name="documentFiles"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => (Array.isArray(e) ? e : e?.fileList)}
-            rules={[
-              {
-                required: true,
-                message: "Please upload at least one document file",
-              },
-            ]}
-          >
-            <Upload beforeUpload={() => false} maxCount={1}>
-              <Button>Select file</Button>
-            </Upload>
-          </Form.Item>
-
-          {/* === NEW: Document type (bắt buộc) === */}
-          <Form.Item
-            label="Document Type"
-            name="documentType"
-            rules={[{ required: true, message: "Please input document type" }]}
-          >
-            <Input placeholder="e.g. BusinessLicense" />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onCreate={handleCreate}
+      />
     </div>
   );
 }

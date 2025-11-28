@@ -48,7 +48,7 @@ const ResumeList: React.FC = () => {
     try {
       const { jobService } = await import("../../../../services/jobService");
       const resp = await jobService.getJobById(Number(jobId));
-      if (resp?.status?.toLowerCase() === "success" && resp.data) {
+      if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
         setJobTitle(resp.data.title || "");
       }
     } catch (e) {
@@ -63,7 +63,7 @@ const ResumeList: React.FC = () => {
       const resp = await resumeService.getByJob(Number(jobId));
       console.debug("[ResumeList] resumeService.getByJob response", resp);
 
-      if (resp?.status?.toLowerCase() === "success" && resp.data) {
+      if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
         const raw = Array.isArray(resp.data) ? resp.data : resp.data.items || [];
         const resumeList = (Array.isArray(raw) ? raw : []) as any[];
         const mapped: Resume[] = resumeList.map((r) => ({
@@ -79,6 +79,8 @@ const ResumeList: React.FC = () => {
         }));
         const sortedList = mapped.slice().sort((a, b) => a.resumeId - b.resumeId);
         setResumes(sortedList);
+      } else {
+        message.error(resp?.message || "Không thể tải danh sách CV");
       }
     } catch (e) {
       console.error("Failed to load resumes:", e);
@@ -94,8 +96,10 @@ const ResumeList: React.FC = () => {
       console.debug("[ResumeList] calling resumeService.getById", { jobId, resumeId });
       const resp = await resumeService.getById(Number(jobId), resumeId);
       console.debug("[ResumeList] resumeService.getById response", resp);
-      if (resp?.status?.toLowerCase() === "success" && resp.data) {
+      if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
         setSelectedResume(resp.data as unknown as Resume);
+      } else {
+        message.error(resp?.message || "Không thể tải chi tiết CV");
       }
     } catch (e) {
       console.error("Failed to load resume detail:", e);
@@ -120,7 +124,7 @@ const ResumeList: React.FC = () => {
       console.debug("[ResumeList] calling resumeService.uploadToJob");
       const resp = await resumeService.uploadToJob(formData);
       console.debug("[ResumeList] uploadToJob response", resp);
-      if (resp?.status?.toLowerCase() === "success") {
+      if (String(resp?.status || "").toLowerCase() === "success") {
         message.success(`Uploaded ${file.name} successfully!`);
         await loadResumes();
       } else {
@@ -128,7 +132,8 @@ const ResumeList: React.FC = () => {
       }
     } catch (e: any) {
       console.error("Upload error:", e);
-      message.error(e?.message || "Upload failed");
+      const errMsg = e?.response?.data?.message || e?.message || "Upload failed";
+      message.error(errMsg);
     } finally {
       setUploading(false);
     }

@@ -31,9 +31,11 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
   return (
     <Drawer
       title="Job Details"
-      width={640}
+      // use a fixed width to encourage vertical expansion instead of horizontal
+      width={720}
       onClose={onClose}
       open={open}
+      bodyStyle={{ overflowX: 'hidden' }}
       footer={
         isPending && onApprove ? (
           <div style={{ textAlign: "right" }}>
@@ -45,16 +47,18 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
       }
     >
       {job ? (
-        <Descriptions column={1} bordered>
-          <Descriptions.Item label="Title">{job.title}</Descriptions.Item>
-          <Descriptions.Item label="Category - Specialization">
-            {job.categoryName ? (
-              <Tag color={tagColorFor(job.categoryName)}>{job.categoryName}</Tag>
-            ) : (
-              "-"
-            )}
-            {" - "}
-            <span style={{ marginLeft: "8px" }}>
+        <Descriptions column={1} bordered style={{ tableLayout: 'fixed', width: '100%' }}>
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Title</div>}>
+            <div style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.title}</div>
+          </Descriptions.Item>
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Category - Specialization</div>}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+              {job.categoryName ? (
+                <Tag color={tagColorFor(job.categoryName)} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>{job.categoryName}</Tag>
+              ) : (
+                "-"
+              )}
+              <span style={{ marginLeft: 8, marginRight: 8 }}> - </span>
               {job.specializationName ? (
                 <Tag
                   color={
@@ -62,45 +66,56 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
                       ? tagColorFor(job.categoryName)
                       : tagColorFor(job.specializationName)
                   }
+                  style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}
                 >
                   {job.specializationName}
                 </Tag>
               ) : (
                 "-"
               )}
-            </span>
+            </div>
           </Descriptions.Item>
-          <Descriptions.Item label="Description">{job.description || "-"}</Descriptions.Item>
-          <Descriptions.Item label="Requirements">{job.requirements || "-"}</Descriptions.Item>
-          <Descriptions.Item label="Criteria">
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Description</div>}>
+            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.description || '-'}</div>
+          </Descriptions.Item>
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Requirements</div>}>
+            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.requirements || '-'}</div>
+          </Descriptions.Item>
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Criteria</div>}>
             {Array.isArray((job as any).criteria) && (job as any).criteria.length > 0 ? (
-              (job as any).criteria.map((c: any) => (
-                <Tag key={c.criteriaId} color={tagColorFor(c.name)}>
-                  {`${c.name} (${c.weight})`}
-                </Tag>
-              ))
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {(job as any).criteria.map((c: any) => (
+                  <Tag key={c.criteriaId} color={tagColorFor(c.name)} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                    {`${c.name} (${c.weight})`}
+                  </Tag>
+                ))}
+              </div>
             ) : (
               <span>-</span>
             )}
           </Descriptions.Item>
-          <Descriptions.Item label="Employment Types">
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Employment Types</div>}>
             {Array.isArray(job.employmentTypes) && job.employmentTypes.length > 0 ? (
-              job.employmentTypes.map((e: any, i: number) => (
-                <Tag key={`${e}-${i}`} color={tagColorFor(String(e))}>
-                  {e}
-                </Tag>
-              ))
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {job.employmentTypes.map((e: any, i: number) => (
+                  <Tag key={`${e}-${i}`} color={tagColorFor(String(e))} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                    {e}
+                  </Tag>
+                ))}
+              </div>
             ) : (
               <span>-</span>
             )}
           </Descriptions.Item>
-          <Descriptions.Item label="Skills">
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Skills</div>}>
             {Array.isArray(job.skills) && job.skills.length > 0 ? (
-              job.skills.map((s: any, i: number) => (
-                <Tag key={`${s}-${i}`} color={tagColorFor(String(s))}>
-                  {s}
-                </Tag>
-              ))
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {job.skills.map((s: any, i: number) => (
+                  <Tag key={`${s}-${i}`} color={tagColorFor(String(s))} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                    {s}
+                  </Tag>
+                ))}
+              </div>
             ) : (
               <span>-</span>
             )}

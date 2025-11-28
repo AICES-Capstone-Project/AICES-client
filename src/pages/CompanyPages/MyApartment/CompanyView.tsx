@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Card, Row, Col, Spin, message, Modal, Button } from "antd";
 import CompanyEditModal from "./components/CompanyEditModal";
 import { companyService } from "../../../services/companyService";
-import type { CompanyMember } from "../../../types/company.types";
 import { useAppSelector } from "../../../hooks/redux";
 
 interface CompanyData {
@@ -15,13 +14,14 @@ interface CompanyData {
   logoUrl?: string;
   companyStatus: string;
   rejectionReason?: string | null;
+  managerName?: string | null;
   documents?: { documentType: string; fileUrl: string }[];
 }
 
 export default function CompanyView() {
   const [company, setCompany] = useState<CompanyData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [hrManager, setHrManager] = useState<CompanyMember | null>(null);
+  // (managerName read from company object) -- no separate hrManager state needed
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewType, setPreviewType] = useState<string>("");
@@ -36,27 +36,8 @@ export default function CompanyView() {
       // 1️⃣ Fetch company data
       const companyResp = await companyService.getSelf();
       if (companyResp?.status === "success" || companyResp?.status === "Success") {
-        setCompany(companyResp.data);
-
-        // 2️⃣ Fetch company members (sau khi có companyId)
-        try {
-          if (!companyResp.data) throw new Error('Company data missing');
-          const membersResp = await companyService.getMembers(companyResp.data.companyId);
-          if (membersResp?.status === "success" || membersResp?.status === "Success") {
-            // API could return either an array or a paginated object { items: [...] }
-            const membersList: CompanyMember[] = Array.isArray(membersResp.data)
-              ? membersResp.data
-              : (membersResp.data && (membersResp.data as any).items) || [];
-
-            const hrMember = membersList.find(
-              (member: CompanyMember) => member.roleName === "HR_Manager"
-            );
-            setHrManager(hrMember || null);
-          }
-        } catch (memberError) {
-          console.error("Failed to fetch company members:", memberError);
-        }
-
+        const companyData = companyResp.data as CompanyData;
+        setCompany(companyData);
       } else {
         message.error("Failed to load company details");
       }
@@ -68,7 +49,7 @@ export default function CompanyView() {
     }
   };
   fetchData();
-}, []);
+  }, []);
 
 
   if (loading) {
@@ -147,12 +128,7 @@ export default function CompanyView() {
               <b>Tax code:</b> <span>{company.taxCode || "N/A"}</span>
             </div>
             <div style={{ marginBottom: 8 }}>
-              <b>HR Manager:</b> <span>
-                {hrManager
-                  ? (hrManager.fullName || hrManager.email)
-                  : "N/A"
-                }
-              </span>
+              <b>HR Manager:</b> <span>{company.managerName || "N/A"}</span>
             </div>
             <div>
               <b>Description:</b> <span>{company.description || "N/A"}</span>

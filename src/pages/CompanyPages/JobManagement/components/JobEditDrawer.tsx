@@ -312,7 +312,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
             >
               Cancel
             </Button>
-            <Button type="primary" htmlType="submit" loading={saving}>
+            <Button className="company-btn--filled" htmlType="submit" loading={saving}>
               Save
             </Button>
           </Space>

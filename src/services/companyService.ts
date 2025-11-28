@@ -13,6 +13,7 @@ interface CompanyData {
   logoUrl?: string;
   companyStatus: "Approved" | "Pending" | "Rejected" | string;
   rejectionReason?: string | null;
+  managerName?: string | null;
   documents?: { documentType: string; fileUrl: string }[];
   isActive?: boolean;
   createdAt?: string;
@@ -28,7 +29,7 @@ export const companyService = {
   // Send multipart/form-data (for logo and document files)
   createForm: async (formData: FormData): Promise<ApiResponse<null>> => {
     return await postForm<null>(
-      API_ENDPOINTS.COMPANY.COMPANY_GET_PROFILE,
+      API_ENDPOINTS.COMPANY.COMPANY_CREATE,
       formData
     );
   },

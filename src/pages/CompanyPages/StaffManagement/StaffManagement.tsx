@@ -12,6 +12,8 @@ import type { CompanyMember } from "../../../types/company.types";
 import StaffTable from "./components/StaffTable";
 import InviteDrawer from "./components/InviteDrawer";
 import PendingMembersDrawer from "./components/PendingMembersDrawer";
+import { useAppSelector } from "../../../hooks/redux";
+import { ROLES } from "../../../services/config";
 
 const { Search } = Input;
 
@@ -23,6 +25,10 @@ const StaffManagement = () => {
   const [sending, setSending] = useState(false);
   const [pendingDrawerOpen, setPendingDrawerOpen] = useState(false);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+
+  const auth = useAppSelector((state) => state.auth);
+  const user = auth?.user;
+  const isHrManager = (user?.roleName || "").toLowerCase() === (ROLES.Hr_Manager || "").toLowerCase();
 
 
   // Fetch company members data
@@ -52,25 +58,31 @@ const StaffManagement = () => {
   }, []);
 
   const fetchJoinRequests = async () => {
+    // Only HR_Manager can fetch join requests
+    if (!isHrManager) {
+      setPendingRequests([]);
+      return;
+    }
+
     try {
       const resp = await companyService.getJoinRequests();
       if (resp?.status === "Success" || resp?.status === "success") {
         setPendingRequests(resp.data || []);
       } else {
         setPendingRequests([]);
-        message.error("Failed to fetch pending members");
       }
     } catch (err) {
       console.error("Error fetching join requests:", err);
       setPendingRequests([]);
-      message.error("Error fetching pending members");
     }
   };
 
   // Load pending join requests when component mounts so badge count is available immediately
   useEffect(() => {
-    fetchJoinRequests();
-  }, []);
+    if (isHrManager) {
+      fetchJoinRequests();
+    }
+  }, [isHrManager]);
 
   const handleView = (member: CompanyMember) => {
     message.info(`Viewing member: ${member.fullName || member.email}`);
@@ -156,12 +168,14 @@ const StaffManagement = () => {
           >
             Invite New Staff
           </Button>
-          <Button className="company-btn" style={{ marginLeft: 8 }} onClick={handleOpenPending}>
-            <Badge className="company-badge" count={pendingRequests.length} size="small" offset={[-2, 1]}>
-              <BellOutlined style={{ fontSize: 16, color: "var(--color-primary-medium) !important" }} />
-            </Badge>
-            <span className="ml-2">Pending Members</span>
-          </Button>
+          {isHrManager && (
+            <Button className="company-btn" style={{ marginLeft: 8 }} onClick={handleOpenPending}>
+              <Badge className="company-badge" count={pendingRequests.length} size="small" offset={[-2, 1]}>
+                <BellOutlined style={{ fontSize: 16, color: "var(--color-primary-medium) !important" }} />
+              </Badge>
+              <span className="ml-2">Pending Members</span>
+            </Button>
+          )}
         </div>
       </div>}
       style={{

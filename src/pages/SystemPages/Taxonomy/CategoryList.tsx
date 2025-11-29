@@ -1,28 +1,15 @@
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  Form,
-  Input,
-  Modal,
-  Space,
-  Table,
-  Tag,
-  message,
-} from "antd";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
-import dayjs from "dayjs";
+import { Card, Form, message } from "antd";
+import type { TablePaginationConfig } from "antd/es/table";
 
 import { categoryService } from "../../../services/categoryService";
 import type { Category } from "../../../types/category.types";
 
-const { Search } = Input;
+import CategoryToolbar from "./components/category/CategoryToolbar";
+import CategoryTable from "./components/category/CategoryTable";
+import CategoryModal from "./components/category/CategoryModal";
+
+const DEFAULT_PAGE_SIZE = 10;
 
 export default function CategoryList() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -30,7 +17,7 @@ export default function CategoryList() {
   const [keyword, setKeyword] = useState("");
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
-    pageSize: 10,
+    pageSize: DEFAULT_PAGE_SIZE,
     total: 0,
   });
 
@@ -38,7 +25,7 @@ export default function CategoryList() {
   const [editing, setEditing] = useState<Category | null>(null);
   const [form] = Form.useForm();
 
-  const fetchData = async (page = 1, pageSize = 10) => {
+  const fetchData = async (page = 1, pageSize = DEFAULT_PAGE_SIZE) => {
     try {
       setLoading(true);
 
@@ -50,7 +37,6 @@ export default function CategoryList() {
 
       const payload = res.data;
 
-      // res.data có thể null → check trước
       if (!payload) {
         setCategories([]);
         setPagination((prev) => ({
@@ -77,13 +63,13 @@ export default function CategoryList() {
   };
 
   useEffect(() => {
-    fetchData(1, pagination.pageSize || 10);
+    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTableChange = (pag: TablePaginationConfig) => {
     const current = pag.current || 1;
-    const size = pag.pageSize || 10;
+    const size = pag.pageSize || DEFAULT_PAGE_SIZE;
     setPagination((prev) => ({ ...prev, current, pageSize: size }));
     fetchData(current, size);
   };
@@ -101,23 +87,26 @@ export default function CategoryList() {
   };
 
   const handleDelete = (record: Category) => {
-    Modal.confirm({
-      title: "Deactivate this category?",
-      content: `Category: "${record.name}" sẽ bị deactivate.`,
-      okText: "Yes",
-      cancelText: "No",
-      onOk: async () => {
-        try {
-          await categoryService.remove(record.categoryId);
+    // vẫn dùng Modal.confirm, nhưng gọi từ Page (logic ở đây)
+    import("antd").then(({ Modal }) =>
+      Modal.confirm({
+        title: "Deactivate this category?",
+        content: `Category: "${record.name}" sẽ bị deactivate.`,
+        okText: "Yes",
+        cancelText: "No",
+        onOk: async () => {
+          try {
+            await categoryService.remove(record.categoryId);
 
-          message.success("Category deactivated successfully");
-          fetchData(pagination.current || 1, pagination.pageSize || 10);
-        } catch (err: any) {
-          console.error(err);
-          message.error("Failed to deactivate category");
-        }
-      },
-    });
+            message.success("Category deactivated successfully");
+            fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+          } catch (err: any) {
+            console.error(err);
+            message.error("Failed to deactivate category");
+          }
+        },
+      })
+    );
   };
 
   const handleSubmit = async () => {
@@ -138,7 +127,7 @@ export default function CategoryList() {
 
       setIsModalOpen(false);
       form.resetFields();
-      fetchData(pagination.current || 1, pagination.pageSize || 10);
+      fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE);
     } catch (err: any) {
       if (err?.response?.data?.message) {
         message.error(err.response.data.message);
@@ -151,119 +140,36 @@ export default function CategoryList() {
     item.name.toLowerCase().includes(keyword.toLowerCase())
   );
 
-  const columns: ColumnsType<Category> = [
-    {
-      title: "ID",
-      dataIndex: "categoryId",
-      width: 80,
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-    },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      width: 120,
-      render: (isActive: boolean) =>
-        isActive ? (
-          <Tag color="green">Active</Tag>
-        ) : (
-          <Tag color="red">Inactive</Tag>
-        ),
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      width: 200,
-      render: (value: string) =>
-        value ? dayjs(value).format("DD/MM/YYYY HH:mm") : "-",
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 200,
-      render: (_, record) => (
-        <Space>
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => openEditModal(record)}
-          >
-            Edit
-          </Button>
-          <Button
-            size="small"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record)}
-          >
-            Deactivate
-          </Button>
-        </Space>
-      ),
-    },
-  ];
-
   return (
     <Card
       title="Categories"
       extra={
-        <Space>
-          <Button
-            icon={<ReloadOutlined />}
-            onClick={() =>
-              fetchData(pagination.current || 1, pagination.pageSize || 10)
-            }
-          />
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={openCreateModal}
-          >
-            Add Category
-          </Button>
-        </Space>
+        <CategoryToolbar
+          onReload={() =>
+            fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE)
+          }
+          onCreate={openCreateModal}
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+        />
       }
     >
-      <div style={{ marginBottom: 16, display: "flex", gap: 8 }}>
-        <Search
-          placeholder="Search by name..."
-          allowClear
-          onChange={(e) => setKeyword(e.target.value)}
-          style={{ maxWidth: 320 }}
-        />
-      </div>
-
-      <Table<Category>
-        rowKey="categoryId"
+      <CategoryTable
         loading={loading}
-        dataSource={filteredData}
-        columns={columns}
+        data={filteredData}
         pagination={pagination}
-        onChange={handleTableChange}
+        onChangePage={handleTableChange}
+        onEdit={openEditModal}
+        onDelete={handleDelete}
       />
 
-      <Modal
+      <CategoryModal
         open={isModalOpen}
-        title={editing ? "Edit Category" : "Create Category"}
+        form={form}
+        editing={editing}
         onCancel={() => setIsModalOpen(false)}
-        onOk={handleSubmit}
-        destroyOnClose
-      >
-        <Form form={form} layout="vertical" preserve={false}>
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[
-              { required: true, message: "Please enter category name" },
-              { max: 255, message: "Max length is 255 characters" },
-            ]}
-          >
-            <Input placeholder="Ex: Software Development" />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onSubmit={handleSubmit}
+      />
     </Card>
   );
 }

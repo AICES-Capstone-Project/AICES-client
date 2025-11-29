@@ -1,31 +1,17 @@
 // src/pages/SystemPages/Taxonomy/SkillList.tsx
 
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  Form,
-  Input,
-  Modal,
-  Popconfirm,
-  Space,
-  Table,
-  Tag,
-  Typography,
-  message,
-} from "antd";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import {
-  PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { Card, Form, Typography, message } from "antd";
+import type { TablePaginationConfig } from "antd/es/table";
+
 import dayjs from "dayjs";
 
 import type { Skill } from "../../../types/skill.types";
 import { skillService } from "../../../services/skillService";
+
+import SkillToolbar from "./components/skill/SkillToolbar";
+import SkillTable from "./components/skill/SkillTable";
+import SkillModal from "./components/skill/SkillModal";
 
 const { Title, Text } = Typography;
 const DEFAULT_PAGE_SIZE = 10;
@@ -67,7 +53,6 @@ export default function SkillList() {
 
       const data = response.data;
 
-      // Ép về đúng Skill[] một cách an toàn
       const list: Skill[] = Array.isArray(data) ? data : [];
 
       setSkills(list);
@@ -175,140 +160,46 @@ export default function SkillList() {
     }
   };
 
-  const columns: ColumnsType<Skill> = [
-    {
-      title: "ID",
-      dataIndex: "skillId",
-      key: "skillId",
-      width: 80,
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      key: "isActive",
-      width: 140,
-      render: (isActive: boolean) =>
-        isActive ? (
-          <Tag color="green">Active</Tag>
-        ) : (
-          <Tag color="red">Inactive</Tag>
-        ),
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      width: 220,
-      render: (value: string) =>
-        value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "-",
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 200,
-      render: (_, record) => (
-        <Space>
-          <Button icon={<EditOutlined />} onClick={() => openEditModal(record)}>
-            Edit
-          </Button>
-          <Popconfirm
-            title="Delete this skill?"
-            description="This action cannot be undone."
-            okText="Delete"
-            okType="danger"
-            onConfirm={() => handleDelete(record.skillId)}
-          >
-            <Button danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-
   return (
     <Card
       title={
-        <Space
-          style={{
-            width: "100%",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <div>
           <Title level={4} style={{ margin: 0 }}>
             Skill Management
           </Title>
-          <Space>
-            <Input
-              allowClear
-              placeholder="Search by name..."
-              value={keyword}
-              onChange={(e) => setKeyword(e.target.value)}
-              onPressEnter={handleSearch}
-              prefix={<SearchOutlined />}
-              style={{ width: 260 }}
-            />
-            <Button onClick={handleResetSearch} icon={<ReloadOutlined />}>
-              Reset
-            </Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={openCreateModal}
-            >
-              New Skill
-            </Button>
-          </Space>
-        </Space>
+          <Text type="secondary">Manage global skills taxonomy</Text>
+        </div>
       }
-      extra={<Text type="secondary">Manage global skills taxonomy</Text>}
+      extra={
+        <SkillToolbar
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onSearch={handleSearch}
+          onReset={handleResetSearch}
+          onCreate={openCreateModal}
+        />
+      }
     >
-      <Table<Skill>
-        rowKey="skillId"
+      <SkillTable
         loading={loading}
-        columns={columns}
-        dataSource={skills}
-        pagination={{
-          ...pagination,
-          total,
-        }}
-        onChange={handleTableChange}
+        data={skills}
+        pagination={{ ...pagination, total }}
+        onChangePage={handleTableChange}
+        onEdit={openEditModal}
+        onDelete={handleDelete}
+        formatDate={(value: string) =>
+          value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "-"
+        }
       />
 
-      <Modal
-        title={editingSkill ? "Edit Skill" : "Create Skill"}
+      <SkillModal
         open={isModalOpen}
+        form={form}
+        editingSkill={editingSkill}
+        submitting={submitting}
         onCancel={handleModalCancel}
-        okText={editingSkill ? "Save changes" : "Create"}
-        onOk={() => form.submit()}
-        confirmLoading={submitting}
-        destroyOnClose
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={handleSubmit}
-          preserve={false}
-        >
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[
-              { required: true, message: "Please enter skill name" },
-              { max: 200, message: "Name is too long" },
-            ]}
-          >
-            <Input placeholder="e.g. Communication, Leadership" />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onSubmit={handleSubmit}
+      />
     </Card>
   );
 }

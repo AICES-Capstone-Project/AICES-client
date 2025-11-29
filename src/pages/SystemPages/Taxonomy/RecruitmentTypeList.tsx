@@ -1,33 +1,15 @@
-// src/pages/SystemPages/Taxonomy/RecruitmentTypeList.tsx
-
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  Form,
-  Input,
-  Modal,
-  Popconfirm,
-  Space,
-  Table,
-  Tag,
-  Typography,
-  message,
-} from "antd";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { Card, Form, Typography, message } from "antd";
+import type { TablePaginationConfig } from "antd/es/table";
 
 import type { RecruitmentType } from "../../../types/recruitmentType.types";
 import { recruitmentTypeService } from "../../../services/recruitmentTypeService";
 
+import RecruitmentTypeToolbar from "./components/recruitment-type/RecruitmentTypeToolbar";
+import RecruitmentTypeTable from "./components/recruitment-type/RecruitmentTypeTable";
+import RecruitmentTypeModal from "./components/recruitment-type/RecruitmentTypeModal";
+
 const { Title, Text } = Typography;
-const { Search } = Input;
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -161,66 +143,10 @@ export default function RecruitmentTypeList() {
     }
   };
 
-  const columns: ColumnsType<RecruitmentType> = [
-    {
-      title: "ID",
-      dataIndex: "recruitmentTypeId",
-      width: 80,
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-    },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      width: 120,
-      render: (isActive: boolean) =>
-        isActive ? (
-          <Tag color="green">Active</Tag>
-        ) : (
-          <Tag color="red">Inactive</Tag>
-        ),
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      width: 220,
-      render: (value: string) =>
-        value ? new Date(value).toLocaleString() : "-",
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 140,
-      render: (_: unknown, record: RecruitmentType) => (
-        <Space>
-          <Button
-            icon={<EditOutlined />}
-            size="small"
-            onClick={() => openEditModal(record)}
-          >
-            Edit
-          </Button>
-          <Popconfirm
-            title="Are you sure to delete this recruitment type?"
-            onConfirm={() => handleDelete(record.recruitmentTypeId)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button danger icon={<DeleteOutlined />} size="small">
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-
   return (
     <Card
       title={
-        <Space direction="vertical" size={0}>
+        <div>
           <Title level={3} style={{ margin: 0 }}>
             Recruitment Types
           </Title>
@@ -228,69 +154,38 @@ export default function RecruitmentTypeList() {
             Manage employment types used in job postings (Full-time, Part-time,
             Contract, Temporary, etc.).
           </Text>
-        </Space>
+        </div>
       }
       extra={
-        <Space>
-          <Search
-            allowClear
-            placeholder="Search by name"
-            prefix={<SearchOutlined />}
-            onSearch={handleSearch}
-            onChange={(e) => setKeyword(e.target.value)}
-            value={keyword}
-            style={{ width: 260 }}
-          />
-          <Button icon={<ReloadOutlined />} onClick={handleReset}>
-            Reset
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={openCreateModal}
-          >
-            New Recruitment Type
-          </Button>
-        </Space>
+        <RecruitmentTypeToolbar
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onSearch={handleSearch}
+          onReset={handleReset}
+          onCreate={openCreateModal}
+        />
       }
     >
-      <Table
-        rowKey="recruitmentTypeId"
+      <RecruitmentTypeTable
         loading={loading}
-        columns={columns}
-        dataSource={recruitmentTypes}
+        data={recruitmentTypes}
         pagination={pagination}
-        onChange={handleTableChange}
+        onChangePage={handleTableChange}
+        onEdit={openEditModal}
+        onDelete={handleDelete}
       />
 
-      <Modal
-        title={editingItem ? "Edit Recruitment Type" : "New Recruitment Type"}
+      <RecruitmentTypeModal
         open={isModalOpen}
-        onOk={handleModalOk}
+        form={form}
+        editingItem={editingItem}
         onCancel={() => {
           setIsModalOpen(false);
           setEditingItem(null);
           form.resetFields();
         }}
-        okText={editingItem ? "Save changes" : "Create"}
-        destroyOnClose
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item
-            label="Name"
-            name="name"
-            rules={[
-              { required: true, message: "Please enter recruitment type name" },
-              {
-                max: 100,
-                message: "Name must be at most 100 characters",
-              },
-            ]}
-          >
-            <Input placeholder="e.g. Full-time, Part-time, Contract, Temporary" />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onOk={handleModalOk}
+      />
     </Card>
   );
 }

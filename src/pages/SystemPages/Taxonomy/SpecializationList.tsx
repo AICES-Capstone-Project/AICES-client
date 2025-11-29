@@ -1,33 +1,15 @@
-// src/pages/SystemPages/Taxonomy/SpecializationList.tsx
-
 import { useEffect, useState } from "react";
-import {
-  Button,
-  Card,
-  Form,
-  Input,
-  InputNumber,
-  Modal,
-  Popconfirm,
-  Space,
-  Table,
-  Tag,
-  Typography,
-  message,
-} from "antd";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import {
-  DeleteOutlined,
-  EditOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { Card, Form, message } from "antd";
+import type { TablePaginationConfig } from "antd/es/table";
 
 import type { Specialization } from "../../../types/specialization.types";
 import { specializationService } from "../../../services/specializationService";
 
-const { Title, Text } = Typography;
+import SpecializationToolbar from "./components/specialization/SpecializationToolbar";
+import SpecializationTable from "./components/specialization/SpecializationTable";
+import SpecializationModal from "./components/specialization/SpecializationModal";
+
+
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -50,7 +32,8 @@ export default function SpecializationList() {
 
   const fetchData = async (
     page = pagination.current || 1,
-    pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE
+    pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE,
+    currentKeyword = keyword
   ) => {
     try {
       setLoading(true);
@@ -58,11 +41,10 @@ export default function SpecializationList() {
       const response = await specializationService.getSpecializationsSystem({
         page,
         pageSize,
-        keyword: keyword || undefined,
+        keyword: currentKeyword || undefined,
       });
 
       const payload = response.data?.data;
-
 
       if (!payload) {
         setSpecializations([]);
@@ -109,12 +91,12 @@ export default function SpecializationList() {
   };
 
   const handleSearch = () => {
-    fetchData(1, pagination.pageSize);
+    fetchData(1, pagination.pageSize, keyword);
   };
 
   const handleReset = () => {
     setKeyword("");
-    fetchData(1, DEFAULT_PAGE_SIZE);
+    fetchData(1, DEFAULT_PAGE_SIZE, "");
   };
 
   const openCreateModal = () => {
@@ -182,7 +164,7 @@ export default function SpecializationList() {
         pagination.pageSize || DEFAULT_PAGE_SIZE
       );
     } catch (error: any) {
-      if (error?.errorFields) return; // validate fail
+      if (error?.errorFields) return;
 
       // eslint-disable-next-line no-console
       console.error("Failed to save specialization", error);
@@ -200,178 +182,32 @@ export default function SpecializationList() {
     form.resetFields();
   };
 
-  const columns: ColumnsType<Specialization> = [
-    {
-      title: "ID",
-      dataIndex: "specializationId",
-      key: "specializationId",
-      width: 80,
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      ellipsis: true,
-    },
-    {
-      title: "Category",
-      dataIndex: "categoryName",
-      key: "categoryName",
-      ellipsis: true,
-    },
-    {
-      title: "Category ID",
-      dataIndex: "categoryId",
-      key: "categoryId",
-      width: 120,
-    },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      key: "isActive",
-      width: 120,
-      render: (value: boolean) =>
-        value ? (
-          <Tag color="green">Active</Tag>
-        ) : (
-          <Tag color="red">Inactive</Tag>
-        ),
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      width: 220,
-      render: (value: string) =>
-        value ? new Date(value).toLocaleString() : "-",
-    },
-    {
-      title: "Actions",
-      key: "actions",
-      fixed: "right",
-      width: 150,
-      render: (_, record) => (
-        <Space>
-          <Button
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => openEditModal(record)}
-          >
-            Edit
-          </Button>
-
-          <Popconfirm
-            title="Are you sure to delete this specialization?"
-            onConfirm={() => handleDelete(record)}
-            okText="Yes"
-            cancelText="No"
-          >
-            <Button size="small" danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-
   return (
     <Card>
-      <Space
-        style={{
-          marginBottom: 16,
-          width: "100%",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
-          <Title level={4} style={{ marginBottom: 0 }}>
-            Specializations
-          </Title>
-          <Text type="secondary">
-            Manage specialization taxonomy used by skills and jobs.
-          </Text>
-        </div>
-
-        <Space>
-          <Input
-            placeholder="Search by name or category..."
-            allowClear
-            prefix={<SearchOutlined />}
-            value={keyword}
-            onChange={(e) => setKeyword(e.target.value)}
-            onPressEnter={handleSearch}
-            style={{ width: 260 }}
-          />
-          <Button icon={<SearchOutlined />} onClick={handleSearch}>
-            Search
-          </Button>
-          <Button icon={<ReloadOutlined />} onClick={handleReset}>
-            Reset
-          </Button>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={openCreateModal}
-          >
-            New Specialization
-          </Button>
-        </Space>
-      </Space>
-
-      <Table<Specialization>
-        rowKey="specializationId"
-        loading={loading}
-        columns={columns}
-        dataSource={specializations}
-        pagination={pagination}
-        onChange={handleTableChange}
-        scroll={{ x: 900 }}
+      <SpecializationToolbar
+        keyword={keyword}
+        onKeywordChange={setKeyword}
+        onSearch={handleSearch}
+        onReset={handleReset}
+        onCreate={openCreateModal}
       />
 
-      <Modal
-        title={
-          editingSpecialization
-            ? "Edit Specialization"
-            : "Create Specialization"
-        }
+      <SpecializationTable
+        loading={loading}
+        data={specializations}
+        pagination={pagination}
+        onChangePage={handleTableChange}
+        onEdit={openEditModal}
+        onDelete={handleDelete}
+      />
+
+      <SpecializationModal
         open={isModalVisible}
+        form={form}
+        editingSpecialization={editingSpecialization}
         onOk={handleModalOk}
         onCancel={handleModalCancel}
-        okText="Save"
-        destroyOnClose
-      >
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={{ name: "", categoryId: undefined }}
-        >
-          <Form.Item
-            name="name"
-            label="Specialization Name"
-            rules={[
-              { required: true, message: "Name is required" },
-              { max: 255, message: "Max 255 characters" },
-            ]}
-          >
-            <Input placeholder="e.g. Backend Development" />
-          </Form.Item>
-
-          <Form.Item
-            name="categoryId"
-            label="Category ID"
-            rules={[
-              { required: true, message: "Category ID is required" },
-              { type: "number", min: 1, message: "Category ID must be > 0" },
-            ]}
-          >
-            <InputNumber
-              style={{ width: "100%" }}
-              placeholder="Enter category ID"
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+      />
     </Card>
   );
 }

@@ -300,6 +300,14 @@ export const API_ENDPOINTS = {
 		SYSTEM_GET: "/system/roles",
 		SYSTEM_GET_BY_ID: (roleId: number) => `/system/roles/${roleId}`,
 	},
+
+	NOTIFICATION: {
+		//------------------------------- AUTH -----------------------------------------
+		AUTH_GET: "/notifications/me",
+		AUTH_MARK_AS_READ: (notificationId: number) =>
+			`/notifications/mark-as-read/${notificationId}`,
+		AUTH_MARK_ALL_AS_READ: "/notifications/mark-all-as-read",
+	},
 } as const;
 
 // App Routes Configuration

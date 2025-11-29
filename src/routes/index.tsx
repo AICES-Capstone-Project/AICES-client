@@ -10,7 +10,6 @@ import CompanyList from "../pages/SystemPages/Company";
 import CompanyDetail from "../pages/SystemPages/Company/CompanyDetail";
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
 import ResumeDetail from "../pages/SystemPages/Company/ResumeDetail";
-import NotificationTestPage from "../pages/NotificationTestPage";
 
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
@@ -202,7 +201,6 @@ export const router = createBrowserRouter([
 	{ path: APP_ROUTES.AUTH_CALLBACK, element: <GitHubCallback /> },
 	{ path: APP_ROUTES.TEST, element: <UserProfileTest /> },
 	{ path: "/payment/success", element: <PaymentSuccess /> },
-	{ path: "/notification-test", element: <NotificationTestPage /> },
 
 	/* ============== Comapany Pages ==============*/
 	{

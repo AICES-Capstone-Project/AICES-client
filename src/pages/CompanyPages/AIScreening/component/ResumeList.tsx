@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Tag, Button, Drawer, Space, Upload } from "antd";
+import { Card, Table, Tag, Button, Drawer, Space, Upload, message } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeftOutlined, InboxOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
@@ -132,7 +132,7 @@ const ResumeList: React.FC = () => {
 			console.debug("[ResumeList] calling resumeService.uploadToJob");
 			const resp = await resumeService.uploadToJob(formData);
 			console.debug("[ResumeList] uploadToJob response", resp);
-			if (resp?.status?.toLowerCase() === "success") {
+			if (String(resp?.status || '').toLowerCase() === "success") {
 				toastSuccess(
 					"Upload thành công",
 					`Uploaded ${file.name} successfully!`

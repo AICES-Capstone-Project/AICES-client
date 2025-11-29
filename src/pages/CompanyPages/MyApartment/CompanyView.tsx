@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { Card, Row, Col, Spin, Modal, Button } from "antd";
+import { Card, Row, Col, Spin, message, Modal, Button } from "antd";
 import CompanyEditModal from "./components/CompanyEditModal";
 import { companyService } from "../../../services/companyService";
 import { useAppSelector } from "../../../hooks/redux";
-import { toastError } from "../../../components/UI/Toast";
 
 interface CompanyData {
   companyId: number;
@@ -32,24 +31,24 @@ export default function CompanyView() {
   const isHrRecruiter = (user?.roleName || "").toLowerCase() === "hr_recruiter";
 
   useEffect(() => {
-  const fetchData = async () => {
-    try {
-      // 1️⃣ Fetch company data
-      const companyResp = await companyService.getSelf();
-      if (companyResp?.status === "success" || companyResp?.status === "Success") {
-        const companyData = companyResp.data as CompanyData;
-        setCompany(companyData);
-      } else {
-        toastError("Failed to load company details");
+    const fetchData = async () => {
+      try {
+        // 1️⃣ Fetch company data
+        const companyResp = await companyService.getSelf();
+        if (companyResp?.status === "success" || companyResp?.status === "Success") {
+          const companyData = companyResp.data as CompanyData;
+          setCompany(companyData);
+        } else {
+          message.error("Failed to load company details");
+        }
+      } catch (err) {
+        console.error(err);
+        message.error("Error fetching company details");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error(err);
-      toastError("Error fetching company details");
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchData();
+    };
+    fetchData();
   }, []);
 
 
@@ -96,43 +95,75 @@ export default function CompanyView() {
           padding: "0 5px",
           borderRadius: 12,
           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          height: 'calc(100% - 25px)',
         }}
       >
-        <Row gutter={32}>
-          {/* LEFT: Logo */}
-          <Col span={5} style={{ textAlign: "center" }}>
-            <img
-              src={company.logoUrl || "https://placehold.co/200x200?text=Logo"}
-              alt="Company Logo"
-              style={{
-                width: 180,
-                height: 180,
-                objectFit: "cover",
-                borderRadius: "10%",
-                border: "1px solid #ddd",
-              }}
-            />
-          </Col>
+        <Row gutter={32} align="middle" justify="center" style={{ width: "100%", marginBottom: 20 }}>
+          <div
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              maxWidth: 900,
+              width: "100%",
+              margin: "0 auto",
+            }}
+          >
+            {/* LEFT: Logo */}
+            <Col span={9} style={{ textAlign: "center" }}>
+              <img
+                src={company.logoUrl || "https://placehold.co/200x200?text=Logo"}
+                alt="Company Logo"
+                style={{
+                  width: 200,
+                  height: 200,
+                  objectFit: "cover",
+                  borderRadius: "10%",
+                  border: "1px solid #ddd",
+                  display: 'block',
+                  margin: '5px auto',
+                }}
+              />
+            </Col>
+            {/* RIGHT: Info */}
+            <Col span={15} >
+              <div style={{ maxWidth: 600 }}>
+                <div style={{ marginBottom: 10 }}>
+                  <b>Name:</b> <span>{company.name}</span>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <b>Website:</b> <span>{company.websiteUrl || "N/A"}</span>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <b>Address:</b> <span>{company.address || "N/A"}</span>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <b>Tax code:</b> <span>{company.taxCode || "N/A"}</span>
+                </div>
+                <div style={{ marginBottom: 10 }}>
+                  <b>HR Manager:</b> <span>{company.managerName || "N/A"}</span>
+                </div>
+              </div>
+            </Col>
+          </div>
 
-          {/* RIGHT: Info */}
-          <Col span={19} style={{ padding: "0 6px" }}>
-            <div style={{ marginBottom: 8 }}>
-              <b>Company name:</b> <span>{company.name}</span>
-            </div>
-            <div style={{ marginBottom: 8 }}>
-              <b>Website:</b> <span>{company.websiteUrl || "N/A"}</span>
-            </div>
-            <div style={{ marginBottom: 8 }}>
-              <b>Address:</b> <span>{company.address || "N/A"}</span>
-            </div>
-            <div style={{ marginBottom: 8 }}>
-              <b>Tax code:</b> <span>{company.taxCode || "N/A"}</span>
-            </div>
-            <div style={{ marginBottom: 8 }}>
-              <b>HR Manager:</b> <span>{company.managerName || "N/A"}</span>
-            </div>
-            <div>
-              <b>Description:</b> <span>{company.description || "N/A"}</span>
+          {/* Description on its own full-width row */}
+          <Col span={24}>
+            <div style={{ maxWidth: 900, margin: '5px auto' }}>
+              <div
+                style={{
+                  lineHeight: '20px',
+                  maxHeight: 120,
+                  overflowY: 'auto',
+                  padding: 10,
+                  background: '#fff',
+                  textAlign: 'center',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                }}
+              >
+                {company.description || 'N/A'}
+              </div>
             </div>
           </Col>
         </Row>
@@ -143,7 +174,6 @@ export default function CompanyView() {
             border: "1px solid #e5e5e5",
             borderRadius: 8,
             padding: "16px 24px",
-            marginTop: 12,
             background: "#fafafa",
             textAlign: "center",
           }}
@@ -163,7 +193,7 @@ export default function CompanyView() {
               style={{
                 maxWidth: 450,
                 margin: "0 auto",
-                
+
               }}
             >
               <div
@@ -178,7 +208,7 @@ export default function CompanyView() {
               >
                 <span style={{ width: "15%" }}>No</span>
                 <span style={{ width: "70%" }}>Document Type</span>
-                <span style={{ width: "15%"}}>Action</span>
+                <span style={{ width: "15%" }}>Action</span>
               </div>
 
               {company.documents.map((doc, index) => (
@@ -196,7 +226,7 @@ export default function CompanyView() {
                   }}
                 >
                   <span style={{ width: "15%" }}>{index + 1}</span>
-                  <span style={{ width: "70%"}}>
+                  <span style={{ width: "70%" }}>
                     {doc.documentType}
                   </span>
                   <a
@@ -218,7 +248,7 @@ export default function CompanyView() {
         </div>
       </Card>
 
-  {/* Popup (Modal preview) */}
+      {/* Popup (Modal preview) */}
       <Modal
         open={previewVisible}
         title={previewType || "Document preview"}

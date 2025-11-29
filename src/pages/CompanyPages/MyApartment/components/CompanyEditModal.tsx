@@ -116,14 +116,20 @@ const CompanyEditModal: React.FC<Props> = ({ open, onClose, company, onUpdated }
             </Upload>
           </div>
         </Form.Item>
-        <Form.Item label="Address" name="address">
-          <Input />
+        <Form.Item label="Address" name="address" rules={[{ max: 65, message: 'Address cannot exceed 65 characters' }]}>
+          <Input maxLength={65} showCount/>
         </Form.Item>
         <Form.Item label="Website" name="websiteUrl">
           <Input />
         </Form.Item>
-        <Form.Item label="Description" name="description">
-          <Input.TextArea rows={3} />
+        <Form.Item
+          label="Description"
+          name="description"
+          rules={[
+            { max: 120, message: 'Description cannot exceed 120 characters' },
+          ]}
+        >
+          <Input.TextArea rows={3} maxLength={120} showCount />
         </Form.Item>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 12 }}>

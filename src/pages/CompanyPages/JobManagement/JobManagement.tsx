@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import { Card, Button, Badge, Form } from "antd";
-import { BellOutlined, PlusOutlined, HistoryOutlined } from "@ant-design/icons";
+import { Card, Button, Badge, Form, Input } from "antd";
+import { BellOutlined, PlusOutlined, HistoryOutlined, SearchOutlined } from "@ant-design/icons";
 import { jobService } from "../../../services/jobService";
 import type { CompanyJob } from "../../../services/jobService";
 import { useAppSelector } from "../../../hooks/redux";
 import { ROLES } from "../../../services/config";
 import JobTable from "./components/JobTable";
-import JobSearchBar from "./components/JobSearchBar";
+// JobSearchBar replaced by inline Input to match Staff search
 import JobViewDrawer from "./components/JobViewDrawer";
 import PendingDrawer from "./components/PendingDrawer";
 import JobEditDrawer from "./components/JobEditDrawer";
@@ -276,7 +276,17 @@ const JobManagement = () => {
     <Card
       title={
         <div className="flex justify-between items-center w-full">
-          <span className="font-semibold">Jobs</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1 }}>
+            <span className="font-semibold">Jobs</span>
+            <Input
+              placeholder="Search by title, category or specialization"
+              prefix={<SearchOutlined />}
+              allowClear
+              style={{ width: 360 }}
+              onChange={(e) => handleSearch(e.target.value)}
+            />
+          </div>
+
           <div className="flex gap-2 items-center">
             {isHrManager && (
               <Button
@@ -302,7 +312,7 @@ const JobManagement = () => {
               My posted
             </Button>
             <Button
-             className="company-btn--filled"
+              className="company-btn--filled"
               icon={<PlusOutlined />}
               onClick={() => {
                 setCreateDrawerOpen(true);
@@ -317,9 +327,10 @@ const JobManagement = () => {
         maxWidth: 1200,
         margin: "12px auto",
         borderRadius: 12,
+        height: 'calc(100% - 25px)',
       }}
     >
-      <JobSearchBar onSearch={handleSearch} />
+
 
       <JobTable
         jobs={filteredJobs}

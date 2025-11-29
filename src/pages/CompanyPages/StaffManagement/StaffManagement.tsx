@@ -15,8 +15,6 @@ import {
 	toastWarning,
 } from "../../../components/UI/Toast";
 
-const { Search } = Input;
-
 const StaffManagement = () => {
 	const [members, setMembers] = useState<CompanyMember[]>([]);
 	const [filteredMembers, setFilteredMembers] = useState<CompanyMember[]>([]);
@@ -179,7 +177,16 @@ const StaffManagement = () => {
 						width: "100%",
 					}}
 				>
-					<span style={{ fontWeight: 600 }}>Staff Management</span>
+					<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+						<span style={{ fontWeight: 600 }}>Staff Management</span>
+						<Input
+							placeholder="Search by name, email, or role..."
+							prefix={<SearchOutlined />}
+							allowClear
+							style={{ width: 360 }}
+							onChange={(e) => handleSearch(e.target.value)}
+						/>
+					</div>
 					<div>
 						<Button
 							className="company-btn--filled"
@@ -219,37 +226,27 @@ const StaffManagement = () => {
 				padding: "0 5px",
 				borderRadius: 12,
 				boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+				// Constrain card height to viewport and make inner content scroll when needed
+				height: 'calc(100% - 25px)',
+				display: 'flex',
+				flexDirection: 'column',
 			}}
 		>
-			<div className="w-full">
-				{/* Header Section */}
-				<div
-					style={{
-						display: "flex",
-						justifyContent: "flex-start",
-						alignItems: "center",
-						marginBottom: 24,
-					}}
-				>
-					<Search
-						placeholder="Search by name, email, or role..."
-						allowClear
-						enterButton={<SearchOutlined />}
-						size="large"
-						style={{ width: 400 }}
-						onSearch={handleSearch}
+			<div className="w-full" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+				{/* Header Section (search moved into Card title) */}
+				<div style={{ padding: '8px 0' }} />
+
+				{/* Staff Table - make body scrollable so whole card fits on one screen */}
+				<div style={{ flex: 1, overflow: 'auto' }}>
+					<StaffTable
+						members={filteredMembers}
+						loading={loading}
+						onView={handleView}
+						onEdit={handleEdit}
+						onDelete={handleDelete}
+						onChangeStatus={handleChangeStatus}
 					/>
 				</div>
-
-				{/* Staff Table */}
-				<StaffTable
-					members={filteredMembers}
-					loading={loading}
-					onView={handleView}
-					onEdit={handleEdit}
-					onDelete={handleDelete}
-					onChangeStatus={handleChangeStatus}
-				/>
 			</div>
 
 			{/* Invite Drawer */}

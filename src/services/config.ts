@@ -276,6 +276,7 @@ export const API_ENDPOINTS = {
 		// Get Stripe session by sessionId
 		COMPANY_GET_SESSION: (sessionId: string) =>
 			`/payments/stripe/session?sessionId=${sessionId}`,
+		CREATE_SETUP_INTENT: "/payments/create-setup-intent",
 	},
 
 	RESUME: {

@@ -113,6 +113,8 @@ const PaymentSuccess = lazy(
 		)
 );
 
+const TestStripePayment = lazy(() => import("../pages/TestStripePayment"));
+
 // ===== System children routes dùng chung cho Admin / Manager / Staff =====
 const systemChildren = [
 	{ index: true, element: <SystemDashboard /> },
@@ -201,6 +203,7 @@ export const router = createBrowserRouter([
 	{ path: APP_ROUTES.AUTH_CALLBACK, element: <GitHubCallback /> },
 	{ path: APP_ROUTES.TEST, element: <UserProfileTest /> },
 	{ path: "/payment/success", element: <PaymentSuccess /> },
+	{ path: "/payment/test-stripe", element: <TestStripePayment /> },
 
 	/* ============== Comapany Pages ==============*/
 	{

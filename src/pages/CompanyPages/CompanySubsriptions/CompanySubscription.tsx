@@ -181,6 +181,7 @@ const CompanyClients: React.FC = () => {
         maxWidth: 1200,
         margin: "12px auto",
         borderRadius: 12,
+        height: 'calc(100% - 25px)',
       }}
       extra={
         <Space>

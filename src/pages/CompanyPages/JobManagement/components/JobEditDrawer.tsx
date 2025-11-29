@@ -1,5 +1,5 @@
 import { Drawer, Form, Input, Button, Space, InputNumber, Select } from "antd";
-import { PlusOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { systemService } from "../../../../services/systemService";
 import type { CompanyJob } from "../../../../services/jobService";
@@ -174,15 +174,15 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
           <Input />
         </Form.Item>
 
-        <Form.Item name="description" label="Description">
+        <Form.Item name="description" label="Description" rules={[{ required: true, message: "Please input description" }]}>
           <Input.TextArea rows={4} />
         </Form.Item>
 
-        <Form.Item name="requirements" label="Requirements">
+        <Form.Item name="requirements" label="Requirements" rules={[{ required: true, message: "Please input requirements" }]}>
           <Input.TextArea rows={3} />
         </Form.Item>
 
-        <Form.Item name="categoryId" label="Category">
+        <Form.Item name="categoryId" label="Category" rules={[{ required: true, message: "Please select a category" }]}>
           <Select
             placeholder={loadingCats ? "Loading categories..." : "Select category"}
             loading={loadingCats}
@@ -195,7 +195,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
           />
         </Form.Item>
 
-        <Form.Item name="specializationId" label="Specialization">
+        <Form.Item name="specializationId" label="Specialization" rules={[{ required: true, message: "Please select a specialization" }]}>
           <Select
             placeholder={
               loadingSpecs ? "Loading specializations..." : "Select specialization"
@@ -245,9 +245,9 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
                       </Form.Item>
 
                       {index === fields.length - 1 ? (
-                        <PlusOutlined
+                        <PlusCircleOutlined
                           onClick={() => add()}
-                          style={{ color: "#1890ff", cursor: "pointer", fontSize: 18 }}
+                          style={{ color: "var(--color-primary-light)", cursor: "pointer", fontSize: 18 }}
                         />
                       ) : (
                         <MinusCircleOutlined
@@ -274,7 +274,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
           </Form.List>
         </Form.Item>
 
-        <Form.Item name="employmentTypes" label="Employment Types">
+        <Form.Item name="employmentTypes" label="Employment Types" rules={[{ required: true, message: "Please select employment types" }]}>
           <Select
             mode="multiple"
             placeholder={
@@ -289,7 +289,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
           />
         </Form.Item>
 
-        <Form.Item name="skills" label="Skills">
+        <Form.Item name="skills" label="Skills" rules={[{ required: true, message: "Please select skills" }]}>
           <Select
             mode="multiple"
             placeholder={loadingSkills ? "Loading skills..." : "Select skills"}

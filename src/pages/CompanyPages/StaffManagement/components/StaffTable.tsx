@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Tag, Space, Button, Empty, Avatar, Modal } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { companyService } from "../../../../services/companyService";
@@ -16,6 +16,18 @@ type Props = {
 };
 
 const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
+  const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    const calculate = () => {
+      const reserved = 220; // space for header/paddings/actions
+      const h = window.innerHeight - reserved;
+      setTableHeight(h > 300 ? h : 300);
+    };
+    calculate();
+    window.addEventListener('resize', calculate);
+    return () => window.removeEventListener('resize', calculate);
+  }, []);
   const getRoleColor = (roleName: string) => {
     switch (roleName?.toLowerCase()) {
       case "hr_manager":
@@ -131,21 +143,26 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
     },
   ];
 
+  const bodyScroll = tableHeight ? Math.max(tableHeight - 140, 300) : undefined;
+
   return (
-    <Table<CompanyMember>
-      columns={columns}
-      dataSource={members}
-      loading={loading}
-      rowKey="userId"
-      pagination={{ pageSize: 10, showSizeChanger: true, showQuickJumper: true }}
-      scroll={{ x: 1000 }}
-      locale={{
-        emptyText: (
-          <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No staff members found" />
-        ),
-      }}
-      rowClassName={(_, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
-    />
+    <div style={{ height: tableHeight, display: 'flex', flexDirection: 'column', width: '100%' }}>
+      <Table<CompanyMember>
+        columns={columns}
+        dataSource={members}
+        loading={loading}
+        rowKey="userId"
+        pagination={{ pageSize: 10, showSizeChanger: true, showQuickJumper: true }}
+        scroll={{ x: 1000, y: bodyScroll }}
+        style={{ flex: 1 }}
+        locale={{
+          emptyText: (
+            <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="No staff members found" />
+          ),
+        }}
+        rowClassName={(_, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
+      />
+    </div>
   );
 };
 

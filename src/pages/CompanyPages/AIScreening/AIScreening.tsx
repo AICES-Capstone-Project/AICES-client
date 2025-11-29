@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Button } from "antd";
+import { Card, Table, Button, Input } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 // Upload icons removed while upload is disabled
 import { useNavigate } from "react-router-dom";
@@ -17,6 +18,7 @@ interface JobRow {
 const AIScreening: React.FC = () => {
   const navigate = useNavigate();
   const [jobs, setJobs] = useState<JobRow[]>([]);
+  const [filteredJobs, setFilteredJobs] = useState<JobRow[]>([]);
   const [loadingJobs, setLoadingJobs] = useState(false);
   // Upload UI temporarily disabled
   // const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
@@ -39,6 +41,7 @@ const AIScreening: React.FC = () => {
             createdAt: j.createdAt,
           }));
           setJobs(mapped);
+          setFilteredJobs(mapped);
         }
       } catch (e) {
         toastError("Failed to load jobs");
@@ -47,6 +50,18 @@ const AIScreening: React.FC = () => {
       }
     };
     load();
+  }, []);
+
+  const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    const calculate = () => {
+      const reserved = 220;
+      const h = window.innerHeight - reserved;
+      setTableHeight(h > 300 ? h : 300);
+    };
+    calculate();
+    window.addEventListener('resize', calculate);
+    return () => window.removeEventListener('resize', calculate);
   }, []);
 
   // Upload functions commented out while upload is disabled
@@ -117,19 +132,33 @@ const AIScreening: React.FC = () => {
       <Card
         title={
           <div className="flex justify-between items-center w-full">
-            <span className="font-semibold">AI CV Screening</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1 }}>
+              <span className="font-semibold">AI CV Screening</span>
+              <Input
+                placeholder="Search by title..."
+                prefix={<SearchOutlined />}
+                allowClear
+                style={{ width: 360 }}
+                onChange={(e) => {
+                  const v = e.target.value.trim().toLowerCase();
+                  if (!v) return setFilteredJobs(jobs);
+                  setFilteredJobs(jobs.filter(j => (j.title || '').toLowerCase().includes(v)));
+                }}
+              />
+            </div>
           </div>
         }
         style={{
           maxWidth: 1200,
           margin: "12px auto",
           borderRadius: 12,
+          height: 'calc(100% - 25px)',
         }}
       >
         <Table<JobRow>
           rowKey="jobId"
           loading={loadingJobs}
-          dataSource={jobs}
+          dataSource={filteredJobs}
           columns={columns}
           pagination={{
             current: currentPage,
@@ -142,6 +171,7 @@ const AIScreening: React.FC = () => {
               setPageSize(size);
             },
           }}
+          scroll={{ y: tableHeight }}
         />
       </Card>
 

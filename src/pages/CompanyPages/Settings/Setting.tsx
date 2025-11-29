@@ -121,6 +121,7 @@ export default function Setting() {
         padding: "0 5px",
         borderRadius: 12,
         boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+        height: 'calc(100% - 25px)',
       }}
     >
       <div className="w-full">

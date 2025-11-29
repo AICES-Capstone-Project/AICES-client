@@ -130,8 +130,18 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
         layout="vertical"
         onFinish={async (values) => {
           if (!Array.isArray(values.criteria)) values.criteria = [];
-          // validate weights sum to 1
+          // require at least 2 criteria
           const crit = values.criteria || [];
+          if (crit.length < 2) {
+            form.setFields([
+              {
+                name: ["criteria"],
+                errors: ["Please add at least 2 criteria"],
+              },
+            ]);
+            return;
+          }
+          // validate weights sum to 1
           const sum = crit.reduce((acc: number, c: any) => acc + Number(c?.weight || 0), 0);
           if (Math.abs(sum - 1) > 1e-6) {
             // set error on the criteria field and abort submit
@@ -194,7 +204,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
           />
         </Form.Item>
 
-        <Form.Item name="criteria" label="Criteria" rules={[{ required: true, message: "Please select a criteria" }]}>
+        <Form.Item name="criteria" label="Criteria">
           <Form.List
             name="criteria"
             initialValue={[{ name: "", weight: 0 }]}
@@ -243,16 +253,22 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
                       {/* Nút thêm / xóa */}
                       {index === fields.length - 1 ? (
                         <PlusCircleOutlined
-                          onClick={() => add()}
+                          onClick={() => {
+                            add();
+                            form.setFields([{ name: ["criteria"], errors: [] }]);
+                          }}
                           style={{
-                            color: "#1890ff",
+                            color: "var(--color-primary-light)",
                             cursor: "pointer",
                             fontSize: 18,
                           }}
                         />
                       ) : (
                         <MinusCircleOutlined
-                          onClick={() => remove(field.name)}
+                          onClick={() => {
+                            remove(field.name);
+                            form.setFields([{ name: ["criteria"], errors: [] }]);
+                          }}
                           style={{
                             color: "red",
                             cursor: "pointer",
@@ -273,6 +289,9 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
                     return null;
                   }}
                 </Form.Item>
+                <div style={{ marginTop: 6, color: "rgba(0,0,0,0.45)", fontSize: 12 }}>
+                  At least 2 criteria required; weights must sum to 1.
+                </div>
               </>
             )}
           </Form.List>
@@ -304,7 +323,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
             >
               Cancel
             </Button>
-            <Button type="primary" htmlType="submit" loading={saving}>
+            <Button className="company-btn--filled" htmlType="submit" loading={saving}>
               Save
             </Button>
           </Space>

@@ -27,7 +27,7 @@ const InviteDrawer: React.FC<Props> = ({ open, onClose, onSubmit, submitting }) 
           <Input size="large" prefix={<MailOutlined />} placeholder="Enter email address (e.g. example@gmail.com)" />
         </Form.Item>
 
-        <Button type="primary" htmlType="submit" icon={<SendOutlined />} loading={submitting} block>
+        <Button className="company-btn--filled" htmlType="submit" icon={<SendOutlined />} loading={submitting} block>
           Send Invitation
         </Button>
       </Form>

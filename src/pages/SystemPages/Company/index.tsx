@@ -87,16 +87,21 @@ export default function CompanyList() {
 
       if (res?.status === "Success" && res?.data) {
         const d = res.data as any;
-        const list = (d.companies ?? []) as Company[];
+        const rawList = (d.companies ?? []) as Company[];
 
-        setAllCompanies(list);
-
-        applyFilterAndPaging(
-          list,
-          keyword,
-          1,
-          pagination.pageSize || DEFAULT_PAGE_SIZE
+        // 🔥 CHỈ LẤY NHỮNG COMPANY ĐANG ACTIVE (chưa deactivate)
+        // BE sau khi delete đang "Company deactivated successfully"
+        // => isActive = false, mình loại ra khỏi list
+        const visibleCompanies = rawList.filter(
+          (c) => c.isActive !== false // true hoặc null đều coi là còn hiển thị
         );
+
+        setAllCompanies(visibleCompanies);
+
+        const page = pagination.current || 1;
+        const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
+
+        applyFilterAndPaging(visibleCompanies, keyword, page, pageSize);
       } else {
         toastError("Failed to fetch companies", res?.message);
       }
@@ -145,36 +150,49 @@ export default function CompanyList() {
   const handleCreate = async () => {
     try {
       const values = await form.validateFields();
-
       setLoading(true);
 
       const formData = new FormData();
-      formData.append("Name", values.name);
-      if (values.description)
-        formData.append("Description", values.description);
-      if (values.address) formData.append("Address", values.address);
-      if (values.websiteUrl) formData.append("Website", values.websiteUrl);
-      if (values.taxCode) formData.append("TaxCode", values.taxCode);
 
+      // ⚠️ dùng giống y MyApartment.tsx: tên field viết thường
+      formData.append("name", values.name || "");
+      formData.append("description", values.description || "");
+      formData.append("address", values.address || "");
+      formData.append("website", values.websiteUrl || "");
+      formData.append("taxCode", values.taxCode || "");
+
+      // Logo (giữ Upload như cũ nhưng key phải là logoFile)
       const logoList = values.logoFile as UploadFile[] | undefined;
       if (logoList && logoList.length > 0) {
         const logoFile = logoList[0].originFileObj as File;
         if (logoFile) {
-          formData.append("LogoFile", logoFile);
+          formData.append("logoFile", logoFile, logoFile.name);
         }
       }
 
-      const fileList = values.documentFiles as UploadFile[] | undefined;
-      if (fileList && fileList.length > 0) {
-        const fileObj = fileList[0].originFileObj as File;
-        if (fileObj) {
-          formData.append("DocumentFiles", fileObj);
-        }
+      // Documents: lấy từ Form.List documents (type + file)
+      const documents = (values.documents || []) as {
+        type?: string;
+        file?: File;
+      }[];
+
+      const validDocs = documents.filter(
+        (d) => d?.type && d?.file instanceof File
+      );
+
+      if (validDocs.length === 0) {
+        toastWarning("Please add at least one document with type and file");
+        setLoading(false);
+        return;
       }
 
-      if (values.documentType) {
-        formData.append("DocumentTypes", values.documentType);
-      }
+      validDocs.forEach((doc, idx) => {
+        formData.append(`documentTypes[${idx}]`, doc.type as string);
+        formData.append("documentFiles", doc.file as File);
+      });
+
+      // debug (nếu cần)
+      // for (const p of formData.entries()) console.log(p[0], p[1]);
 
       const res = await companyService.createAdminForm(formData);
 
@@ -226,9 +244,25 @@ export default function CompanyList() {
     setLoading(true);
     try {
       const res = await companyService.deleteCompany(companyId);
+
       if (res.status === "Success") {
         toastSuccess("Company deleted successfully");
-        await fetchData();
+
+        // 🔥 XÓA NGAY TRONG STATE (UI biến liền)
+        setAllCompanies((prev) => {
+          const updated = prev.filter((c) => c.companyId !== companyId);
+
+          const page = pagination.current || 1;
+          const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
+
+          // dùng list mới để tính lại paging + filter
+          applyFilterAndPaging(updated, keyword, page, pageSize);
+
+          return updated;
+        });
+
+        // (tuỳ chọn) gọi lại API để sync với BE, nếu muốn:
+        // await fetchData();
       } else {
         toastError("Failed to delete company", res?.message);
       }

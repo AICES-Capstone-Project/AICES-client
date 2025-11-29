@@ -8,14 +8,27 @@ export interface Company {
   size?: string | null; // e.g. "51-200"
   logoUrl?: string | null;
   isActive?: boolean;
-  createdAt?: string; // ISO
 
     // ✅ thêm mới theo BE
   websiteUrl?: string | null;
+  taxCode?: string | null;
+  description?: string | null;
   companyStatus?: "Approved" | "Pending" | "Rejected" | string | null;
+  rejectionReason?: string | null;
+  createdBy?: number;
+  approvalBy?: number;
+  createdAt?: string; // ISO
 
-  
+
+  documents?: CompanyDocument[];
+
 }
+export interface CompanyDocument {
+  documentType: string;
+  fileUrl: string;
+}
+
+
 
 export interface CompanyMember {
   comUserId: number;

@@ -14,13 +14,13 @@ export const bannerService = {
 
   // ===== SYSTEM (System Admin) =====
   getAllSystem(params?: any) {
-    return api.get(API_ENDPOINTS.BANNER_CONFIG.SYSTEM_GET, { params });
+    return this.getAllPublic(params);
   },
 
   getByIdSystem(id: number) {
-    return api.get(API_ENDPOINTS.BANNER_CONFIG.SYSTEM_GET_BY_ID(id));
+    return this.getByIdPublic(id);
   },
-
+  
   create(formData: FormData) {
     return api.post(API_ENDPOINTS.BANNER_CONFIG.SYSTEM_CREATE, formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -28,13 +28,9 @@ export const bannerService = {
   },
 
   update(id: number, formData: FormData) {
-    return api.patch(
-      API_ENDPOINTS.BANNER_CONFIG.SYSTEM_UPDATE(id),
-      formData,
-      {
-        headers: { "Content-Type": "multipart/form-data" },
-      }
-    );
+    return api.patch(API_ENDPOINTS.BANNER_CONFIG.SYSTEM_UPDATE(id), formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   },
 
   delete(id: number) {

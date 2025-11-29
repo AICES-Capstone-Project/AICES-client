@@ -1,9 +1,6 @@
 import { Button, Popconfirm, Space, Table, Tag } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import {
-  DeleteOutlined,
-  EditOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import type { BannerConfig } from "../../../../types/banner.types";
 
 interface BannerTableProps {
@@ -26,35 +23,74 @@ export default function BannerTable({
   const columns: ColumnsType<BannerConfig> = [
     {
       title: "Image",
-      dataIndex: "source",
+      dataIndex: "sourceUrl", // nhớ đang dùng sourceUrl
+      width: 120,
       render: (src: string) => (
-        <img src={src} width={80} style={{ borderRadius: 6 }} />
+        <div
+          style={{
+            width: 80,
+            height: 48,
+            borderRadius: 8,
+            overflow: "hidden",
+            border: "1px solid #f0f0f0",
+            background: "#fafafa",
+          }}
+        >
+          <img
+            src={src}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
+        </div>
       ),
     },
     {
       title: "Title",
       dataIndex: "title",
+      ellipsis: true,
     },
     {
       title: "Color",
       dataIndex: "colorCode",
+      width: 160,
       render: (c: string | null | undefined) =>
-        c ? <Tag color={c}>{c}</Tag> : <Tag>None</Tag>,
+        c ? (
+          <Space>
+            <span
+              style={{
+                display: "inline-block",
+                width: 18,
+                height: 18,
+                borderRadius: "999px",
+                border: "1px solid #f0f0f0",
+                backgroundColor: c,
+              }}
+            />
+            <Tag style={{ marginInlineStart: 0 }} color="gold">
+              {c}
+            </Tag>
+          </Space>
+        ) : (
+          <Tag color="default">No color</Tag>
+        ),
     },
     {
       title: "Actions",
+      align: "right",
       render: (_: unknown, record: BannerConfig) => (
-        <Space>
+        <Space size="middle">
           <Button
-            type="primary"
+            type="default"
+            shape="circle"
             icon={<EditOutlined />}
             onClick={() => onEdit(record)}
           />
           <Popconfirm
             title="Delete this banner?"
-            onConfirm={() => onDelete(record.id)}
+            okText="Delete"
+            okButtonProps={{ danger: true }}
+            onConfirm={() => onDelete(record.bannerId)}
           >
-            <Button danger icon={<DeleteOutlined />} />
+            <Button danger shape="circle" icon={<DeleteOutlined />} />
           </Popconfirm>
         </Space>
       ),
@@ -63,11 +99,16 @@ export default function BannerTable({
 
   return (
     <Table<BannerConfig>
-      rowKey="id"
+      rowKey="bannerId"
+      size="middle"
+      style={{ marginTop: 12 }}
       loading={loading}
       dataSource={data}
       columns={columns}
-      pagination={pagination}
+      pagination={{
+        ...pagination,
+        showSizeChanger: false,
+      }}
       onChange={(p) => onChangePage(p)}
     />
   );

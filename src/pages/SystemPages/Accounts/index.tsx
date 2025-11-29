@@ -1,33 +1,19 @@
 // pages/SystemPages/Accounts/index.tsx
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Button,
-  Input,
-  Modal,
-  Space,
-  Table,
-  Tag,
-  Form,
-  Select,
-  message,
-  Tooltip,
-  Popconfirm,
-} from "antd";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import {
-  PlusOutlined,
-  EditOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-  EyeOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { Form, message } from "antd";
+import type { TablePaginationConfig } from "antd/es/table";
 import { userService } from "../../../services/userService";
 import type {
   User,
   CreateUserRequest,
   UpdateUserRequest,
 } from "../../../types/user.types";
+
+import AccountsToolbar from "./components/AccountsToolbar";
+import AccountsTable from "./components/AccountsTable";
+import UserCreateModal from "./components/UserCreateModal";
+import UserEditModal from "./components/UserEditModal";
+import UserDetailModal from "./components/UserDetailModal";
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -67,7 +53,6 @@ export default function Accounts() {
           pageSize: ps,
           search: kw,
         });
-        // log để nhìn thấy response thật
         console.log("[Users] GET /user res =", res);
 
         const statusStr = String(res.status);
@@ -89,11 +74,9 @@ export default function Accounts() {
 
         const d: any = res.data;
 
-        // 1) lấy mảng users từ nhiều key khác nhau
         const rawList =
           d.users ?? d.items ?? d.data?.users ?? d.data?.items ?? [];
 
-        // 2) chuẩn hóa field cho Table: userId, email, fullName, roleName, isActive, ...
         const list: User[] = rawList.map((x: any) => ({
           userId: x.userId ?? x.id ?? x.user_id ?? 0,
           email: x.email ?? x.mail ?? "",
@@ -109,7 +92,6 @@ export default function Accounts() {
           createdAt: x.createdAt ?? x.created_at ?? new Date().toISOString(),
         }));
 
-        // 3) tính total: ưu tiên totalRecords/total/totalItems; fallback từ totalPages*pageSize
         const totalRecords: number =
           d.totalRecords ??
           d.total ??
@@ -135,74 +117,6 @@ export default function Accounts() {
     fetchData();
   }, [fetchData]);
 
-  const columns: ColumnsType<User> = [
-    { title: "ID", dataIndex: "userId", width: 80 },
-    { title: "Email", dataIndex: "email" },
-    {
-      title: "Full name",
-      dataIndex: "fullName",
-      render: (v: string | null) => v || "—",
-    },
-    {
-      title: "Role",
-      dataIndex: "roleName",
-      width: 160,
-      render: (r: string) => <Tag>{r}</Tag>,
-    },
-
-    {
-      title: "Actions",
-      key: "actions",
-      width: 320,
-      render: (_, record) => (
-        <Space>
-          {/* View */}
-          <Tooltip title="View details">
-            <Button icon={<EyeOutlined />} onClick={() => onViewDetail(record)}>
-              View
-            </Button>
-          </Tooltip>
-
-          {/* Edit */}
-          <Tooltip title="Edit user">
-            <Button icon={<EditOutlined />} onClick={() => onEdit(record)}>
-              Edit
-            </Button>
-          </Tooltip>
-
-          {/* Lock / Unlock */}
-          {record.userStatus !== "Locked" ? (
-            <Tooltip title="Lock user">
-              <Button danger onClick={() => onChangeStatus(record, "Locked")}>
-                Lock
-              </Button>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Unlock user">
-              <Button onClick={() => onChangeStatus(record, "Verified")}>
-                Unlock
-              </Button>
-            </Tooltip>
-          )}
-
-          {/* Delete */}
-          <Popconfirm
-            title="Delete user"
-            description={`Are you sure you want to delete ${record.email}?`}
-            okText="Delete"
-            okButtonProps={{ danger: true }}
-            cancelText="Cancel"
-            onConfirm={() => onDelete(record)}
-          >
-            <Tooltip title="Delete user">
-              <Button icon={<DeleteOutlined />} danger />
-            </Tooltip>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ];
-
   const onSearch = () => {
     setPagination({ ...pagination, current: 1 });
     fetchData(1, pageSize, keyword);
@@ -226,7 +140,7 @@ export default function Accounts() {
         email: values.email,
         fullName: values.fullName,
         password: values.password,
-        roleId: values.roleId, // 👈 quan trọng
+        roleId: values.roleId,
       };
 
       const res = await userService.create(payload);
@@ -267,7 +181,6 @@ export default function Accounts() {
       fullName: user.fullName || "",
       roleId: (user as any).roleId ?? ROLE_NAME_TO_ID[user.roleName] ?? 0,
     } as any);
-
     setIsEditOpen(true);
   };
 
@@ -278,9 +191,9 @@ export default function Accounts() {
       const values = await editForm.validateFields(); // { fullName, roleId }
 
       const payload: UpdateUserRequest = {
-        email: editingUser.email, // giữ email cũ
+        email: editingUser.email,
         fullName: values.fullName,
-        roleId: values.roleId, // 👈 gửi roleId cho BE
+        roleId: values.roleId,
       };
 
       const res = await userService.update(editingUser.userId, payload);
@@ -325,184 +238,60 @@ export default function Accounts() {
     }
   };
 
+  const paginationConfig: TablePaginationConfig = {
+    current: page,
+    pageSize,
+    total,
+    showSizeChanger: true,
+  };
+
   return (
     <div>
-      <Space style={{ marginBottom: 16 }} wrap>
-        <Input
-          placeholder="Search by email or name"
-          allowClear
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-          onPressEnter={onSearch}
-          style={{ width: 280 }}
-          prefix={<SearchOutlined />}
-        />
-        <Button type="primary" onClick={onSearch}>
-          Search
-        </Button>
-        <Button onClick={onReset} icon={<ReloadOutlined />}>
-          Reset
-        </Button>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => setIsCreateOpen(true)}
-        >
-          New User
-        </Button>
-      </Space>
-
-      <Table
-        rowKey="userId"
-        loading={loading}
-        dataSource={users}
-        columns={columns}
-        pagination={{
-          current: page,
-          pageSize,
-          total,
-          showSizeChanger: true,
-        }}
-        onChange={onChangePage}
+      <AccountsToolbar
+        keyword={keyword}
+        onKeywordChange={setKeyword}
+        onSearch={onSearch}
+        onReset={onReset}
+        onOpenCreate={() => setIsCreateOpen(true)}
       />
 
-      {/* Create */}
-      <Modal
+      <AccountsTable
+        loading={loading}
+        data={users}
+        pagination={paginationConfig}
+        onChangePage={onChangePage}
+        onViewDetail={onViewDetail}
+        onEdit={onEdit}
+        onChangeStatus={onChangeStatus}
+        onDelete={onDelete}
+      />
+
+      <UserCreateModal
         open={isCreateOpen}
-        title="Create user"
+        form={createForm}
+        roleOptions={roleOptions}
         onCancel={() => setIsCreateOpen(false)}
-        onOk={onCreate}
-        okText="Create"
-        destroyOnClose
-      >
-        <Form form={createForm} layout="vertical">
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[{ required: true, type: "email" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="fullName"
-            label="Full name"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[{ required: true, min: 6 }]}
-          >
-            <Input.Password />
-          </Form.Item>
-          <Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
-            <Select options={roleOptions} />
-          </Form.Item>
-        </Form>
-      </Modal>
+        onCreate={onCreate}
+      />
 
-      {/* Edit */}
-      <Modal
+      <UserEditModal
         open={isEditOpen}
-        title={`Edit user: ${editingUser?.email || ""}`}
+        form={editForm}
+        roleOptions={roleOptions}
+        email={editingUser?.email || ""}
         onCancel={() => setIsEditOpen(false)}
-        onOk={onUpdate}
-        okText="Save"
-        destroyOnClose
-      >
-        <Form form={editForm} layout="vertical">
-          <Form.Item
-            name="fullName"
-            label="Full name"
-            rules={[{ required: true }]}
-          >
-            <Input />
-          </Form.Item>
+        onUpdate={onUpdate}
+      />
 
-          <Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
-            <Select options={roleOptions} />
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      {/* Detail */}
-      <Modal
+      <UserDetailModal
         open={isDetailOpen}
-        title="User Details"
-        onCancel={() => {
+        loading={loadingDetail}
+        user={detailUser}
+        onClose={() => {
           setIsDetailOpen(false);
           setDetailUser(null);
         }}
-        footer={<Button onClick={() => setIsDetailOpen(false)}>Close</Button>}
-        width={600}
-      >
-        {loadingDetail ? (
-          <div style={{ textAlign: "center", padding: 20 }}>Loading...</div>
-        ) : detailUser ? (
-          <Space direction="vertical" style={{ width: "100%" }} size="middle">
-            <div>
-              <strong>User ID:</strong> {detailUser.userId}
-            </div>
-            <div>
-              <strong>Email:</strong> {detailUser.email}
-            </div>
-            <div>
-              <strong>Full Name:</strong> {detailUser.fullName || "—"}
-            </div>
-            <div>
-              <strong>Role:</strong> {detailUser.roleName}
-            </div>
-            <div>
-              <strong>Phone:</strong> {detailUser.phoneNumber || "—"}
-            </div>
-            <div>
-              <strong>Address:</strong> {detailUser.address || "—"}
-            </div>
-            <div>
-              <strong>Date of Birth:</strong>{" "}
-              {detailUser.dateOfBirth
-                ? new Date(detailUser.dateOfBirth).toLocaleDateString()
-                : "—"}
-            </div>
-
-            <div>
-              <strong>Created At:</strong>{" "}
-              {new Date(detailUser.createdAt).toLocaleString()}
-            </div>
-            <div>
-              <strong>Login Providers:</strong>
-              <div style={{ marginTop: 8 }}>
-                {detailUser.loginProviders.map((p, i) => (
-                  <Tag key={i} color={p.isActive ? "blue" : "default"}>
-                    {p.authProvider}
-                  </Tag>
-                ))}
-              </div>
-            </div>
-            {detailUser.avatarUrl && (
-              <div>
-                <strong>Avatar:</strong>
-                <div style={{ marginTop: 8 }}>
-                  <img
-                    src={detailUser.avatarUrl}
-                    alt="Avatar"
-                    style={{
-                      width: 100,
-                      height: 100,
-                      borderRadius: "50%",
-                      objectFit: "cover",
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </Space>
-        ) : (
-          <div>No user data available</div>
-        )}
-      </Modal>
+      />
     </div>
   );
 }

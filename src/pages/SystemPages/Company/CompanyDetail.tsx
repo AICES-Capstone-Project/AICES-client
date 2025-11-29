@@ -13,7 +13,10 @@ import {
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { companyService } from "../../../services/companyService";
 import type { Company, CompanyMember, Job } from "../../../types/company.types";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, LeftOutlined } from "@ant-design/icons";
+import { companySubscriptionService } from "../../../services/companySubscriptionService";
+import type { CompanySubscription } from "../../../types/companySubscription.types";
+
 
 const { Title, Text } = Typography;
 const DEFAULT_PAGE_SIZE = 10;
@@ -42,24 +45,38 @@ export default function CompanyDetail() {
     pageSize: DEFAULT_PAGE_SIZE,
   });
 
+  // Company subscription (System Admin)
+  const [subscription, setSubscription] = useState<CompanySubscription | null>(
+    null
+  );
+
   const loadCompany = async () => {
     setLoading(true);
-    const res = await companyService.getSystemCompanyById(id); // dùng /system/companies/{id}
+    const res = await companyService.getSystemCompanyById(id);
     if (res.status === "Success" && res.data) {
-      const d = res.data;
+      const d: any = res.data;
+
       setCompany({
         companyId: d.companyId,
         name: d.name,
-        domain: (d as any).domain || null,
-        email: (d as any).email || null,
-        phone: (d as any).phone || null,
-        address: d.address || null,
-        size: (d as any).size || null,
-        logoUrl: d.logoUrl || null,
+        address: d.address ?? null,
+        logoUrl: d.logoUrl ?? null,
         isActive: d.isActive ?? true,
-        createdAt: d.createdAt || new Date().toISOString(),
+
+        // ⬇️ các field BE trả trong detail
+        websiteUrl: d.websiteUrl ?? null,
+        companyStatus: d.companyStatus ?? null,
+        createdBy: d.createdBy,
+        approvalBy: d.approvalBy,
+        createdAt: d.createdAt ?? new Date().toISOString(),
+        taxCode: d.taxCode ?? null,
+        description: d.description ?? null,
+        rejectionReason: d.rejectionReason ?? null,
+        documents: Array.isArray(d.documents) ? d.documents : [],
       });
-    } else message.error(res.message || "Failed to load company");
+    } else {
+      message.error(res.message || "Failed to load company");
+    }
     setLoading(false);
   };
 
@@ -68,11 +85,34 @@ export default function CompanyDetail() {
       page: membersPg.current,
       pageSize: membersPg.pageSize,
     });
+
     if (res.status === "Success" && res.data) {
-      setMembers(res.data.items);
-      setMembersTotal(
-        res.data.totalPages * (membersPg.pageSize || DEFAULT_PAGE_SIZE)
-      );
+      const d: any = res.data;
+
+      // ✅ ưu tiên dạng phân trang { items, totalPages, ... }
+      let items: CompanyMember[] = [];
+      let totalPages = 1;
+
+      if (Array.isArray(d)) {
+        // data = [ ... ]
+        items = d;
+        totalPages = 1;
+      } else {
+        if (Array.isArray(d.items)) {
+          items = d.items;
+        } else if (Array.isArray(d.members)) {
+          // phòng trường hợp BE đặt tên là 'members'
+          items = d.members;
+        }
+        totalPages = d.totalPages ?? 1;
+      }
+
+      setMembers(items);
+      setMembersTotal(totalPages * (membersPg.pageSize || DEFAULT_PAGE_SIZE));
+    } else {
+      setMembers([]);
+      setMembersTotal(0);
+      message.error(res.message || "Failed to load members");
     }
   };
 
@@ -81,17 +121,59 @@ export default function CompanyDetail() {
       page: jobsPg.current,
       pageSize: jobsPg.pageSize,
     });
+
     if (res.status === "Success" && res.data) {
-      setJobs(res.data.items);
-      setJobsTotal(
-        res.data.totalPages * (jobsPg.pageSize || DEFAULT_PAGE_SIZE)
-      );
+      const d: any = res.data;
+
+      let items: Job[] = [];
+      let totalPages = 1;
+
+      if (Array.isArray(d)) {
+        items = d;
+        totalPages = 1;
+      } else {
+        if (Array.isArray(d.items)) {
+          items = d.items;
+        } else if (Array.isArray(d.jobs)) {
+          items = d.jobs;
+        }
+        totalPages = d.totalPages ?? 1;
+      }
+
+      setJobs(items);
+      setJobsTotal(totalPages * (jobsPg.pageSize || DEFAULT_PAGE_SIZE));
+    } else {
+      setJobs([]);
+      setJobsTotal(0);
+      message.error(res.message || "Failed to load jobs");
+    }
+  };
+
+  const loadSubscription = async () => {
+    try {
+      const data = await companySubscriptionService.getList({
+        page: 1,
+        pageSize: 1,
+        search: String(id),
+      });
+
+      const first =
+        data.companySubscriptions && data.companySubscriptions.length > 0
+          ? data.companySubscriptions[0]
+          : null;
+
+      setSubscription(first);
+    } catch (err) {
+      console.error(err);
+      setSubscription(null);
     }
   };
 
   useEffect(() => {
     loadCompany();
+    loadSubscription();
   }, [id]);
+
   useEffect(() => {
     loadMembers(); /* eslint-disable-next-line */
   }, [membersPg.current, membersPg.pageSize]);
@@ -184,6 +266,10 @@ export default function CompanyDetail() {
         align="center"
         style={{ width: "100%", justifyContent: "space-between" }}
       >
+        <Button icon={<LeftOutlined />} onClick={() => nav(-1)}>
+          Back
+        </Button>
+
         <Title level={4} style={{ margin: 0 }}>
           Company Detail
         </Title>
@@ -219,7 +305,21 @@ export default function CompanyDetail() {
               <Tag color={company.isActive ? "green" : "red"}>
                 {company.isActive ? "Active" : "Inactive"}
               </Tag>
+              {company.companyStatus && (
+                <Tag
+                  color={
+                    company.companyStatus === "Approved"
+                      ? "green"
+                      : company.companyStatus === "Pending"
+                      ? "gold"
+                      : "red"
+                  }
+                >
+                  {company.companyStatus}
+                </Tag>
+              )}
             </Space>
+
             {/* <Text type="secondary">Created: {new Date(company.createdAt).toLocaleString()}</Text> */}
           </Space>
         )}
@@ -233,12 +333,137 @@ export default function CompanyDetail() {
             label: "Overview",
             children: (
               <Card>
-                <Text type="secondary">
-                  General information of the company.
-                </Text>
+                {company ? (
+                  <Space
+                    direction="vertical"
+                    style={{ width: "100%" }}
+                    size="middle"
+                  >
+                    <div>
+                      <Text strong>Description: </Text>
+                      <Text>{company.description || "—"}</Text>
+                    </div>
+
+                    <div>
+                      <Text strong>Address: </Text>
+                      <Text>{company.address || "—"}</Text>
+                    </div>
+
+                    <div>
+                      <Text strong>Website: </Text>
+                      {company.websiteUrl ? (
+                        <a
+                          href={company.websiteUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          {company.websiteUrl}
+                        </a>
+                      ) : (
+                        <Text>—</Text>
+                      )}
+                    </div>
+
+                    <div>
+                      <Text strong>Tax Code: </Text>
+                      <Text>{company.taxCode || "—"}</Text>
+                    </div>
+                    <div>
+                      <Text strong>Subscription: </Text>
+                      {subscription ? (
+                        <>
+                          <Text>
+                            {subscription.subscriptionName} (
+                            {new Date(
+                              subscription.startDate
+                            ).toLocaleDateString()}{" "}
+                            -{" "}
+                            {new Date(
+                              subscription.endDate
+                            ).toLocaleDateString()}
+                            )
+                          </Text>
+                          <Tag
+                            style={{ marginLeft: 8 }}
+                            color={
+                              subscription.subscriptionStatus === "Active"
+                                ? "green"
+                                : subscription.subscriptionStatus ===
+                                  "Cancelled"
+                                ? "red"
+                                : "gold"
+                            }
+                          >
+                            {subscription.subscriptionStatus}
+                          </Tag>
+                        </>
+                      ) : (
+                        <Text>—</Text>
+                      )}
+                    </div>
+
+                    <div>
+                      <Text strong>Status: </Text>
+                      {company.companyStatus ? (
+                        <Tag
+                          color={
+                            company.companyStatus === "Approved"
+                              ? "green"
+                              : company.companyStatus === "Pending"
+                              ? "gold"
+                              : "red"
+                          }
+                        >
+                          {company.companyStatus}
+                        </Tag>
+                      ) : (
+                        <Text>—</Text>
+                      )}
+                    </div>
+
+                    <div>
+                      <Text strong>Created by: </Text>
+                      <Text>{company.createdBy ?? "—"}</Text>
+                    </div>
+
+                    <div>
+                      <Text strong>Approved by: </Text>
+                      <Text>{company.approvalBy ?? "—"}</Text>
+                    </div>
+
+                    <div>
+                      <Text strong>Documents:</Text>
+                      {company.documents && company.documents.length > 0 ? (
+                        <ul style={{ marginTop: 4, paddingLeft: 20 }}>
+                          {company.documents.map((doc, idx) => (
+                            <li key={idx}>
+                              <Text>
+                                {doc.documentType}{" "}
+                                <a
+                                  href={doc.fileUrl}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  View
+                                </a>
+                              </Text>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <Text type="secondary">No documents</Text>
+                      )}
+                    </div>
+                  </Space>
+                ) : (
+                  <Text type="secondary">
+                    General information of the company.
+                  </Text>
+                )}
               </Card>
             ),
           },
+
           {
             key: "jobs",
             label: "Jobs",

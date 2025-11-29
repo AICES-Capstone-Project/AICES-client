@@ -32,7 +32,7 @@ export default function BannerList() {
       const res = await bannerService.getAllSystem({
         page: pagination.current,
         pageSize: pagination.pageSize,
-        keyword: keyword || undefined,
+        search: keyword || undefined,
       });
 
       const data = res.data.data;
@@ -52,7 +52,7 @@ export default function BannerList() {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.current]);
+  }, [pagination.current, keyword]);
 
   const handleTableChange = (p: TablePaginationConfig) => {
     setPagination((prev) => ({
@@ -77,7 +77,6 @@ export default function BannerList() {
       ...prev,
       current: 1,
     }));
-    fetchData();
   };
 
   const handleReload = () => {
@@ -95,7 +94,7 @@ export default function BannerList() {
   };
 
   return (
-    <Card>
+    <Card style={{ borderRadius: 16 }} bodyStyle={{ padding: 16 }}>
       <BannerToolbar
         keyword={keyword}
         onKeywordChange={setKeyword}

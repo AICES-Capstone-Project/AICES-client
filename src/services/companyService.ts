@@ -16,6 +16,10 @@ interface CompanyData {
   managerName?: string | null;
   documents?: { documentType: string; fileUrl: string }[];
   isActive?: boolean;
+  
+  createdBy?: number;
+  approvalBy?: number;
+
   createdAt?: string;
 }
 

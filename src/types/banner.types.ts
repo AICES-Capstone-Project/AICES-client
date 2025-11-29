@@ -1,8 +1,9 @@
 export interface BannerConfig {
-  id: number;
+  bannerId: number;  
   title: string;
   colorCode?: string | null;
-  source: string; // URL ảnh
+  sourceUrl: string;
+  createdAt: string;
 }
 
 export interface BannerConfigListData {

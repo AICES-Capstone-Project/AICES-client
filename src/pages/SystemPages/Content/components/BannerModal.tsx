@@ -47,7 +47,7 @@ export default function BannerModal({
       }
 
       if (editData) {
-        await bannerService.update(editData.id, fd);
+        await bannerService.update(editData.bannerId, fd);
         toastSuccess("Banner updated");
       } else {
         await bannerService.create(fd);

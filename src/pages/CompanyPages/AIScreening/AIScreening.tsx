@@ -131,23 +131,28 @@ const AIScreening: React.FC = () => {
     <>
       <Card
         title={
-          <div className="flex justify-between items-center w-full">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: 1 }}>
-              <span className="font-semibold">AI CV Screening</span>
-              <Input
-                placeholder="Search by title..."
-                prefix={<SearchOutlined />}
-                allowClear
-                style={{ width: 360 }}
-                onChange={(e) => {
-                  const v = e.target.value.trim().toLowerCase();
-                  if (!v) return setFilteredJobs(jobs);
-                  setFilteredJobs(jobs.filter(j => (j.title || '').toLowerCase().includes(v)));
-                }}
-              />
+            <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 16 }}>
+              <div style={{ flex: '0 0 auto' }}>
+                <span className="font-semibold">AI CV Screening</span>
+              </div>
+
+              <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+                <Input
+                  placeholder="Search by title..."
+                  prefix={<SearchOutlined />}
+                  allowClear
+                  style={{ width: 360 }}
+                  onChange={(e) => {
+                    const v = e.target.value.trim().toLowerCase();
+                    if (!v) return setFilteredJobs(jobs);
+                    setFilteredJobs(jobs.filter(j => (j.title || '').toLowerCase().includes(v)));
+                  }}
+                />
+              </div>
+
+              <div style={{ flex: '0 0 auto' }} />
             </div>
-          </div>
-        }
+          }
         style={{
           maxWidth: 1200,
           margin: "12px auto",

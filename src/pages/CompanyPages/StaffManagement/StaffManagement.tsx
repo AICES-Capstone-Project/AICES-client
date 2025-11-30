@@ -169,16 +169,12 @@ const StaffManagement = () => {
 	return (
 		<Card
 			title={
-				<div
-					style={{
-						display: "flex",
-						alignItems: "center",
-						justifyContent: "space-between",
-						width: "100%",
-					}}
-				>
-					<div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+				<div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 16 }}>
+					<div style={{ flex: '0 0 auto' }}>
 						<span style={{ fontWeight: 600 }}>Staff Management</span>
+					</div>
+
+					<div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
 						<Input
 							placeholder="Search by name, email, or role..."
 							prefix={<SearchOutlined />}
@@ -187,36 +183,39 @@ const StaffManagement = () => {
 							onChange={(e) => handleSearch(e.target.value)}
 						/>
 					</div>
-					<div>
-						<Button
-							className="company-btn--filled"
-							icon={<PlusOutlined />}
-							onClick={() => setDrawerOpen(true)}
-						>
-							Invite New Staff
-						</Button>
-						{isHrManager && (
+
+					<div style={{ flex: '0 0 auto' }}>
+						<div>
 							<Button
-								className="company-btn"
-								style={{ marginLeft: 8 }}
-								onClick={handleOpenPending}
+								className="company-btn--filled"
+								icon={<PlusOutlined />}
+								onClick={() => setDrawerOpen(true)}
 							>
-								<Badge
-									className="company-badge"
-									count={pendingRequests.length}
-									size="small"
-									offset={[-2, 1]}
-								>
-									<BellOutlined
-										style={{
-											fontSize: 16,
-											color: "var(--color-primary-medium) !important",
-										}}
-									/>
-								</Badge>
-								<span className="ml-2">Pending Members</span>
+								Invite New Staff
 							</Button>
-						)}
+							{isHrManager && (
+								<Button
+									className="company-btn"
+									style={{ marginLeft: 8 }}
+									onClick={handleOpenPending}
+								>
+									<Badge
+										className="company-badge"
+										count={pendingRequests.length}
+										size="small"
+										offset={[-2, 1]}
+									>
+										<BellOutlined
+											style={{
+												fontSize: 16,
+												color: "var(--color-primary-medium) !important",
+											}}
+										/>
+									</Badge>
+									<span className="ml-2">Pending Members</span>
+								</Button>
+							)}
+						</div>
 					</div>
 				</div>
 			}

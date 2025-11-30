@@ -178,7 +178,7 @@ export default function CompanyCreate() {
       if (String(resp?.status).toLowerCase() === "success") {
         toastSuccess("Join request submitted successfully");
         setJoinModalOpen(false);
-        navigate("/company/pending-approval"); 
+        navigate("/company/pending-approval");
       } else {
         toastError("Failed to submit join request", resp?.message);
       }
@@ -295,6 +295,7 @@ export default function CompanyCreate() {
                       label="Address"
                       rules={[
                         { required: true, message: "Please enter the company address" },
+                        { max: 60, message: "Address must be at most 60 characters" },
                         {
                           validator: (_, value) => {
                             if (!value) return Promise.resolve();
@@ -307,7 +308,7 @@ export default function CompanyCreate() {
                       ]}
                       style={{ marginBottom: 12 }}
                     >
-                      <Input placeholder="Enter company address" />
+                      <Input placeholder="Enter company address" maxLength={60} />
                     </Form.Item>
                   </Col>
 
@@ -338,18 +339,18 @@ export default function CompanyCreate() {
             </Row>
 
             {/* === ROW 2: Full width section below === */}
-            <div style={{ marginTop: 24 }}>
+            <div style={{ marginTop: 12 }}>
               {/* Attached documents */}
               <div
                 style={{
                   border: "1px solid #e5e5e5",
                   borderRadius: 8,
                   padding: "12px 16px",
-                  marginBottom: 12,
+                  marginBottom: 6,
                   background: "#fafafa",
                   display: "flex",
                   flexDirection: "column",
-                  height: 185,
+                  height: 205,
                   overflow: "hidden",
                 }}
               >
@@ -373,7 +374,6 @@ export default function CompanyCreate() {
                           flex: 1,
                           overflowY: "auto",
                           paddingRight: 8,
-                          marginBottom: 12,
                         }}
                       >
                         {fields.map((field, index) => (
@@ -404,7 +404,7 @@ export default function CompanyCreate() {
                                 onClick={() => add()}
                                 style={{
                                   fontSize: 18,
-                                  color: "#1677ff",
+                                  color: "var(--color-primary-light)",
                                   cursor: "pointer",
                                 }}
                               />
@@ -431,45 +431,89 @@ export default function CompanyCreate() {
                               <Input
                                 placeholder="e.g.: Business license, Certificate of incorporation"
                                 style={{
-                                  height: 40,
                                   borderRadius: 6,
                                 }}
                               />
                             </Form.Item>
 
                             {/* Upload file (do not bind input value to Form.Item) */}
-                            <Form.Item style={{ flex: 1, marginBottom: 0 }}>
+                            <Form.Item
+                              name={[field.name, "file"]}
+                              style={{ flex: 1, marginBottom: 0 }}
+                              valuePropName="file"
+                              getValueFromEvent={() => undefined}
+                              rules={[
+                                {
+                                  validator: async () => {
+                                    // we read the file from form state instead of the validator value
+                                    const fields = form.getFieldValue("documents") || [];
+                                    const fileObj = fields[field.name]?.file;
+                                    if (!fileObj) {
+                                      return Promise.reject(new Error("Please select a document file"));
+                                    }
+                                    const validation = validateFile(fileObj);
+                                    return validation.isValid ? Promise.resolve() : Promise.reject(new Error(validation.message));
+                                  },
+                                },
+                              ]}
+                            >
                               <input
                                 type="file"
                                 accept=".pdf,.jpg,.jpeg,.png"
                                 style={{
                                   display: "block",
-                                  height: 40,
-                                  lineHeight: "38px",
+                                  height: "32px",
+                                  lineHeight: "32px",
                                   padding: "0 10px",
                                   border: "1px solid #d9d9d9",
                                   borderRadius: 6,
                                   width: "100%",
                                   cursor: "pointer",
                                   background: "#fff",
+                                  color: "#bfbfbf",
                                 }}
                                 onChange={(e) => {
                                   const file = e.target.files?.[0];
-                                  if (file) {
-                                    // Validate file
-                                    const validation = validateFile(file);
-                                    if (!validation.isValid) {
-                                      toastError("Invalid document", validation.message);
-                                      e.target.value = ""; // Clear the input
-                                      return;
-                                    }
-
-                                    // set this file into the form field for documents[index].file
-                                    const fields = form.getFieldValue("documents") || [];
-                                    fields[field.name] = { ...(fields[field.name] || {}), file };
+                                  const fields = form.getFieldValue("documents") || [];
+                                  if (!file) {
+                                    // clear file value and set error
+                                    fields[field.name] = { ...(fields[field.name] || {}), file: undefined };
                                     form.setFieldsValue({ documents: fields });
-                                    toastSuccess("Document selected", `Selected: ${file.name}`);
+                                    form.setFields([
+                                      {
+                                        name: ["documents", field.name, "file"],
+                                        errors: ["Please select a document file"],
+                                      },
+                                    ]);
+                                    return;
                                   }
+
+                                  // Validate file
+                                  const validation = validateFile(file);
+                                  if (!validation.isValid) {
+                                    // set error on the specific field so Ant displays it inline
+                                    fields[field.name] = { ...(fields[field.name] || {}), file: undefined };
+                                    form.setFieldsValue({ documents: fields });
+                                    form.setFields([
+                                      {
+                                        name: ["documents", field.name, "file"],
+                                        errors: [validation.message || "Invalid document"],
+                                      },
+                                    ]);
+                                    e.target.value = ""; // Clear the input
+                                    return;
+                                  }
+
+                                  // Valid file: clear any previous errors and set the file into the form field
+                                  fields[field.name] = { ...(fields[field.name] || {}), file };
+                                  form.setFieldsValue({ documents: fields });
+                                  form.setFields([
+                                    {
+                                      name: ["documents", field.name, "file"],
+                                      errors: [],
+                                    },
+                                  ]);
+                                  toastSuccess("Document selected", `Selected: ${file.name}`);
                                 }}
                               />
                             </Form.Item>
@@ -509,22 +553,26 @@ export default function CompanyCreate() {
                             border: "1px dashed #ccc",
                             margin: "0 auto 10px",
                             lineHeight: 1.4,
-                            width: "80%",
-                            textAlign: "left",
+                            width: "100%",
+                            textAlign: "center",
                           }}
                         >
-                          💡 <b>Document Requirements:</b>
+                          <div style={{ textAlign: "center", fontWeight: 600, marginTop: 4 }}>💡<b>Document Requirements:</b> </div>
                           <ul
                             style={{
                               margin: "4px 0 0 0",
-                              padding: "0 0 0 16px",
+                              padding: "0",
                               listStyle: "disc",
+                              display: "inline-grid",
+                              gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                              gap: "6px 10px",
+                              justifyItems: "start",
                             }}
                           >
-                            <li><b>File format:</b> PDF, JPG, or PNG only</li>
-                            <li><b>File size:</b> Maximum 10MB per file</li>
-                            <li><b>Document types:</b> Business license, Certificate of incorporation, Tax registration, etc.</li>
-                            <li><b>Required:</b> At least 1 document must be provided</li>
+                            <li style={{ textAlign: "left" }}><b>Required:</b> At least 2 documents must be provided</li>
+                            <li style={{ textAlign: "left" }}><b>File format:</b> PDF, JPG, or PNG only</li>
+                            <li style={{ textAlign: "left" }}><b>File size:</b> Maximum 10MB per file</li>
+                            <li style={{ textAlign: "left" }}><b>Document types:</b> Business license, Certificate of incorporation, Tax registration, etc.</li>
                           </ul>
                         </div>
 
@@ -556,7 +604,7 @@ export default function CompanyCreate() {
                   rows={2}
                   placeholder="Short introduction about the company (minimum 20 characters)"
                   showCount
-                  maxLength={1000}
+                  maxLength={120}
                 />
               </Form.Item>
 
@@ -576,19 +624,23 @@ export default function CompanyCreate() {
         title="Join a Company"
         open={joinModalOpen}
         onCancel={() => setJoinModalOpen(false)}
-        footer={[
-          <Button key="cancel" className="company-btn" onClick={() => setJoinModalOpen(false)}>
-            Cancel
-          </Button>,
-          <Button key="join" className="company-btn--filled" onClick={handleConfirmJoin}>
-            Join
-          </Button>
-        ]}
+        footer={
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <Button key="cancel" className="company-btn" onClick={() => setJoinModalOpen(false)}>
+              Cancel
+            </Button>,
+            <Button key="join" className="company-btn--filled" onClick={handleConfirmJoin}>
+              Join
+            </Button>
+          </div>
+
+        }
       >
         {companiesLoading ? (
           <div style={{ textAlign: 'center' }}><Spin /></div>
         ) : (
           <Select
+            className="join-company-select"
             style={{ width: '100%' }}
             placeholder="Select a company to join"
             value={selectedCompanyId || undefined}

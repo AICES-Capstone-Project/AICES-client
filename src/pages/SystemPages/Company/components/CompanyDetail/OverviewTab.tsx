@@ -1,4 +1,4 @@
-import { Card, Space, Tag, Typography } from "antd";
+import { Space, Tag, Typography } from "antd";
 import type { Company } from "../../../../../types/company.types";
 import type { CompanySubscription } from "../../../../../types/companySubscription.types";
 

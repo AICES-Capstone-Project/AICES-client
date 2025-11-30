@@ -7,7 +7,7 @@ import GitHubCallback from "../pages/Login/partials/GitHubCallback";
 import Setting from "../pages/CompanyPages/Settings/Setting";
 import MyApartmentWrapper from "../pages/CompanyPages/MyApartment/MyApartmentWrapper";
 import CompanyList from "../pages/SystemPages/Company";
-import CompanyDetail from "../pages/SystemPages/Company/CompanyDetail";
+import CompanyDetail from "../pages/SystemPages/Company/components/CompanyDetail";
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
 import ResumeDetail from "../pages/SystemPages/Company/ResumeDetail";
 

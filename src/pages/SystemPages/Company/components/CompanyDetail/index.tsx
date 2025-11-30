@@ -193,9 +193,6 @@ export default function CompanyDetail() {
         </Title>
       </Space>
 
-      <Card loading={loading} style={{ marginTop: 12 }}>
-        <OverviewTab company={company} subscription={subscription} />
-      </Card>
 
       <Tabs
         style={{ marginTop: 16 }}

@@ -27,7 +27,6 @@ export default function CompanyDetail() {
   const nav = useNavigate();
 
   const [company, setCompany] = useState<Company | null>(null);
-  const [loading, setLoading] = useState(false);
 
   // Members
   const [members, setMembers] = useState<CompanyMember[]>([]);
@@ -52,7 +51,6 @@ export default function CompanyDetail() {
 
   // ====== LOADERS ======
   const loadCompany = async () => {
-    setLoading(true);
     const res = await companyService.getSystemCompanyById(id);
 
     if (res.status === "Success" && res.data) {
@@ -76,7 +74,6 @@ export default function CompanyDetail() {
     } else {
       message.error(res.message || "Failed to load company");
     }
-    setLoading(false);
   };
 
   const loadMembers = async () => {

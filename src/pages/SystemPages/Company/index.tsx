@@ -15,7 +15,6 @@ import {
 import CompanyToolbar from "./components/CompanyToolbar";
 import CompanySearchBar from "./components/CompanySearchBar";
 import CompanyTable from "./components/CompanyTable";
-import CompanyPreviewModal from "./components/CompanyPreviewModal";
 import RejectCompanyModal from "./components/RejectCompanyModal";
 import CreateCompanyModal from "./components/CreateCompanyModal";
 
@@ -34,9 +33,6 @@ export default function CompanyList() {
     current: 1,
     pageSize: DEFAULT_PAGE_SIZE,
   });
-
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [preview, setPreview] = useState<Company | null>(null);
 
   const [rejectingCompany, setRejectingCompany] = useState<Company | null>(
     null
@@ -60,8 +56,7 @@ export default function CompanyList() {
     const filtered = keywordLower
       ? source.filter((c) => {
           const name = (c.name || "").toLowerCase();
-          const website = (c.websiteUrl || "").toLowerCase();
-          return name.includes(keywordLower) || website.includes(keywordLower);
+          return name.includes(keywordLower);
         })
       : source;
 
@@ -89,19 +84,12 @@ export default function CompanyList() {
         const d = res.data as any;
         const rawList = (d.companies ?? []) as Company[];
 
-        // 🔥 CHỈ LẤY NHỮNG COMPANY ĐANG ACTIVE (chưa deactivate)
-        // BE sau khi delete đang "Company deactivated successfully"
-        // => isActive = false, mình loại ra khỏi list
-        const visibleCompanies = rawList.filter(
-          (c) => c.isActive !== false // true hoặc null đều coi là còn hiển thị
-        );
-
-        setAllCompanies(visibleCompanies);
+        setAllCompanies(rawList);
 
         const page = pagination.current || 1;
         const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
 
-        applyFilterAndPaging(visibleCompanies, keyword, page, pageSize);
+        applyFilterAndPaging(rawList, keyword, page, pageSize);
       } else {
         toastError("Failed to fetch companies", res?.message);
       }
@@ -212,34 +200,6 @@ export default function CompanyList() {
     }
   };
 
-  const openPreview = async (c: Company) => {
-    setIsPreviewOpen(true);
-    try {
-      const res = await companyService.getSystemCompanyById(c.companyId);
-
-      if (res.status === "Success" && res.data) {
-        const cd = res.data as any;
-        const mapped: Company = {
-          companyId: cd.companyId,
-          name: cd.name,
-          address: cd.address ?? null,
-          logoUrl: cd.logoUrl ?? null,
-          websiteUrl: cd.websiteUrl ?? null,
-          companyStatus: cd.companyStatus ?? null,
-          isActive: cd.isActive ?? false,
-          createdAt: cd.createdAt ?? new Date().toISOString(),
-        };
-        setPreview(mapped);
-      } else {
-        toastError("Failed to load company", res?.message);
-        setIsPreviewOpen(false);
-      }
-    } catch {
-      toastError("Failed to load company");
-      setIsPreviewOpen(false);
-    }
-  };
-
   const handleDeleteCompany = async (companyId: number) => {
     setLoading(true);
     try {
@@ -336,7 +296,6 @@ export default function CompanyList() {
           allCompanies={allCompanies}
           defaultPageSize={DEFAULT_PAGE_SIZE}
           onChangePagination={handleChangeTable}
-          onOpenPreview={openPreview}
           onOpenDetail={handleOpenDetail}
           onApprove={handleApprove}
           onOpenReject={(c) => {
@@ -346,15 +305,6 @@ export default function CompanyList() {
           onDelete={handleDeleteCompany}
         />
       </Card>
-
-      <CompanyPreviewModal
-        open={isPreviewOpen}
-        company={preview}
-        onClose={() => {
-          setIsPreviewOpen(false);
-          setPreview(null);
-        }}
-      />
 
       <RejectCompanyModal
         open={!!rejectingCompany}

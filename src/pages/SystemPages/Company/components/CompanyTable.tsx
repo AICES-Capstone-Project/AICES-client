@@ -1,9 +1,6 @@
 import { Button, Popconfirm, Space, Table, Tag } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import {
-  DeleteOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
+import { DeleteOutlined } from "@ant-design/icons";
 
 import type { Company } from "../../../../types/company.types";
 
@@ -16,7 +13,6 @@ interface CompanyTableProps {
   allCompanies: Company[];
   defaultPageSize: number;
   onChangePagination: (p: TablePaginationConfig) => void;
-  onOpenPreview: (c: Company) => void;
   onOpenDetail: (companyId: number) => void;
   onApprove: (companyId: number) => void;
   onOpenReject: (c: Company) => void;
@@ -30,7 +26,6 @@ export default function CompanyTable({
   total,
   defaultPageSize,
   onChangePagination,
-  onOpenPreview,
   onOpenDetail,
   onApprove,
   onOpenReject,
@@ -41,7 +36,7 @@ export default function CompanyTable({
     {
       title: "Company",
       dataIndex: "name",
-      render: (v, r) => (
+      render: (v, r: Company) => (
         <Space>
           {r.logoUrl ? (
             <img
@@ -68,27 +63,10 @@ export default function CompanyTable({
         </Space>
       ),
     },
-    {
-      title: "Website",
-      render: (_, r: any) => {
-        const url = r.websiteUrl as string | undefined;
-        if (!url) return "—";
-        let host = "";
-        try {
-          host = new URL(url).hostname;
-        } catch {
-          host = url;
-        }
-        return (
-          <a href={url} target="_blank" rel="noreferrer">
-            {host}
-          </a>
-        );
-      },
-    },
+
     {
       title: "Company Status",
-      render: (_, r: any) => {
+      render: (_, r: Company) => {
         const s = r.companyStatus as string | undefined;
         const color =
           s === "Approved" ? "green" : s === "Pending" ? "gold" : "red";
@@ -97,15 +75,41 @@ export default function CompanyTable({
       width: 150,
     },
     {
-      title: "Active",
-      dataIndex: "isActive",
-      width: 110,
-      render: (b?: boolean) =>
-        b ? <Tag color="green">Active</Tag> : <Tag color="red">Inactive</Tag>,
+      title: "Address",
+      dataIndex: "address",
+      width: 150,
+      render: (v: Company["address"]) =>
+        v ? (
+          <Tag
+            style={{
+              maxWidth: 140,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {v}
+          </Tag>
+        ) : (
+          "—"
+        ),
+    },
+
+    {
+      title: "Created By",
+      dataIndex: "createdBy",
+      render: (v: Company["createdBy"]) => v || "—",
+      width: 140,
     },
     {
+      title: "Approval By",
+      dataIndex: "approvalBy",
+      render: (v: Company["approvalBy"]) => v || "—",
+      width: 140,
+    },
+
+    {
       title: "Created",
-      render: (_, r: any) =>
+      render: (_, r: Company) =>
         r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
       width: 170,
     },
@@ -113,18 +117,9 @@ export default function CompanyTable({
       title: "Actions",
       key: "actions",
       width: 260,
-      render: (_, record) => (
+      render: (_, record: Company) => (
         <Space>
-          <Button
-            icon={<EyeOutlined />}
-            onClick={() => onOpenPreview(record)}
-          >
-            Preview
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => onOpenDetail(record.companyId)}
-          >
+          <Button type="primary" onClick={() => onOpenDetail(record.companyId)}>
             Open
           </Button>
 

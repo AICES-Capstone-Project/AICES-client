@@ -15,10 +15,9 @@ interface CompanyData {
   rejectionReason?: string | null;
   managerName?: string | null;
   documents?: { documentType: string; fileUrl: string }[];
-  isActive?: boolean;
   
-  createdBy?: number;
-  approvalBy?: number;
+  createdBy?: string | number | null;
+  approvalBy?: string | number | null;
 
   createdAt?: string;
 }

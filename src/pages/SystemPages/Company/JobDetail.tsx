@@ -14,7 +14,7 @@ import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { jobService } from "../../../services/jobService";
 import { resumeService } from "../../../services/resumeService";
 import type { Job, Resume } from "../../../types/company.types";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, LeftOutlined } from "@ant-design/icons";
 
 const { Title, Text } = Typography;
 const DEFAULT_PAGE_SIZE = 10;
@@ -34,25 +34,23 @@ export default function JobDetail() {
   });
 
   const loadJob = async () => {
-  const res = await jobService.getSystemJobById(cid, jid);
-  if (res.status === "Success" && res.data) setJob(res.data as any);
-  else message.error(res.message || "Failed to load job");
-};
-
+    const res = await jobService.getSystemJobById(cid, jid);
+    if (res.status === "Success" && res.data) setJob(res.data as any);
+    else message.error(res.message || "Failed to load job");
+  };
 
   const loadResumes = async () => {
-  const res = await resumeService.getSystemResumes(jid, {
-    page: resumesPg.current,
-    pageSize: resumesPg.pageSize,
-  });
-  if (res.status === "Success" && res.data) {
-    setResumes(res.data.items);
-    setResumesTotal(
-      res.data.totalPages * (resumesPg.pageSize || DEFAULT_PAGE_SIZE)
-    );
-  }
-};
-
+    const res = await resumeService.getSystemResumes(jid, {
+      page: resumesPg.current,
+      pageSize: resumesPg.pageSize,
+    });
+    if (res.status === "Success" && res.data) {
+      setResumes(res.data.items);
+      setResumesTotal(
+        res.data.totalPages * (resumesPg.pageSize || DEFAULT_PAGE_SIZE)
+      );
+    }
+  };
 
   useEffect(() => {
     loadJob();
@@ -131,6 +129,10 @@ export default function JobDetail() {
         align="center"
         style={{ width: "100%", justifyContent: "space-between" }}
       >
+        <Button icon={<LeftOutlined />} onClick={() => nav(-1)}>
+          Back
+        </Button>
+
         <Title level={4} style={{ margin: 0 }}>
           Job Detail
         </Title>

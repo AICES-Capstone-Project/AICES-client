@@ -1,31 +1,29 @@
 export interface Company {
+  logoUrl: string | undefined;
   companyId: number;
   name: string;
-  domain?: string | null;
-  email?: string | null;
-  phone?: string | null;
-  address?: string | null;
-  size?: string | null; // e.g. "51-200"
-  logoUrl?: string | null;
-  isActive?: boolean;
 
-    // ✅ thêm mới theo BE
-  websiteUrl?: string | null;
-  taxCode?: string | null;
-  description?: string | null;
+  address?: string | null;
+
   companyStatus?: "Approved" | "Pending" | "Rejected" | string | null;
   rejectionReason?: string | null;
+
+  description?: string | null;
+  websiteUrl?: string | null;
+  taxCode?: string | null;
+
   createdBy?: number;
   approvalBy?: number;
   createdAt?: string; // ISO
 
-
+  
   documents?: CompanyDocument[];
 
 }
 export interface CompanyDocument {
   documentType: string;
   fileUrl: string;
+  logoUrl?: string | null;
 }
 
 
@@ -39,7 +37,6 @@ export interface CompanyMember {
   avatarUrl?: string | null;
   phoneNumber?: string | null;
   joinStatus: string; // Approved / Pending / Rejected
-  isActive?: boolean;
   createdAt?: string; // ISO
 }
 

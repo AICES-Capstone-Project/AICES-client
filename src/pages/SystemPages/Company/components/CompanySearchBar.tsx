@@ -33,7 +33,7 @@ export default function CompanySearchBar({
   return (
     <Space style={{ marginBottom: 16 }} wrap>
       <Input
-        placeholder="Search by company name or website"
+        placeholder="Search by company name"
         allowClear
         value={keyword}
         onChange={(e) => {

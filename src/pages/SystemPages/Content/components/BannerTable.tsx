@@ -22,8 +22,14 @@ export default function BannerTable({
 }: BannerTableProps) {
   const columns: ColumnsType<BannerConfig> = [
     {
+      title: "ID",
+      dataIndex: "bannerId",
+      width: 80,
+      render: (id: number) => <span style={{ fontWeight: 500 }}>{id}</span>,
+    },
+    {
       title: "Image",
-      dataIndex: "sourceUrl", // nhớ đang dùng sourceUrl
+      dataIndex: "source",
       width: 120,
       render: (src: string) => (
         <div

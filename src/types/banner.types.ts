@@ -1,8 +1,10 @@
+
+
 export interface BannerConfig {
   bannerId: number;  
   title: string;
-  colorCode?: string | null;
-  sourceUrl: string;
+  colorCode: string | null;
+  source: string;
   createdAt: string;
 }
 

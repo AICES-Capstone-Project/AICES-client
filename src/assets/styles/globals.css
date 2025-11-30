@@ -47,10 +47,10 @@ button {
 }
 
 :root {
-  --color-primary-dark: #052e16;
-  --color-primary: #065f46;
-  --color-primary-medium: #2f6c2b;
-  --color-primary-light: #4d7c0f;
+	--color-primary-dark: #052e16;
+	--color-primary: #065f46;
+	--color-primary-medium: #2f6c2b;
+	--color-primary-light: #4d7c0f;
 }
 
 
@@ -179,6 +179,38 @@ button {
 	.ant-select-selector:hover {
 		border-color: var(--color-primary-light) !important;
 	}
+
+	/* Keep hover tinted, but prevent inputs from switching to primary color on focus/click */
+	.ant-input:focus,
+	.ant-input:focus-visible,
+	.ant-input-affix-wrapper:focus,
+	.ant-input-affix-wrapper:focus-within,
+	.ant-input-affix-wrapper:active,
+	.ant-input-textarea:focus,
+	.ant-picker:focus,
+	.ant-select-selector:focus {
+		border-color: #d9d9d9 !important;
+		box-shadow: none !important;
+		outline: none !important;
+	}
+
+	/* Keep join-company select neutral (no primary border) */
+	.join-company-select .ant-select-selector {
+		border-color: #d9d9d9 !important;
+		box-shadow: none !important;
+	}
+
+	.join-company-select .ant-select-selector:hover,
+	.join-company-select.ant-select-focused .ant-select-selector,
+	.join-company-select .ant-select-focused .ant-select-selector {
+		border-color: #d9d9d9 !important;
+	}
+
+	.ant-select-item-option-selected,
+	.ant-select-item-option-selected .ant-select-item-option-content {
+		background-color: var(--color-primary-light) !important;
+		color: white !important;
+	}
 }
 
 /* --- ACTIVE HEADER ITEM FIX --- */
@@ -188,6 +220,33 @@ button {
 	background: transparent !important;
 	font-weight: 600 !important;
 }
+
+/* Center Modal.confirm when using class `ant-confirm-centered` */
+.ant-confirm-centered .ant-modal-title,
+.ant-confirm-centered .ant-modal-body {
+	text-align: center;
+}
+
+.ant-confirm-centered .ant-modal-footer {
+	display: flex;
+	justify-content: center;
+}
+
+/* Spread footer: place first button left and last button right */
+.ant-confirm-spread .ant-modal-footer {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.ant-confirm-spread .ant-modal-footer .ant-btn:first-child {
+	margin-left: 0;
+}
+.custom-confirm-wrapper .ant-modal {
+  width: 1100px !important;
+  max-width: 1100px !important;
+}
+
 
 
 @layer utilities {
@@ -379,9 +438,10 @@ button {
 .job-pending-badge .ant-badge-count::after {
 	display: none;
 }
+
 /* Remove extra margin under Ant Design Table pagination */
 .ant-table-pagination {
-  margin-bottom: 0 !important;
+	margin-bottom: 0 !important;
 }
 
 /* Pending Jobs button styling (override AntD defaults) */
@@ -398,7 +458,7 @@ button {
 	background-color: color-mix(in srgb, var(--color-primary-light) 12%, white) !important;
 	color: var(--color-primary-dark) !important;
 	border-color: var(--color-primary-light) !important;
-	
+
 }
 
 .company-btn .anticon {
@@ -482,5 +542,5 @@ button {
 }
 
 .icon {
-  color: white !important;
+	color: white !important;
 }

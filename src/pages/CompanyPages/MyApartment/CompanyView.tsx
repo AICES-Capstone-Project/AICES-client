@@ -176,6 +176,9 @@ export default function CompanyView() {
             padding: "16px 24px",
             background: "#fafafa",
             textAlign: "center",
+            width: "100%",
+            maxWidth: 900,
+            margin: "0 auto",
           }}
         >
           <p
@@ -191,9 +194,9 @@ export default function CompanyView() {
           {company.documents && company.documents.length > 0 ? (
             <div
               style={{
-                maxWidth: 450,
+                width: "100%",
+                maxWidth: 650,
                 margin: "0 auto",
-
               }}
             >
               <div

@@ -175,7 +175,6 @@ const CompanyClients: React.FC = () => {
 
   return (
     <Card
-      title="Subscription Plans"
       bordered={false}
       style={{
         maxWidth: 1200,
@@ -183,29 +182,36 @@ const CompanyClients: React.FC = () => {
         borderRadius: 12,
         height: 'calc(100% - 25px)',
       }}
-      extra={
-        <Space>
-          <Button className="company-btn" onClick={() => navigate("/company/payment-history")}>
-            Payment History
-          </Button>
-          <Button className="company-btn--filled" onClick={handleViewMySubscription}>
-            View My Subscription
-          </Button>
-        </Space>
+      title={
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 16 }}>
+          <div style={{ flex: '0 0 auto' }}>
+            <span className="font-semibold">Subscription Plans</span>
+          </div>
+
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+            <Input
+              placeholder="Search by name"
+              prefix={<SearchOutlined />}
+              style={{ width: 360 }}
+              value={searchText}
+              onChange={(e) => handleSearch(e.target.value)}
+              allowClear
+            />
+          </div>
+
+          <div style={{ flex: '0 0 auto' }}>
+            <Space>
+              <Button className="company-btn" onClick={() => navigate("/company/payment-history")}>
+                Payment History
+              </Button>
+              <Button className="company-btn--filled" onClick={handleViewMySubscription}>
+                View My Subscription
+              </Button>
+            </Space>
+          </div>
+        </div>
       }
     >
-      <Space style={{ marginBottom: 16, width: "100%" }} direction="vertical">
-        <Space wrap>
-          <Input
-            placeholder="Search by name"
-            prefix={<SearchOutlined />}
-            style={{ width: 300 }}
-            value={searchText}
-            onChange={(e) => handleSearch(e.target.value)}
-            allowClear
-          />
-        </Space>
-      </Space>
 
       <Table
         rowKey="subscriptionId"

@@ -275,9 +275,12 @@ const JobManagement = () => {
   return (
     <Card
       title={
-        <div className="flex justify-between items-center w-full">
-          <div style={{ display: "flex", alignItems: "center", gap: 16, flex: 1 }}>
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 16 }}>
+          <div style={{ flex: '0 0 auto' }}>
             <span className="font-semibold">Jobs</span>
+          </div>
+
+          <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
             <Input
               placeholder="Search by title, category or specialization"
               prefix={<SearchOutlined />}
@@ -287,39 +290,41 @@ const JobManagement = () => {
             />
           </div>
 
-          <div className="flex gap-2 items-center">
-            {isHrManager && (
+          <div style={{ flex: '0 0 auto' }}>
+            <div className="flex gap-2 items-center">
+              {isHrManager && (
+                <Button
+                  className="company-btn--filled"
+                  icon={<BellOutlined style={{ fontSize: 16 }} />}
+                  onClick={() => {
+                    fetchPendingJobs();
+                    setPendingDrawerOpen(true);
+                  }}
+                >
+                  <Badge className="company-badge" count={pendingCount} size="small" offset={[-15, -13]} />
+                  <span>Pending</span>
+                </Button>
+              )}
               <Button
-                className="company-btn--filled"
-                icon={<BellOutlined style={{ fontSize: 16 }} />}
-                onClick={() => {
-                  fetchPendingJobs();
-                  setPendingDrawerOpen(true);
+                className="company-btn"
+                icon={<HistoryOutlined />}
+                onClick={async () => {
+                  await fetchPostedJobs();
+                  setPostedDrawerOpen(true);
                 }}
               >
-                <Badge className="company-badge" count={pendingCount} size="small" offset={[-15, -13]} />
-                <span>Pending</span>
+                My posted
               </Button>
-            )}
-            <Button
-              className="company-btn"
-              icon={<HistoryOutlined />}
-              onClick={async () => {
-                await fetchPostedJobs();
-                setPostedDrawerOpen(true);
-              }}
-            >
-              My posted
-            </Button>
-            <Button
-              className="company-btn--filled"
-              icon={<PlusOutlined />}
-              onClick={() => {
-                setCreateDrawerOpen(true);
-              }}
-            >
-              Create
-            </Button>
+              <Button
+                className="company-btn--filled"
+                icon={<PlusOutlined />}
+                onClick={() => {
+                  setCreateDrawerOpen(true);
+                }}
+              >
+                Create
+              </Button>
+            </div>
           </div>
         </div>
       }

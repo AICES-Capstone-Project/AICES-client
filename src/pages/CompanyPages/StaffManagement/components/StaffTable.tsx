@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Table, Tag, Space, Button, Empty, Avatar, Modal } from "antd";
-import { UserOutlined } from "@ant-design/icons";
+import { Table, Tag, Space, Button, Empty, Avatar, Modal, Tooltip } from "antd";
+import { UserOutlined, DeleteOutlined } from "@ant-design/icons";
 import { companyService } from "../../../../services/companyService";
 import type { ColumnsType } from "antd/es/table";
 import type { CompanyMember } from "../../../../types/company.types";
@@ -98,45 +98,47 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
               {record.joinStatus || "Approved"}
             </Tag>
           ) : (
-            <Button
-              size="small"
-              className="company-btn--filled"
-              onClick={() => {
-                Modal.confirm({
-                  title: "Remove Member",
-                  content: `Are you sure you want to remove ${record.fullName || record.email} from the company?`,
-                  okText: "Remove",
-                  okButtonProps: { danger: true },
-                  onOk: async () => {
-                    try {
-                      const res = await companyService.deleteMember(record.comUserId);
-                      if (String(res?.status).toLowerCase() === "success") {
+            <Tooltip title="Remove member">
+              <Button
+                type="text"
+                icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: 16 }} />}
+                onClick={() => {
+                  Modal.confirm({
+                    className: 'ant-confirm-spread',
+                    wrapClassName: "custom-confirm-wrapper",
+                    title: <div style={{ textAlign: 'center' }}>Remove Member</div>,
+                    content: <div style={{ textAlign: 'center' }}>{`Are you sure you want to remove ${record.fullName || record.email} from the company?`}</div>,
+                    okText: "Remove",
+                    okButtonProps: { danger: true },
+                    onOk: async () => {
+                      try {
+                        const res = await companyService.deleteMember(record.comUserId);
+                        if (String(res?.status).toLowerCase() === "success") {
+                          Modal.destroyAll();
+                          toastSuccess("Member removed successfully");
+                          if (typeof onDelete === "function") onDelete(record);
+                          setTimeout(() => {
+                            try {
+                              window.location.reload();
+                            } catch (e) {
+                              // ignore
+                            }
+                          }, 900);
+                        } else {
+                          Modal.destroyAll();
+                          Modal.error({ title: "Failed", content: res?.message || "Failed to remove member" });
+                        }
+                      } catch (err) {
+                        console.error(err);
                         Modal.destroyAll();
-                        toastSuccess("Member removed successfully");
-                        if (typeof onDelete === "function") onDelete(record);
-                        setTimeout(() => {
-                          try {
-                            window.location.reload();
-                          } catch (e) {
-                            // ignore
-                          }
-                        }, 900);
-                      } else {
-                        Modal.destroyAll();
-                        Modal.error({ title: "Failed", content: res?.message || "Failed to remove member" });
+                        toastError("Failed to remove member");
+                        Modal.error({ title: "Error", content: "An error occurred while removing member" });
                       }
-                    } catch (err) {
-                      console.error(err);
-                      Modal.destroyAll();
-                      toastError("Failed to remove member");
-                      Modal.error({ title: "Error", content: "An error occurred while removing member" });
-                    }
-                  },
-                });
-              }}
-            >
-              Remove
-            </Button>
+                    },
+                  });
+                }}
+              />
+            </Tooltip>
           )}
         </Space>
       ),

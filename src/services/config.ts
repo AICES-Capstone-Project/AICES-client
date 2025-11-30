@@ -409,6 +409,8 @@ export const APP_ROUTES = {
 	COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
 	COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
 	COMPANY_PAYMENT_HISTORY: "/company/payment-history",
+	COMPANY_CHECKOUT: "/company/checkout/:subscriptionId",
+	COMPANY_SUBSCRIPTION_SUCCESS: "/company/subscription-success",
 } as const;
 
 export const ROLES = {

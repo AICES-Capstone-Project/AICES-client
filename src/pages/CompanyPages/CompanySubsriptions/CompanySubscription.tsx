@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Button, Space, Input, Modal } from "antd";
+import { Card, Table, Button, Space, Input } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 import { subscriptionService } from "../../../services/subscriptionService";
-import { paymentService } from "../../../services/paymentService";
 import SubscriptionDrawer from "./components/SubscriptionDrawer";
-import SubscriptionCheckout from "../../../components/payments/SubscriptionCheckout";
 import { toastError } from "../../../components/UI/Toast";
 
 interface SubscriptionPlan {
@@ -30,12 +28,6 @@ const CompanyClients: React.FC = () => {
 	const [searchText, setSearchText] = useState("");
 	const [viewDrawerOpen, setViewDrawerOpen] = useState(false);
 	const [selectedSubscription, setSelectedSubscription] = useState<any>(null);
-	const [upgradingId, setUpgradingId] = useState<number | null>(null);
-	const [checkoutModalVisible, setCheckoutModalVisible] = useState(false);
-	const [selectedPlanForCheckout, setSelectedPlanForCheckout] =
-		useState<SubscriptionPlan | null>(null);
-	const [errorModalVisible, setErrorModalVisible] = useState(false);
-	const [errorMessage, setErrorMessage] = useState("");
 
 	useEffect(() => {
 		loadClients();
@@ -103,21 +95,15 @@ const CompanyClients: React.FC = () => {
 	};
 
 	const handleUpgrade = (plan: SubscriptionPlan) => {
-		setSelectedPlanForCheckout(plan);
-		setCheckoutModalVisible(true);
-	};
-
-	const handleCheckoutSuccess = () => {
-		setCheckoutModalVisible(false);
-		setSelectedPlanForCheckout(null);
-		// Reload subscriptions or navigate to success page
-		navigate("/company/my-subscription");
-	};
-
-	const handleCheckoutError = (error: string) => {
-		console.error("Payment error:", error);
-		setErrorMessage(error);
-		setErrorModalVisible(true);
+		// Navigate to checkout page with subscription data
+		navigate(`/company/checkout/${plan.subscriptionId}`, {
+			state: {
+				subscriptionName: plan.name,
+				price: parseFloat(plan.price.replace(/[^0-9.-]+/g, "")),
+				description: plan.description,
+				durationDays: plan.durationDays,
+			},
+		});
 	};
 
 	const columns: ColumnsType<SubscriptionPlan> = [
@@ -230,55 +216,6 @@ const CompanyClients: React.FC = () => {
 				}}
 				subscription={selectedSubscription}
 			/>
-
-			{/* Checkout Modal */}
-			<Modal
-				open={checkoutModalVisible}
-				onCancel={() => {
-					setCheckoutModalVisible(false);
-					setSelectedPlanForCheckout(null);
-				}}
-				footer={null}
-				width={700}
-				centered
-				destroyOnClose
-			>
-				{selectedPlanForCheckout && (
-					<SubscriptionCheckout
-						subscriptionId={selectedPlanForCheckout.subscriptionId}
-						subscriptionName={selectedPlanForCheckout.name}
-						price={parseFloat(
-							selectedPlanForCheckout.price.replace(/[^0-9.-]+/g, "")
-						)}
-						currency="USD"
-						onSuccess={handleCheckoutSuccess}
-						onError={handleCheckoutError}
-					/>
-				)}
-			</Modal>
-
-			{/* Error Modal */}
-			<Modal
-				open={errorModalVisible}
-				onCancel={() => setErrorModalVisible(false)}
-				footer={[
-					<Button
-						key="ok"
-						className="company-btn--filled"
-						onClick={() => setErrorModalVisible(false)}
-					>
-						OK
-					</Button>,
-				]}
-				centered
-			>
-				<div style={{ textAlign: "center", padding: "20px 0" }}>
-					<p style={{ fontSize: 16, marginBottom: 12, fontWeight: 500 }}>
-						Payment Error
-					</p>
-					<p style={{ color: "#666" }}>{errorMessage}</p>
-				</div>
-			</Modal>
 		</Card>
 	);
 };

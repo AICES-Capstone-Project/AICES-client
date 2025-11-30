@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
 	Elements,
 	PaymentElement,
@@ -11,51 +11,59 @@ import { Spin } from "antd";
 import type { SubscriptionCheckoutProps } from "../../types/payment.types";
 
 interface CheckoutFormProps {
-	clientSecret: string;
+	subscriptionId: number;
 	onSuccess?: () => void;
 	onError?: (error: string) => void;
 }
 
-function CheckoutForm({ clientSecret, onSuccess, onError }: CheckoutFormProps) {
+function CheckoutForm({
+	subscriptionId,
+	onSuccess,
+	onError,
+}: CheckoutFormProps) {
 	const stripe = useStripe();
 	const elements = useElements();
 
-	const [isProcessing, setIsProcessing] = useState(false);
+	const [processing, setProcessing] = useState(false);
 	const [errorMessage, setErrorMessage] = useState("");
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		setIsProcessing(true);
-		setErrorMessage("");
 
 		if (!stripe || !elements) {
-			setIsProcessing(false);
+			console.warn("⚠️ Stripe or Elements not loaded yet");
 			return;
 		}
 
+		setProcessing(true);
+		setErrorMessage("");
+
 		try {
+			console.log("🔄 Confirming setup with Stripe...");
+
 			const { error } = await stripe.confirmSetup({
 				elements,
 				confirmParams: {
 					return_url: window.location.origin + "/company/subscription-success",
 				},
-				redirect: "if_required",
 			});
 
 			if (error) {
-				setErrorMessage(error.message || "Đã xảy ra lỗi");
-				onError?.(error.message || "Đã xảy ra lỗi");
+				console.error("❌ Stripe confirmSetup error:", error);
+				setErrorMessage(error.message || "Có lỗi xảy ra");
+				onError?.(error.message || "Có lỗi xảy ra");
+				setProcessing(false);
 			} else {
-				onSuccess?.();
+				console.log("✅ Setup confirmed successfully!");
+				// Don't call onSuccess here - Stripe will redirect to return_url
 			}
 		} catch (err: any) {
-			console.error(err);
-			const errMsg = err?.message || "Đã xảy ra lỗi không xác định.";
+			console.error("❌ Exception during confirmSetup:", err);
+			const errMsg = err?.message || "Có lỗi xảy ra.";
 			setErrorMessage(errMsg);
 			onError?.(errMsg);
+			setProcessing(false);
 		}
-
-		setIsProcessing(false);
 	};
 
 	return (
@@ -63,27 +71,41 @@ function CheckoutForm({ clientSecret, onSuccess, onError }: CheckoutFormProps) {
 			<PaymentElement />
 
 			{errorMessage && (
-				<div style={{ color: "red", marginTop: 10 }}>{errorMessage}</div>
+				<div
+					style={{
+						color: "#cf1322",
+						backgroundColor: "#fff2f0",
+						padding: "12px",
+						borderRadius: "6px",
+						marginTop: 16,
+						border: "1px solid #ffccc7",
+					}}
+				>
+					{errorMessage}
+				</div>
 			)}
 
 			<button
 				type="submit"
-				disabled={isProcessing || !stripe || !elements}
+				disabled={processing || !stripe || !elements}
 				style={{
-					marginTop: 20,
 					width: "100%",
-					backgroundColor: "#1677ff",
+					marginTop: 20,
+					background:
+						processing || !stripe || !elements ? "#d9d9d9" : "#1677ff",
 					color: "#fff",
-					padding: "10px 16px",
-					borderRadius: 6,
+					padding: "12px 16px",
 					fontSize: 16,
+					fontWeight: 500,
+					borderRadius: 6,
 					border: "none",
 					cursor:
-						isProcessing || !stripe || !elements ? "not-allowed" : "pointer",
-					opacity: isProcessing || !stripe || !elements ? 0.6 : 1,
+						processing || !stripe || !elements ? "not-allowed" : "pointer",
+					opacity: processing || !stripe || !elements ? 0.6 : 1,
+					transition: "all 0.3s",
 				}}
 			>
-				{isProcessing ? "Đang xử lý..." : "Thanh toán"}
+				{processing ? "Đang xử lý..." : "Xác nhận thanh toán"}
 			</button>
 		</form>
 	);
@@ -100,38 +122,67 @@ const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
 	const [clientSecret, setClientSecret] = useState<string>("");
 	const [loading, setLoading] = useState<boolean>(true);
 	const [error, setError] = useState<string>("");
+	const hasRun = useRef(false);
 
 	useEffect(() => {
-		const fetchIntent = async () => {
+		// ❗ Prevent double call in React Strict Mode
+		if (hasRun.current) return;
+		hasRun.current = true;
+
+		let isMounted = true;
+
+		const loadIntent = async () => {
 			try {
 				setLoading(true);
 				setError("");
 
+				console.log(
+					"🔄 Creating SetupIntent for subscription:",
+					subscriptionId
+				);
+
 				const res = await paymentService.createSetupIntent(subscriptionId);
 
+				console.log("📦 SetupIntent response:", res);
+
+				if (!isMounted) return;
+
 				if (res?.status === "Success" && res?.data?.clientSecret) {
+					console.log(
+						"✅ Got clientSecret:",
+						res.data.clientSecret.substring(0, 20) + "..."
+					);
 					setClientSecret(res.data.clientSecret);
 				} else {
-					const errorMsg = res?.message || "No clientSecret returned";
+					const errorMsg = res?.message || "Không thể tạo yêu cầu thanh toán.";
+					console.error("❌ Failed to get clientSecret:", errorMsg);
 					setError(errorMsg);
 					onError?.(errorMsg);
 				}
 			} catch (err: any) {
-				console.error(err);
-				const errorMsg = err?.message || "Không thể tạo SetupIntent";
+				console.error("❌ Error creating SetupIntent:", err);
+				if (!isMounted) return;
+
+				const errorMsg = err?.message || "Không thể tạo yêu cầu thanh toán.";
 				setError(errorMsg);
 				onError?.(errorMsg);
 			} finally {
-				setLoading(false);
+				if (isMounted) {
+					setLoading(false);
+				}
 			}
 		};
 
-		fetchIntent();
-	}, [subscriptionId, onError]);
+		loadIntent();
+
+		return () => {
+			isMounted = false;
+		};
+	}, [subscriptionId]); // ❗ ONLY subscriptionId in dependency array
 
 	if (loading) {
 		return (
-			<div style={{ textAlign: "center", padding: "40px 0" }}>
+			<div style={{ textAlign: "center", padding: 40 }}>
 				<Spin size="large" />
 				<p style={{ marginTop: 16, color: "#666" }}>
 					Đang tải thông tin thanh toán...
@@ -142,55 +193,50 @@ const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
 
 	if (error || !clientSecret) {
 		return (
-			<div style={{ padding: 20, textAlign: "center" }}>
-				<div
-					style={{
-						backgroundColor: "#fff2f0",
-						border: "1px solid #ffccc7",
-						borderRadius: 8,
-						padding: 20,
-					}}
-				>
-					<p
-						style={{
-							color: "#cf1322",
-							fontWeight: 600,
-							marginBottom: 8,
-						}}
-					>
-						Không thể tạo phiên thanh toán
-					</p>
-					<p style={{ color: "#666" }}>{error || "Vui lòng thử lại sau."}</p>
-				</div>
+			<div
+				style={{
+					padding: 20,
+					backgroundColor: "#fff2f0",
+					border: "1px solid #ffccc7",
+					borderRadius: 8,
+					textAlign: "center",
+				}}
+			>
+				<p style={{ color: "#cf1322", fontWeight: 600 }}>
+					{error || "Không thể tạo phiên thanh toán."}
+				</p>
 			</div>
 		);
 	}
 
+	// ❗ Elements options must not change after mount
 	const options = {
 		clientSecret,
 		appearance: {
 			theme: "stripe" as const,
 			variables: {
 				colorPrimary: "#1677ff",
-				colorBackground: "#ffffff",
-				colorText: "#1f2937",
-				colorDanger: "#cf1322",
-				fontFamily: "system-ui, sans-serif",
-				borderRadius: "8px",
 			},
 		},
 	};
 
 	return (
-		<div style={{ padding: 20, maxWidth: 600, margin: "0 auto" }}>
-			<h2 style={{ marginBottom: 4, fontSize: 24, fontWeight: 600 }}>
+		<div style={{ padding: 20 }}>
+			<h2 style={{ marginBottom: 8, fontSize: 24, fontWeight: 600 }}>
 				Thanh toán đăng ký
 			</h2>
-			<p style={{ marginTop: 0, fontSize: 16 }}>
+			<p style={{ fontSize: 16, marginBottom: 4 }}>
 				<strong>{subscriptionName}</strong>
 			</p>
 			{price && (
-				<p style={{ color: "#1677ff", fontWeight: 600, fontSize: 18 }}>
+				<p
+					style={{
+						color: "#1677ff",
+						fontSize: 24,
+						fontWeight: 600,
+						marginBottom: 8,
+					}}
+				>
 					{new Intl.NumberFormat("vi-VN", {
 						style: "currency",
 						currency: currency,
@@ -198,14 +244,14 @@ const SubscriptionCheckout: React.FC<SubscriptionCheckoutProps> = ({
 					}).format(price)}
 				</p>
 			)}
-
-			<p style={{ marginTop: 8, marginBottom: 20, color: "#666" }}>
+			<p style={{ color: "#666", marginBottom: 24 }}>
 				🔒 Thanh toán an toàn qua Stripe
 			</p>
 
+			{/* ❗ Elements only mounts once with clientSecret */}
 			<Elements stripe={stripePromise} options={options}>
 				<CheckoutForm
-					clientSecret={clientSecret}
+					subscriptionId={subscriptionId}
 					onSuccess={onSuccess}
 					onError={onError}
 				/>

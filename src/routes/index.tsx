@@ -76,6 +76,9 @@ const PaymentHistory = lazy(
 			"../pages/CompanyPages/CompanySubsriptions/components/PaymentHistory"
 		)
 );
+const CheckoutPage = lazy(
+	() => import("../pages/CompanyPages/CompanySubsriptions/CheckoutPage")
+);
 
 /* ============== System Pages ==============*/
 const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
@@ -246,6 +249,10 @@ export const router = createBrowserRouter([
 			{
 				path: APP_ROUTES.COMPANY_PAYMENT_HISTORY,
 				element: <PaymentHistory />,
+			},
+			{
+				path: "checkout/:subscriptionId",
+				element: <CheckoutPage />,
 			},
 		],
 	},

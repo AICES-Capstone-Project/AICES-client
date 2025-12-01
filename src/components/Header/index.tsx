@@ -72,16 +72,16 @@ const AppHeader: React.FC = () => {
 			),
 		},
 		{
-			key: "/pricing",
+			key: "/subscriptions",
 			label: (
 				<NavLink
-					to="/pricing"
+					to="/subscriptions"
 					className={({ isActive }) =>
 						isActive ? "font-semibold" : "text-slate-800"
 					}
 					onClick={() => setDrawerOpen(false)}
 				>
-					{t("app.pricing")}
+					{t("app.subscriptions")}
 				</NavLink>
 			),
 		},

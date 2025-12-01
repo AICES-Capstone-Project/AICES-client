@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { Card, Button, Input, Space } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Card, Button, Space, Modal } from "antd";
 import { useNavigate } from "react-router-dom";
 // paymentService not used on this page
 import { companySubscriptionService } from "../../../services/companySubscriptionService";
 import SubscriptionStatsCard from "./components/SubscriptionStatsCard";
 import SubscriptionDetailsSection from "./components/SubscriptionDetailsSection";
-import { toastError } from "../../../components/UI/Toast";
+import { toastError, toastSuccess } from "../../../components/UI/Toast";
 
-const CompanyClients: React.FC = () => {
+const CompanySubscription: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  const [searchText, setSearchText] = useState("");
+  
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
+  const [cancelling, setCancelling] = useState(false);
+  const [confirmVisible, setConfirmVisible] = useState(false);
 
   useEffect(() => {
     const loadCurrent = async () => {
@@ -46,8 +47,46 @@ const CompanyClients: React.FC = () => {
     loadCurrent();
   }, []);
 
-  const handleSearch = (value: string) => {
-    setSearchText(value);
+  
+
+  const handleCancelSubscription = () => {
+    setConfirmVisible(true);
+  };
+
+  const handleConfirmCancel = async () => {
+    setConfirmVisible(false);
+    setCancelling(true);
+    try {
+      const response = await companySubscriptionService.cancelSubscription();
+      if (response.status === "Success") {
+        toastSuccess("Subscription cancelled successfully");
+        // Reload current subscription
+        const updatedResponse = await companySubscriptionService.getCurrentSubscription();
+        if (updatedResponse.status === "Success" && updatedResponse.data) {
+          const data = updatedResponse.data;
+          setCurrentSubscription({
+            subscriptionName: data.subscriptionName,
+            description: data.description,
+            startDate: data.startDate,
+            endDate: data.endDate,
+            status: data.subscriptionStatus,
+            resumeLimit: data.resumeLimit,
+            price: data.price,
+            hoursLimit: data.hoursLimit,
+            durationDays: data.durationDays,
+          });
+        } else {
+          setCurrentSubscription(null);
+        }
+      } else {
+        toastError(response.message || "Failed to cancel subscription");
+      }
+    } catch (error: any) {
+      console.error("Failed to cancel subscription:", error);
+      toastError(error?.response?.data?.message || error?.message || "Failed to cancel subscription");
+    } finally {
+      setCancelling(false);
+    }
   };
 
   // table/columns removed — this screen shows the company's current subscription instead
@@ -62,29 +101,15 @@ const CompanyClients: React.FC = () => {
         height: 'calc(100% - 25px)',
       }}
       title={
-        <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', gap: 16 }}>
           <div style={{ flex: '0 0 auto' }}>
             <span className="font-semibold">My Subscription</span>
-          </div>
-
-          <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-            <Input
-              placeholder="Search by name"
-              prefix={<SearchOutlined />}
-              style={{ width: 360 }}
-              value={searchText}
-              onChange={(e) => handleSearch(e.target.value)}
-              allowClear
-            />
           </div>
 
           <div style={{ flex: '0 0 auto' }}>
             <Space>
               <Button className="company-btn" onClick={() => navigate("/company/payment-history") }>
                 Payment History
-              </Button>
-              <Button className="company-btn--filled" onClick={() => navigate("/pricing") }>
-                View Plans
               </Button>
             </Space>
           </div>
@@ -106,6 +131,8 @@ const CompanyClients: React.FC = () => {
             startDate={currentSubscription.startDate}
             endDate={currentSubscription.endDate}
             price={currentSubscription.price}
+            onCancel={handleCancelSubscription}
+            cancelling={cancelling}
           />
         </div>
       ) : (
@@ -113,15 +140,26 @@ const CompanyClients: React.FC = () => {
           <div style={{ fontSize: 48, marginBottom: 16 }}>📭</div>
           <p style={{ fontSize: 16, fontWeight: 500, margin: 0 }}>No active subscription found</p>
           <p style={{ fontSize: 14, marginTop: 8 }}>Choose a plan to get started</p>
-          <Button className="company-btn--filled" style={{ marginTop: 24 }} onClick={() => navigate("/company/subscriptions")}>View Subscription Plans</Button>
+          <Button className="company-btn--filled" style={{ marginTop: 24 }} onClick={() => navigate("/subscriptions")}>View Subscription Plans</Button>
         </div>
       )}
 
-
-
-      {/* no error modal needed on this page */}
+      {/* Cancel Subscription Confirmation Modal */}
+      <Modal
+        title="Cancel Subscription"
+        open={confirmVisible}
+        onOk={handleConfirmCancel}
+        onCancel={() => setConfirmVisible(false)}
+        okText="Yes, Cancel"
+        cancelText="No, Keep it"
+        okButtonProps={{ danger: true }}
+        confirmLoading={cancelling}
+        centered
+      >
+        <p>Are you sure you want to cancel your subscription?</p>
+      </Modal>
     </Card>
   );
 };
 
-export default CompanyClients;
+export default CompanySubscription;

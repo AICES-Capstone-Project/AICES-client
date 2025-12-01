@@ -149,7 +149,7 @@ export default function PaymentSuccess() {
           <Button 
             className="company-btn--filled" 
             size="large"
-            onClick={() => navigate("/company/subscription")}
+            onClick={() => navigate("/company/subscriptions")}
           >
             View My Subscription
           </Button>

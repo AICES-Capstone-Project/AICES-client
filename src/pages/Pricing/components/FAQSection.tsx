@@ -1,6 +1,6 @@
 import React from "react";
 import { Collapse, Typography } from "antd";
-import type { FAQItem } from "../types";
+import type { FAQItem } from "../../../types/subscription.types";
 
 const { Paragraph, Text, Title } = Typography;
 

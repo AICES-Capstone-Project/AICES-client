@@ -16,12 +16,12 @@ const SubscriptionStatsCard: React.FC<SubscriptionStatsCardProps> = ({
   return (
     <div
       style={{
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+        background: "linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 33%, var(--color-primary-medium) 66%, var(--color-primary-light) 100%)",
         padding: "32px",
         borderRadius: 12,
         marginBottom: 24,
         color: "white",
-        boxShadow: "0 8px 24px rgba(102, 126, 234, 0.3)",
+        boxShadow: "0 8px 24px rgba(9, 37, 22, 0.18)",
       }}
     >
       <div style={{ marginBottom: 24 }}>

@@ -65,7 +65,12 @@ const SubscriptionDetailsSection: React.FC<SubscriptionDetailsSectionProps> = ({
         </Descriptions.Item>
         <Descriptions.Item label="Total Price">
           <strong style={{ fontSize: 16, color: "#667eea" }}>
-            {price?.toLocaleString()} VND
+            {price === 0
+              ? "Free"
+              : `$${(price / 100).toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}`}
           </strong>
         </Descriptions.Item>
       </Descriptions>

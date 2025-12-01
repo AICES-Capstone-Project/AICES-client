@@ -137,7 +137,9 @@ export default function PaymentSuccess() {
           }}>
             <span style={{ color: "#666", fontSize: 16 }}>Amount Paid:</span>
             <strong style={{ fontSize: 22, color: "#52c41a" }}>
-              {paymentInfo.amount.toLocaleString()} {paymentInfo.currency}
+              {paymentInfo.amount === 0
+                ? "Free"
+                : `$${(paymentInfo.amount / 100).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             </strong>
           </div>
         </div>
@@ -147,7 +149,7 @@ export default function PaymentSuccess() {
           <Button 
             className="company-btn--filled" 
             size="large"
-            onClick={() => navigate("/company/my-subscription")}
+            onClick={() => navigate("/company/subscription")}
           >
             View My Subscription
           </Button>

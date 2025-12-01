@@ -1,57 +1,74 @@
 import React from "react";
 import { Card, Button, Typography } from "antd";
 import { CheckOutlined, ArrowRightOutlined } from "@ant-design/icons";
-import type { PlanType } from "../types";
+import { paymentService } from "../../../services/paymentService";
+import { Modal } from "antd";
+import { useState } from "react";
+import type { PlanType } from "../../../types/subscription.types";
 
 const { Title, Paragraph, Text } = Typography;
 
 type Props = {
   plan: PlanType;
+  featured?: boolean;
 };
 
-const PlanCard: React.FC<Props> = ({ plan }) => {
-  const isPopular = plan.title === "Pro";
+const PlanCard: React.FC<Props> = ({ plan, featured = false }) => {
+  const isPopular = featured || plan.title === "Pro";
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
 
   return (
-    <Card
-      variant={isPopular ? "outlined" : "borderless"}
-      className={`rounded-2xl shadow-md transition-all duration-300 h-full flex flex-col justify-between ${isPopular
-        ? "border-2 bg-white relative shadow-lg"
-        : "bg-white hover:shadow-lg"
+    <div style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      <Card
+      className={`rounded-2xl transition-all duration-300 h-full flex flex-col justify-between ${isPopular
+        ? "relative shadow-lg"
+        : "hover:shadow-lg"
         }`}
       style={{
-        borderColor: isPopular ? "var(--color-primary-dark)" : "rgba(0,0,0,0.05)",
-        borderTop: isPopular ? "4px solid var(--color-primary-dark)" : "4px solid rgba(0,0,0,0.05)",
-        height: "100%",
+        backgroundColor: "var(--color-primary-light)",
+        color: "var(--text-on-primary, #0f1724)",
+        border: isPopular ? "1px solid rgba(0,0,0,0.06)" : "1px solid rgba(0,0,0,0.03)",
+        minHeight: 420,
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-between",
+        padding: 24,
       }}
     >
-      {isPopular && (
-        <div
-          className="absolute -top-3 left-1/2 -translate-x-1/2 text-white text-xs font-semibold !px-5 !py-2 rounded-full shadow"
-          style={{ backgroundColor: "var(--color-primary-dark)" }}
-        >
-          Most Popular
-        </div>
-      )}
-
-      <div className="flex-1 text-center px-2">
-        <Title level={3} className="!text-slate-900 !font-semibold !text-xl mb-1">
+      <div style={{ minHeight: 20, display: "flex", justifyContent: "flex-end", alignItems: "center", paddingRight: 12 }}>
+        {isPopular ? (
+          <span
+            style={{
+              backgroundColor: "var(--color-primary-dark)",
+              color: "#fff",
+              padding: "2px 6px",
+              borderRadius: 999,
+              fontSize: 11,
+              fontWeight: 700,
+              boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
+            }}
+          >
+            Most Popular
+          </span>
+        ) : null}
+      </div>
+      <div className="flex-1 text-left">
+        <Title level={4} className="!text-white !font-semibold !text-lg mb-1">
           {plan.title}
         </Title>
-        <Paragraph className="!text-slate-500 text-base mb-4">{plan.description}</Paragraph>
+        <Paragraph className="!text-white text-sm mb-4">{plan.description}</Paragraph>
 
-        <Title level={1} className="!text-4xl !font-bold !text-slate-900 mb-2">
-          {plan.price}
-          <Text className="!text-[var(--color-primary-dark)] !text-lg"> {plan.period}</Text>
-        </Title>
+        <div className="mb-4">
+          <Title level={2} className="!text-3xl !font-bold !text-white mb-0">
+            {plan.price}
+            <Text className="!text-white !text-base"> {plan.period}</Text>
+          </Title>
+        </div>
 
-        <ul className="space-y-3 mb-8 text-left mt-6 inline-block">
-          {plan.features.map((feature, i) => (
-            <li key={i} className="flex items-start gap-2 text-slate-700 text-sm">
-              <CheckOutlined className="text-[var(--color-primary-dark)] mt-1" />
+        <ul className="flex flex-col gap-5 mb-8 text-left mt-2">
+          {plan.features.map((feature: string, i: number) => (
+            <li key={i} className="flex items-start gap-3 text-white text-sm">
+              <CheckOutlined className="text-white mt-1" />
               <span>{feature}</span>
             </li>
           ))}
@@ -59,17 +76,35 @@ const PlanCard: React.FC<Props> = ({ plan }) => {
       </div>
 
       <Button
-        type={isPopular ? "primary" : "default"}
+        className="company-btn--filled w-full rounded-full font-medium !bg-[var(--color-primary-dark)] hover:!bg-[var(--color-primary-medium)] text-white border-none"
         size="large"
-        className={`w-full rounded-full font-medium ${isPopular
-          ? "!bg-[var(--color-primary-dark)] hover:!bg-[var(--color-primary-light)] text-white border-none"
-          : "!border-[var(--color-primary-dark)] !text-[var(--color-primary-dark)] hover:!bg-[var(--color-primary-light)] hover:!text-white"
-          }`}
-        href={plan.link}
+        style={{ marginTop: 15 }}
+        loading={loadingCheckout}
+        onClick={async () => {
+          if (!plan.subscriptionId) {
+            Modal.error({ title: "Missing plan", content: "This plan cannot be purchased." });
+            return;
+          }
+
+          setLoadingCheckout(true);
+          try {
+            const res = await paymentService.createCheckoutSession(plan.subscriptionId!);
+            if (res.status === "Success" && res.data?.url) {
+              window.location.href = res.data.url;
+            } else {
+              Modal.error({ title: "Checkout failed", content: res.message || "Failed to create checkout session" });
+            }
+          } catch (err: any) {
+            Modal.error({ title: "Checkout error", content: err?.message || "Failed to create checkout session" });
+          } finally {
+            setLoadingCheckout(false);
+          }
+        }}
       >
-        {isPopular ? "Get Pro Plan" : "Contact Sales"} <ArrowRightOutlined />
+        Get Plan <ArrowRightOutlined />
       </Button>
     </Card>
+    </div>
   );
 };
 

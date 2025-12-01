@@ -1,11 +1,5 @@
 // src/types/subscription.types.ts
 
-export interface ApiResponse<T> {
-  status: string; // "success"
-  message: string; // "All subscriptions retrieved successfully"
-  data: T;
-}
-
 export interface SubscriptionListData {
   subscriptions: SubscriptionPlan[];
 }
@@ -19,6 +13,9 @@ export interface SubscriptionPlan {
   limit: string;
   isActive: boolean;
   createdAt?: string;
+  // optional fields sometimes returned by public API
+  resumeLimit?: number;
+  hoursLimit?: number;
 }
 
 // ================= Company Subscriptions =================
@@ -42,3 +39,20 @@ export interface CompanySubscriptionListData {
   pageSize: number;
   totalItems: number;
 }
+
+// UI types used by Pricing page and components
+export type PlanType = {
+  title: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  subscriptionId?: number;
+  buttonType: "default" | "primary" | "link" | "text" | "dashed";
+  link: string;
+};
+
+export type FAQItem = {
+  question: string;
+  answer: string;
+};

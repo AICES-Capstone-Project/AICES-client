@@ -243,8 +243,8 @@ button {
 	margin-left: 0;
 }
 .custom-confirm-wrapper .ant-modal {
-  width: 1100px !important;
-  max-width: 1100px !important;
+  width: 600px !important;
+  max-width: 600px !important;
 }
 
 

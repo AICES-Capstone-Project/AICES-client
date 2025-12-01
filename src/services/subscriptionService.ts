@@ -1,11 +1,8 @@
 // src/services/subscriptionService.ts
 import api from "./api";
 import { API_ENDPOINTS } from "./config";
-import type {
-  ApiResponse,
-  SubscriptionPlan,
-  SubscriptionListData,
-} from "../types/subscription.types";
+import type { ApiResponse } from "../types/api.types";
+import type { SubscriptionPlan, SubscriptionListData } from "../types/subscription.types";
 
 export const subscriptionService = {
   // ================== SYSTEM ADMIN ==================
@@ -34,7 +31,7 @@ export const subscriptionService = {
     const res = await api.get<ApiResponse<SubscriptionPlan>>(
       API_ENDPOINTS.SUBSCRIPTION.PUBLIC_GET_BY_ID(subscriptionId)
     );
-    return res.data.data;
+    return res.data.data!;
   },
 
   // ================== SYSTEM CRUD PLAN ==================
@@ -43,7 +40,7 @@ export const subscriptionService = {
       API_ENDPOINTS.SUBSCRIPTION.SYSTEM_CREATE,
       payload
     );
-    return res.data.data;
+    return res.data.data!;
   },
 
   async update(
@@ -61,7 +58,7 @@ export const subscriptionService = {
       API_ENDPOINTS.SUBSCRIPTION.SYSTEM_UPDATE(id),
       payload
     );
-    return res.data.data;
+    return res.data.data!;
   },
 
   async delete(id: number) {

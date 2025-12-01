@@ -326,7 +326,7 @@ export const APP_ROUTES = {
 	AUTH_CALLBACK: "/auth/callback",
 
 	// General routes
-	PRICING: "/pricing",
+	SUBSCRIPTIONS: "/subscriptions",
 
 	// Profile routes
 	PROFILE: "/profile",
@@ -405,6 +405,7 @@ export const APP_ROUTES = {
 	COMPANY_PENDING_APPROVAL: "/company/pending-approval",
 	COMPANY_AI_SCREENING: "/company/ai-screening",
 	COMPANY_AI_SCREENING_RESUMES: "/company/ai-screening/:jobId/resumes",
+	COMPANY_AI_SCREENING_COMPARE: "/company/ai-screening/compare",
 	COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
 	COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
 	COMPANY_PAYMENT_HISTORY: "/company/payment-history",

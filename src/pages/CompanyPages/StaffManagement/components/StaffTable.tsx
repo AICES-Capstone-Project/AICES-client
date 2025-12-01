@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Table, Tag, Space, Button, Empty, Avatar, Modal, Tooltip } from "antd";
 import { UserOutlined, DeleteOutlined } from "@ant-design/icons";
 import { companyService } from "../../../../services/companyService";
@@ -147,11 +147,22 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
 
   const bodyScroll = tableHeight ? Math.max(tableHeight - 140, 300) : undefined;
 
+  // Ensure HR Manager(s) always appear first in the table
+  const sortedMembers = useMemo(() => {
+    if (!members || members.length === 0) return members;
+    return [...members].sort((a, b) => {
+      const aIsManager = String(a.roleName || "").toLowerCase() === "hr_manager";
+      const bIsManager = String(b.roleName || "").toLowerCase() === "hr_manager";
+      if (aIsManager === bIsManager) return 0;
+      return aIsManager ? -1 : 1;
+    });
+  }, [members]);
+
   return (
     <div style={{ height: tableHeight, display: 'flex', flexDirection: 'column', width: '100%' }}>
       <Table<CompanyMember>
         columns={columns}
-        dataSource={members}
+        dataSource={sortedMembers}
         loading={loading}
         rowKey="userId"
         pagination={{ pageSize: 10, showSizeChanger: true, showQuickJumper: true }}

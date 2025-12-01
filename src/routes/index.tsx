@@ -30,7 +30,7 @@ const ProfileLayout = lazy(() => import("../components/Layout/ProfileLayout"));
 
 /* ============== General Pages ==============*/
 const Home = lazy(() => import("../pages/Homepage/Homepage"));
-const Pricing = lazy(() => import("../pages/Pricing/Pricing"));
+const Subscriptions = lazy(() => import("../pages/Pricing/Subscriptions"));
 const Login = lazy(() => import("../pages/Login/Login"));
 const VerifyEmailPage = lazy(() => import("../pages/SignUp/VerifyEmailPage"));
 const SignUp = lazy(() => import("../pages/SignUp/Signup"));
@@ -60,6 +60,9 @@ const AIScreening = lazy(
 );
 const ResumeList = lazy(
 	() => import("../pages/CompanyPages/AIScreening/component/ResumeList")
+);
+const CompareResumes = lazy(
+	() => import("../pages/CompanyPages/AIScreening/CompareResumes")
 );
 const CompanySubscription = lazy(
 	() => import("../pages/CompanyPages/CompanySubsriptions/CompanySubscription")
@@ -166,7 +169,7 @@ export const router = createBrowserRouter([
 		errorElement: <ErrorPage />,
 		children: [
 			{ index: true, element: <Home /> },
-			{ path: APP_ROUTES.PRICING, element: <Pricing /> },
+			{ path: APP_ROUTES.SUBSCRIPTIONS, element: <Subscriptions /> },
 			{
 				path: APP_ROUTES.PROFILE, // /profile
 				element: (
@@ -227,6 +230,10 @@ export const router = createBrowserRouter([
 			{
 				path: APP_ROUTES.COMPANY_AI_SCREENING,
 				element: <AIScreening />,
+			},
+			{
+				path: APP_ROUTES.COMPANY_AI_SCREENING_COMPARE,
+				element: <CompareResumes />,
 			},
 			{
 				path: APP_ROUTES.COMPANY_AI_SCREENING_RESUMES,

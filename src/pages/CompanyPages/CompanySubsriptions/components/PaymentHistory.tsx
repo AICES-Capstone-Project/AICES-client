@@ -66,7 +66,12 @@ const PaymentHistory: React.FC = () => {
       align: "center" as const,
       render: (_: any, record: Payment) => (
         <strong>
-          {record.amount.toLocaleString()} {record.currency || "USD"}
+          {record.amount === 0
+            ? "Free"
+            : `$${(record.amount / 100).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}`}
         </strong>
       ),
     },

@@ -24,12 +24,12 @@ const SubscriptionStatsCard: React.FC<SubscriptionStatsCardProps> = ({
         boxShadow: "0 8px 24px rgba(9, 37, 22, 0.18)",
       }}
     >
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 24, textAlign: "center" }}>
         <h2
           style={{
             color: "rgba(255,255,255,0.8)",
-            margin: "8px 0 0 0",
-            fontSize: 14,
+            fontSize: 20,
+            fontWeight: 600,
           }}
         >
           {subscriptionName || "Premium subscription plan"}

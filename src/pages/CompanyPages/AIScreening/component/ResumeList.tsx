@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Card, Table, Tag, Button, Drawer, Space, Upload, message } from "antd";
+import React, { useEffect, useState, useMemo } from "react";
+import { Card, Table, Tag, Button, Drawer, Space, Upload, message, Popover, Modal, Input } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeftOutlined, InboxOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, InboxOutlined, TeamOutlined, EyeOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import resumeService from "../../../../services/resumeService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
@@ -34,9 +34,28 @@ const ResumeList: React.FC = () => {
 	const [loadingDetail, setLoadingDetail] = useState(false);
 	const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
 	const [uploading, setUploading] = useState(false);
+	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+	const [showSelection, setShowSelection] = useState(false);
+	const [tempSelection, setTempSelection] = useState(false);
+	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+	const [confirmInput, setConfirmInput] = useState("");
+	const [deletingMultiple, setDeletingMultiple] = useState(false);
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [jobTitle, setJobTitle] = useState<string>("");
+
+	// Ensure displayed order is always by score desc (nulls last)
+	const sortedResumes = useMemo(() => {
+		return resumes.slice().sort((a, b) => {
+			const aS = a.totalResumeScore;
+			const bS = b.totalResumeScore;
+			if (aS == null && bS == null) return a.resumeId - b.resumeId;
+			if (aS == null) return 1;
+			if (bS == null) return -1;
+			if (bS !== aS) return bS - aS;
+			return a.resumeId - b.resumeId;
+		});
+	}, [resumes]);
 
 	useEffect(() => {
 		if (jobId) {
@@ -80,20 +99,39 @@ const ResumeList: React.FC = () => {
 					aiExplanation: r.aiExplanation,
 					scoreDetails: r.scoreDetails,
 				}));
-				const sortedList = mapped
-					.slice()
-					.sort((a, b) => a.resumeId - b.resumeId);
+				// Sort by totalResumeScore descending (highest first). Place null/undefined scores last.
+				// For equal scores, fallback to resumeId ascending for stable order.
+				const sortedList = mapped.slice().sort((a, b) => {
+					const aS = a.totalResumeScore;
+					const bS = b.totalResumeScore;
+					if (aS == null && bS == null) return a.resumeId - b.resumeId;
+					if (aS == null) return 1; // a should come after b
+					if (bS == null) return -1; // b should come after a
+					if (bS !== aS) return bS - aS; // descending numeric
+					return a.resumeId - b.resumeId;
+				});
 				setResumes(sortedList);
 			} else {
-				message.error(resp?.message || "Không thể tải danh sách CV");
+				message.error(resp?.message || "Unable to load resumes");
 			}
 		} catch (e) {
 			console.error("Failed to load resumes:", e);
-			toastError("Không thể tải danh sách CV");
+			toastError("Unable to load resumes");
 		} finally {
 			setLoading(false);
 		}
 	};
+
+	// compute score counts to detect duplicates (based on displayed/sorted list)
+	const scoreCounts = useMemo(() => {
+		const m = new Map<number, number>();
+		for (const r of sortedResumes) {
+			if (r.totalResumeScore != null) {
+				m.set(r.totalResumeScore, (m.get(r.totalResumeScore) || 0) + 1);
+			}
+		}
+		return m;
+	}, [sortedResumes]);
 
 	const loadResumeDetail = async (resumeId: number) => {
 		setLoadingDetail(true);
@@ -107,14 +145,47 @@ const ResumeList: React.FC = () => {
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
 				setSelectedResume(resp.data as unknown as Resume);
 			} else {
-				message.error(resp?.message || "Không thể tải chi tiết CV");
+				message.error(resp?.message || "Unable to load resume details");
 			}
 		} catch (e) {
 			console.error("Failed to load resume detail:", e);
-			toastError("Không thể tải chi tiết CV");
+			toastError("Unable to load resume details");
 		} finally {
 			setLoadingDetail(false);
 		}
+	};
+
+	// Note: single-delete flow has been unified with multi-delete selection flow.
+	// Clicking the trash icon will show the selection checkboxes, pre-check the
+	// row and open the confirmation modal. Actual deletion is performed by
+	// `handleDeleteSelected` which deletes all selected rows.
+
+	const handleDeleteSelected = async () => {
+		if (!selectedRowKeys || selectedRowKeys.length === 0) return;
+		setDeletingMultiple(true);
+		const ids = selectedRowKeys.map((k) => Number(k));
+		let success = 0;
+		for (const id of ids) {
+			try {
+				const resp = await resumeService.delete(id);
+				if (String(resp?.status || "").toLowerCase() === "success") {
+					success++;
+				}
+			} catch (e) {
+				console.error("Delete selected resume failed:", e);
+			}
+		}
+		setDeletingMultiple(false);
+		setDeleteModalOpen(false);
+		setSelectedRowKeys([]);
+		// reload and reset page
+		await loadResumes();
+		setCurrentPage(1);
+		setSelectedResume(null);
+		setTempSelection(false);
+		setShowSelection(false);
+		setConfirmInput("");
+		toastSuccess("Delete completed", `${success} of ${ids.length} resumes deleted`);
 	};
 
 	const handleUpload = async (file: File) => {
@@ -134,7 +205,7 @@ const ResumeList: React.FC = () => {
 			console.debug("[ResumeList] uploadToJob response", resp);
 			if (String(resp?.status || '').toLowerCase() === "success") {
 				toastSuccess(
-					"Upload thành công",
+					"Upload successful",
 					`Uploaded ${file.name} successfully!`
 				);
 				await loadResumes();
@@ -154,25 +225,29 @@ const ResumeList: React.FC = () => {
 		{
 			title: "No",
 			width: 80,
+			align: "center" as const,
 			render: (_: any, __: any, index: number) =>
 				(currentPage - 1) * pageSize + index + 1,
 		},
 		{
 			title: "Full Name",
 			dataIndex: "fullName",
+			align: "center" as const,
 			render: (text: string) => <strong>{text || "Unknown"}</strong>,
 		},
 		{
-			title: "Status",
+			title: "Screening Status",
 			dataIndex: "status",
+			align: "center" as const,
+			width: 150,
 			render: (status: string) => (
 				<Tag
 					color={
 						status === "Completed"
 							? "green"
 							: status === "Pending"
-							? "blue"
-							: "default"
+								? "blue"
+								: "default"
 					}
 				>
 					{status || "Processing"}
@@ -182,6 +257,8 @@ const ResumeList: React.FC = () => {
 		{
 			title: "Score",
 			dataIndex: "totalResumeScore",
+			width: 120,
+			align: "center" as const,
 			render: (score: number | null) =>
 				score != null ? (
 					<Tag color={score >= 70 ? "green" : score >= 40 ? "orange" : "red"}>
@@ -192,20 +269,77 @@ const ResumeList: React.FC = () => {
 				),
 		},
 		{
+			title: "Ties",
+			width: 100,
+			align: "center" as const,
+			render: (_: any, record: Resume) => {
+				const score = record.totalResumeScore;
+				if (score == null || score === 0) return <span style={{ color: '#9ca3af' }}>—</span>;
+				const count = scoreCounts.get(score) || 0;
+				if (count <= 1) return <span style={{ color: '#9ca3af' }}>—</span>;
+					const content = (
+						<div style={{ maxWidth: 290 }}>
+							<div>There are {count} candidates with the same score.</div>
+						</div>
+					);
+
+					// choose tag color based on number of ties
+					let bgColor = "var(--color-primary-light)";
+					let textColor = "#fff";
+					if (count < 5) {
+						bgColor = "#f472b6"; // pink
+						textColor = "#fff";
+					} else if (count < 10) {
+						bgColor = "#f59e0b"; // amber/yellow
+						textColor = "#000";
+					} else {
+						bgColor = "#ef4444"; // red
+						textColor = "#fff";
+					}
+
+					return (
+						<Popover content={content} trigger={["hover"]}>
+							<Tag
+								style={{ cursor: 'pointer', backgroundColor: bgColor, color: textColor }}
+								onClick={() => navigate(`/company/ai-screening/compare?jobId=${jobId}&score=${score}`)}
+							>
+								{count} <TeamOutlined style={{ marginLeft: 6, color: textColor }} />
+							</Tag>
+						</Popover>
+					);
+			},
+		},
+		{
 			title: "Actions",
 			key: "actions",
-			width: 150,
+			width: 120,
 			align: "center" as const,
 			render: (_, record) => (
-				<Button
-					className="company-btn"
-					onClick={async () => {
-						setDrawerOpen(true);
-						await loadResumeDetail(record.resumeId);
-					}}
-				>
-					View Detail
-				</Button>
+				<Space size="middle">
+					<Button
+						type="text"
+						icon={<EyeOutlined />}
+						aria-label="View detail"
+						onClick={async () => {
+							setDrawerOpen(true);
+							await loadResumeDetail(record.resumeId);
+						}}
+					/>
+						<Button
+							type="text"
+							danger
+							icon={<DeleteOutlined />}
+							aria-label="Delete resume"
+							onClick={() => {
+								// Show selection checkboxes and pre-check this row. User can adjust selection,
+								// then use the "Delete selected" button to open confirmation.
+								setShowSelection(true);
+								setTempSelection(true);
+								setSelectedRowKeys([record.resumeId]);
+							}}
+							loading={deletingMultiple && selectedRowKeys.some((k) => Number(k) === record.resumeId)}
+						/>
+				</Space>
 			),
 		},
 	];
@@ -226,6 +360,16 @@ const ResumeList: React.FC = () => {
 							</span>
 						</div>
 						<div className="flex gap-2 items-center">
+							{selectedRowKeys.length > 0 && (
+								<Button
+									type="primary"
+									danger
+									onClick={() => setDeleteModalOpen(true)}
+									style={{ marginRight: 8 }}
+								>
+									Delete selected ({selectedRowKeys.length})
+								</Button>
+							)}
 							<Button
 								className="company-btn--filled"
 								onClick={() => setUploadDrawerOpen(true)}
@@ -244,7 +388,16 @@ const ResumeList: React.FC = () => {
 				<Table
 					rowKey="resumeId"
 					loading={loading}
-					dataSource={resumes}
+					dataSource={sortedResumes}
+					rowSelection={
+						showSelection
+							? {
+								selectedRowKeys,
+								onChange: (keys) => setSelectedRowKeys(keys),
+								type: "checkbox",
+							}
+							: undefined
+					}
 					columns={columns}
 					scroll={{ y: "67vh" }}
 					pagination={{
@@ -261,6 +414,42 @@ const ResumeList: React.FC = () => {
 					}}
 				/>
 			</Card>
+
+			{/* Delete selected confirmation modal requiring exact job title */}
+			<Modal
+				title={`Confirm delete ${selectedRowKeys.length} resumes`}
+				open={deleteModalOpen}
+					onCancel={() => {
+						setDeleteModalOpen(false);
+						setConfirmInput("");
+						if (tempSelection) {
+							setShowSelection(false);
+							setSelectedRowKeys([]);
+							setTempSelection(false);
+						}
+					}}
+				onOk={handleDeleteSelected}
+				okButtonProps={{
+					disabled: confirmInput !== (jobTitle || "") || deletingMultiple,
+					loading: deletingMultiple,
+				}}
+				cancelButtonProps={{ disabled: deletingMultiple }}
+			>
+				<div>
+					<p>
+						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có thể gây ra
+						những bất tiện cho bạn trong quá trình sử dụng hệ thống.
+						Vui lòng nhập chính xác tiêu đề công việc
+						<strong>{jobTitle || "(job title)"}</strong> để xác nhận xoá.
+					</p>
+
+					<Input
+						value={confirmInput}
+						onChange={(e) => setConfirmInput(e.target.value)}
+						placeholder="Type job title here"
+					/>
+				</div>
+			</Modal>
 
 			<Drawer
 				title={
@@ -302,8 +491,8 @@ const ResumeList: React.FC = () => {
 											selectedResume.status === "Completed"
 												? "green"
 												: selectedResume.status === "Pending"
-												? "blue"
-												: "default"
+													? "blue"
+													: "default"
 										}
 									>
 										{selectedResume.status || "Processing"}
@@ -334,8 +523,8 @@ const ResumeList: React.FC = () => {
 												selectedResume.totalResumeScore >= 70
 													? "green"
 													: selectedResume.totalResumeScore >= 40
-													? "orange"
-													: "red"
+														? "orange"
+														: "red"
 											}
 											style={{ fontSize: 16, padding: "4px 12px" }}
 										>
@@ -387,8 +576,8 @@ const ResumeList: React.FC = () => {
 															detail.score >= 70
 																? "green"
 																: detail.score >= 40
-																? "orange"
-																: "red"
+																	? "orange"
+																	: "red"
 														}
 														style={{ marginLeft: 8 }}
 													>
@@ -431,10 +620,9 @@ const ResumeList: React.FC = () => {
 					<p className="ant-upload-drag-icon">
 						<InboxOutlined />
 					</p>
-					<p className="ant-upload-text">Click hoặc kéo thả file CV vào đây</p>
+					<p className="ant-upload-text">Click or drag CV files here</p>
 					<p className="ant-upload-hint">
-						Hỗ trợ PDF / DOC / DOCX. Hệ thống AI sẽ phân tích và đánh giá CV tự
-						động.
+						Supports PDF / DOC / DOCX. The AI system will automatically analyze and evaluate resumes.
 					</p>
 				</Upload.Dragger>
 			</Drawer>

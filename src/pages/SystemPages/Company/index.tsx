@@ -28,6 +28,7 @@ export default function CompanyList() {
 
   const [total, setTotal] = useState(0);
   const [keyword, setKeyword] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
 
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
@@ -89,7 +90,11 @@ export default function CompanyList() {
         const page = pagination.current || 1;
         const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
 
-        applyFilterAndPaging(rawList, keyword, page, pageSize);
+        const source = statusFilter
+          ? rawList.filter((c) => (c.companyStatus || "") === statusFilter)
+          : rawList;
+
+        applyFilterAndPaging(source, keyword, page, pageSize);
       } else {
         toastError("Failed to fetch companies", res?.message);
       }
@@ -98,6 +103,20 @@ export default function CompanyList() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleChangeStatusFilter = (value: string) => {
+    const newStatus = value || "";
+    setStatusFilter(newStatus);
+
+    const page = 1;
+    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
+
+    const source = newStatus
+      ? allCompanies.filter((c) => (c.companyStatus || "") === newStatus)
+      : allCompanies;
+
+    applyFilterAndPaging(source, keyword, page, pageSize);
   };
 
   useEffect(() => {
@@ -208,21 +227,20 @@ export default function CompanyList() {
       if (res.status === "Success") {
         toastSuccess("Company deleted successfully");
 
-        // 🔥 XÓA NGAY TRONG STATE (UI biến liền)
         setAllCompanies((prev) => {
           const updated = prev.filter((c) => c.companyId !== companyId);
 
           const page = pagination.current || 1;
           const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
 
-          // dùng list mới để tính lại paging + filter
-          applyFilterAndPaging(updated, keyword, page, pageSize);
+          const source = statusFilter
+            ? updated.filter((c) => (c.companyStatus || "") === statusFilter)
+            : updated;
+
+          applyFilterAndPaging(source, keyword, page, pageSize);
 
           return updated;
         });
-
-        // (tuỳ chọn) gọi lại API để sync với BE, nếu muốn:
-        // await fetchData();
       } else {
         toastError("Failed to delete company", res?.message);
       }
@@ -262,8 +280,16 @@ export default function CompanyList() {
     const page = p.current || 1;
     const pageSize = p.pageSize || DEFAULT_PAGE_SIZE;
     setPagination(p);
-    applyFilterAndPaging(allCompanies, keyword, page, pageSize);
+
+    const source = statusFilter
+      ? allCompanies.filter((c) => (c.companyStatus || "") === statusFilter)
+      : allCompanies;
+
+    applyFilterAndPaging(source, keyword, page, pageSize);
   };
+  const companiesByStatus = statusFilter
+    ? allCompanies.filter((c) => (c.companyStatus || "") === statusFilter)
+    : allCompanies;
 
   return (
     <div>
@@ -274,6 +300,8 @@ export default function CompanyList() {
           setIsCreateOpen(true);
         }}
         onRefresh={fetchData}
+        statusFilter={statusFilter}
+        onChangeStatusFilter={handleChangeStatusFilter}
       />
 
       <Card style={{ marginTop: 12 }}>
@@ -281,7 +309,7 @@ export default function CompanyList() {
           keyword={keyword}
           setKeyword={setKeyword}
           loading={loading}
-          allCompanies={allCompanies}
+          allCompanies={companiesByStatus}
           pagination={pagination}
           defaultPageSize={DEFAULT_PAGE_SIZE}
           applyFilterAndPaging={applyFilterAndPaging}

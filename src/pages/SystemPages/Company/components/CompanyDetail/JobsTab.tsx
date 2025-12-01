@@ -23,51 +23,38 @@ export default function JobsTab({
     { title: "Job ID", dataIndex: "jobId", width: 90 },
     { title: "Title", dataIndex: "title" },
     {
-      title: "Department",
-      dataIndex: "department",
-      width: 140,
-      render: (v: string | null) => v || "—",
-    },
-    {
-      title: "Location",
-      dataIndex: "location",
-      width: 160,
-      render: (v: string | null) => v || "—",
-    },
-    {
       title: "Status",
-      dataIndex: "status",
-      width: 120,
-      render: (s: Job["status"]) =>
-        s === "Open" ? (
-          <Tag color="green">Open</Tag>
-        ) : s === "Draft" ? (
-          <Tag color="gold">Draft</Tag>
-        ) : (
-          <Tag color="red">Closed</Tag>
-        ),
+      width: 140,
+      render: (_, r) => {
+        const s = (r.status || r.jobStatus || "") as string;
+        if (!s) return "—";
+
+        const normalized = s.toLowerCase();
+        let color: "green" | "gold" | "red" | "blue" = "blue";
+
+        if (normalized === "open" || normalized === "published")
+          color = "green";
+        else if (normalized === "draft" || normalized === "pending")
+          color = "gold";
+        else if (normalized === "closed" || normalized === "cancelled")
+          color = "red";
+
+        return <Tag color={color}>{s}</Tag>;
+      },
     },
     {
-      title: "Openings",
-      dataIndex: "openings",
-      width: 110,
-      render: (v?: number) => v ?? "—",
-    },
-    {
-      title: "Updated",
-      dataIndex: "updatedAt",
+      title: "Created",
       width: 200,
-      render: (v: string) => new Date(v).toLocaleString(),
+      render: (_, r) =>
+        r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
     },
+
     {
       title: "Actions",
       key: "actions",
       width: 120,
       render: (_, r) => (
-        <Button
-          icon={<EyeOutlined />}
-          onClick={() => onViewJob(r.jobId)}
-        >
+        <Button icon={<EyeOutlined />} onClick={() => onViewJob(r.jobId)}>
           View
         </Button>
       ),

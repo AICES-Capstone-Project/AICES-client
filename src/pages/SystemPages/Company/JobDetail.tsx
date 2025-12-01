@@ -145,23 +145,35 @@ export default function JobDetail() {
               {job.title}
             </Title>
             <Space wrap>
-              <Tag color="blue">Department: {job.department || "—"}</Tag>
-              <Tag color="blue">Location: {job.location || "—"}</Tag>
-              <Tag
-                color={
-                  job.status === "Open"
-                    ? "green"
-                    : job.status === "Draft"
-                    ? "gold"
-                    : "red"
-                }
-              >
-                {job.status}
+              {/* map với categoryName & specializationName từ API */}
+              <Tag color="blue">Category: {job.categoryName || "—"}</Tag>
+              <Tag color="blue">
+                Specialization: {job.specializationName || "—"}
               </Tag>
-              <Tag>Openings: {job.openings ?? "—"}</Tag>
+
+              {(() => {
+                // ưu tiên jobStatus, fallback về status cũ
+                const s = (job.jobStatus || job.status || "") as string;
+                if (!s) return <Tag>—</Tag>;
+
+                const normalized = s.toLowerCase();
+                let color: "green" | "gold" | "red" | "blue" = "blue";
+
+                if (normalized === "open" || normalized === "published")
+                  color = "green";
+                else if (normalized === "draft" || normalized === "pending")
+                  color = "gold";
+                else if (normalized === "closed" || normalized === "cancelled")
+                  color = "red";
+
+                return <Tag color={color}>{s}</Tag>;
+              })()}
+
             </Space>
+
             <Text type="secondary">
-              Updated: {new Date(job.updatedAt).toLocaleString()}
+              Created:{" "}
+              {job.createdAt ? new Date(job.createdAt).toLocaleString() : "—"}
             </Text>
           </Space>
         ) : (
@@ -175,8 +187,71 @@ export default function JobDetail() {
           {
             key: "overview",
             label: "Overview",
-            children: <Card>Job description / settings hiển thị ở đây…</Card>,
+            children: (
+              <Card>
+                {job ? (
+                  <Space
+                    direction="vertical"
+                    style={{ width: "100%" }}
+                    size="middle"
+                  >
+                    <div>
+                      <Text strong>Description: </Text>
+                      <Text>{job.description || "—"}</Text>
+                    </div>
+
+                    <div>
+                      <Text strong>Requirements: </Text>
+                      <Text>{job.requirements || "—"}</Text>
+                    </div>
+
+                    <div>
+                      <Text strong>Employment Types: </Text>
+                      <Text>
+                        {job.employmentTypes && job.employmentTypes.length
+                          ? job.employmentTypes.join(", ")
+                          : "—"}
+                      </Text>
+                    </div>
+                    <div>
+                      <Text strong>Criteria: </Text>
+                      {job.criteria && job.criteria.length > 0 ? (
+                        <ul style={{ marginTop: 4, paddingLeft: 20 }}>
+                          {job.criteria.map((c) => (
+                            <li key={c.criteriaId}>
+                              <Text>
+                                {c.name} — weight: {(c.weight * 100).toFixed(0)}
+                                %
+                              </Text>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <Text>—</Text>
+                      )}
+                    </div>
+
+                    <div>
+                      <Text strong>Skills: </Text>
+                      <Text>
+                        {job.skills && job.skills.length
+                          ? job.skills.join(", ")
+                          : "—"}
+                      </Text>
+                    </div>
+
+                    <div>
+                      <Text strong>Created by: </Text>
+                      <Text>{job.fullName || "—"}</Text>
+                    </div>
+                  </Space>
+                ) : (
+                  <Text type="secondary">Loading…</Text>
+                )}
+              </Card>
+            ),
           },
+
           {
             key: "resumes",
             label: "Resumes",

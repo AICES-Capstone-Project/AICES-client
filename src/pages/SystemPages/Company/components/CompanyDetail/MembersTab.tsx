@@ -17,6 +17,33 @@ export default function MembersTab({
   onChangePagination,
 }: MembersTabProps) {
   const memberCols: ColumnsType<CompanyMember> = [
+    {
+      title: "Avatar",
+      dataIndex: "avatarUrl",
+      width: 80,
+      render: (url?: string | null) =>
+        url ? (
+          <img
+            src={url}
+            alt="avatar"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              objectFit: "cover",
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: "#f0f0f0",
+            }}
+          />
+        ),
+    },
     { title: "User ID", dataIndex: "userId", width: 90 },
     {
       title: "Name",
@@ -24,6 +51,12 @@ export default function MembersTab({
       render: (v: string | null) => v || "—",
     },
     { title: "Email", dataIndex: "email" },
+    {
+      title: "Phone",
+      dataIndex: "phoneNumber",
+      width: 140,
+      render: (v?: string | null) => v || "—",
+    },
     { title: "Role", dataIndex: "roleName", width: 160 },
     {
       title: "Status",
@@ -39,15 +72,14 @@ export default function MembersTab({
       title: "Joined At",
       dataIndex: "createdAt",
       width: 200,
-      render: (v?: string) =>
-        v ? new Date(v).toLocaleString() : "—",
+      render: (v?: string) => (v ? new Date(v).toLocaleString() : "—"),
     },
   ];
 
   return (
     <Card>
       <Table<CompanyMember>
-        rowKey="userId"
+        rowKey="comUserId"
         dataSource={members}
         columns={memberCols}
         pagination={{

@@ -1,5 +1,5 @@
 export interface Company {
-  logoUrl: string | undefined;
+  logoUrl: string | null;
   companyId: number;
   name: string;
 
@@ -12,21 +12,16 @@ export interface Company {
   websiteUrl?: string | null;
   taxCode?: string | null;
 
-  createdBy?: number;
-  approvalBy?: number;
+  createdBy?: string | number | null;
+  approvalBy?: string | number | null;
   createdAt?: string; // ISO
 
-  
   documents?: CompanyDocument[];
-
 }
 export interface CompanyDocument {
   documentType: string;
   fileUrl: string;
-  logoUrl?: string | null;
 }
-
-
 
 export interface CompanyMember {
   comUserId: number;
@@ -36,7 +31,8 @@ export interface CompanyMember {
   roleName: string; // HR_Manager / HR_Recruiter / System_Staff...
   avatarUrl?: string | null;
   phoneNumber?: string | null;
-  joinStatus: string; // Approved / Pending / Rejected
+  joinStatus: "Approved" | "Pending" | "Rejected" | string;
+
   createdAt?: string; // ISO
 }
 
@@ -51,16 +47,35 @@ export interface CreateCompanyRequest {
   documentTypes: boolean;
 }
 
+export interface JobCriteria {
+  criteriaId: number;
+  name: string;
+  weight: number; // 0–1
+}
+
 export interface Job {
   jobId: number;
   companyId: number;
   title: string;
-  location?: string | null;
-  department?: string | null;
-  status: "Open" | "Closed" | "Draft";
-  createdAt: string;
-  updatedAt: string;
-  openings?: number;
+
+  // trạng thái job – map từ jobStatus của BE
+  status?: "Open" | "Closed" | "Draft" | "Published" | string;
+  jobStatus?: string;
+
+  createdAt?: string;
+  updatedAt?: string;
+
+  // extra từ SystemJob
+  companyName?: string;
+  description?: string;
+  slug?: string;
+  requirements?: string;
+  categoryName?: string;
+  specializationName?: string;
+  employmentTypes?: string[];
+  criteria?: JobCriteria[];
+  skills?: string[];
+  fullName?: string; // người tạo job
 }
 
 export interface Resume {
@@ -89,7 +104,7 @@ export interface CompaniesListData {
 }
 
 export interface ApiEnvelope<T> {
-  status: string;  // "Success" | "Error" | ...
+  status: string; // "Success" | "Error" | ...
   message: string;
   data: T;
 }

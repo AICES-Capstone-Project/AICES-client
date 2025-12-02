@@ -56,22 +56,18 @@ export default function SystemStaffLayout() {
         <Link to={toStaffPath(APP_ROUTES.SYSTEM_DASHBOARD)}>Dashboard</Link>
       ),
     },
-    // Companies (xem thông tin công ty)
+    // Companies group: xem công ty + subscribed companies
     {
-      key: toStaffPath(APP_ROUTES.SYSTEM_COMPANY),
+      key: "companies",
       icon: <ApartmentOutlined />,
-      label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_COMPANY)}>Companies</Link>,
-    },
-    // Subscriptions (Plans + Subscribed companies)
-    {
-      key: "subscriptions",
-      icon: <BarChartOutlined />,
-      label: "Subscriptions",
+      label: "Companies",
       children: [
         {
-          key: toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS),
+          key: toStaffPath(APP_ROUTES.SYSTEM_COMPANY),
           label: (
-            <Link to={toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS)}>Plans</Link>
+            <Link to={toStaffPath(APP_ROUTES.SYSTEM_COMPANY)}>
+              Company Management
+            </Link>
           ),
         },
         {
@@ -84,6 +80,17 @@ export default function SystemStaffLayout() {
         },
       ],
     },
+    // Subscriptions: chỉ còn 1 item, mở thẳng trang Plans
+    {
+      key: toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS),
+      icon: <BarChartOutlined />,
+      label: (
+        <Link to={toStaffPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS)}>
+          Subscriptions
+        </Link>
+      ),
+    },
+
     // Payments (xem lịch sử thanh toán)
     {
       key: toStaffPath(APP_ROUTES.SYSTEM_PAYMENTS),

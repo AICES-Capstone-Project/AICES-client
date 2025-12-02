@@ -22,7 +22,7 @@ export default function SubscribedCompaniesToolbar({
       }}
     >
       <Title level={4} style={{ margin: 0 }}>
-        Subscribed Companies
+        Subscription History
       </Title>
 
       <Search

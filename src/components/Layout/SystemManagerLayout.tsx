@@ -53,24 +53,17 @@ export default function SystemManagerLayout() {
         <Link to={toManagerPath(APP_ROUTES.SYSTEM_DASHBOARD)}>Dashboard</Link>
       ),
     },
+    // Companies group: Company Management + Subscribed Companies
     {
-      key: toManagerPath(APP_ROUTES.SYSTEM_COMPANY),
+      key: "companies",
       icon: <ApartmentOutlined />,
-      label: (
-        <Link to={toManagerPath(APP_ROUTES.SYSTEM_COMPANY)}>Companies</Link>
-      ),
-    },
-    // Subscriptions (Plans + Subscribed companies)
-    {
-      key: "subscriptions",
-      icon: <BarChartOutlined />,
-      label: "Subscriptions",
+      label: "Companies",
       children: [
         {
-          key: toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS),
+          key: toManagerPath(APP_ROUTES.SYSTEM_COMPANY),
           label: (
-            <Link to={toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS)}>
-              Plans
+            <Link to={toManagerPath(APP_ROUTES.SYSTEM_COMPANY)}>
+              Company Management
             </Link>
           ),
         },
@@ -84,6 +77,17 @@ export default function SystemManagerLayout() {
         },
       ],
     },
+    // Subscriptions: chỉ còn 1 item, mở thẳng trang plans
+    {
+      key: toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS),
+      icon: <BarChartOutlined />,
+      label: (
+        <Link to={toManagerPath(APP_ROUTES.SYSTEM_SUBSCRIPTIONS)}>
+          Subscriptions
+        </Link>
+      ),
+    },
+
     // Payments
     {
       key: toManagerPath(APP_ROUTES.SYSTEM_PAYMENTS),

@@ -53,20 +53,15 @@ export default function SystemAdminLayout() {
       icon: <TeamOutlined />,
       label: <Link to={APP_ROUTES.SYSTEM_USERS}>Users</Link>,
     },
+    // Companies group (gồm Company Management + Subscription History)
     {
-      key: APP_ROUTES.SYSTEM_COMPANY,
+      key: "companies",
       icon: <ApartmentOutlined />,
-      label: <Link to={APP_ROUTES.SYSTEM_COMPANY}>Companies</Link>,
-    },
-    // Subscriptions
-    {
-      key: "subscriptions",
-      icon: <BarChartOutlined />,
-      label: "Subscriptions",
+      label: "Companies",
       children: [
         {
-          key: APP_ROUTES.SYSTEM_SUBSCRIPTIONS,
-          label: <Link to={APP_ROUTES.SYSTEM_SUBSCRIPTIONS}>Plans</Link>,
+          key: APP_ROUTES.SYSTEM_COMPANY,
+          label: <Link to={APP_ROUTES.SYSTEM_COMPANY}>Company Management</Link>,
         },
         {
           key: APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES,
@@ -78,6 +73,13 @@ export default function SystemAdminLayout() {
         },
       ],
     },
+    // Subscriptions: chỉ còn Plans
+    {
+      key: APP_ROUTES.SYSTEM_SUBSCRIPTIONS,
+      icon: <BarChartOutlined />,
+      label: <Link to={APP_ROUTES.SYSTEM_SUBSCRIPTIONS}>Subscriptions</Link>,
+    },
+
     // Payments
     {
       key: APP_ROUTES.SYSTEM_PAYMENTS,

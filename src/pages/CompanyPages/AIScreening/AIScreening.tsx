@@ -106,7 +106,8 @@ const AIScreening: React.FC = () => {
     {
       title: "Title",
       dataIndex: "title",
-      render: (text: string) => <span style={{ fontWeight: 500 }}>{text}</span>,
+      align: "center" as const,
+      render: (text: string) => <span>{text}</span>,
     },
     {
       title: "Actions",

@@ -1,7 +1,27 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Card, Table, Tag, Button, Drawer, Space, Upload, message, Popover, Modal, Input } from "antd";
+import {
+	Card,
+	Table,
+	Tag,
+	Button,
+	Drawer,
+	Space,
+	Upload,
+	message,
+	Popover,
+	Modal,
+	Input,
+	Tooltip,
+} from "antd";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeftOutlined, InboxOutlined, TeamOutlined, EyeOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+	ArrowLeftOutlined,
+	InboxOutlined,
+	TeamOutlined,
+	EyeOutlined,
+	EditOutlined,
+	ReloadOutlined,
+} from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import resumeService from "../../../../services/resumeService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
@@ -35,8 +55,7 @@ const ResumeList: React.FC = () => {
 	const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
 	const [uploading, setUploading] = useState(false);
 	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-	const [showSelection, setShowSelection] = useState(false);
-	const [tempSelection, setTempSelection] = useState(false);
+	const [editMode, setEditMode] = useState(false);
 	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 	const [confirmInput, setConfirmInput] = useState("");
 	const [deletingMultiple, setDeletingMultiple] = useState(false);
@@ -84,9 +103,7 @@ const ResumeList: React.FC = () => {
 			console.debug("[ResumeList] resumeService.getByJob response", resp);
 
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
-				const raw = Array.isArray(resp.data)
-					? resp.data
-					: resp.data.items || [];
+				const raw = Array.isArray(resp.data) ? resp.data : resp.data.items || [];
 				const resumeList = (Array.isArray(raw) ? raw : []) as any[];
 				const mapped: Resume[] = resumeList.map((r) => ({
 					resumeId: r.resumeId,
@@ -122,6 +139,16 @@ const ResumeList: React.FC = () => {
 		}
 	};
 
+	// canRetrySelected: true only when at least one selected and ALL selected have status === "Failed"
+	const canRetrySelected = useMemo(() => {
+		if (!selectedRowKeys || selectedRowKeys.length === 0) return false;
+		// map to numbers and find the resume objects
+		const ids = selectedRowKeys.map((k) => Number(k));
+		const selected = resumes.filter((r) => ids.includes(r.resumeId));
+		if (selected.length === 0) return false;
+		return selected.every((r) => String(r.status) === "Failed");
+	}, [selectedRowKeys, resumes]);
+
 	// compute score counts to detect duplicates (based on displayed/sorted list)
 	const scoreCounts = useMemo(() => {
 		const m = new Map<number, number>();
@@ -155,10 +182,54 @@ const ResumeList: React.FC = () => {
 		}
 	};
 
-	// Note: single-delete flow has been unified with multi-delete selection flow.
-	// Clicking the trash icon will show the selection checkboxes, pre-check the
-	// row and open the confirmation modal. Actual deletion is performed by
-	// `handleDeleteSelected` which deletes all selected rows.
+	// retry analysis for a failed resume
+	const [retryingIds, setRetryingIds] = useState<number[]>([]);
+	const handleRetry = async (resumeId: number) => {
+		if (!resumeId) return;
+		setRetryingIds((s) => [...s, resumeId]);
+		try {
+			const resp = await resumeService.retryAnalysis(resumeId);
+			if (String(resp?.status || "").toLowerCase() === "success") {
+				toastSuccess("Retry requested", "Resume reprocessing has been queued.");
+				// reload list to reflect status changes (if backend updates quickly)
+				await loadResumes();
+			} else {
+				toastError("Retry failed", resp?.message);
+			}
+		} catch (e) {
+			console.error("Retry analysis failed:", e);
+			toastError("Retry failed", (e as any)?.message);
+		} finally {
+			setRetryingIds((s) => s.filter((id) => id !== resumeId));
+		}
+	};
+
+	const handleRetrySelected = async () => {
+		if (!selectedRowKeys || selectedRowKeys.length === 0) return;
+		setDeletingMultiple(true);
+		const ids = selectedRowKeys.map((k) => Number(k));
+		let success = 0;
+		for (const id of ids) {
+			try {
+				const resp = await resumeService.retryAnalysis(id);
+				if (String(resp?.status || "").toLowerCase() === "success") {
+					success++;
+				}
+			} catch (e) {
+				console.error("Retry selected resume failed:", e);
+			}
+		}
+		setDeletingMultiple(false);
+		setSelectedRowKeys([]);
+		// keep edit mode on — user can continue editing; if you want to auto-exit, uncomment next line
+		// setEditMode(false);
+		await loadResumes();
+		setCurrentPage(1);
+		toastSuccess(
+			"Retry completed",
+			`${success} of ${ids.length} resumes queued for reprocessing`
+		);
+	};
 
 	const handleDeleteSelected = async () => {
 		if (!selectedRowKeys || selectedRowKeys.length === 0) return;
@@ -182,9 +253,9 @@ const ResumeList: React.FC = () => {
 		await loadResumes();
 		setCurrentPage(1);
 		setSelectedResume(null);
-		setTempSelection(false);
-		setShowSelection(false);
 		setConfirmInput("");
+		// Optionally exit edit mode after delete:
+		setEditMode(false);
 		toastSuccess("Delete completed", `${success} of ${ids.length} resumes deleted`);
 	};
 
@@ -203,11 +274,8 @@ const ResumeList: React.FC = () => {
 			console.debug("[ResumeList] calling resumeService.uploadToJob");
 			const resp = await resumeService.uploadToJob(formData);
 			console.debug("[ResumeList] uploadToJob response", resp);
-			if (String(resp?.status || '').toLowerCase() === "success") {
-				toastSuccess(
-					"Upload successful",
-					`Uploaded ${file.name} successfully!`
-				);
+			if (String(resp?.status || "").toLowerCase() === "success") {
+				toastSuccess("Upload successful", `Uploaded ${file.name} successfully!`);
 				await loadResumes();
 			} else {
 				toastError("Upload failed", resp?.message);
@@ -246,8 +314,8 @@ const ResumeList: React.FC = () => {
 						status === "Completed"
 							? "green"
 							: status === "Pending"
-								? "blue"
-								: "default"
+							? "blue"
+							: "default"
 					}
 				>
 					{status || "Processing"}
@@ -265,7 +333,7 @@ const ResumeList: React.FC = () => {
 						{score}
 					</Tag>
 				) : (
-					<Tag color="default">—</Tag>
+					<span>—</span>
 				),
 		},
 		{
@@ -274,39 +342,45 @@ const ResumeList: React.FC = () => {
 			align: "center" as const,
 			render: (_: any, record: Resume) => {
 				const score = record.totalResumeScore;
-				if (score == null || score === 0) return <span style={{ color: '#9ca3af' }}>—</span>;
+				if (score == null || score === 0)
+					return <span style={{ color: "#9ca3af" }}>—</span>;
 				const count = scoreCounts.get(score) || 0;
-				if (count <= 1) return <span style={{ color: '#9ca3af' }}>—</span>;
-					const content = (
-						<div style={{ maxWidth: 290 }}>
-							<div>There are {count} candidates with the same score.</div>
-						</div>
-					);
+				if (count <= 1) return <span style={{ color: "#9ca3af" }}>—</span>;
+				const content = (
+					<div style={{ maxWidth: 290 }}>
+						<div>There are {count} candidates with the same score.</div>
+					</div>
+				);
 
-					// choose tag color based on number of ties
-					let bgColor = "var(--color-primary-light)";
-					let textColor = "#fff";
-					if (count < 5) {
-						bgColor = "#f472b6"; // pink
-						textColor = "#fff";
-					} else if (count < 10) {
-						bgColor = "#f59e0b"; // amber/yellow
-						textColor = "#000";
-					} else {
-						bgColor = "#ef4444"; // red
-						textColor = "#fff";
-					}
+				// choose tag color based on number of ties
+				let bgColor = "var(--color-primary-light)";
+				let textColor = "#fff";
+				if (count < 5) {
+					bgColor = "#f472b6"; // pink
+					textColor = "#fff";
+				} else if (count < 10) {
+					bgColor = "#f59e0b"; // amber/yellow
+					textColor = "#000";
+				} else {
+					bgColor = "#ef4444"; // red
+					textColor = "#fff";
+				}
 
-					return (
-						<Popover content={content} trigger={["hover"]}>
-							<Tag
-								style={{ cursor: 'pointer', backgroundColor: bgColor, color: textColor }}
-								onClick={() => navigate(`/company/ai-screening/compare?jobId=${jobId}&score=${score}`)}
-							>
-								{count} <TeamOutlined style={{ marginLeft: 6, color: textColor }} />
-							</Tag>
-						</Popover>
-					);
+				return (
+					<Popover content={content} trigger={["hover"]}>
+						<Tag
+							style={{ cursor: "pointer", backgroundColor: bgColor, color: textColor }}
+							onClick={() =>
+								navigate(
+									`/company/ai-screening/compare?jobId=${jobId}&score=${score}`
+								)
+							}
+						>
+							{count}{" "}
+							<TeamOutlined style={{ marginLeft: 6, color: textColor }} />
+						</Tag>
+					</Popover>
+				);
 			},
 		},
 		{
@@ -325,20 +399,31 @@ const ResumeList: React.FC = () => {
 							await loadResumeDetail(record.resumeId);
 						}}
 					/>
+					{/* Always show edit icon — clicking enters edit mode */}
+					<Tooltip title="Enter edit mode (select resumes)">
 						<Button
 							type="text"
-							danger
-							icon={<DeleteOutlined />}
-							aria-label="Delete resume"
+							icon={<EditOutlined />}
+							style={{ color: "#096dd9" }}
 							onClick={() => {
-								// Show selection checkboxes and pre-check this row. User can adjust selection,
-								// then use the "Delete selected" button to open confirmation.
-								setShowSelection(true);
-								setTempSelection(true);
-								setSelectedRowKeys([record.resumeId]);
+								// enter edit mode; keep existing selection if any
+								setEditMode(true);
 							}}
-							loading={deletingMultiple && selectedRowKeys.some((k) => Number(k) === record.resumeId)}
 						/>
+					</Tooltip>
+
+					{/* Per-row retry button (optional) - show only for Failed */}
+					{String(record.status) === "Failed" && (
+						<Tooltip title="Retry processing">
+							<Button
+								type="text"
+								icon={<ReloadOutlined />}
+								style={{ color: "#096dd9" }}
+								loading={retryingIds.includes(record.resumeId)}
+								onClick={async () => handleRetry(record.resumeId)}
+							/>
+						</Tooltip>
+					)}
 				</Space>
 			),
 		},
@@ -355,21 +440,47 @@ const ResumeList: React.FC = () => {
 								icon={<ArrowLeftOutlined />}
 								onClick={() => navigate("/company/ai-screening")}
 							/>
-							<span className="font-semibold">
-								{jobTitle || `Job #${jobId}`}
-							</span>
+							<span className="font-semibold">{jobTitle || `Job #${jobId}`}</span>
 						</div>
 						<div className="flex gap-2 items-center">
-							{selectedRowKeys.length > 0 && (
-								<Button
-									type="primary"
-									danger
-									onClick={() => setDeleteModalOpen(true)}
-									style={{ marginRight: 8 }}
-								>
-									Delete selected ({selectedRowKeys.length})
-								</Button>
+							{/* Buttons visible only in edit mode */}
+							{editMode && (
+								<>
+									{canRetrySelected && (
+										<Button
+											type="primary"
+											onClick={() => handleRetrySelected()}
+											disabled={!canRetrySelected || deletingMultiple}
+											style={{ marginRight: 8 }}
+										>
+											Retry screening ({selectedRowKeys.length})
+										</Button>
+									)}
+
+									{selectedRowKeys.length > 0 && (
+										<Button
+											type="primary"
+											danger
+											onClick={() => setDeleteModalOpen(true)}
+											style={{ marginRight: 8 }}
+										>
+											Delete resumes ({selectedRowKeys.length})
+										</Button>
+									)}
+
+									{/* Done / Exit edit mode */}
+									<Button
+										onClick={() => {
+											setEditMode(false);
+											setSelectedRowKeys([]);
+										}}
+										style={{ marginRight: 8 }}
+									>
+										Done
+									</Button>
+								</>
 							)}
+
 							<Button
 								className="company-btn--filled"
 								onClick={() => setUploadDrawerOpen(true)}
@@ -390,12 +501,12 @@ const ResumeList: React.FC = () => {
 					loading={loading}
 					dataSource={sortedResumes}
 					rowSelection={
-						showSelection
+						editMode
 							? {
-								selectedRowKeys,
-								onChange: (keys) => setSelectedRowKeys(keys),
-								type: "checkbox",
-							}
+									selectedRowKeys,
+									onChange: (keys) => setSelectedRowKeys(keys),
+									type: "checkbox",
+							  }
 							: undefined
 					}
 					columns={columns}
@@ -419,15 +530,10 @@ const ResumeList: React.FC = () => {
 			<Modal
 				title={`Confirm delete ${selectedRowKeys.length} resumes`}
 				open={deleteModalOpen}
-					onCancel={() => {
-						setDeleteModalOpen(false);
-						setConfirmInput("");
-						if (tempSelection) {
-							setShowSelection(false);
-							setSelectedRowKeys([]);
-							setTempSelection(false);
-						}
-					}}
+				onCancel={() => {
+					setDeleteModalOpen(false);
+					setConfirmInput("");
+				}}
 				onOk={handleDeleteSelected}
 				okButtonProps={{
 					disabled: confirmInput !== (jobTitle || "") || deletingMultiple,
@@ -437,9 +543,9 @@ const ResumeList: React.FC = () => {
 			>
 				<div>
 					<p>
-						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có thể gây ra
-						những bất tiện cho bạn trong quá trình sử dụng hệ thống.
-						Vui lòng nhập chính xác tiêu đề công việc
+						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có thể gây
+						ra những bất tiện cho bạn trong quá trình sử dụng hệ thống. Vui lòng nhập
+						chính xác tiêu đề công việc{" "}
 						<strong>{jobTitle || "(job title)"}</strong> để xác nhận xoá.
 					</p>
 
@@ -452,11 +558,7 @@ const ResumeList: React.FC = () => {
 			</Modal>
 
 			<Drawer
-				title={
-					selectedResume
-						? `Resume Detail - ${selectedResume.fullName}`
-						: "Resume Detail"
-				}
+				title={selectedResume ? `Resume Detail - ${selectedResume.fullName}` : "Resume Detail"}
 				width={720}
 				onClose={() => {
 					setDrawerOpen(false);
@@ -471,8 +573,7 @@ const ResumeList: React.FC = () => {
 						<Card size="small" title="Basic Information">
 							<Space direction="vertical" style={{ width: "100%" }}>
 								<div>
-									<strong>Full Name:</strong>{" "}
-									{selectedResume.fullName || "Unknown"}
+									<strong>Full Name:</strong> {selectedResume.fullName || "Unknown"}
 								</div>
 								{selectedResume.email && (
 									<div>
@@ -491,8 +592,8 @@ const ResumeList: React.FC = () => {
 											selectedResume.status === "Completed"
 												? "green"
 												: selectedResume.status === "Pending"
-													? "blue"
-													: "default"
+												? "blue"
+												: "default"
 										}
 									>
 										{selectedResume.status || "Processing"}
@@ -501,11 +602,7 @@ const ResumeList: React.FC = () => {
 								{selectedResume.fileUrl && (
 									<div>
 										<strong>Resume File:</strong>{" "}
-										<Button
-											type="link"
-											href={selectedResume.fileUrl}
-											target="_blank"
-										>
+										<Button type="link" href={selectedResume.fileUrl} target="_blank">
 											View PDF
 										</Button>
 									</div>
@@ -523,15 +620,15 @@ const ResumeList: React.FC = () => {
 												selectedResume.totalResumeScore >= 70
 													? "green"
 													: selectedResume.totalResumeScore >= 40
-														? "orange"
-														: "red"
+													? "orange"
+													: "red"
 											}
 											style={{ fontSize: 16, padding: "4px 12px" }}
 										>
 											{selectedResume.totalResumeScore}
 										</Tag>
 									) : (
-										<Tag color="default">—</Tag>
+										<span>—</span>
 									)}
 								</div>
 								{selectedResume.aiExplanation && (
@@ -552,52 +649,44 @@ const ResumeList: React.FC = () => {
 							</Space>
 						</Card>
 
-						{selectedResume.scoreDetails &&
-							selectedResume.scoreDetails.length > 0 && (
-								<Card size="small" title="Criteria Scores">
-									<Space
-										direction="vertical"
-										style={{ width: "100%" }}
-										size="middle"
-									>
-										{selectedResume.scoreDetails.map((detail) => (
-											<div
-												key={detail.criteriaId}
-												style={{
-													padding: 12,
-													border: "1px solid #d9d9d9",
-													borderRadius: 4,
-												}}
-											>
-												<div style={{ marginBottom: 8 }}>
-													<strong>{detail.criteriaName}</strong>
-													<Tag
-														color={
-															detail.score >= 70
-																? "green"
-																: detail.score >= 40
-																	? "orange"
-																	: "red"
-														}
-														style={{ marginLeft: 8 }}
-													>
-														Score: {detail.score}
-													</Tag>
-													<Tag
-														color={detail.matched ? "success" : "default"}
-														style={{ marginLeft: 4 }}
-													>
-														{detail.matched ? "Matched" : "Not Matched"}
-													</Tag>
-												</div>
-												<div style={{ color: "#666" }}>
-													<em>{detail.aiNote}</em>
-												</div>
+						{selectedResume.scoreDetails && selectedResume.scoreDetails.length > 0 && (
+							<Card size="small" title="Criteria Scores">
+								<Space direction="vertical" style={{ width: "100%" }} size="middle">
+									{selectedResume.scoreDetails.map((detail) => (
+										<div
+											key={detail.criteriaId}
+											style={{
+												padding: 12,
+												border: "1px solid #d9d9d9",
+												borderRadius: 4,
+											}}
+										>
+											<div style={{ marginBottom: 8 }}>
+												<strong>{detail.criteriaName}</strong>
+												<Tag
+													color={
+														detail.score >= 70
+															? "green"
+															: detail.score >= 40
+															? "orange"
+															: "red"
+													}
+													style={{ marginLeft: 8 }}
+												>
+													Score: {detail.score}
+												</Tag>
+												<Tag color={detail.matched ? "success" : "default"} style={{ marginLeft: 4 }}>
+													{detail.matched ? "Matched" : "Not Matched"}
+												</Tag>
 											</div>
-										))}
-									</Space>
-								</Card>
-							)}
+											<div style={{ color: "#666" }}>
+												<em>{detail.aiNote}</em>
+											</div>
+										</div>
+									))}
+								</Space>
+							</Card>
+						)}
 					</Space>
 				)}
 			</Drawer>

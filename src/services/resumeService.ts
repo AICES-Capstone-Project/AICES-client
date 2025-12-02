@@ -1,4 +1,4 @@
-import { postForm, get, remove } from "./api";
+import { postForm, post, get, remove } from "./api";
 import { API_ENDPOINTS } from "./config";
 import type { ApiResponse } from "../types/api.types";
 import type { Resume, Paginated } from "../types/company.types";
@@ -34,7 +34,8 @@ export const resumeService = {
 
   // Retry analysis / reprocess a resume
   retryAnalysis: async (resumeId: number): Promise<ApiResponse<null>> => {
-    return await get<null>(API_ENDPOINTS.RESUME.COMPANY_RETRY(resumeId));
+    // Use POST for retry requests (server may expect POST even without a body)
+    return await post<null>(API_ENDPOINTS.RESUME.COMPANY_RETRY(resumeId), {});
   },
 
   // Delete a resume

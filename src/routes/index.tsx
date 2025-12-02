@@ -62,7 +62,7 @@ const ResumeList = lazy(
 	() => import("../pages/CompanyPages/AIScreening/component/ResumeList")
 );
 const CompareResumes = lazy(
-	() => import("../pages/CompanyPages/AIScreening/CompareResumes")
+	() => import("../pages/CompanyPages/AIScreening/component/CompareResumes")
 );
 const CompanySubscription = lazy(
 	() => import("../pages/CompanyPages/CompanySubsriptions/CompanySubscription")

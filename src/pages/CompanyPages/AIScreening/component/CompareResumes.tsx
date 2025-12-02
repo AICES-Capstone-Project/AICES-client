@@ -2,9 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Card, Table, Tag, Button, Drawer, Space, message } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import resumeService from "../../../services/resumeService";
+import resumeService from "../../../../services/resumeService";
 import { EyeOutlined, ArrowLeftOutlined } from "@ant-design/icons";
-import { toastError } from "../../../components/UI/Toast";
+import { toastError } from "../../../../components/UI/Toast";
 
 interface Resume {
     resumeId: number;

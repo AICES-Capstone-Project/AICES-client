@@ -9,8 +9,6 @@ import SpecializationToolbar from "./components/specialization/SpecializationToo
 import SpecializationTable from "./components/specialization/SpecializationTable";
 import SpecializationModal from "./components/specialization/SpecializationModal";
 
-
-
 const DEFAULT_PAGE_SIZE = 10;
 
 export default function SpecializationList() {
@@ -182,6 +180,12 @@ export default function SpecializationList() {
     form.resetFields();
   };
 
+  const filteredSpecializations = specializations.filter((item) =>
+    `${item.name} ${item.categoryName || ""}`
+      .toLowerCase()
+      .includes(keyword.toLowerCase())
+  );
+
   return (
     <Card>
       <SpecializationToolbar
@@ -194,8 +198,11 @@ export default function SpecializationList() {
 
       <SpecializationTable
         loading={loading}
-        data={specializations}
-        pagination={pagination}
+        data={filteredSpecializations}
+        pagination={{
+          ...pagination,
+          total: filteredSpecializations.length, // tổng sau filter
+        }}
         onChangePage={handleTableChange}
         onEdit={openEditModal}
         onDelete={handleDelete}

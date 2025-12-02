@@ -42,13 +42,13 @@ export const skillService = {
 
   // ---------- SYSTEM (CHO SYSTEM ADMIN / TAXONOMY) ----------
   getSkillsSystem(params?: SkillListParams) {
-    return api.get<ApiResponse<Skill[]>>(SYSTEM_SKILL_BASE_URL, {
+    return api.get<ApiResponse<Skill[]>>(PUBLIC_SKILL_BASE_URL, {
       params,
     });
   },
 
   getSkillByIdSystem(id: number) {
-    return api.get<ApiResponse<Skill>>(`${SYSTEM_SKILL_BASE_URL}/${id}`);
+    return api.get<ApiResponse<Skill>>(`${PUBLIC_SKILL_BASE_URL}/${id}`);
   },
 
   createSkillSystem(payload: { name: string }) {

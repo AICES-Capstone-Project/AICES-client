@@ -29,15 +29,11 @@ export default function CategoryList() {
     try {
       setLoading(true);
 
-      const res = await categoryService.getAllSystem({
-        page,
-        pageSize,
-        // keyword, // nếu sau này muốn search server-side thì bật
-      });
+      const res = await categoryService.getAllSystem({ page, pageSize });
 
-      const payload = res.data;
-
-      if (!payload) {
+      if (res.status !== "Success" || !res.data) {
+        // status trả về không phải "Success" => báo lỗi
+        message.error(res.message || "Failed to load categories");
         setCategories([]);
         setPagination((prev) => ({
           ...prev,
@@ -47,6 +43,8 @@ export default function CategoryList() {
         }));
         return;
       }
+
+      const payload = res.data;
 
       setCategories(payload.categories);
       setPagination({
@@ -87,7 +85,6 @@ export default function CategoryList() {
   };
 
   const handleDelete = (record: Category) => {
-    // vẫn dùng Modal.confirm, nhưng gọi từ Page (logic ở đây)
     import("antd").then(({ Modal }) =>
       Modal.confirm({
         title: "Deactivate this category?",
@@ -96,10 +93,18 @@ export default function CategoryList() {
         cancelText: "No",
         onOk: async () => {
           try {
-            await categoryService.remove(record.categoryId);
+            const res = await categoryService.remove(record.categoryId);
+
+            if (res.status !== "Success") {
+              message.error(res.message || "Failed to deactivate category");
+              return;
+            }
 
             message.success("Category deactivated successfully");
-            fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+            fetchData(
+              pagination.current || 1,
+              pagination.pageSize || DEFAULT_PAGE_SIZE
+            );
           } catch (err: any) {
             console.error(err);
             message.error("Failed to deactivate category");
@@ -113,26 +118,40 @@ export default function CategoryList() {
     try {
       const values = await form.validateFields();
 
+      let res;
       if (editing) {
-        await categoryService.update(editing.categoryId, {
+        res = await categoryService.update(editing.categoryId, {
           name: values.name,
         });
-        message.success("Category updated successfully");
       } else {
-        await categoryService.create({
-          name: values.name,
-        });
-        message.success("Category created successfully");
+        res = await categoryService.create({ name: values.name });
       }
+
+      if (res.status !== "Success") {
+        message.error(
+          res.message ||
+            (editing
+              ? "Failed to update category"
+              : "Failed to create category")
+        );
+        return;
+      }
+
+      message.success(
+        editing
+          ? "Category updated successfully"
+          : "Category created successfully"
+      );
 
       setIsModalOpen(false);
       form.resetFields();
-      fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+      fetchData(
+        pagination.current || 1,
+        pagination.pageSize || DEFAULT_PAGE_SIZE
+      );
     } catch (err: any) {
-      if (err?.response?.data?.message) {
-        message.error(err.response.data.message);
-      }
-      // nếu là error validate của antd thì k làm gì thêm
+      // err này chủ yếu là error validate Form của antd
+      console.error(err);
     }
   };
 
@@ -146,7 +165,10 @@ export default function CategoryList() {
       extra={
         <CategoryToolbar
           onReload={() =>
-            fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE)
+            fetchData(
+              pagination.current || 1,
+              pagination.pageSize || DEFAULT_PAGE_SIZE
+            )
           }
           onCreate={openCreateModal}
           keyword={keyword}

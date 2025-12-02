@@ -143,6 +143,10 @@ export default function RecruitmentTypeList() {
     }
   };
 
+  const filteredRecruitmentTypes = recruitmentTypes.filter((item) =>
+    item.name.toLowerCase().includes(keyword.toLowerCase())
+  );
+
   return (
     <Card
       title={
@@ -168,8 +172,11 @@ export default function RecruitmentTypeList() {
     >
       <RecruitmentTypeTable
         loading={loading}
-        data={recruitmentTypes}
-        pagination={pagination}
+        data={filteredRecruitmentTypes}
+        pagination={{
+          ...pagination,
+          total: filteredRecruitmentTypes.length, // 👈 tổng theo filter
+        }}
         onChangePage={handleTableChange}
         onEdit={openEditModal}
         onDelete={handleDelete}

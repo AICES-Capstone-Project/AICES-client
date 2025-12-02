@@ -38,26 +38,39 @@ export default function SkillList() {
 
   const [form] = Form.useForm<SkillFormValues>();
 
-  const fetchSkills = async (
-    page = 1,
-    pageSize = DEFAULT_PAGE_SIZE,
-    currentKeyword = keyword
-  ) => {
+  const filteredSkills = skills.filter((item) =>
+    item.name.toLowerCase().includes(keyword.toLowerCase())
+  );
+
+  const fetchSkills = async (page = 1, pageSize = DEFAULT_PAGE_SIZE) => {
     setLoading(true);
     try {
       const response = await skillService.getSkillsSystem({
         page,
         pageSize,
-        keyword: currentKeyword || undefined,
+        // keyword: currentKeyword || undefined,  // ❌ bỏ dòng này
       });
 
-      const data = response.data;
+      const apiRes = response.data; // ApiResponse<Skill[]>
 
-      const list: Skill[] = Array.isArray(data) ? data : [];
+      if (apiRes.status !== "Success" || !apiRes.data) {
+        message.error(
+          apiRes.message || "Failed to load skills. Please try again."
+        );
+        setSkills([]);
+        setTotal(0);
+        setPagination((prev) => ({
+          ...prev,
+          current: page,
+          pageSize,
+        }));
+        return;
+      }
+
+      const list: Skill[] = apiRes.data;
 
       setSkills(list);
       setTotal(list.length);
-
       setPagination((prev) => ({
         ...prev,
         current: page,
@@ -84,12 +97,13 @@ export default function SkillList() {
   };
 
   const handleSearch = () => {
-    fetchSkills(1, pagination.pageSize || DEFAULT_PAGE_SIZE, keyword);
+    // realtime rồi nên chỉ cần refetch nếu bạn thích, hoặc để trống cũng được
+    fetchSkills(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
   };
 
   const handleResetSearch = () => {
     setKeyword("");
-    fetchSkills(1, pagination.pageSize || DEFAULT_PAGE_SIZE, "");
+    fetchSkills(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
   };
 
   const openCreateModal = () => {
@@ -182,8 +196,11 @@ export default function SkillList() {
     >
       <SkillTable
         loading={loading}
-        data={skills}
-        pagination={{ ...pagination, total }}
+        data={filteredSkills}
+        pagination={{
+          ...pagination,
+          total: filteredSkills.length, // 👈 cho phân trang theo search
+        }}
         onChangePage={handleTableChange}
         onEdit={openEditModal}
         onDelete={handleDelete}

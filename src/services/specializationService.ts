@@ -56,7 +56,7 @@ export const specializationService = {
   // CREATE (system)
   create(payload: { name: string; categoryId: number }) {
     return api.post<ApiResponse<Specialization>>(
-      SYSTEM_SPECIALIZATION_BASE_URL,
+      API_ENDPOINTS.SPECIALIZATION.SYSTEM_CREATE, // ✅ dùng endpoint system_create
       payload
     );
   },

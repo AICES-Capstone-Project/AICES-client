@@ -64,6 +64,7 @@ export const useNotificationSignalR = (
 				detail: notif.detail || "",
 				type: notif.type,
 				isRead: notif.isRead || false,
+				invitation: notif.invitation || null,
 				createdAt: notif.createdAt,
 			};
 

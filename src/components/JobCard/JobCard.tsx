@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Typography, Image, Tooltip, Button } from "antd";
 import { EnvironmentOutlined, StarFilled, StarOutlined } from "@ant-design/icons";
-import type { Job } from "../../types/Jobs/job";
+import type { Job } from "../../types/job";
 
 const { Text } = Typography;
 

@@ -72,7 +72,7 @@ const SubscriptionDetailsSection: React.FC<SubscriptionDetailsSectionProps> = ({
 
           {/* cancel icon area */}
           {onCancel ? (
-            <div style={{ flex: '0 0 56px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ flex: '0 0 56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <Tooltip title="Cancel subscription">
                 <Button
                   onClick={onCancel}

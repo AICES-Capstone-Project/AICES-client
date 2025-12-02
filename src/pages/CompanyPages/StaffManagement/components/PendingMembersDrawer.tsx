@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Drawer, List, Button, Empty, Modal } from "antd";
-import { ExclamationCircleOutlined } from "@ant-design/icons";
 
 type JoinRequest = {
   comUserId: number;
@@ -59,7 +58,6 @@ const PendingMembersDrawer: React.FC<Props> = ({ open, onClose, requests, onAppr
                 <Button 
                   className="company-btn--filled" 
                   onClick={() => handleApproveClick(r)} 
-                  size="small"
                 >
                   Approve
                 </Button>
@@ -70,7 +68,6 @@ const PendingMembersDrawer: React.FC<Props> = ({ open, onClose, requests, onAppr
       )}
 
       <Modal
-        title="Approve Member"
         open={confirmVisible}
         onCancel={() => {
           setConfirmVisible(false);
@@ -100,9 +97,8 @@ const PendingMembersDrawer: React.FC<Props> = ({ open, onClose, requests, onAppr
           </div>,
         ]}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <ExclamationCircleOutlined style={{ fontSize: 22, color: "#faad14" }} />
-          <span>Are you sure you want to approve <strong>{selectedRequest?.fullName || selectedRequest?.email}</strong>?</span>
+        <div  style={{ textAlign: "center", fontSize: 16 , marginTop: 8 }}>
+          <span>Are you sure you want to approve <strong>{selectedRequest?.fullName || selectedRequest?.email}</strong> staff?</span>
         </div>
       </Modal>
     </Drawer>

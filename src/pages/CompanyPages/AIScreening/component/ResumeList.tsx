@@ -27,21 +27,32 @@ import resumeService from "../../../../services/resumeService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 
 interface Resume {
-	resumeId: number;
-	fullName: string;
-	status: string;
-	totalResumeScore: number | null;
-	email?: string;
-	phoneNumber?: string;
-	fileUrl?: string;
-	aiExplanation?: string;
-	scoreDetails?: Array<{
-		criteriaId: number;
-		criteriaName: string;
-		matched: number;
-		score: number;
-		aiNote: string;
-	}>;
+  resumeId: number;
+  queueJobId?: string;
+  fileUrl: string;
+  status: "Completed" | "Pending" | "Failed" | string;
+  createdAt?: string;
+  candidateId?: number;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  aiScores: AiScore[];
+}
+
+interface AiScore {
+  scoreId: number;
+  totalResumeScore: number;
+  aiExplanation: string;
+  createdAt: string;
+  scoreDetails: ScoreDetail[];
+}
+
+interface ScoreDetail {
+  criteriaId: number;
+  criteriaName: string;
+  matched: number;
+  score: number;
+  aiNote: string;
 }
 
 const ResumeList: React.FC = () => {
@@ -66,8 +77,8 @@ const ResumeList: React.FC = () => {
 	// Ensure displayed order is always by score desc (nulls last)
 	const sortedResumes = useMemo(() => {
 		return resumes.slice().sort((a, b) => {
-			const aS = a.totalResumeScore;
-			const bS = b.totalResumeScore;
+			const aS = a.aiScores?.[0]?.totalResumeScore;
+			const bS = b.aiScores?.[0]?.totalResumeScore;
 			if (aS == null && bS == null) return a.resumeId - b.resumeId;
 			if (aS == null) return 1;
 			if (bS == null) return -1;
@@ -109,7 +120,7 @@ const ResumeList: React.FC = () => {
 					resumeId: r.resumeId,
 					fullName: r.fullName || r.candidateName || "Unknown",
 					status: r.status || r.stage || "Processing",
-					totalResumeScore: r.totalResumeScore ?? null,
+					aiScores: r.aiScores ?? [],
 					email: r.email,
 					phoneNumber: r.phone || r.phoneNumber,
 					fileUrl: r.fileUrl,
@@ -119,8 +130,8 @@ const ResumeList: React.FC = () => {
 				// Sort by totalResumeScore descending (highest first). Place null/undefined scores last.
 				// For equal scores, fallback to resumeId ascending for stable order.
 				const sortedList = mapped.slice().sort((a, b) => {
-					const aS = a.totalResumeScore;
-					const bS = b.totalResumeScore;
+					const aS = a.aiScores?.[0]?.totalResumeScore;
+					const bS = b.aiScores?.[0]?.totalResumeScore;
 					if (aS == null && bS == null) return a.resumeId - b.resumeId;
 					if (aS == null) return 1; // a should come after b
 					if (bS == null) return -1; // b should come after a
@@ -153,8 +164,8 @@ const ResumeList: React.FC = () => {
 	const scoreCounts = useMemo(() => {
 		const m = new Map<number, number>();
 		for (const r of sortedResumes) {
-			if (r.totalResumeScore != null) {
-				m.set(r.totalResumeScore, (m.get(r.totalResumeScore) || 0) + 1);
+			if (r.aiScores?.[0]?.totalResumeScore != null) {
+				m.set(r.aiScores[0].totalResumeScore, (m.get(r.aiScores[0].totalResumeScore) || 0) + 1);
 			}
 		}
 		return m;
@@ -314,8 +325,8 @@ const ResumeList: React.FC = () => {
 						status === "Completed"
 							? "green"
 							: status === "Pending"
-							? "blue"
-							: "default"
+								? "blue"
+								: "default"
 					}
 				>
 					{status || "Processing"}
@@ -323,25 +334,29 @@ const ResumeList: React.FC = () => {
 			),
 		},
 		{
-			title: "Score",
-			dataIndex: "totalResumeScore",
-			width: 120,
-			align: "center" as const,
-			render: (score: number | null) =>
-				score != null ? (
-					<Tag color={score >= 70 ? "green" : score >= 40 ? "orange" : "red"}>
-						{score}
-					</Tag>
-				) : (
-					<span>—</span>
-				),
-		},
+            title: "Score",
+            key: "score", 
+            width: 120,
+            align: "center" as const,
+            render: (_: any, record: Resume) => {
+                // Lấy điểm từ phần tử đầu tiên của mảng aiScores
+                const score = record.aiScores?.[0]?.totalResumeScore;
+
+                return score != null ? (
+                    <Tag color={score >= 70 ? "green" : score >= 40 ? "orange" : "red"}>
+                        {score}
+                    </Tag>
+                ) : (
+                    <span style={{ color: "#9ca3af" }}>—</span>
+                );
+            },
+        },
 		{
 			title: "Ties",
 			width: 100,
 			align: "center" as const,
 			render: (_: any, record: Resume) => {
-				const score = record.totalResumeScore;
+				const score = record.aiScores?.[0]?.totalResumeScore;
 				if (score == null || score === 0)
 					return <span style={{ color: "#9ca3af" }}>—</span>;
 				const count = scoreCounts.get(score) || 0;
@@ -418,7 +433,7 @@ const ResumeList: React.FC = () => {
 							<Button
 								type="text"
 								icon={<ReloadOutlined />}
-								style={{ color: "#096dd9" }}
+								style={{ color: "var(--color-primary)" }}
 								loading={retryingIds.includes(record.resumeId)}
 								onClick={async () => handleRetry(record.resumeId)}
 							/>
@@ -448,7 +463,7 @@ const ResumeList: React.FC = () => {
 								<>
 									{canRetrySelected && (
 										<Button
-											type="primary"
+											className="company-btn--filled"
 											onClick={() => handleRetrySelected()}
 											disabled={!canRetrySelected || deletingMultiple}
 											style={{ marginRight: 8 }}
@@ -459,17 +474,19 @@ const ResumeList: React.FC = () => {
 
 									{selectedRowKeys.length > 0 && (
 										<Button
+											className="company-btn--danger"
 											type="primary"
 											danger
 											onClick={() => setDeleteModalOpen(true)}
 											style={{ marginRight: 8 }}
 										>
-											Delete resumes ({selectedRowKeys.length})
+											({selectedRowKeys.length}) Delete resumes
 										</Button>
 									)}
 
 									{/* Done / Exit edit mode */}
 									<Button
+										className="company-btn"
 										onClick={() => {
 											setEditMode(false);
 											setSelectedRowKeys([]);
@@ -503,10 +520,10 @@ const ResumeList: React.FC = () => {
 					rowSelection={
 						editMode
 							? {
-									selectedRowKeys,
-									onChange: (keys) => setSelectedRowKeys(keys),
-									type: "checkbox",
-							  }
+								selectedRowKeys,
+								onChange: (keys) => setSelectedRowKeys(keys),
+								type: "checkbox",
+							}
 							: undefined
 					}
 					columns={columns}
@@ -528,21 +545,41 @@ const ResumeList: React.FC = () => {
 
 			{/* Delete selected confirmation modal requiring exact job title */}
 			<Modal
-				title={`Confirm delete ${selectedRowKeys.length} resumes`}
 				open={deleteModalOpen}
 				onCancel={() => {
 					setDeleteModalOpen(false);
 					setConfirmInput("");
 				}}
-				onOk={handleDeleteSelected}
-				okButtonProps={{
-					disabled: confirmInput !== (jobTitle || "") || deletingMultiple,
-					loading: deletingMultiple,
-				}}
-				cancelButtonProps={{ disabled: deletingMultiple }}
+				footer={
+					<div
+						style={{
+							display: "flex",
+							justifyContent: "space-between",
+							width: "100%",
+						}}
+					>
+						<Button
+							onClick={() => {
+								setDeleteModalOpen(false);
+								setConfirmInput("");
+							}}
+						>
+							Cancel
+						</Button>
+
+						<Button
+							className="company-btn--danger"
+							danger
+							onClick={handleDeleteSelected}
+							disabled={confirmInput !== (jobTitle || "")}
+						>
+							Delete
+						</Button>
+					</div>
+				}
 			>
 				<div>
-					<p>
+					<p style={{ textAlign: "center", fontSize: 16, marginTop: 8 }}>
 						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có thể gây
 						ra những bất tiện cho bạn trong quá trình sử dụng hệ thống. Vui lòng nhập
 						chính xác tiêu đề công việc{" "}
@@ -555,6 +592,7 @@ const ResumeList: React.FC = () => {
 						placeholder="Type job title here"
 					/>
 				</div>
+
 			</Modal>
 
 			<Drawer
@@ -592,8 +630,8 @@ const ResumeList: React.FC = () => {
 											selectedResume.status === "Completed"
 												? "green"
 												: selectedResume.status === "Pending"
-												? "blue"
-												: "default"
+													? "blue"
+													: "default"
 										}
 									>
 										{selectedResume.status || "Processing"}
@@ -614,24 +652,24 @@ const ResumeList: React.FC = () => {
 							<Space direction="vertical" style={{ width: "100%" }}>
 								<div>
 									<strong>Total Score:</strong>{" "}
-									{selectedResume.totalResumeScore != null ? (
+									{selectedResume.aiScores?.[0]?.totalResumeScore != null ? (
 										<Tag
 											color={
-												selectedResume.totalResumeScore >= 70
+												selectedResume.aiScores?.[0]?.totalResumeScore >= 70
 													? "green"
-													: selectedResume.totalResumeScore >= 40
-													? "orange"
-													: "red"
+													: selectedResume.aiScores?.[0]?.totalResumeScore >= 40
+														? "orange"
+														: "red"
 											}
 											style={{ fontSize: 16, padding: "4px 12px" }}
 										>
-											{selectedResume.totalResumeScore}
+											{selectedResume.aiScores?.[0]?.totalResumeScore}
 										</Tag>
 									) : (
 										<span>—</span>
 									)}
 								</div>
-								{selectedResume.aiExplanation && (
+								{selectedResume.aiScores?.[0]?.aiExplanation && (
 									<div>
 										<strong>AI Explanation:</strong>
 										<p
@@ -642,17 +680,17 @@ const ResumeList: React.FC = () => {
 												borderRadius: 4,
 											}}
 										>
-											{selectedResume.aiExplanation.replace(/\\u0027/g, "'")}
+											{selectedResume.aiScores?.[0]?.aiExplanation.replace(/\\u0027/g, "'")}
 										</p>
 									</div>
 								)}
 							</Space>
 						</Card>
 
-						{selectedResume.scoreDetails && selectedResume.scoreDetails.length > 0 && (
+						{selectedResume.aiScores?.[0]?.scoreDetails && selectedResume.aiScores[0].scoreDetails.length > 0 && (
 							<Card size="small" title="Criteria Scores">
 								<Space direction="vertical" style={{ width: "100%" }} size="middle">
-									{selectedResume.scoreDetails.map((detail) => (
+									{selectedResume.aiScores?.[0]?.scoreDetails.map((detail) => (
 										<div
 											key={detail.criteriaId}
 											style={{
@@ -668,8 +706,8 @@ const ResumeList: React.FC = () => {
 														detail.score >= 70
 															? "green"
 															: detail.score >= 40
-															? "orange"
-															: "red"
+																? "orange"
+																: "red"
 													}
 													style={{ marginLeft: 8 }}
 												>

@@ -1,4 +1,4 @@
-import { Table, Space, Tooltip, Button, Tag, Popconfirm } from "antd";
+import { Table, Space, Tooltip, Button, Tag, Modal, Input } from "antd";
 import { useEffect, useState } from "react";
 import type { ColumnsType } from "antd/es/table";
 import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
@@ -17,11 +17,11 @@ type Props = {
 };
 
 const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
+  // Table height
   const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
 
   useEffect(() => {
     const calculate = () => {
-      // Reserve area for header, paddings and controls. Tweak reserved as needed.
       const reserved = 220; // px
       const h = window.innerHeight - reserved;
       setTableHeight(h > 300 ? h : 300);
@@ -31,8 +31,31 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
     window.addEventListener("resize", calculate);
     return () => window.removeEventListener("resize", calculate);
   }, []);
+
+  // Role checker
   const { user } = useAppSelector((s) => s.auth);
-  const isRecruiter = (user?.roleName || "").toLowerCase() === (ROLES.Hr_Recruiter || "").toLowerCase();
+  const isRecruiter =
+    (user?.roleName || "").toLowerCase() ===
+    (ROLES.Hr_Recruiter || "").toLowerCase();
+
+  // Modal delete states
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [confirmInput, setConfirmInput] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [deleting, setDeleting] = useState(false);
+  const [selectedJob, setSelectedJob] = useState<CompanyJob | null>(null);
+
+  const handleDeleteSelected = async () => {
+    if (!selectedJob) return;
+
+    setDeleting(true);
+    await onDelete(selectedJob);
+    setDeleting(false);
+    setDeleteModalOpen(false);
+    setConfirmInput("");
+  };
+
+  // Table columns
   const columns: ColumnsType<CompanyJob> = [
     {
       title: "No",
@@ -66,9 +89,7 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       key: "categoryName",
       width: "20%",
       align: "center",
-      render: (cat) => (
-        <Tag color={tagColorFor(cat)}>{cat || "-"}</Tag>
-      ),
+      render: (cat) => <Tag color={tagColorFor(cat)}>{cat || "-"}</Tag>,
     },
     {
       title: "Specialization",
@@ -77,7 +98,6 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       width: "20%",
       align: "center",
       render: (spec, record) => {
-        // If category exists, use its color for specialization to match user's request
         const category = (record as CompanyJob).categoryName;
         const color = category ? tagColorFor(category) : tagColorFor(spec);
         return <Tag color={color}>{spec || "-"}</Tag>;
@@ -99,6 +119,8 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
               onClick={() => onView(record)}
             />
           </Tooltip>
+
+          {/* Recruiter cannot edit/delete */}
           {!isRecruiter && (
             <>
               <Tooltip title="Edit Job">
@@ -109,20 +131,19 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
                   onClick={() => onEdit(record)}
                 />
               </Tooltip>
+
               <Tooltip title="Remove Job">
-                <Popconfirm
-                  title="Are you sure to delete this job?"
-                  onConfirm={() => onDelete(record)}
-                  okText="Yes"
-                  cancelText="No"
-                >
-                  <Button
-                    type="text"
-                    icon={<DeleteOutlined />}
-                    size="small"
-                    danger
-                  />
-                </Popconfirm>
+                <Button
+                  type="text"
+                  icon={<DeleteOutlined />}
+                  size="small"
+                  danger
+                  onClick={() => {
+                    setSelectedJob(record);
+                    setJobTitle(record.title);
+                    setDeleteModalOpen(true);
+                  }}
+                />
               </Tooltip>
             </>
           )}
@@ -148,8 +169,66 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
         tableLayout="fixed"
         className="job-table"
         scroll={{ y: tableHeight }}
-        rowClassName={(_, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
+        rowClassName={(_, index) =>
+          index % 2 === 0 ? "table-row-light" : "table-row-dark"
+        }
       />
+
+      {/* Delete Modal */}
+      <Modal
+        open={deleteModalOpen}
+        onCancel={() => {
+          setDeleteModalOpen(false);
+          setConfirmInput("");
+        }}
+        footer={
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              width: "100%",
+            }}
+          >
+            <Button
+              onClick={() => {
+                setDeleteModalOpen(false);
+                setConfirmInput("");
+              }}
+              disabled={deleting}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              className="company-btn--danger"
+              danger
+              onClick={handleDeleteSelected}
+              disabled={confirmInput !== (jobTitle || "")}
+              loading={deleting}
+            >
+              Delete
+            </Button>
+          </div>
+        }
+      >
+        <div>
+          <p style={{ textAlign: "center", fontSize: 16 , marginTop: 8 }}>
+            Việc xoá tin tuyển dụng là hành động{" "}
+            <strong>không thể khôi phục</strong>.
+            <br />
+            Vui lòng nhập chính xác tiêu đề công việc{" "}
+            <strong>{jobTitle || "(job title)"}</strong> để xác nhận xoá.
+          </p>
+
+          <Input
+            style={{ marginTop: 16, width: "100%" }}
+            value={confirmInput}
+            onChange={(e) => setConfirmInput(e.target.value)}
+            placeholder="Type job title here"
+          />
+        </div>
+      </Modal>
+
     </div>
   );
 };

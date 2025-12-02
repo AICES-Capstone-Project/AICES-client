@@ -10,7 +10,7 @@ import { toastError, toastSuccess } from "../../../components/UI/Toast";
 const CompanySubscription: React.FC = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
-  
+
   const [currentSubscription, setCurrentSubscription] = useState<any>(null);
   const [cancelling, setCancelling] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
@@ -47,7 +47,7 @@ const CompanySubscription: React.FC = () => {
     loadCurrent();
   }, []);
 
-  
+
 
   const handleCancelSubscription = () => {
     setConfirmVisible(true);
@@ -108,7 +108,7 @@ const CompanySubscription: React.FC = () => {
 
           <div style={{ flex: '0 0 auto' }}>
             <Space>
-              <Button className="company-btn" onClick={() => navigate("/company/payment-history") }>
+              <Button className="company-btn" onClick={() => navigate("/company/payment-history")}>
                 Payment History
               </Button>
             </Space>
@@ -146,17 +146,41 @@ const CompanySubscription: React.FC = () => {
 
       {/* Cancel Subscription Confirmation Modal */}
       <Modal
-        title="Cancel Subscription"
+        
         open={confirmVisible}
-        onOk={handleConfirmCancel}
         onCancel={() => setConfirmVisible(false)}
-        okText="Yes, Cancel"
-        cancelText="No, Keep it"
-        okButtonProps={{ danger: true }}
-        confirmLoading={cancelling}
+        footer={null} // ❗Ẩn footer mặc định
         centered
       >
-        <p>Are you sure you want to cancel your subscription?</p>
+        <h1 style={{ textAlign: "center", fontSize: 16 }}>Are you sure you want to cancel your subscription?</h1>
+
+        {/* Footer tự tạo */}
+        <div
+          style={{
+            marginTop: 24,
+            display: "flex",
+            justifyContent: "space-between", 
+            alignItems: "center",
+          }}
+        >
+          <Button
+            className="company-btn"
+            onClick={() => setConfirmVisible(false)}
+            style={{ minWidth: 110 }}
+          >
+            No, Keep it
+          </Button>
+
+          <Button
+            className="company-btn--danger"
+            danger
+            onClick={handleConfirmCancel}
+            loading={cancelling}
+            style={{ minWidth: 110 }}
+          >
+            Yes, Cancel
+          </Button>
+        </div>
       </Modal>
     </Card>
   );

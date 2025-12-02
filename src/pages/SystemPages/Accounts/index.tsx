@@ -232,7 +232,13 @@ export default function Accounts() {
     const res = await userService.updateStatus(user.userId, status);
     if (res.status === "Success") {
       message.success("Status updated");
-      fetchData(page, pageSize, keyword);
+
+      // ✅ Cập nhật ngay trong state, không refetch => user đứng yên trên cùng 1 page
+      setUsers((prev) =>
+        prev.map((u) =>
+          u.userId === user.userId ? { ...u, userStatus: status } : u
+        )
+      );
     } else {
       message.error(res.message || "Failed to update status");
     }

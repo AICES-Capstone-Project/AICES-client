@@ -1,10 +1,6 @@
-import { Button, Space, Table, Tag, Tooltip, Popconfirm } from "antd";
+import { Button, Space, Table, Tag, Tooltip, Popconfirm, Avatar } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import {
-  EyeOutlined,
-  EditOutlined,
-  DeleteOutlined,
-} from "@ant-design/icons";
+import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { User } from "../../../../types/user.types";
 
 interface AccountsTableProps {
@@ -33,6 +29,17 @@ export default function AccountsTable({
 }: AccountsTableProps) {
   const columns: ColumnsType<User> = [
     { title: "ID", dataIndex: "userId", width: 80 },
+    {
+      title: "",
+      dataIndex: "avatarUrl",
+      width: 56,
+      render: (url: string, record) => (
+        <Avatar src={url} alt={record.fullName || record.email} size="small">
+          {(record.fullName || record.email)?.charAt(0).toUpperCase()}
+        </Avatar>
+      ),
+    },
+
     { title: "Email", dataIndex: "email" },
     {
       title: "Full name",
@@ -45,6 +52,21 @@ export default function AccountsTable({
       width: 160,
       render: (r: string) => <Tag>{r}</Tag>,
     },
+    
+    {
+      title: "Status",
+      dataIndex: "userStatus",
+      width: 120,
+      render: (status: User["userStatus"]) => {
+        let color: string = "default";
+        if (status === "Verified") color = "green";
+        else if (status === "Unverified") color = "orange";
+        else if (status === "Locked") color = "red";
+
+        return <Tag color={color}>{status}</Tag>;
+      },
+    },
+
     {
       title: "Actions",
       key: "actions",
@@ -68,10 +90,7 @@ export default function AccountsTable({
           {/* Lock / Unlock */}
           {record.userStatus !== "Locked" ? (
             <Tooltip title="Lock user">
-              <Button
-                danger
-                onClick={() => onChangeStatus(record, "Locked")}
-              >
+              <Button danger onClick={() => onChangeStatus(record, "Locked")}>
                 Lock
               </Button>
             </Tooltip>

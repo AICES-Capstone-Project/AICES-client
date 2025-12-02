@@ -23,7 +23,6 @@ interface SkillFormValues {
 export default function SkillList() {
   const [loading, setLoading] = useState(false);
   const [skills, setSkills] = useState<Skill[]>([]);
-  const [total, setTotal] = useState(0);
   const [keyword, setKeyword] = useState("");
 
   const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -58,7 +57,6 @@ export default function SkillList() {
           apiRes.message || "Failed to load skills. Please try again."
         );
         setSkills([]);
-        setTotal(0);
         setPagination((prev) => ({
           ...prev,
           current: page,
@@ -70,7 +68,6 @@ export default function SkillList() {
       const list: Skill[] = apiRes.data;
 
       setSkills(list);
-      setTotal(list.length);
       setPagination((prev) => ({
         ...prev,
         current: page,

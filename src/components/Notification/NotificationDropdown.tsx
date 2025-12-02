@@ -26,9 +26,12 @@ import {
 	EllipsisOutlined,
 	ReloadOutlined,
 	ExclamationCircleOutlined,
+	CloseOutlined,
+	MailOutlined,
 } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 import { notificationService } from "../../services/notificationService";
+import { invitationService } from "../../services/invitationService";
 import { useNotificationSignalR } from "../../hooks/useNotificationSignalR";
 import type { Notification } from "../../types/notification.types";
 
@@ -67,6 +70,8 @@ const getNotificationIcon = (type: string) => {
 		},
 		PaymentSuccess: { icon: <DollarOutlined />, color: "#52c41a" },
 		UserRegistered: { icon: <TeamOutlined />, color: "#1890ff" },
+		Invitation: { icon: <MailOutlined />, color: "#722ed1" },
+		Resume: { icon: <FileTextOutlined />, color: "#1890ff" },
 	};
 
 	return typeMap[type] || { icon: <BellFilled />, color: "#1890ff" };
@@ -195,6 +200,11 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 	};
 
 	const handleNotificationClick = async (notif: Notification) => {
+		// Don't close dropdown for notifications with pending invitation
+		if (notif.invitation?.status?.toLowerCase() === "pending") {
+			return;
+		}
+
 		if (!notif.isRead) {
 			await notificationService.markAsRead(notif.notifId);
 			setNotifications((prev) =>
@@ -205,6 +215,116 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 		}
 		// TODO: Navigate to notification detail or related page
 		setOpen(false);
+	};
+
+	const [respondingInvitation, setRespondingInvitation] = useState<
+		number | null
+	>(null);
+
+	const handleAcceptInvitation = async (
+		notif: Notification,
+		e: React.MouseEvent
+	) => {
+		e.stopPropagation();
+		if (!notif.invitation) return;
+
+		setRespondingInvitation(notif.invitation.invitationId);
+		try {
+			const response = await invitationService.acceptInvitation(
+				notif.invitation.invitationId
+			);
+			if (response.status === "Success") {
+				// Update invitation status in notification
+				setNotifications((prev) =>
+					prev.map((n) =>
+						n.notifId === notif.notifId
+							? {
+									...n,
+									isRead: true,
+									invitation: n.invitation
+										? { ...n.invitation, status: "Accepted" as const }
+										: null,
+							  }
+							: n
+					)
+				);
+				antNotification.success({
+					message: t("notification.invitationAccepted", "Đã chấp nhận lời mời"),
+					description: t(
+						"notification.invitationAcceptedDesc",
+						`Bạn đã tham gia ${notif.invitation.companyName}`
+					),
+				});
+			} else {
+				antNotification.error({
+					message: t("notification.error", "Lỗi"),
+					description:
+						response.message ||
+						t("notification.invitationError", "Không thể xử lý lời mời"),
+				});
+			}
+		} catch (error) {
+			console.error("Failed to accept invitation:", error);
+			antNotification.error({
+				message: t("notification.error", "Lỗi"),
+				description: t(
+					"notification.invitationError",
+					"Không thể xử lý lời mời"
+				),
+			});
+		}
+		setRespondingInvitation(null);
+	};
+
+	const handleDeclineInvitation = async (
+		notif: Notification,
+		e: React.MouseEvent
+	) => {
+		e.stopPropagation();
+		if (!notif.invitation) return;
+
+		setRespondingInvitation(notif.invitation.invitationId);
+		try {
+			const response = await invitationService.declineInvitation(
+				notif.invitation.invitationId
+			);
+			if (response.status === "Success") {
+				// Update invitation status in notification
+				setNotifications((prev) =>
+					prev.map((n) =>
+						n.notifId === notif.notifId
+							? {
+									...n,
+									isRead: true,
+									invitation: n.invitation
+										? { ...n.invitation, status: "Declined" as const }
+										: null,
+							  }
+							: n
+					)
+				);
+				antNotification.info({
+					message: t("notification.invitationDeclined", "Đã từ chối lời mời"),
+				});
+			} else {
+				antNotification.error({
+					message: t("notification.error", "Lỗi"),
+					description:
+						response.message ||
+						t("notification.invitationError", "Không thể xử lý lời mời"),
+				});
+			}
+		} catch (error) {
+			console.error("Failed to decline invitation:", error);
+			antNotification.error({
+				message: t("notification.error", "Lỗi"),
+				description: t(
+					"notification.invitationError",
+					"Không thể xử lý lời mời"
+				),
+			});
+		}
+		setRespondingInvitation(null);
 	};
 
 	const filteredNotifications =
@@ -327,22 +447,27 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 				) : (
 					filteredNotifications.map((notif) => {
 						const { icon, color } = getNotificationIcon(notif.type);
-						const itemMenuItems: MenuProps["items"] = !notif.isRead
-							? [
-									{
-										key: "markRead",
-										icon: <CheckOutlined />,
-										label: t("notification.markAsRead", "Đánh dấu là đã đọc"),
-										onClick: (info) => {
-											info.domEvent.stopPropagation();
-											handleMarkAsRead(
-												notif.notifId,
-												info.domEvent as unknown as React.MouseEvent
-											);
+						const isResponding =
+							respondingInvitation === notif.invitation?.invitationId;
+						const isPending =
+							notif.invitation?.status?.toLowerCase() === "pending";
+						const itemMenuItems: MenuProps["items"] =
+							!notif.isRead && !isPending
+								? [
+										{
+											key: "markRead",
+											icon: <CheckOutlined />,
+											label: t("notification.markAsRead", "Đánh dấu là đã đọc"),
+											onClick: (info) => {
+												info.domEvent.stopPropagation();
+												handleMarkAsRead(
+													notif.notifId,
+													info.domEvent as unknown as React.MouseEvent
+												);
+											},
 										},
-									},
-							  ]
-							: [];
+								  ]
+								: [];
 
 						return (
 							<div
@@ -387,6 +512,92 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 									>
 										{formatTimeAgo(notif.createdAt)}
 									</div>
+
+									{/* Invitation Action Buttons - Show when invitation exists and status is pending */}
+									{notif.invitation &&
+										notif.invitation.status?.toLowerCase() === "pending" && (
+											<div className="flex gap-2 mt-3">
+												<Button
+													type="primary"
+													size="middle"
+													loading={isResponding}
+													onClick={(e) => handleAcceptInvitation(notif, e)}
+													className="bg-blue-600 hover:bg-blue-700 border-none font-semibold px-5 h-9"
+												>
+													{t("notification.accept", "Accept")}
+												</Button>
+												<Button
+													size="middle"
+													loading={isResponding}
+													onClick={(e) => handleDeclineInvitation(notif, e)}
+													className="bg-gray-200 hover:bg-gray-300 border-none font-semibold px-5 h-9 text-gray-800"
+												>
+													{t("notification.decline", "Decline")}
+												</Button>
+											</div>
+										)}
+
+									{/* Show invitation status after responded */}
+									{notif.invitation &&
+										notif.invitation.status?.toLowerCase() !== "pending" && (
+											<div className="mt-2">
+												<span
+													className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+														notif.invitation.status?.toLowerCase() ===
+														"accepted"
+															? "bg-green-100 text-green-700"
+															: notif.invitation.status?.toLowerCase() ===
+															  "declined"
+															? "bg-gray-100 text-gray-600"
+															: notif.invitation.status?.toLowerCase() ===
+															  "cancelled"
+															? "bg-red-100 text-red-600"
+															: "bg-yellow-100 text-yellow-700"
+													}`}
+												>
+													{notif.invitation.status?.toLowerCase() ===
+														"accepted" && (
+														<>
+															<CheckCircleOutlined />
+															{t(
+																"notification.invitationStatusAccepted",
+																"Đã chấp nhận"
+															)}
+														</>
+													)}
+													{notif.invitation.status?.toLowerCase() ===
+														"declined" && (
+														<>
+															<CloseOutlined />
+															{t(
+																"notification.invitationStatusDeclined",
+																"Đã từ chối"
+															)}
+														</>
+													)}
+													{notif.invitation.status?.toLowerCase() ===
+														"cancelled" && (
+														<>
+															<ExclamationCircleOutlined />
+															{t(
+																"notification.invitationStatusCancelled",
+																"Đã bị hủy"
+															)}
+														</>
+													)}
+													{notif.invitation.status?.toLowerCase() ===
+														"expired" && (
+														<>
+															<ExclamationCircleOutlined />
+															{t(
+																"notification.invitationStatusExpired",
+																"Đã hết hạn"
+															)}
+														</>
+													)}
+												</span>
+											</div>
+										)}
 								</div>
 
 								{/* Actions */}

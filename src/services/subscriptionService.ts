@@ -2,7 +2,20 @@
 import api from "./api";
 import { API_ENDPOINTS } from "./config";
 import type { ApiResponse } from "../types/api.types";
-import type { SubscriptionPlan, SubscriptionListData } from "../types/subscription.types";
+import type {
+  SubscriptionPlan,
+  SubscriptionListData,
+} from "../types/subscription.types";
+
+export interface UpsertSubscriptionPlanRequest {
+  name: string;
+  description?: string | null;
+  price: number;
+  durationDays: number;
+  resumeLimit: number;
+  hoursLimit: number;
+  stripePriceId: string;
+}
 
 export const subscriptionService = {
   // ================== SYSTEM ADMIN ==================
@@ -35,7 +48,7 @@ export const subscriptionService = {
   },
 
   // ================== SYSTEM CRUD PLAN ==================
-  async create(payload: Partial<SubscriptionPlan>) {
+  async create(payload: UpsertSubscriptionPlanRequest) { 
     const res = await api.post<ApiResponse<SubscriptionPlan>>(
       API_ENDPOINTS.SUBSCRIPTION.SYSTEM_CREATE,
       payload
@@ -43,17 +56,7 @@ export const subscriptionService = {
     return res.data.data!;
   },
 
-  async update(
-    id: number,
-    payload: {
-      name: string;
-      description?: string | null;
-      price: number;
-      durationDays: number;
-      limit: string;
-      isActive: boolean;
-    }
-  ) {
+  async update (id: number, payload: UpsertSubscriptionPlanRequest) {
     const res = await api.patch<ApiResponse<SubscriptionPlan>>(
       API_ENDPOINTS.SUBSCRIPTION.SYSTEM_UPDATE(id),
       payload

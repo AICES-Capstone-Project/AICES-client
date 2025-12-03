@@ -10,12 +10,15 @@ export interface SubscriptionPlan {
   description?: string | null;
   price: number;
   durationDays: number;
-  limit: string;
-  isActive: boolean;
+
+  resumeLimit: number;
+  hoursLimit: number;
+  stripePriceId?: string;
+
+
   createdAt?: string;
   // optional fields sometimes returned by public API
-  resumeLimit?: number;
-  hoursLimit?: number;
+
 }
 
 // ================= Company Subscriptions =================

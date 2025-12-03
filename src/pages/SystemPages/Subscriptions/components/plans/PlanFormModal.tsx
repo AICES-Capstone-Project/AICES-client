@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Subscriptions/components/plans/PlanFormModal.tsx
 
-import { Form, Input, InputNumber, Modal, Switch } from "antd";
+import { Form, Input, InputNumber, Modal } from "antd";
 import type { FormInstance } from "antd";
 import type { SubscriptionPlan } from "../../../../../types/subscription.types";
 
@@ -9,8 +9,9 @@ export interface SubscriptionPlanFormValues {
   description?: string | null;
   price: number;
   durationDays: number;
-  limit: string;
-  isActive: boolean;
+  resumeLimit: number;
+  hoursLimit: number;
+  stripePriceId: string;
 }
 
 interface PlanFormModalProps {
@@ -72,17 +73,28 @@ export default function PlanFormModal({
         >
           <InputNumber min={1} style={{ width: "100%" }} placeholder="30" />
         </Form.Item>
-
         <Form.Item
-          name="limit"
-          label="Limit"
-          rules={[{ required: true, message: "Please enter limit" }]}
+          name="resumeLimit"
+          label="Resume Limit"
+          rules={[{ required: true, message: "Please enter resume limit" }]}
         >
-          <Input placeholder='e.g. "Up to 50 jobs" or "Unlimited"' />
+          <InputNumber min={0} style={{ width: "100%" }} placeholder="5" />
         </Form.Item>
 
-        <Form.Item name="isActive" label="Active" valuePropName="checked">
-          <Switch />
+        <Form.Item
+          name="hoursLimit"
+          label="Hours Limit"
+          rules={[{ required: true, message: "Please enter hours limit" }]}
+        >
+          <InputNumber min={0} style={{ width: "100%" }} placeholder="24" />
+        </Form.Item>
+
+        <Form.Item
+          name="stripePriceId"
+          label="Stripe Price Id"
+          rules={[{ required: true, message: "Please enter Stripe price id" }]}
+        >
+          <Input placeholder="price_1234567890" />
         </Form.Item>
       </Form>
     </Modal>

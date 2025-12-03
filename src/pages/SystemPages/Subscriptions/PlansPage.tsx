@@ -39,7 +39,11 @@ export default function PlansPage() {
     setEditingPlan(null);
     form.resetFields();
     form.setFieldsValue({
-      isActive: true,
+      price: 0,
+      durationDays: 30,
+      resumeLimit: 0,
+      hoursLimit: 0,
+      stripePriceId: "",
     } as Partial<SubscriptionPlanFormValues>);
     setModalVisible(true);
   };
@@ -51,8 +55,9 @@ export default function PlansPage() {
       description: record.description,
       price: record.price,
       durationDays: record.durationDays,
-      limit: record.limit,
-      isActive: record.isActive,
+      resumeLimit: record.resumeLimit,
+      hoursLimit: record.hoursLimit,
+      stripePriceId: record.stripePriceId,
     });
     setModalVisible(true);
   };
@@ -81,8 +86,9 @@ export default function PlansPage() {
         description: values.description,
         price: values.price,
         durationDays: values.durationDays,
-        limit: values.limit,
-        isActive: values.isActive,
+        resumeLimit: values.resumeLimit,
+        hoursLimit: values.hoursLimit,
+        stripePriceId: values.stripePriceId,
       };
 
       if (editingPlan) {

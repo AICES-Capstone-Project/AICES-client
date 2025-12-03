@@ -3,7 +3,7 @@
 import { Button, Popconfirm, Space, Table, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { SubscriptionPlan } from "../../../../../types/subscription.types";
-import PlanStatusTag from "./PlanStatusTag";
+
 
 const { Text } = Typography;
 
@@ -56,14 +56,15 @@ export default function PlansTable({
     },
     {
       title: "Limit",
-      dataIndex: "limit",
+      key: "limit",
+      width: 200,
+      render: (_, record) => (
+        <Text>
+          {record.resumeLimit} resumes / {record.hoursLimit}h
+        </Text>
+      ),
     },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      width: 110,
-      render: (value: boolean) => <PlanStatusTag isActive={value} />,
-    },
+
     {
       title: "Actions",
       key: "actions",

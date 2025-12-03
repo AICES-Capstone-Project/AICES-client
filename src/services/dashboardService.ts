@@ -8,7 +8,7 @@ import type { ApiResponse } from "../types/api.types";
 
 export interface DashboardSummary {
   activeJobs: number;       // Thay cho totalJobs
-  totalCandidates: number;  // Thay cho totalResumes
+  totalMembers: number;  // Thay cho totalResumes
   aiProcessed: number;      // Thay cho totalViews
   creditsRemaining: number; // Trường mới
 }

@@ -4,13 +4,11 @@ import { UserOutlined, DeleteOutlined } from "@ant-design/icons";
 import { companyService } from "../../../../services/companyService";
 import type { ColumnsType } from "antd/es/table";
 import type { CompanyMember } from "../../../../types/company.types";
-import { toastSuccess, toastError } from "../../../../components/UI/Toast";
+import {toastError } from "../../../../components/UI/Toast";
 
 type Props = {
   members: CompanyMember[];
   loading: boolean;
-  onView: (m: CompanyMember) => void;
-  onEdit: (m: CompanyMember) => void;
   onDelete: (m: CompanyMember) => void;
   onChangeStatus?: (m: CompanyMember, status: string) => void;
 };
@@ -108,7 +106,7 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
                   title: null,
                   icon: null,
                   content: (
-                    <div style={{ textAlign: "center", fontSize: 16 , marginBottom: 16 }}>
+                    <div style={{ textAlign: "center", fontSize: 16, marginBottom: 16 }}>
                       Are you sure you want to remove <strong>{record.fullName || record.email}</strong> from the company?
                     </div>
                   ),
@@ -118,7 +116,7 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
                   // Tùy chỉnh footer để căn button 2 đầu
                   footer: (
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <Button  className="company-btn" onClick={() => Modal.destroyAll()}>Cancel</Button>
+                      <Button className="company-btn" onClick={() => Modal.destroyAll()}>Cancel</Button>
                       <Button
                         type="primary"
                         className="company-btn--danger"
@@ -128,7 +126,6 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
                             const res = await companyService.deleteMember(record.comUserId);
                             if (String(res?.status).toLowerCase() === "success") {
                               Modal.destroyAll();
-                              toastSuccess("Member removed successfully");
                               if (typeof onDelete === "function") onDelete(record);
                             } else {
                               Modal.destroyAll();

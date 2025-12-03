@@ -11,9 +11,7 @@ import { useAppSelector } from "../../../hooks/redux";
 import { ROLES } from "../../../services/config";
 import {
 	toastError,
-	toastInfo,
 	toastSuccess,
-	toastWarning,
 } from "../../../components/UI/Toast";
 
 const StaffManagement = () => {
@@ -88,17 +86,15 @@ const StaffManagement = () => {
 		}
 	}, [isHrManager]);
 
-	const handleView = (member: CompanyMember) => {
-		toastInfo("Viewing member", member.fullName || member.email);
-	};
-
-	const handleEdit = (member: CompanyMember) => {
-		toastInfo("Editing member", member.fullName || member.email);
-	};
-
 	const handleDelete = (member: CompanyMember) => {
-		toastWarning("Remove member", member.fullName || member.email);
+		setMembers((prev) => prev.filter((m) => m.comUserId !== member.comUserId));
+		setFilteredMembers((prev) =>
+			prev.filter((m) => m.comUserId !== member.comUserId)
+		);
+
+		toastSuccess("Member removed successfully");
 	};
+
 
 	const handleChangeStatus = async (member: CompanyMember, status: string) => {
 		if (!member?.comUserId) return;
@@ -250,8 +246,6 @@ const StaffManagement = () => {
 					<StaffTable
 						members={filteredMembers}
 						loading={loading}
-						onView={handleView}
-						onEdit={handleEdit}
 						onDelete={handleDelete}
 						onChangeStatus={handleChangeStatus}
 					/>

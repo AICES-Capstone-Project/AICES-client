@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { 
-  Card, Spin, Table, Tag, Row, Col, Statistic, Avatar, 
-  InputNumber, Button, Space, message 
+  Card, Spin, Table, Tag, Row, Col, Statistic, InputNumber, Button, Space, message 
 } from "antd";
 import {
   BarChart,
@@ -54,7 +53,7 @@ const Dashboard: React.FC = () => {
 
       setSummary(summaryRes?.data || { 
         activeJobs: 0, 
-        totalCandidates: 0, 
+        totalMembers: 0, 
         aiProcessed: 0, 
         creditsRemaining: 0 
       });
@@ -165,7 +164,7 @@ const Dashboard: React.FC = () => {
       bodyStyle={{ padding: 24, overflowY: 'auto', height: 'calc(100% - 60px)' }}
     >
       {loading ? (
-        <div style={{ textAlign: "center", padding: 100 }}>
+        <div style={{ textAlign: "center", padding: 50 }}>
           <Spin size="large" />
           <div style={{ marginTop: 10, color: "#888" }}>Loading dashboard...</div>
         </div>
@@ -187,7 +186,7 @@ const Dashboard: React.FC = () => {
               <Card size="small" hoverable>
                 <Statistic
                   title="Total Candidates"
-                  value={summary?.totalCandidates || 0}
+                  value={summary?.totalMembers || 0}
                   prefix={<UserOutlined />}
                   valueStyle={{ color: "#1890ff" }}
                 />
@@ -210,7 +209,7 @@ const Dashboard: React.FC = () => {
                   value={summary?.creditsRemaining || 0}
                   prefix={<WalletOutlined />}
                   valueStyle={{ color: "#cf1322" }}
-                  suffix="point"
+                  suffix="credits"
                 />
               </Card>
             </Col>
@@ -305,7 +304,7 @@ const Dashboard: React.FC = () => {
                       key: "candidate",
                       render: (_, record) => (
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#87d068' }} />
+                          {/* <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#87d068' }} /> */}
                           <div>
                             <div style={{ fontWeight: 600 }}>{record.name}</div>
                             <div style={{ fontSize: 11, color: '#888' }}>{record.jobTitle}</div>

@@ -322,6 +322,11 @@ export const API_ENDPOINTS = {
     TOP_RATE_RESUME: "/dashboard/top-rated-candidates",
   },
 
+  COMPANY_REPORT: {
+    JOBS_EXCEL: (jobId: number) => `/reports/job/${jobId}/excel`,
+    JOBS_PDF: (jobId: number) => `/reports/job/${jobId}/pdf`,
+  },
+
   ROLE: {
     //------------------------------- SYSTEM -----------------------------------------
     SYSTEM_GET: "/system/roles",

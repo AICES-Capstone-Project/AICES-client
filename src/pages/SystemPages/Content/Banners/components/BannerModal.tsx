@@ -2,12 +2,9 @@ import { useEffect } from "react";
 import { Button, Form, Input, Modal, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
-import { bannerService } from "../../../../services/bannerService";
-import type { BannerConfig } from "../../../../types/banner.types";
-import {
-  toastError,
-  toastSuccess,
-} from "../../../../components/UI/Toast";
+import { bannerService } from "../../../../../services/bannerService";
+import type { BannerConfig } from "../../../../../types/banner.types";
+import { toastError, toastSuccess } from "../../../../../components/UI/Toast";
 
 interface BannerModalProps {
   open: boolean;

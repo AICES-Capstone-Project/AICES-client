@@ -1,7 +1,7 @@
 import { Button, Popconfirm, Space, Table, Tag } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-import type { BannerConfig } from "../../../../types/banner.types";
+import type { BannerConfig } from "../../../../../types/banner.types";
 
 interface BannerTableProps {
   loading: boolean;

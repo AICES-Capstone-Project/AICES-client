@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 import type { TablePaginationConfig } from "antd/es/table";
 import { Card, message } from "antd";
 
-import { bannerService } from "../../../services/bannerService";
-import type { BannerConfig } from "../../../types/banner.types";
+import { bannerService } from "../../../../services/bannerService";
+import type { BannerConfig } from "../../../../types/banner.types";
 
 import BannerToolbar from "./components/BannerToolbar";
 import BannerTable from "./components/BannerTable";

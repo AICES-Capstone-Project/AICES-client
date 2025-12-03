@@ -14,7 +14,7 @@ interface UseNotificationSignalROptions {
 interface UseNotificationSignalRReturn {
 	isConnected: boolean;
 	error: string | null;
-	connectionRef: React.MutableRefObject<signalR.HubConnection | null>;
+	connectionRef: React.RefObject<signalR.HubConnection | null>;
 }
 
 export const useNotificationSignalR = (
@@ -54,16 +54,16 @@ export const useNotificationSignalR = (
 		connectionRef.current = connection;
 
 		// Handle receiving new notification
-		connection.on("ReceiveNotification", (notif: any) => {
+		connection.on("ReceiveNotification", (notif: Notification) => {
 			console.log("📨 SignalR: ReceiveNotification", notif);
 
 			// Map backend data to frontend Notification type
 			const mappedNotif: Notification = {
-				notifId: notif.notifId || notif.id,
+				notifId: notif.notifId,
 				message: notif.message,
-				detail: notif.detail || "",
+				detail: notif.detail,
 				type: notif.type,
-				isRead: notif.isRead || false,
+				isRead: notif.isRead,
 				invitation: notif.invitation || null,
 				createdAt: notif.createdAt,
 			};

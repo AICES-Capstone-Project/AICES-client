@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { Card, Table, Tag, Button, Drawer, Space, message } from "antd";
+import { Card, Table, Tag, Button, Drawer, Space, message, Tooltip } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import resumeService from "../../../../services/resumeService";
-import { EyeOutlined, ArrowLeftOutlined } from "@ant-design/icons";
-import { toastError } from "../../../../components/UI/Toast";
+import { EyeOutlined, ArrowLeftOutlined, ReloadOutlined } from "@ant-design/icons";
+import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 
 interface Resume {
     resumeId: number;
@@ -30,6 +30,9 @@ const CompareResumes: React.FC = () => {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
     const [loadingDetail, setLoadingDetail] = useState(false);
+
+    // State quản lý loading cho từng nút resend (đổi tên từ retryingIds cho đúng ngữ cảnh)
+    const [resendingIds, setResendingIds] = useState<number[]>([]);
 
     useEffect(() => {
         if (!jobId || score == null || Number.isNaN(jobId) || Number.isNaN(score)) return;
@@ -86,6 +89,29 @@ const CompareResumes: React.FC = () => {
         }
     };
 
+    // --- HÀM GỌI API RESEND (Sửa lại đúng method) ---
+    const handleResend = async (resumeId: number) => {
+        if (!jobId) return; // Kiểm tra jobId
+
+        setResendingIds((prev) => [...prev, resumeId]);
+        try {
+            // Gọi hàm resend với jobId và resumeId
+            const resp = await resumeService.resend(jobId, resumeId);
+            
+            if (String(resp?.status || "").toLowerCase() === "success") {
+                toastSuccess("Resend successful", "Resume has been resent successfully.");
+            } else {
+                toastError("Resend failed", resp?.message);
+            }
+        } catch (e: any) {
+            console.error("Resend failed:", e);
+            toastError("Resend failed", e?.message);
+        } finally {
+            setResendingIds((prev) => prev.filter((id) => id !== resumeId));
+        }
+    };
+    // ------------------------------------------------
+
     const columns: ColumnsType<Resume> = [
         {
             title: "No", width: 80,
@@ -105,24 +131,40 @@ const CompareResumes: React.FC = () => {
                 <Tag color={s === "Completed" ? "green" : s === "Pending" ? "blue" : "default"}>{s}</Tag>
             ),
         },
-        {
-            title: "Sub-criteria score",
-            align: "center" as const,
-            width: 150,
-            
-        },
+        // {
+        //     title: "Sub-criteria score",
+        //     align: "center" as const,
+        //     width: 150,
+        //     render: (_, record) => (
+        //        <span style={{ color: '#999' }}>View details</span>
+        //     )
+        // },
         {
             title: "Actions",
             key: "actions",
-            width: 120,
+            width: 150,
             align: "center" as const,
             render: (_, record) => (
                 <Space>
-                    <Button
-                        type="link"
-                        icon={<EyeOutlined />}
-                        onClick={() => loadResumeDetail(record.resumeId)}
-                    />
+                    <Tooltip title="View Details">
+                        <Button
+                            type="text"
+                            icon={<EyeOutlined style={{ color: '#1890ff' }} />}
+                            onClick={() => loadResumeDetail(record.resumeId)}
+                        />
+                    </Tooltip>
+
+                    {/* --- NÚT RELOAD GỌI HÀM RESEND --- */}
+                    <Tooltip title="Resend Resume">
+                        <Button
+                            type="text"
+                            icon={<ReloadOutlined style={{ color: '#faad14' }} />}
+                            // Loading dựa trên resendingIds
+                            loading={resendingIds.includes(record.resumeId)}
+                            onClick={() => handleResend(record.resumeId)}
+                        />
+                    </Tooltip>
+                    {/* -------------------------------- */}
                 </Space>
             ),
         },

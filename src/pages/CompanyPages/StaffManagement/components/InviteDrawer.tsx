@@ -21,7 +21,7 @@ const InviteDrawer: React.FC<Props> = ({ open, onClose, onSubmit, submitting }) 
           rules={[
             { required: true, message: "Please enter an email address" },
             { type: "email", message: "Please enter a valid email address" },
-            { pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/, message: "Only Gmail addresses are allowed" },
+            // { pattern: /^[a-zA-Z0-9._%+-]+@gmail\.com$/, message: "Only Gmail addresses are allowed" },
           ]}
         >
           <Input size="large" prefix={<MailOutlined />} placeholder="Enter email address (e.g. example@gmail.com)" />

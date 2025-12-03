@@ -109,6 +109,25 @@ button {
 		color: var(--color-primary) !important;
 	}
 
+	/* 👇👇👇 PHẦN THÊM MỚI: Style cho InputNumber ở Dashboard 👇👇👇 */
+    /* Chỉ đổi màu khi không có lỗi (status != error) */
+    .company-input-number.ant-input-number:not(.ant-input-number-status-error) {
+        border-color: var(--color-primary-light) !important;
+    }
+
+    /* Hover & Focus state */
+    .company-input-number.ant-input-number:not(.ant-input-number-status-error):hover,
+    .company-input-number.ant-input-number:not(.ant-input-number-status-error):focus,
+    .company-input-number.ant-input-number-focused:not(.ant-input-number-status-error) {
+        border-color: var(--color-primary-light) !important;
+        box-shadow: 0 0 0 2px rgba(77, 124, 15, 0.2) !important; /* Hiệu ứng glow nhẹ màu xanh */
+    }
+
+    /* Đổi màu 2 nút tăng giảm bên phải cho đồng bộ */
+    .company-input-number .ant-input-number-handler-wrap {
+        border-left-color: var(--color-primary-light) !important;
+    }
+
 	/* =================== HEADER MENU =================== */
 	.custom-menu.ant-menu-horizontal {
 		border: none !important;

@@ -38,6 +38,14 @@ export const resumeService = {
     return await post<null>(API_ENDPOINTS.RESUME.COMPANY_RETRY(resumeId), {});
   },
 
+  // Resend resume to AI for re-analysis// Resend resume (e.g., resend email to candidate or reviewer)
+  resend: async (jobId: number, resumeId: number): Promise<ApiResponse<null>> => {
+    return await post<null>(
+      API_ENDPOINTS.RESUME.COMPANY_RESEND(jobId, resumeId),
+      {} // Body rỗng vì data đã có sẵn theo resumeId, method POST yêu cầu phải có body
+    );
+  },
+
   // Delete a resume
   delete: async (resumeId: number): Promise<ApiResponse<null>> => {
     return await remove<null>(API_ENDPOINTS.RESUME.COMPANY_DELETE(resumeId));

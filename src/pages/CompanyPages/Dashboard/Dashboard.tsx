@@ -1,570 +1,339 @@
-import { useEffect, useState } from "react";
-import { Card, Row, Col, Statistic, Table, Tabs, Spin, Empty, Progress } from "antd";
+import React, { useEffect, useState } from "react";
+import { 
+  Card, Spin, Table, Tag, Row, Col, Statistic, Avatar, 
+  InputNumber, Button, Space, message 
+} from "antd";
 import {
-	FundOutlined,
-	FileTextOutlined,
-	TrophyOutlined,
-} from "@ant-design/icons";
-import {
-	BarChart,
-	Bar,
-	LineChart,
-	Line,
-	PieChart,
-	Pie,
-	Cell,
-	XAxis,
-	YAxis,
-	CartesianGrid,
-	Tooltip,
-	Legend,
-	ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+  Cell,
 } from "recharts";
-import { jobService } from "../../../services/jobService";
-import { companyService } from "../../../services/companyService";
+import {
+  UserOutlined,
+  FileProtectOutlined,
+  TrophyOutlined,
+  ThunderboltOutlined,
+  WalletOutlined,
+  RiseOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 
-const { TabPane } = Tabs;
+// Import Service and Types
+import companyDashboardService from "../../../services/dashboardService";
+import type {
+  DashboardSummary,
+  TopCandidate,
+  TopCategory,
+} from "../../../services/dashboardService";
 
-const COLORS = ["#52c41a", "#ff4d4f", "#1890ff", "#faad14", "#722ed1", "#eb2f96"];
+const Dashboard: React.FC = () => {
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [topCandidates, setTopCandidates] = useState<TopCandidate[]>([]);
+  const [topCategories, setTopCategories] = useState<TopCategory[]>([]);
+  
+  // State input
+  const [topN, setTopN] = useState<number | null>(5); 
+  
+  const [loadingTopCate, setLoadingTopCate] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-interface DashboardStats {
-	activeJobs: number;
-	newJobs: number;
-	totalJobs: number;
-	cvsToday: number;
-	cvsThisWeek: number;
-	cvsThisMonth: number;
-	cvsTotal: number;
-	aiScreenedSuccess: number;
-	pendingScreening: number;
-	highScore: number;
-	lowScore: number;
-}
+  // Hàm fetch toàn bộ dữ liệu (dùng cho nút Refresh tổng hoặc load ban đầu)
+  const fetchAllData = async () => {
+    try {
+      setLoading(true);
+      const [summaryRes, candidatesData] = await Promise.all([
+        companyDashboardService.getSummary(),
+        companyDashboardService.getTopRatedCandidates(5),
+      ]);
 
-interface TopCV {
-	resumeId: number;
-	fullName: string;
-	jobTitle: string;
-	score: number;
-	category: string;
-	uploadDate: string;
-}
+      setSummary(summaryRes?.data || { 
+        activeJobs: 0, 
+        totalCandidates: 0, 
+        aiProcessed: 0, 
+        creditsRemaining: 0 
+      });
+      
+      setTopCandidates(candidatesData || []);
+      
+      // Gọi luôn cái chart
+      if (topN) {
+        await fetchTopCategories(topN);
+      }
+    } catch (err) {
+      console.error("Dashboard API error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-const Dashboard = () => {
-	const containerStyle: React.CSSProperties = {
-		maxWidth: 1200,
-		margin: "0 auto",
-		padding: "24px",
-	};
+  const fetchTopCategories = async (n: number) => {
+    try {
+      setLoadingTopCate(true);
+      const data = await companyDashboardService.getTopCategorySpec(n);
+      setTopCategories(data || []);
+    } catch (err) {
+      console.error("Fetch Top Categories error:", err);
+    } finally {
+      setLoadingTopCate(false);
+    }
+  };
 
-	const cardStyleCommon: React.CSSProperties = {
-		borderRadius: 12,
-		boxShadow: "0 6px 18px rgba(13,38,59,0.06)",
-		overflow: "hidden",
-	};
-	const [loading, setLoading] = useState(true);
-	const [stats, setStats] = useState<DashboardStats>({
-		activeJobs: 0,
-		newJobs: 0,
-		totalJobs: 0,
-		cvsToday: 0,
-		cvsThisWeek: 0,
-		cvsThisMonth: 0,
-		cvsTotal: 0,
-		aiScreenedSuccess: 0,
-		pendingScreening: 0,
-		highScore: 0,
-		lowScore: 0,
-	});
-	const [topCVs, setTopCVs] = useState<TopCV[]>([]);
-	const [topCVsFilter, setTopCVsFilter] = useState<string>("all");
+  useEffect(() => {
+    fetchAllData();
+  }, []);
 
-	useEffect(() => {
-		loadDashboardData();
-	}, []);
+  const handleReloadTopCate = () => {
+    if (!topN) {
+      message.warning("Please enter a number!");
+      return;
+    }
+    if (topN < 2) {
+      message.warning("Minimum value is 2!");
+      return;
+    }
+    fetchTopCategories(topN);
+  };
 
-	const loadDashboardData = async () => {
-		try {
-			setLoading(true);
+  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884d8", "#82ca9d"];
 
-			// Get company info to get companyId
-			const companyResp = await companyService.getSelf();
-			if (String(companyResp?.status || '').toLowerCase() === "success" && companyResp.data) {
-				const cId = companyResp.data.companyId;
+  // 👇 Custom Component để hiển thị 2 dòng trên trục Y
+  const CustomYAxisTick = (props: any) => {
+    const { x, y, payload } = props;
+    // payload.index giúp lấy đúng phần tử trong mảng topCategories
+    const item = topCategories[payload.index];
 
-				// Load all data in parallel
-				await Promise.all([
-					loadJobStats(cId),
-					loadCVStats(),
-					loadTopCVs(cId),
-				]);
-			}
-		} catch (error) {
-			console.error("Failed to load dashboard data:", error);
-		} finally {
-			setLoading(false);
-		}
-	};
+    if (!item) return <g />;
 
-	const loadJobStats = async (_cId: number) => {
-		try {
-			// Get all jobs to calculate stats
-			const publishedResp = await jobService.getCompanyJobs(1, 100);
-			const pendingResp = await jobService.getPendingJobs(1, 100);
+    // Hàm cắt chuỗi nếu quá dài
+    const truncate = (str: string, max: number) => 
+      str.length > max ? str.substring(0, max) + "..." : str;
 
-			let activeCount = 0;
-			let newCount = 0;
-			let totalCount = 0;
+    return (
+      <g transform={`translate(${x},${y})`}>
+        {/* Dòng 1: Tên Specialization (Đậm) */}
+        <text x={-6} y={-4} dy={0} textAnchor="end" fill="#333" fontSize={12} fontWeight={600}>
+          {truncate(item.specializationName, 25)}
+        </text>
+        {/* Dòng 2: Tên Category (Nhạt hơn) */}
+        <text x={-6} y={12} dy={0} textAnchor="end" fill="#888" fontSize={11}>
+          {truncate(item.categoryName, 30)}
+        </text>
+      </g>
+    );
+  };
 
-			if (String(publishedResp?.status || '').toLowerCase() === "success" && publishedResp.data?.jobs) {
-				const publishedJobs = publishedResp.data.jobs;
-				totalCount += publishedJobs.length;
-				activeCount = publishedJobs.filter(
-					(j) => j.jobStatus === "Published"
-				).length;
+  return (
+    // Sử dụng Wrapper Card giống hệt JobManagement
+    <Card
+      title={
+        <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 16 }}>
+          {/* Left: Title */}
+          <div style={{ flex: '0 0 auto' }}>
+            <span className="font-semibold" style={{ fontSize: 16 }}>Dashboard Overview</span>
+          </div>
 
-				// Jobs created in last 7 days are "new"
-				const weekAgo = new Date();
-				weekAgo.setDate(weekAgo.getDate() - 7);
-				newCount = publishedJobs.filter(
-					(j) => new Date(j.createdAt) >= weekAgo
-				).length;
-			}
+          {/* Middle: Spacer (Dashboard không cần search bar ở đây) */}
+          <div style={{ flex: 1 }}></div>
 
-			if (String(pendingResp?.status || '').toLowerCase() === "success" && pendingResp.data?.jobs) {
-				totalCount += pendingResp.data.jobs.length;
-			}
+          {/* Right: Actions */}
+          <div style={{ flex: '0 0 auto' }}>
+            <div className="flex gap-2 items-center">
+              <Button
+                className="company-btn"
+                icon={<ReloadOutlined />}
+                onClick={fetchAllData}
+                loading={loading}
+              >
+                Refresh Data
+              </Button>
+            </div>
+          </div>
+        </div>
+      }
+      style={{
+        maxWidth: 1200,
+        margin: "12px auto",
+        borderRadius: 12,
+        height: 'calc(100% - 25px)',
+      }}
+      bodyStyle={{ padding: 24, overflowY: 'auto', height: 'calc(100% - 60px)' }}
+    >
+      {loading ? (
+        <div style={{ textAlign: "center", padding: 100 }}>
+          <Spin size="large" />
+          <div style={{ marginTop: 10, color: "#888" }}>Loading dashboard...</div>
+        </div>
+      ) : (
+        <>
+          {/* ================= 1. STATISTICS (4 Cards) ================ */}
+          <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+            <Col xs={24} sm={12} lg={6}>
+              <Card size="small" hoverable>
+                <Statistic
+                  title="Active Jobs"
+                  value={summary?.activeJobs || 0}
+                  prefix={<FileProtectOutlined />}
+                  valueStyle={{ color: "#3f8600" }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card size="small" hoverable>
+                <Statistic
+                  title="Total Candidates"
+                  value={summary?.totalCandidates || 0}
+                  prefix={<UserOutlined />}
+                  valueStyle={{ color: "#1890ff" }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card size="small" hoverable>
+                <Statistic
+                  title="AI Processed CVs"
+                  value={summary?.aiProcessed || 0}
+                  prefix={<ThunderboltOutlined />}
+                  valueStyle={{ color: "#faad14" }}
+                />
+              </Card>
+            </Col>
+            <Col xs={24} sm={12} lg={6}>
+              <Card size="small" hoverable>
+                <Statistic
+                  title="Upload Credits"
+                  value={summary?.creditsRemaining || 0}
+                  prefix={<WalletOutlined />}
+                  valueStyle={{ color: "#cf1322" }}
+                  suffix="point"
+                />
+              </Card>
+            </Col>
+          </Row>
 
-			setStats((prev) => ({
-				...prev,
-				activeJobs: activeCount,
-				newJobs: newCount,
-				totalJobs: totalCount,
-			}));
-		} catch (error) {
-			console.error("Failed to load job stats:", error);
-		}
-	};
+          <Row gutter={[24, 24]}>
+            {/* ================= 2. CHARTS ================= */}
+            <Col xs={24} lg={14}>
+              <Card 
+                size="small"
+                title={<span><RiseOutlined /> Popular Specializations</span>} 
+                extra={
+                  <Space>
+                    <span style={{ fontSize: 12, color: '#888' }}>Top:</span>
+                    <InputNumber 
+                      className="company-input-number"
+                      min={2} 
+                      precision={0}
+                      value={topN} 
+                      onChange={(val) => setTopN(val)} 
+                      status={!topN || topN < 2 ? "error" : ""}
+                      style={{ width: 60 }}
+                      onPressEnter={handleReloadTopCate}
+                    />
+                    <Button 
+                      className="company-btn"
+                      icon={<ReloadOutlined />} 
+                      onClick={handleReloadTopCate}
+                      loading={loadingTopCate}
+                      disabled={!topN || topN < 2}
+                    >
+                      Apply
+                    </Button>
+                  </Space>
+                }
+                style={{ minHeight: 450 }}
+              >
+                {loadingTopCate ? (
+                  <div style={{ textAlign: "center", padding: 80 }}>
+                    <Spin />
+                  </div>
+                ) : topCategories.length > 0 ? (
+                  <ResponsiveContainer width="100%" height={350}>
+                    <BarChart
+                      data={topCategories}
+                      layout="vertical"
+                      // Tăng margin left để chứa đủ text dài
+                      margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis type="number" allowDecimals={false} />
+                      
+                      {/* 👇 SỬ DỤNG CUSTOM TICK */}
+                      <YAxis 
+                        type="category" 
+                        dataKey="specializationName"
+                        width={190} // Tăng chiều rộng trục Y để đủ chỗ cho 2 dòng
+                        tick={<CustomYAxisTick />} 
+                        interval={0} // Đảm bảo hiện đủ các dòng không bị ẩn
+                      />
 
-	const loadCVStats = async () => {
-		try {
-			// Get all jobs first
-			const jobsResp = await jobService.getCompanyJobs(1, 100);
-			if (String(jobsResp?.status || '').toLowerCase() !== "success" || !jobsResp.data?.jobs) return;
+                      <Tooltip formatter={(val) => [`${val} Resumes`, 'Count']} />
+                      <Legend />
+                      <Bar dataKey="resumeCount" name="Resume Count" barSize={20} radius={[0, 4, 4, 0]}>
+                        {topCategories.map((_, index) => (
+                          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: 50, color: '#999' }}>No data available</div>
+                )}
+              </Card>
+            </Col>
 
-			const jobs = jobsResp.data.jobs;
-			let allResumes: any[] = [];
-
-			// Fetch resumes for each job
-		for (const job of jobs.slice(0, 10)) {
-			// Limit to first 10 jobs to avoid too many requests
-			try {
-				const resumesResp = await companyService.getResumes(
-					job.jobId,
-					{ page: 1, pageSize: 100 }
-				);
-				if (String(resumesResp?.status || '').toLowerCase() === "success" && resumesResp.data?.items) {
-					allResumes = [...allResumes, ...resumesResp.data.items];
-				}
-			} catch (err) {
-				// Skip if no resumes for this job
-				console.log(`No resumes for job ${job.jobId}`);
-			}
-		}			// Calculate CV stats based on dates
-			const now = new Date();
-			const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-			const weekAgo = new Date(today);
-			weekAgo.setDate(weekAgo.getDate() - 7);
-			const monthAgo = new Date(today);
-			monthAgo.setMonth(monthAgo.getMonth() - 1);
-
-			let cvsToday = 0;
-			let cvsWeek = 0;
-			let cvsMonth = 0;
-			let aiScreened = 0;
-			let pending = 0;
-			let highScore = 0;
-			let lowScore = 0;
-
-			allResumes.forEach((resume) => {
-				const uploadDate = resume.uploadedAt
-					? new Date(resume.uploadedAt)
-					: new Date();
-
-				if (uploadDate >= today) cvsToday++;
-				if (uploadDate >= weekAgo) cvsWeek++;
-				if (uploadDate >= monthAgo) cvsMonth++;
-
-				// AI Screening stats
-				if (resume.status === "Screened" || resume.totalResumeScore != null) {
-					aiScreened++;
-				} else if (resume.status === "Pending") {
-					pending++;
-				}
-
-				// Score distribution
-				if (resume.totalResumeScore != null) {
-					if (resume.totalResumeScore >= 50) {
-						highScore++;
-					} else {
-						lowScore++;
-					}
-				}
-			});
-
-			setStats((prev) => ({
-				...prev,
-				cvsToday,
-				cvsThisWeek: cvsWeek,
-				cvsThisMonth: cvsMonth,
-				cvsTotal: allResumes.length,
-				aiScreenedSuccess: aiScreened,
-				pendingScreening: pending,
-				highScore,
-				lowScore,
-			}));
-		} catch (error) {
-			console.error("Failed to load CV stats:", error);
-		}
-	};
-
-	const loadTopCVs = async (_cId: number) => {
-		try {
-			// Get all jobs
-			const jobsResp = await jobService.getCompanyJobs(1, 100);
-			if (String(jobsResp?.status || '').toLowerCase() !== "success" || !jobsResp.data?.jobs) return;
-
-			const jobs = jobsResp.data.jobs;
-			let allResumesWithDetails: TopCV[] = [];
-
-			// Fetch resumes for each job and build top CVs list
-			for (const job of jobs.slice(0, 10)) {
-				try {
-					const resumesResp = await companyService.getResumes(
-						job.jobId,
-						{ page: 1, pageSize: 100 }
-					);
-					if (String(resumesResp?.status || '').toLowerCase() === "success" && resumesResp.data?.items) {
-						const resumes = resumesResp.data.items;
-						resumes.forEach((resume: any) => {
-							if (resume.totalResumeScore != null) {
-								allResumesWithDetails.push({
-									resumeId: resume.resumeId,
-									fullName: resume.fullName || "Unknown",
-									jobTitle: job.title,
-									score: resume.totalResumeScore,
-									category: job.categoryName || "Uncategorized",
-									uploadDate: resume.uploadedAt || new Date().toISOString(),
-								});
-							}
-						});
-					}
-				} catch (err) {
-					console.log(`No resumes for job ${job.jobId}`);
-				}
-			}
-
-			// Sort by score and take top 100
-			allResumesWithDetails.sort((a, b) => b.score - a.score);
-			setTopCVs(allResumesWithDetails.slice(0, 100));
-		} catch (error) {
-			console.error("Failed to load top CVs:", error);
-		}
-	};
-
-	const getFilteredTopCVs = (): TopCV[] => {
-		if (!topCVs || topCVs.length === 0) return [];
-		if (topCVsFilter === "all") return topCVs;
-		return topCVs.filter((cv) => cv.category === topCVsFilter);
-	};
-
-	const topCVsColumns = [
-		{
-			title: "Rank",
-			key: "rank",
-			width: 60,
-			render: (_: any, __: any, index: number) => (
-				<span className="font-bold text-blue-600">#{index + 1}</span>
-			),
-		},
-		{
-			title: "Candidate Name",
-			dataIndex: "fullName",
-			key: "fullName",
-			render: (text: string) => <span className="font-medium">{text}</span>,
-		},
-		{
-			title: "Job Title",
-			dataIndex: "jobTitle",
-			key: "jobTitle",
-		},
-		{
-			title: "Category",
-			dataIndex: "category",
-			key: "category",
-			render: (category: string) => (
-				<span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-md text-sm">
-					{category}
-				</span>
-			),
-		},
-		{
-			title: "Score",
-			dataIndex: "score",
-			key: "score",
-			render: (score: number) => (
-				<div className="flex items-center gap-2">
-					<Progress
-						percent={score}
-						size="small"
-						strokeColor={score >= 80 ? "#52c41a" : score >= 50 ? "#faad14" : "#ff4d4f"}
-						style={{ width: 100 }}
-					/>
-					<span className="font-semibold">{score}%</span>
-				</div>
-			),
-			sorter: (a: TopCV, b: TopCV) => b.score - a.score,
-		},
-		{
-			title: "Upload Date",
-			dataIndex: "uploadDate",
-			key: "uploadDate",
-			render: (date: string) => new Date(date).toLocaleDateString(),
-		},
-	];
-
-	const uniqueCategories =
-		topCVs.length > 0 ? [...new Set(topCVs.map((cv) => cv.category))] : [];
-
-	// Prepare chart data
-	const cvStatsChartData = [
-		{ name: "Today", count: stats.cvsToday },
-		{ name: "This Week", count: stats.cvsThisWeek },
-		{ name: "This Month", count: stats.cvsThisMonth },
-		{ name: "Total", count: stats.cvsTotal },
-	];
-
-	const jobStatsChartData = [
-		{ name: "Active", count: stats.activeJobs, fill: "#3f8600" },
-		{ name: "New", count: stats.newJobs, fill: "#1890ff" },
-		{ name: "Total", count: stats.totalJobs, fill: "#722ed1" },
-	];
-
-	const screeningPieData = [
-		{ name: "Screened", value: stats.aiScreenedSuccess },
-		{ name: "Pending", value: stats.pendingScreening },
-	];
-
-	const scorePieData = [
-		{ name: "Score ≥ 50%", value: stats.highScore },
-		{ name: "Score < 50%", value: stats.lowScore },
-	];
-
-	const categoryDistribution = uniqueCategories.map((category) => ({
-		name: category,
-		count: topCVs.filter((cv) => cv.category === category).length,
-	}));
-
-	if (loading) {
-		return (
-			<div className="flex justify-center items-center min-h-[400px] flex-col">
-				<Spin size="large" tip="Loading dashboard data..." />
-			</div>
-		);
-	}
-
-	return (
-		<div style={containerStyle}>
-			<h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 16, color: "#111827" }}>Company Dashboard</h1>
-
-			{/* Job Statistics */}
-			<Row gutter={[16, 16]} className="mb-4">
-				<Col xs={24} sm={12} lg={8}>
-					<Card style={{ ...cardStyleCommon, borderLeft: "4px solid #16a34a" }} bodyStyle={{ padding: 20 }}>
-							<Statistic
-								title="Active Jobs"
-								value={stats.activeJobs}
-								prefix={<FundOutlined />}
-								valueStyle={{ color: "#16a34a", fontWeight: 700 }}
-							/>
-						</Card>
-				</Col>
-				<Col xs={24} sm={12} lg={8}>
-						<Card style={{ ...cardStyleCommon, borderLeft: "4px solid #0ea5e9" }} bodyStyle={{ padding: 20 }}>
-							<Statistic
-								title="New Jobs (7d)"
-								value={stats.newJobs}
-								prefix={<FundOutlined />}
-								valueStyle={{ color: "#0ea5e9", fontWeight: 700 }}
-							/>
-						</Card>
-				</Col>
-				<Col xs={24} sm={12} lg={8}>
-						<Card style={{ ...cardStyleCommon, borderLeft: "4px solid #6d28d9" }} bodyStyle={{ padding: 20 }}>
-							<Statistic
-								title="Total Jobs"
-								value={stats.totalJobs}
-								prefix={<FundOutlined />}
-								valueStyle={{ color: "#6d28d9", fontWeight: 700 }}
-							/>
-						</Card>
-				</Col>
-			</Row>
-
-			{/* CV Statistics */}
-			<h2 className="text-xl font-semibold mt-8 mb-4 text-gray-800 flex items-center gap-2">CV Upload Statistics</h2>
-			<Row gutter={[16, 16]} className="mb-4">
-				{[
-				  { title: 'CVs Today', value: stats.cvsToday, color: '#f97316', border: '#fb923c' },
-				  { title: 'CVs This Week', value: stats.cvsThisWeek, color: '#06b6d4', border: '#06b6d4' },
-				  { title: 'CVs This Month', value: stats.cvsThisMonth, color: '#7c3aed', border: '#7c3aed' },
-				  { title: 'Total CVs', value: stats.cvsTotal, color: '#ec4899', border: '#ec4899' },
-				].map((kpi, i) => (
-				  <Col key={i} xs={24} sm={12} lg={6}>
-					<Card style={{ ...cardStyleCommon, borderLeft: `4px solid ${kpi.border}` }} bodyStyle={{ padding: 20 }}>
-					  <Statistic title={kpi.title} value={kpi.value} prefix={<FileTextOutlined />} valueStyle={{ color: kpi.color, fontWeight: 700 }} />
-					</Card>
-				  </Col>
-				))}
-			</Row>
-
-			{/* Charts Section */}
-			<Row gutter={[16, 16]} className="mb-4">
-				{/* Job Statistics Chart */}
-				<Col xs={24} lg={8}>
-					<Card style={{ ...cardStyleCommon }} title="Job Statistics">
-						<ResponsiveContainer width="100%" height={250}>
-							<BarChart data={jobStatsChartData}>
-								<CartesianGrid strokeDasharray="3 3" />
-								<XAxis dataKey="name" />
-								<YAxis />
-								<Tooltip />
-								<Bar dataKey="count" fill="#1890ff" />
-							</BarChart>
-						</ResponsiveContainer>
-					</Card>
-				</Col>
-
-				{/* CV Upload Trend */}
-				<Col xs={24} lg={8}>
-					<Card style={{ ...cardStyleCommon }} title="CV Upload Trend">
-						<ResponsiveContainer width="100%" height={250}>
-							<LineChart data={cvStatsChartData}>
-								<CartesianGrid strokeDasharray="3 3" />
-								<XAxis dataKey="name" />
-								<YAxis />
-								<Tooltip />
-								<Legend />
-								<Line
-									type="monotone"
-									dataKey="count"
-									stroke="#52c41a"
-									strokeWidth={2}
-									name="CVs Uploaded"
-								/>
-							</LineChart>
-						</ResponsiveContainer>
-					</Card>
-				</Col>
-
-				{/* AI Screening Status */}
-				<Col xs={24} lg={8}>
-					<Card style={{ ...cardStyleCommon }} title="AI Screening Status">
-						<ResponsiveContainer width="100%" height={250}>
-							<PieChart>
-								<Pie
-									data={screeningPieData}
-									cx="50%"
-									cy="50%"
-									labelLine={false}
-									label={({ name, value }) => `${name}: ${value}`}
-									outerRadius={80}
-									fill="#8884d8"
-									dataKey="value"
-								>
-									{screeningPieData.map((_entry, index) => (
-										<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-									))}
-								</Pie>
-								<Tooltip />
-							</PieChart>
-						</ResponsiveContainer>
-					</Card>
-				</Col>
-			</Row>
-
-			{/* Score Distribution & Category Distribution */}
-			<Row gutter={[16, 16]} className="mb-4">
-				<Col xs={24} lg={12}>
-					<Card style={{ ...cardStyleCommon }} title="Score Distribution">
-						<ResponsiveContainer width="100%" height={300}>
-							<PieChart>
-								<Pie
-									data={scorePieData}
-									cx="50%"
-									cy="50%"
-									labelLine={false}
-									label={({ name, value, percent }) =>
-										`${name}: ${value} (${((percent || 0) * 100).toFixed(0)}%)`
-									}
-									outerRadius={100}
-									fill="#8884d8"
-									dataKey="value"
-								>
-									<Cell fill="#52c41a" />
-									<Cell fill="#ff4d4f" />
-								</Pie>
-								<Tooltip />
-							</PieChart>
-						</ResponsiveContainer>
-					</Card>
-				</Col>
-
-				{categoryDistribution.length > 0 && (
-					<Col xs={24} lg={12}>
-						<Card style={{ ...cardStyleCommon }} title="Top CVs by Category">
-							<ResponsiveContainer width="100%" height={300}>
-								<BarChart data={categoryDistribution}>
-									<CartesianGrid strokeDasharray="3 3" />
-									<XAxis dataKey="name" />
-									<YAxis />
-									<Tooltip />
-									<Bar dataKey="count" fill="#722ed1" />
-								</BarChart>
-							</ResponsiveContainer>
-						</Card>
-					</Col>
-				)}
-			</Row>
-
-			{/* Top 100 CVs */}
-			<h2 className="text-xl font-semibold mt-8 mb-4 text-gray-800 flex items-center gap-2">
-				<TrophyOutlined /> Top CVs by Score
-			</h2>
-			<Card style={{ ...cardStyleCommon, marginBottom: 16 }}>
-				{topCVs.length > 0 ? (
-					<>
-						<Tabs defaultActiveKey="all" onChange={(key) => setTopCVsFilter(key)} tabBarStyle={{ marginBottom: 12 }}>
-							<TabPane tab="All Categories" key="all" />
-							{uniqueCategories.map((category) => (
-								<TabPane tab={category} key={category} />
-							))}
-						</Tabs>
-						<Table
-							columns={topCVsColumns}
-							dataSource={getFilteredTopCVs()}
-							rowKey="resumeId"
-							size="middle"
-							pagination={{ pageSize: 10, showSizeChanger: true, showTotal: (total) => `Total ${total} CVs` }}
-							// remove forced horizontal scroll so table fits container
-						/>
-					</>
-				) : (
-					<Empty description="No CVs with scores yet" />
-				)}
-			</Card>
-		</div>
-	);
+            {/* ================= 3. TOP CANDIDATES ================ */}
+            <Col xs={24} lg={10}>
+              <Card 
+                size="small"
+                title={<span><TrophyOutlined /> Top Potential Candidates</span>} 
+                style={{ minHeight: 450 }}
+              >
+                <Table
+                  dataSource={topCandidates}
+                  rowKey={(_, index) => index!.toString()} 
+                  pagination={false}
+                  size="middle"
+                  columns={[
+                    {
+                      title: "Candidate",
+                      key: "candidate",
+                      render: (_, record) => (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#87d068' }} />
+                          <div>
+                            <div style={{ fontWeight: 600 }}>{record.name}</div>
+                            <div style={{ fontSize: 11, color: '#888' }}>{record.jobTitle}</div>
+                          </div>
+                        </div>
+                      )
+                    },
+                    {
+                      title: "AI Score",
+                      dataIndex: "aiScore",
+                      key: "aiScore",
+                      align: "center",
+                      width: 90,
+                      render: (score) => (
+                        <Tag color={score >= 80 ? "green" : "orange"}>
+                          {score}
+                        </Tag>
+                      ),
+                    },
+                  ]}
+                />
+              </Card>
+            </Col>
+          </Row>
+        </>
+      )}
+    </Card>
+  );
 };
 
 export default Dashboard;

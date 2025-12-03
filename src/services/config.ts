@@ -232,6 +232,12 @@ export const API_ENDPOINTS = {
 		COMPANY_SEND_JOIN_REQUEST: (companyId: number) =>
 			`/companies/${companyId}/join`,
 
+		// HR_Manager gửi lời mời qua email
+		COMPANY_SEND_INVITATION:`/companies/invitations`,
+
+		// HR_Manager xem danh sách lời mời của công ty
+		COMPANY_GET_INVITATIONS: "/companies/invitations",
+
 		// HR_Manager xem các yêu cầu tham gia company
 		COMPANY_GET_PENDING_JOIN_REQUESTS: "/companies/join-requests",
 
@@ -294,8 +300,17 @@ export const API_ENDPOINTS = {
 		// Gửi lại resume để AI phân tích lại
 		COMPANY_RETRY: (resumeId: number) => `/resumes/${resumeId}/retry`,
 
+		COMPANY_RESEND: (jobId: number, resumeId: number) => `/jobs/${jobId}/resumes/${resumeId}/resend`,
+
 		// Delete a resume
 		COMPANY_DELETE: (resumeId: number) => `/resumes/${resumeId}`,
+	},
+
+	COMPANY_DASHBOARD: {
+		TOP_CATE_SPEC: "/dashboard/top-category-spec",
+		SUMMARY: "/dashboard/summary",
+		TOP_RATE_RESUME: "/dashboard/top-rated-candidates",
+		
 	},
 
 	ROLE: {

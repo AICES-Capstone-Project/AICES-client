@@ -116,17 +116,46 @@ const ResumeList: React.FC = () => {
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
 				const raw = Array.isArray(resp.data) ? resp.data : resp.data.items || [];
 				const resumeList = (Array.isArray(raw) ? raw : []) as any[];
-				const mapped: Resume[] = resumeList.map((r) => ({
-					resumeId: r.resumeId,
-					fullName: r.fullName || r.candidateName || "Unknown",
-					status: r.status || r.stage || "Processing",
-					aiScores: r.aiScores ?? [],
-					email: r.email,
-					phoneNumber: r.phone || r.phoneNumber,
-					fileUrl: r.fileUrl,
-					aiExplanation: r.aiExplanation,
-					scoreDetails: r.scoreDetails,
-				}));
+				
+				// Debug: log first resume to see structure
+				if (resumeList.length > 0) {
+					console.log("🔍 First resume data structure:", resumeList[0]);
+					console.log("🔍 aiScores:", resumeList[0]?.aiScores);
+					console.log("🔍 totalResumeScore:", resumeList[0]?.totalResumeScore);
+					console.log("🔍 score:", resumeList[0]?.score);
+				}
+				
+				const mapped: Resume[] = resumeList.map((r) => {
+					// Try multiple ways to get aiScores
+					let aiScores = r.aiScores ?? [];
+					
+					// If aiScores is empty but we have score data, try to construct it
+					if (aiScores.length === 0) {
+						// Check if score is directly on the object
+						if (r.totalResumeScore != null || r.score != null) {
+							const scoreValue = r.totalResumeScore ?? r.score;
+							aiScores = [{
+								scoreId: r.scoreId || 0,
+								totalResumeScore: Number(scoreValue),
+								aiExplanation: r.aiExplanation || "",
+								createdAt: r.createdAt || new Date().toISOString(),
+								scoreDetails: r.scoreDetails || [],
+							}];
+						}
+					}
+					
+					return {
+						resumeId: r.resumeId,
+						fullName: r.fullName || r.candidateName || "Unknown",
+						status: r.status || r.stage || "Processing",
+						aiScores: aiScores,
+						email: r.email,
+						phoneNumber: r.phone || r.phoneNumber,
+						fileUrl: r.fileUrl,
+						aiExplanation: r.aiExplanation,
+						scoreDetails: r.scoreDetails,
+					};
+				});
 				// Sort by totalResumeScore descending (highest first). Place null/undefined scores last.
 				// For equal scores, fallback to resumeId ascending for stable order.
 				const sortedList = mapped.slice().sort((a, b) => {
@@ -339,15 +368,39 @@ const ResumeList: React.FC = () => {
             width: 120,
             align: "center" as const,
             render: (_: any, record: Resume) => {
-                // Lấy điểm từ phần tử đầu tiên của mảng aiScores
-                const score = record.aiScores?.[0]?.totalResumeScore;
+                // Try multiple ways to get score
+                let score: number | null | undefined = null;
+                
+                // Method 1: From aiScores array
+                if (record.aiScores && Array.isArray(record.aiScores) && record.aiScores.length > 0) {
+                    score = record.aiScores[0]?.totalResumeScore;
+                }
+                
+                // Method 2: Direct score property (fallback)
+                if (score == null && (record as any).score != null) {
+                    score = (record as any).score;
+                }
+                
+                // Method 3: Direct totalResumeScore property (fallback)
+                if (score == null && (record as any).totalResumeScore != null) {
+                    score = (record as any).totalResumeScore;
+                }
 
-                return score != null ? (
-                    <Tag color={score >= 70 ? "green" : score >= 40 ? "orange" : "red"}>
-                        {score}
-                    </Tag>
-                ) : (
-                    <span style={{ color: "#9ca3af" }}>—</span>
+                if (score != null && score !== undefined && !isNaN(Number(score))) {
+                    // Làm tròn điểm số đến 1 chữ số thập phân
+                    const roundedScore = Math.round(Number(score) * 10) / 10;
+                    return (
+                        <Tag 
+                            color={roundedScore >= 70 ? "green" : roundedScore >= 40 ? "orange" : "red"}
+                            style={{ textAlign: "center" }}
+                        >
+                            {roundedScore}
+                        </Tag>
+                    );
+                }
+                
+                return (
+                    <span style={{ color: "#9ca3af", fontSize: 14 }}>—</span>
                 );
             },
         },

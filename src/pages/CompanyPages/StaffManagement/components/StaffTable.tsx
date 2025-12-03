@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Table, Tag, Space, Button, Empty, Avatar, Modal, Tooltip } from "antd";
+import { Table, Tag, Space, Button, Empty, Avatar, Modal } from "antd";
 import { UserOutlined, DeleteOutlined } from "@ant-design/icons";
 import { companyService } from "../../../../services/companyService";
 import type { ColumnsType } from "antd/es/table";
@@ -98,59 +98,57 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
               {record.joinStatus || "Approved"}
             </Tag>
           ) : (
-            <Tooltip>
-              <Button
-                type="text"
-                icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: 16 }} />}
-                onClick={() => {
-                  Modal.confirm({
-                    className: 'ant-confirm-spread',
-                    wrapClassName: "custom-confirm-wrapper",
-                    title: null, // không cần title
-                    content: (
-                      <div style={{ textAlign: "center", fontSize: 16 , marginBottom: 8 }}>
-                        {`Are you sure you want to remove ${record.fullName || record.email} from the company?`}
-                      </div>
-                    ),
-                    okText: "Remove",
-                    okButtonProps: { danger: true },
-                    cancelText: "Cancel",
-                    // Tùy chỉnh footer để căn button 2 đầu
-                    footer: (
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <Button onClick={() => Modal.destroyAll()}>Cancel</Button>
-                        <Button
-                          type="primary"
-                          danger
-                          onClick={async () => {
-                            try {
-                              const res = await companyService.deleteMember(record.comUserId);
-                              if (String(res?.status).toLowerCase() === "success") {
-                                Modal.destroyAll();
-                                toastSuccess("Member removed successfully");
-                                if (typeof onDelete === "function") onDelete(record);
-                              } else {
-                                Modal.destroyAll();
-                                Modal.error({ title: "Failed", content: res?.message || "Failed to remove member" });
-                              }
-                            } catch (err) {
-                              console.error(err);
+            <Button
+              type="text"
+              icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: 16 }} />}
+              onClick={() => {
+                Modal.confirm({
+                  className: 'ant-confirm-spread',
+                  wrapClassName: "custom-confirm-wrapper",
+                  title: null,
+                  icon: null,
+                  content: (
+                    <div style={{ textAlign: "center", fontSize: 16 , marginBottom: 16 }}>
+                      Are you sure you want to remove <strong>{record.fullName || record.email}</strong> from the company?
+                    </div>
+                  ),
+                  okText: "Remove",
+                  okButtonProps: { danger: true },
+                  cancelText: "Cancel",
+                  // Tùy chỉnh footer để căn button 2 đầu
+                  footer: (
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <Button  className="company-btn" onClick={() => Modal.destroyAll()}>Cancel</Button>
+                      <Button
+                        type="primary"
+                        className="company-btn--danger"
+                        danger
+                        onClick={async () => {
+                          try {
+                            const res = await companyService.deleteMember(record.comUserId);
+                            if (String(res?.status).toLowerCase() === "success") {
                               Modal.destroyAll();
-                              toastError("Failed to remove member");
-                              Modal.error({ title: "Error", content: "An error occurred while removing member" });
+                              toastSuccess("Member removed successfully");
+                              if (typeof onDelete === "function") onDelete(record);
+                            } else {
+                              Modal.destroyAll();
+                              Modal.error({ title: "Failed", content: res?.message || "Failed to remove member" });
                             }
-                          }}
-                        >
-                          Remove
-                        </Button>
-                      </div>
-                    ),
-                  });
-                }}
-              />
-            </Tooltip>
-
-
+                          } catch (err) {
+                            console.error(err);
+                            Modal.destroyAll();
+                            toastError("Failed to remove member");
+                            Modal.error({ title: "Error", content: "An error occurred while removing member" });
+                          }
+                        }}
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ),
+                });
+              }}
+            />
           )}
         </Space>
       ),

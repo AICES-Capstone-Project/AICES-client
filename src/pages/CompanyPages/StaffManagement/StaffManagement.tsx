@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, Button, Input, Badge } from "antd";
 import { PlusOutlined, SearchOutlined, BellOutlined } from "@ant-design/icons";
 import { companyService } from "../../../services/companyService";
+import { invitationService } from "../../../services/invitationService";
 import type { CompanyMember } from "../../../types/company.types";
 import StaffTable from "./components/StaffTable";
 import InviteDrawer from "./components/InviteDrawer";
@@ -120,14 +121,23 @@ const StaffManagement = () => {
 		}
 	};
 
-	// Drawer form submission (mock)
+	// Drawer form submission
 	const handleInviteSubmit = async (values: { email: string }) => {
 		setSending(true);
-		setTimeout(() => {
-			toastSuccess(`Invitation sent to ${values.email}`);
+		try {
+			const resp = await invitationService.sendInvitation({ email: values.email });
+			if (resp?.status === "Success" || resp?.status === "success") {
+				toastSuccess(`Invitation sent to ${values.email}`);
+				setDrawerOpen(false);
+			} else {
+				toastError("Failed to send invitation", resp?.message);
+			}
+		} catch (err) {
+			console.error("Error sending invitation:", err);
+			toastError("Error sending invitation");
+		} finally {
 			setSending(false);
-			setDrawerOpen(false);
-		}, 1000);
+		}
 	};
 
 	const handleOpenPending = async () => {

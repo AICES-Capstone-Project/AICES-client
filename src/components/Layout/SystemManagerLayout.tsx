@@ -2,12 +2,12 @@ import React from "react";
 import { Layout, Menu, Button, Typography, ConfigProvider } from "antd";
 import {
   DashboardOutlined,
-  FileDoneOutlined,
+  // FileDoneOutlined,
   AppstoreOutlined,
   BarChartOutlined,
-  BellOutlined,
+  // BellOutlined,
   ApartmentOutlined,
-  TagsOutlined,
+  // TagsOutlined,
   PartitionOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -88,14 +88,6 @@ export default function SystemManagerLayout() {
       ),
     },
 
-    // Payments
-    {
-      key: toManagerPath(APP_ROUTES.SYSTEM_PAYMENTS),
-      icon: <FileDoneOutlined />,
-      label: (
-        <Link to={toManagerPath(APP_ROUTES.SYSTEM_PAYMENTS)}>Payments</Link>
-      ),
-    },
     // Taxonomy
     {
       key: "taxonomy",
@@ -148,43 +140,38 @@ export default function SystemManagerLayout() {
           key: toManagerPath(APP_ROUTES.SYSTEM_BLOGS),
           label: <Link to={toManagerPath(APP_ROUTES.SYSTEM_BLOGS)}>Blogs</Link>,
         },
-        {
-          key: toManagerPath(APP_ROUTES.SYSTEM_TAGS),
-          icon: <TagsOutlined />,
-          label: <Link to={toManagerPath(APP_ROUTES.SYSTEM_TAGS)}>Tags</Link>,
-        },
       ],
     },
-    // Notifications
-    {
-      key: "notifications",
-      icon: <BellOutlined />,
-      label: "Notifications",
-      children: [
-        {
-          key: toManagerPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES),
-          label: (
-            <Link to={toManagerPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}>
-              Notification Templates
-            </Link>
-          ),
-        },
-        {
-          key: toManagerPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES),
-          label: (
-            <Link to={toManagerPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES)}>
-              Email Templates
-            </Link>
-          ),
-        },
-      ],
-    },
-    // Reports
-    {
-      key: toManagerPath(APP_ROUTES.SYSTEM_REPORTS),
-      icon: <FileDoneOutlined />,
-      label: <Link to={toManagerPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>,
-    },
+    // // Notifications
+    // {
+    //   key: "notifications",
+    //   icon: <BellOutlined />,
+    //   label: "Notifications",
+    //   children: [
+    //     {
+    //       key: toManagerPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES),
+    //       label: (
+    //         <Link to={toManagerPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}>
+    //           Notification Templates
+    //         </Link>
+    //       ),
+    //     },
+    //     {
+    //       key: toManagerPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES),
+    //       label: (
+    //         <Link to={toManagerPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES)}>
+    //           Email Templates
+    //         </Link>
+    //       ),
+    //     },
+    //   ],
+    // },
+    // // Reports
+    // {
+    //   key: toManagerPath(APP_ROUTES.SYSTEM_REPORTS),
+    //   icon: <FileDoneOutlined />,
+    //   label: <Link to={toManagerPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>,
+    // },
   ];
 
   const handleLogout = () => {

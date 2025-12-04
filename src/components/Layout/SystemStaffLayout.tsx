@@ -2,12 +2,12 @@ import React from "react";
 import { Layout, Menu, Button, Typography, ConfigProvider } from "antd";
 import {
   DashboardOutlined,
-  FileDoneOutlined,
+  // FileDoneOutlined,
   AppstoreOutlined,
   BarChartOutlined,
-  BellOutlined,
+  // BellOutlined,
   ApartmentOutlined,
-  TagsOutlined,
+  // TagsOutlined,
   PartitionOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -91,12 +91,6 @@ export default function SystemStaffLayout() {
       ),
     },
 
-    // Payments (xem lịch sử thanh toán)
-    {
-      key: toStaffPath(APP_ROUTES.SYSTEM_PAYMENTS),
-      icon: <FileDoneOutlined />,
-      label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_PAYMENTS)}>Payments</Link>,
-    },
     // Taxonomy CRUD (Category, Skill, RecruitmentType, Specialization)
     {
       key: "taxonomy",
@@ -147,43 +141,38 @@ export default function SystemStaffLayout() {
           key: toStaffPath(APP_ROUTES.SYSTEM_BLOGS),
           label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_BLOGS)}>Blogs</Link>,
         },
-        {
-          key: toStaffPath(APP_ROUTES.SYSTEM_TAGS),
-          icon: <TagsOutlined />,
-          label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_TAGS)}>Tags</Link>,
-        },
       ],
     },
-    // Notifications (gửi thông báo hệ thống)
-    {
-      key: "notifications",
-      icon: <BellOutlined />,
-      label: "Notifications",
-      children: [
-        {
-          key: toStaffPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES),
-          label: (
-            <Link to={toStaffPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}>
-              Notification Templates
-            </Link>
-          ),
-        },
-        {
-          key: toStaffPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES),
-          label: (
-            <Link to={toStaffPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES)}>
-              Email Templates
-            </Link>
-          ),
-        },
-      ],
-    },
-    // Reports (xuất báo cáo)
-    {
-      key: toStaffPath(APP_ROUTES.SYSTEM_REPORTS),
-      icon: <FileDoneOutlined />,
-      label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>,
-    },
+    // // Notifications (gửi thông báo hệ thống)
+    // {
+    //   key: "notifications",
+    //   icon: <BellOutlined />,
+    //   label: "Notifications",
+    //   children: [
+    //     {
+    //       key: toStaffPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES),
+    //       label: (
+    //         <Link to={toStaffPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}>
+    //           Notification Templates
+    //         </Link>
+    //       ),
+    //     },
+    //     {
+    //       key: toStaffPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES),
+    //       label: (
+    //         <Link to={toStaffPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES)}>
+    //           Email Templates
+    //         </Link>
+    //       ),
+    //     },
+    //   ],
+    // },
+    // // Reports (xuất báo cáo)
+    // {
+    //   key: toStaffPath(APP_ROUTES.SYSTEM_REPORTS),
+    //   icon: <FileDoneOutlined />,
+    //   label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>,
+    // },
   ];
 
   const handleLogout = () => {

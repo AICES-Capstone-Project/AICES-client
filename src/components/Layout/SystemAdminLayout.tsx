@@ -3,13 +3,13 @@ import { Layout, Menu, Button, Typography, ConfigProvider } from "antd";
 import {
   DashboardOutlined,
   TeamOutlined,
-  FileDoneOutlined,
+  // FileDoneOutlined,
   AppstoreOutlined,
   BarChartOutlined,
-  BellOutlined,
-  SettingOutlined,
+  // BellOutlined,
+  // SettingOutlined,
   ApartmentOutlined,
-  TagsOutlined,
+  // TagsOutlined,
   PartitionOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -80,12 +80,6 @@ export default function SystemAdminLayout() {
       label: <Link to={APP_ROUTES.SYSTEM_SUBSCRIPTIONS}>Subscriptions</Link>,
     },
 
-    // Payments
-    {
-      key: APP_ROUTES.SYSTEM_PAYMENTS,
-      icon: <FileDoneOutlined />,
-      label: <Link to={APP_ROUTES.SYSTEM_PAYMENTS}>Payments</Link>,
-    },
     // Taxonomy
     {
       key: "taxonomy",
@@ -134,75 +128,70 @@ export default function SystemAdminLayout() {
           key: APP_ROUTES.SYSTEM_BLOGS,
           label: <Link to={APP_ROUTES.SYSTEM_BLOGS}>Blogs</Link>,
         },
-        {
-          key: APP_ROUTES.SYSTEM_TAGS,
-          icon: <TagsOutlined />,
-          label: <Link to={APP_ROUTES.SYSTEM_TAGS}>Tags</Link>,
-        },
       ],
     },
-    // Notifications
-    {
-      key: "notifications",
-      icon: <BellOutlined />,
-      label: "Notifications",
-      children: [
-        {
-          key: APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES,
-          label: (
-            <Link to={APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES}>
-              Notification Templates
-            </Link>
-          ),
-        },
-        {
-          key: APP_ROUTES.SYSTEM_EMAIL_TEMPLATES,
-          label: (
-            <Link to={APP_ROUTES.SYSTEM_EMAIL_TEMPLATES}>Email Templates</Link>
-          ),
-        },
-      ],
-    },
+    // // Notifications
+    // {
+    //   key: "notifications",
+    //   icon: <BellOutlined />,
+    //   label: "Notifications",
+    //   children: [
+    //     {
+    //       key: APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES,
+    //       label: (
+    //         <Link to={APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES}>
+    //           Notification Templates
+    //         </Link>
+    //       ),
+    //     },
+    //     {
+    //       key: APP_ROUTES.SYSTEM_EMAIL_TEMPLATES,
+    //       label: (
+    //         <Link to={APP_ROUTES.SYSTEM_EMAIL_TEMPLATES}>Email Templates</Link>
+    //       ),
+    //     },
+    //   ],
+    // },
     // Reports
-    {
-      key: APP_ROUTES.SYSTEM_REPORTS,
-      icon: <FileDoneOutlined />,
-      label: <Link to={APP_ROUTES.SYSTEM_REPORTS}>Reports</Link>,
-    },
+    // {
+    //   key: APP_ROUTES.SYSTEM_REPORTS,
+    //   icon: <FileDoneOutlined />,
+    //   label: <Link to={APP_ROUTES.SYSTEM_REPORTS}>Reports</Link>,
+    // },
     // System Settings
-    {
-      key: "settings",
-      icon: <SettingOutlined />,
-      label: "System Settings",
-      children: [
-        {
-          key: APP_ROUTES.SYSTEM_ROLES,
-          label: <Link to={APP_ROUTES.SYSTEM_ROLES}>Roles & Permissions</Link>,
-        },
-        {
-          key: APP_ROUTES.SYSTEM_AI_ENDPOINTS,
-          label: <Link to={APP_ROUTES.SYSTEM_AI_ENDPOINTS}>AI Endpoints</Link>,
-        },
-        {
-          key: APP_ROUTES.SYSTEM_FEATURE_FLAGS,
-          label: (
-            <Link to={APP_ROUTES.SYSTEM_FEATURE_FLAGS}>
-              Feature Flags & Limits
-            </Link>
-          ),
-        },
-        {
-          key: APP_ROUTES.SYSTEM_EMAIL_CONFIG,
-          label: (
-            <Link to={APP_ROUTES.SYSTEM_EMAIL_CONFIG}>Email Configuration</Link>
-          ),
-        },
-        {
-          key: APP_ROUTES.SYSTEM_API_KEYS,
-          label: <Link to={APP_ROUTES.SYSTEM_API_KEYS}>API Keys</Link>,
-        },
-      ],
-    },
+    // {
+    //   key: "settings",
+    //   icon: <SettingOutlined />,
+    //   label: "System Settings",
+    //   children: [
+    //     {
+    //       key: APP_ROUTES.SYSTEM_ROLES,
+    //       label: <Link to={APP_ROUTES.SYSTEM_ROLES}>Roles & Permissions</Link>,
+    //     },
+    //     {
+    //       key: APP_ROUTES.SYSTEM_AI_ENDPOINTS,
+    //       label: <Link to={APP_ROUTES.SYSTEM_AI_ENDPOINTS}>AI Endpoints</Link>,
+    //     },
+    //     {
+    //       key: APP_ROUTES.SYSTEM_FEATURE_FLAGS,
+    //       label: (
+    //         <Link to={APP_ROUTES.SYSTEM_FEATURE_FLAGS}>
+    //           Feature Flags & Limits
+    //         </Link>
+    //       ),
+    //     },
+    //     {
+    //       key: APP_ROUTES.SYSTEM_EMAIL_CONFIG,
+    //       label: (
+    //         <Link to={APP_ROUTES.SYSTEM_EMAIL_CONFIG}>Email Configuration</Link>
+    //       ),
+    //     },
+    //     {
+    //       key: APP_ROUTES.SYSTEM_API_KEYS,
+    //       label: <Link to={APP_ROUTES.SYSTEM_API_KEYS}>API Keys</Link>,
+    //     },
+    //   ],
+    // },
   ];
 
   const handleLogout = () => {

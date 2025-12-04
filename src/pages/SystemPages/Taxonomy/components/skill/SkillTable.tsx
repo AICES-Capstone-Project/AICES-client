@@ -3,7 +3,7 @@ import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 import type { Skill } from "../../../../../types/skill.types";
-import SkillStatusTag from "./SkillStatusTag";
+
 
 interface SkillTableProps {
   loading: boolean;

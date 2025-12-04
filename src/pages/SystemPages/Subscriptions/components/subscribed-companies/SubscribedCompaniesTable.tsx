@@ -3,7 +3,7 @@
 import { Table, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { CompanySubscription } from "../../../../../types/companySubscription.types";
-import SubscriptionTypeTag from "./SubscriptionTypeTag";
+
 
 const { Text } = Typography;
 

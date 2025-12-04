@@ -3,7 +3,7 @@ import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 import type { RecruitmentType } from "../../../../../types/recruitmentType.types";
-import RecruitmentTypeStatusTag from "./RecruitmentTypeStatusTag";
+
 
 interface RecruitmentTypeTableProps {
   loading: boolean;

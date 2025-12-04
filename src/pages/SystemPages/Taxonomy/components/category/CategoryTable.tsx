@@ -4,7 +4,7 @@ import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 
 import type { Category } from "../../../../../types/category.types";
-import CategoryStatusTag from "./CategoryStatusTag";
+
 
 interface CategoryTableProps {
   loading: boolean;

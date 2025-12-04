@@ -37,13 +37,6 @@ export default function SkillTable({
       key: "name",
     },
     {
-      title: "Status",
-      dataIndex: "isActive",
-      key: "isActive",
-      width: 140,
-      render: (isActive: boolean) => <SkillStatusTag isActive={isActive} />,
-    },
-    {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",

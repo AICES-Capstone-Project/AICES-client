@@ -68,12 +68,7 @@ export default function SubscribedCompaniesTable({
         );
       },
     },
-    {
-      title: "Status",
-      dataIndex: "subscriptionStatus",
-      width: 130,
-      render: (status: string) => <SubscriptionTypeTag status={status} />,
-    },
+
   ];
 
   return (

@@ -33,14 +33,6 @@ export default function RecruitmentTypeTable({
       dataIndex: "name",
     },
     {
-      title: "Status",
-      dataIndex: "isActive",
-      width: 120,
-      render: (isActive: boolean) => (
-        <RecruitmentTypeStatusTag isActive={isActive} />
-      ),
-    },
-    {
       title: "Created At",
       dataIndex: "createdAt",
       width: 220,

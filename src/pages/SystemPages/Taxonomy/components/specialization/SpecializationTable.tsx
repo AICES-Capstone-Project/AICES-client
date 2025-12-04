@@ -48,15 +48,6 @@ export default function SpecializationTable({
       width: 120,
     },
     {
-      title: "Status",
-      dataIndex: "isActive",
-      key: "isActive",
-      width: 120,
-      render: (value: boolean) => (
-        <SpecializationStatusTag isActive={value} />
-      ),
-    },
-    {
       title: "Created At",
       dataIndex: "createdAt",
       key: "createdAt",

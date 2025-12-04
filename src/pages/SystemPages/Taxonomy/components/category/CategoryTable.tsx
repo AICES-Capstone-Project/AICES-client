@@ -33,12 +33,7 @@ export default function CategoryTable({
       title: "Name",
       dataIndex: "name",
     },
-    {
-      title: "Status",
-      dataIndex: "isActive",
-      width: 120,
-      render: (isActive: boolean) => <CategoryStatusTag isActive={isActive} />,
-    },
+
     {
       title: "Created At",
       dataIndex: "createdAt",

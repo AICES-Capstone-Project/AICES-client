@@ -4,7 +4,6 @@ import { Button, Popconfirm, Space, Table, Typography } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { SubscriptionPlan } from "../../../../../types/subscription.types";
 
-
 const { Text } = Typography;
 
 interface PlansTableProps {
@@ -46,8 +45,20 @@ export default function PlansTable({
       title: "Price",
       dataIndex: "price",
       width: 140,
-      render: (value) => <Text>{value.toLocaleString()} ₫</Text>,
+      render: (value: number) => {
+        const dollars = value / 100; // cents -> USD
+
+        return (
+          <Text>
+            {dollars.toLocaleString("en-US", {
+              style: "currency",
+              currency: "USD",
+            })}
+          </Text>
+        );
+      },
     },
+
     {
       title: "Duration",
       dataIndex: "durationDays",

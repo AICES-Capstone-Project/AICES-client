@@ -5,7 +5,6 @@ import { useEffect } from "react";
 
 export interface BlogFormValues {
 	title: string;
-	slug: string;
 	content: string;
 	thumbnailUrl?: string | null;
 }
@@ -71,14 +70,6 @@ export default function BlogModal({
 					rules={[{ required: true, message: "Please enter title" }]}
 				>
 					<Input placeholder="Enter blog title" />
-				</Form.Item>
-
-				<Form.Item
-					label="Slug"
-					name="slug"
-					rules={[{ required: true, message: "Please enter slug" }]}
-				>
-					<Input placeholder="slug-for-this-blog" />
 				</Form.Item>
 
 				<Form.Item

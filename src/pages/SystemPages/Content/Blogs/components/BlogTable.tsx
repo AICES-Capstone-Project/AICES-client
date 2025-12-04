@@ -32,12 +32,6 @@ export default function BlogTable({
       ellipsis: true,
     },
     {
-      title: "Slug",
-      dataIndex: "slug",
-      width: 220,
-      ellipsis: true,
-    },
-    {
       title: "Thumbnail",
       dataIndex: "thumbnailUrl",
       width: 140,

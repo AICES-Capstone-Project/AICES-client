@@ -165,7 +165,6 @@ export default function BlogList() {
           currentBlog
             ? {
                 title: currentBlog.title,
-                slug: currentBlog.slug,
                 content: currentBlog.content,
                 thumbnailUrl: currentBlog.thumbnailUrl || undefined,
               }

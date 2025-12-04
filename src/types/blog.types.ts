@@ -6,7 +6,7 @@ export interface Blog {
   userId: number;
   authorName: string | null;
   title: string;
-  slug: string;
+  slug?: string;
   content: string;
   thumbnailUrl: string | null;
   createdAt: string;
@@ -38,7 +38,6 @@ export interface CreateBlogResponse /* extends ApiResponse<Blog> */ {
 // Body khi tạo mới
 export interface CreateBlogRequest {
   title: string;
-  slug: string;
   content: string;
   thumbnailUrl?: string | null;
 }
@@ -46,7 +45,6 @@ export interface CreateBlogRequest {
 // Body khi update
 export interface UpdateBlogRequest {
   title?: string;
-  slug?: string;
   content?: string;
   thumbnailUrl?: string | null;
 }

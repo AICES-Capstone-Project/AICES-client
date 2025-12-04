@@ -169,10 +169,13 @@ export const API_ENDPOINTS = {
   // Blog endpoints
   BLOG: {
     //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET_MY: "/system/blogs/me",
+    SYSTEM_GET_ALL: "/system/blogs/me", 
     SYSTEM_CREATE: "/system/blogs",
     SYSTEM_UPDATE: (blogId: number) => `/system/blogs/${blogId}`,
     SYSTEM_DELETE: (blogId: number) => `/system/blogs/${blogId}`,
+
+    PUBLIC_GET_ALL: "/public/blogs",
+    PUBLIC_GET_BY_ID: (id: number) => `/public/blogs/${id}`,
   },
 
   // Job endpoints

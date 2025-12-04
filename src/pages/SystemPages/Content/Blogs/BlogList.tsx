@@ -36,7 +36,7 @@ export default function BlogList() {
         const current = page ?? pagination.current ?? 1;
         const size = pageSize ?? pagination.pageSize ?? 10;
 
-        const res = await blogService.getMyBlogs({
+        const res = await blogService.getAllBlogs({
           page: current,
           pageSize: size,
         });

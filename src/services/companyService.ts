@@ -11,11 +11,18 @@ interface CompanyData {
   websiteUrl?: string;
   taxCode?: string | null;
   logoUrl?: string;
-  companyStatus: "Approved" | "Pending" | "Rejected" | string;
+  companyStatus:
+    | "Pending"
+    | "Approved"
+    | "Rejected"
+    | "Suspended"
+    | "Canceled"
+    | string;
+
   rejectionReason?: string | null;
   managerName?: string | null;
   documents?: { documentType: string; fileUrl: string }[];
-  
+
   createdBy?: string | number | null;
   approvalBy?: string | number | null;
 
@@ -31,10 +38,7 @@ export const companyService = {
   },
   // Send multipart/form-data (for logo and document files)
   createForm: async (formData: FormData): Promise<ApiResponse<null>> => {
-    return await postForm<null>(
-      API_ENDPOINTS.COMPANY.COMPANY_CREATE,
-      formData
-    );
+    return await postForm<null>(API_ENDPOINTS.COMPANY.COMPANY_CREATE, formData);
   },
   // === NEW: Create company as System Admin (POST /api/companies) ===
   createAdminForm: async (formData: FormData): Promise<ApiResponse<null>> => {
@@ -190,7 +194,7 @@ export const companyService = {
   updateStatus: async (
     companyId: number,
     payload: {
-      status: "Approved" | "Rejected" | "Pending";
+      status: "Approved" | "Rejected" | "Pending" | "Suspended";
       rejectionReason?: string | null;
     }
   ): Promise<ApiResponse<null>> => {

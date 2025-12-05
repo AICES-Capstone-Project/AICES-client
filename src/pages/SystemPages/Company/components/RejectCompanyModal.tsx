@@ -45,6 +45,7 @@ export default function RejectCompanyModal({
         className="reject-textarea"
         maxLength={500}
         showCount
+        style={{ marginTop: 8, marginBottom: 24 }}
       />
 
       {/* FOOTER */}

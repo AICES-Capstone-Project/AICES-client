@@ -771,13 +771,15 @@
   border-radius: 6px;
 }
 
-/* Option đang được chọn */
 .system-role-dropdown
   .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-  background-color: var(--aices-green-soft) !important; /* nền xanh AICES nhạt */
-  color: var(--aices-green-dark) !important;            /* chữ xanh AICES đậm */
-  font-weight: 600 !important;
+  background-color: #ffffff !important;   /* ⬅ trắng, không còn nền xanh */
+  color: #111827 !important;              /* chữ xám đậm nhẹ */
+  font-weight: 500 !important;            /* đừng bold quá */
 }
+
+
+
 
 /* Hover lên option (kể cả option selected) */
 .system-role-dropdown
@@ -794,11 +796,14 @@
 }
 /* Option đang được chọn trong mọi Select của AntD */
 .ant-select-dropdown
-  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-  background-color: var(--aices-green-soft) !important; /* nền xanh AICES nhạt */
-  color: var(--aices-green-dark) !important;            /* chữ xanh AICES đậm */
-  font-weight: 600 !important;
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled),
+.ant-select-dropdown
+  .ant-select-item-option-selected.ant-select-item-option-active {
+  background-color: #ffffff !important;   /* ⬅ trắng sạch */
+  color: #111827 !important;
+  font-weight: 500 !important;
 }
+
 
 /* Khi hover lên option (kể cả option đang selected) */
 .ant-select-dropdown
@@ -1368,4 +1373,22 @@
 .company-status-suspended::before,
 .company-status-canceled::before {
   background:#6b7280;
+}
+/* ==== HARD OVERRIDE: tắt nền xanh selected trong mọi Select ==== */
+
+/* Item đang được chọn (kể cả đang active) */
+.ant-select-dropdown
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled),
+.ant-select-dropdown
+  .ant-select-item-option-selected.ant-select-item-option-active {
+  background-color: #ffffff !important;   /* nền trắng sạch */
+  color: #111827 !important;              /* chữ xám đậm nhẹ */
+  font-weight: 500 !important;            /* không in đậm quá */
+}
+
+/* Hover lên option (kể cả option đang selected) */
+.ant-select-dropdown
+  .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: #f3f7f5 !important;   /* xanh siêu nhạt */
+  color: var(--aices-green-dark) !important;
 }

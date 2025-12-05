@@ -189,9 +189,17 @@ export default function Accounts() {
 
     // chuẩn hoá roleName: "System_Admin" -> "System Admin"
     const normalizedRoleName = (user.roleName || "").replace(/_/g, " ");
-
-    const roleId =
+    // Lấy roleId gốc của user
+    const rawRoleId =
       (user as any).roleId ?? ROLE_NAME_TO_ID[normalizedRoleName] ?? 0;
+
+    // Chỉ các role System mới được phép hiển thị khi edit
+    const allowedEditRoleIds = [1, 2, 3];
+
+    // Nếu user là HR Manager (4) hoặc HR Recruiter (5) → để undefined
+    const roleId = allowedEditRoleIds.includes(rawRoleId)
+      ? rawRoleId
+      : undefined;
 
     editForm.setFieldsValue({
       fullName: user.fullName || "",
@@ -299,7 +307,7 @@ export default function Accounts() {
       <UserCreateModal
         open={isCreateOpen}
         form={createForm}
-        roleOptions={roleOptions}
+        roleOptions={createRoleOptions}
         onCancel={() => setIsCreateOpen(false)}
         onCreate={onCreate}
       />
@@ -307,7 +315,7 @@ export default function Accounts() {
       <UserEditModal
         open={isEditOpen}
         form={editForm}
-        roleOptions={roleOptions}
+        roleOptions={editRoleOptions}
         email={editingUser?.email || ""}
         onCancel={() => setIsEditOpen(false)}
         onUpdate={onUpdate}
@@ -327,12 +335,19 @@ export default function Accounts() {
 }
 
 // ===== Helpers =====
-const roleOptions = [
+// Dùng cho Create: bỏ HR Manager, vẫn cho tạo HR Recruiter
+const createRoleOptions = [
   { label: "System Admin", value: 1 },
   { label: "System Manager", value: 2 },
   { label: "System Staff", value: 3 },
-  { label: "HR Manager", value: 4 },
   { label: "HR Recruiter", value: 5 },
+];
+
+// Dùng cho Edit: chỉ cho chọn 3 role System
+const editRoleOptions = [
+  { label: "System Admin", value: 1 },
+  { label: "System Manager", value: 2 },
+  { label: "System Staff", value: 3 },
 ];
 
 const ROLE_NAME_TO_ID: Record<string, number> = {

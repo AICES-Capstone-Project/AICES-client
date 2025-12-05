@@ -24,7 +24,9 @@ export default function CompanyToolbar({
   onChangeStatusFilter,
 }: CompanyToolbarProps) {
   return (
-    <div className="company-right">    {/* 🔥 chỉ dùng company-right, bỏ accounts-toolbar */}
+    <div className="company-right">
+      {" "}
+      {/* 🔥 chỉ dùng company-right, bỏ accounts-toolbar */}
       {/* FILTER STATUS */}
       <Select
         value={statusFilter}
@@ -35,7 +37,6 @@ export default function CompanyToolbar({
         className="toolbar-select"
         dropdownClassName="system-role-dropdown"
       />
-
       {/* ADD COMPANY */}
       <Button
         icon={<PlusOutlined />}

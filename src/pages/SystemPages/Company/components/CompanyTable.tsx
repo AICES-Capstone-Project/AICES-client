@@ -1,12 +1,12 @@
 import { Button, Popconfirm, Space, Table } from "antd";
 import { useAppSelector } from "../../../../hooks/redux";
 
-
 import {
   EyeOutlined,
   CheckOutlined,
   CloseOutlined,
   DeleteOutlined,
+  PauseCircleOutlined,
 } from "@ant-design/icons";
 
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
@@ -23,6 +23,7 @@ interface CompanyTableProps {
   onApprove: (companyId: number) => void;
   onOpenReject: (c: Company) => void;
   onDelete: (companyId: number) => void;
+  onSuspend: (companyId: number) => void; // ⭐ NEW
 }
 
 export default function CompanyTable({
@@ -36,6 +37,7 @@ export default function CompanyTable({
   onApprove,
   onOpenReject,
   onDelete,
+  onSuspend,
 }: CompanyTableProps) {
   const { user } = useAppSelector((state) => state.auth);
   const normalizedRole = (user?.roleName || "")
@@ -111,11 +113,37 @@ export default function CompanyTable({
 
     {
       title: "Actions",
-      width: 150,
+      width: 180,
       align: "center",
       render: (_, record) => {
-        const disabledApprove = record.companyStatus === "Approved";
-        const disabledReject = record.companyStatus === "Rejected";
+        const status = (record.companyStatus || "").toString();
+
+        // ===== RULE CHUYỂN TRẠNG THÁI =====
+        // Pending  -> Approved / Rejected / Suspended
+        // Approved -> Suspended
+        // Rejected -> Approved / Suspended
+        // Suspended-> Approved
+        // Canceled -> (không cho chuyển)
+
+        const isCanceled = status === "Canceled";
+
+        const canApprove =
+          (status === "Pending" ||
+            status === "Rejected" ||
+            status === "Suspended") &&
+          !isCanceled;
+
+        const canReject = status === "Pending" && !isCanceled;
+
+        const canSuspend =
+          (status === "Pending" ||
+            status === "Approved" ||
+            status === "Rejected") &&
+          !isCanceled;
+
+        const disabledApprove = !canApprove;
+        const disabledReject = !canReject;
+        const disabledSuspend = !canSuspend;
 
         // ⭐ System Staff: CHỈ ĐƯỢC XEM
         if (isStaff) {
@@ -151,13 +179,22 @@ export default function CompanyTable({
               onClick={() => onApprove(record.companyId)}
             />
 
-            {/* Reject */}
+            {/* Reject (chỉ từ Pending) */}
             <Button
               size="small"
               shape="circle"
               disabled={disabledReject}
               icon={<CloseOutlined />}
               onClick={() => onOpenReject(record)}
+            />
+
+            {/* Suspend */}
+            <Button
+              size="small"
+              shape="circle"
+              disabled={disabledSuspend}
+              icon={<PauseCircleOutlined />}
+              onClick={() => onSuspend(record.companyId)}
             />
 
             {/* Delete */}

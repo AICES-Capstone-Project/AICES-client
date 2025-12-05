@@ -130,7 +130,7 @@ export default function CompanyList() {
   // ================== STATUS HANDLERS ==================
   const updateCompanyStatus = async (
     companyId: number,
-    status: "Approved" | "Rejected",
+    status: "Approved" | "Rejected" | "Suspended", // ⭐ thêm "Suspended"
     reason?: string
   ) => {
     setLoading(true);
@@ -141,11 +141,16 @@ export default function CompanyList() {
       });
 
       if (res?.status === "Success") {
-        toastSuccess(
+        const msg =
           status === "Approved"
             ? "Company approved successfully"
-            : "Company rejected successfully"
-        );
+            : status === "Rejected"
+            ? "Company rejected successfully"
+            : status === "Suspended"
+            ? "Company suspended successfully"
+            : "Company status updated successfully";
+
+        toastSuccess(msg);
         await fetchData();
       } else {
         toastError("Failed to update company status", res?.message);
@@ -270,6 +275,10 @@ export default function CompanyList() {
   const handleApprove = (companyId: number) =>
     updateCompanyStatus(companyId, "Approved");
 
+  // ⭐ NEW: tạm ngưng company
+  const handleSuspend = (companyId: number) =>
+    updateCompanyStatus(companyId, "Suspended");
+
   const companiesByStatus = statusFilter
     ? allCompanies.filter((c) => (c.companyStatus || "") === statusFilter)
     : allCompanies;
@@ -341,6 +350,7 @@ export default function CompanyList() {
               <Select.Option value="Approved">Approved</Select.Option>
               <Select.Option value="Rejected">Rejected</Select.Option>
               <Select.Option value="Suspended">Suspended</Select.Option>
+              <Select.Option value="Canceled">Canceled</Select.Option>
             </Select>
             {/* Add Company chỉ cho Manager/Admin */}
             {!isStaff && (
@@ -371,6 +381,7 @@ export default function CompanyList() {
               setRejectionReason("");
             }}
             onDelete={handleDeleteCompany}
+            onSuspend={handleSuspend} // ⭐ thêm dòng này
           />
         </div>
       </Card>

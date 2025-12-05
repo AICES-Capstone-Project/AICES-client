@@ -19,26 +19,27 @@ export default function RecruitmentTypeModal({
 }: RecruitmentTypeModalProps) {
   return (
     <Modal
-      title={editingItem ? "Edit Recruitment Type" : "New Recruitment Type"}
       open={open}
-      onOk={onOk}
+      title={editingItem ? "Edit Recruitment Type" : "Create Recruitment Type"}
       onCancel={onCancel}
-      okText={editingItem ? "Save changes" : "Create"}
+      onOk={onOk}
+      okText={editingItem ? "Save" : "Create"}
       destroyOnClose
+      centered
+      className="system-modal"
     >
+      <div className="system-modal-section-title">Basic Information</div>
+
       <Form form={form} layout="vertical">
         <Form.Item
           label="Name"
           name="name"
           rules={[
             { required: true, message: "Please enter recruitment type name" },
-            {
-              max: 100,
-              message: "Name must be at most 100 characters",
-            },
+            { max: 100 },
           ]}
         >
-          <Input placeholder="e.g. Full-time, Part-time, Contract, Temporary" />
+          <Input placeholder="Ex: Full-time, Part-time, Contract..." />
         </Form.Item>
       </Form>
     </Modal>

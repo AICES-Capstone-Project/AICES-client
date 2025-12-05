@@ -28,23 +28,24 @@ export default function BlogTable({
     {
       title: "Title",
       dataIndex: "title",
-      width: 240,
+      width: 260,
       ellipsis: true,
+      render: (value) => <span style={{ fontWeight: 500 }}>{value}</span>,
     },
     {
       title: "Thumbnail",
       dataIndex: "thumbnailUrl",
-      width: 140,
+      width: 160,
       render: (value: string | null) =>
         value ? (
           <a href={value} target="_blank" rel="noreferrer">
             <div
               style={{
-                width: 80,
-                height: 48,
-                borderRadius: 8,
+                width: 96,
+                height: 54,
+                borderRadius: 10,
                 overflow: "hidden",
-                border: "1px solid #f0f0f0",
+                border: "1px solid #e5e7eb",
                 background: "#fafafa",
               }}
             >
@@ -64,7 +65,6 @@ export default function BlogTable({
           "—"
         ),
     },
-
     {
       title: "Created At",
       dataIndex: "createdAt",
@@ -77,11 +77,13 @@ export default function BlogTable({
       key: "actions",
       width: 140,
       fixed: "right",
+      align: "center",
       render: (_, record) => (
-        <Space>
+        <Space size="small">
           <Button
-            icon={<EditOutlined />}
             size="small"
+            shape="circle"
+            icon={<EditOutlined />}
             onClick={() => onEdit(record)}
           />
           <Popconfirm
@@ -91,7 +93,12 @@ export default function BlogTable({
             cancelText="No"
             onConfirm={() => onDelete(record.blogId)}
           >
-            <Button icon={<DeleteOutlined />} size="small" danger />
+            <Button
+              size="small"
+              shape="circle"
+              danger
+              icon={<DeleteOutlined />}
+            />
           </Popconfirm>
         </Space>
       ),
@@ -107,6 +114,7 @@ export default function BlogTable({
       pagination={pagination}
       onChange={(pag) => onChangePage(pag)}
       scroll={{ x: 900 }}
+      className="accounts-table"
     />
   );
 }

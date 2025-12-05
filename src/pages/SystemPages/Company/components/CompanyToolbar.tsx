@@ -1,12 +1,9 @@
-import { Button, Space, Typography, Select } from "antd";
-import { PlusOutlined, ReloadOutlined } from "@ant-design/icons";
-
-const { Title } = Typography;
+import { Button, Select } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
 
 interface CompanyToolbarProps {
   loading: boolean;
   onAdd: () => void;
-  onRefresh: () => void;
   statusFilter: string;
   onChangeStatusFilter: (value: string) => void;
 }
@@ -23,40 +20,31 @@ const STATUS_OPTIONS = [
 export default function CompanyToolbar({
   loading,
   onAdd,
-  onRefresh,
   statusFilter,
   onChangeStatusFilter,
 }: CompanyToolbarProps) {
   return (
-    <Space
-      align="center"
-      style={{ width: "100%", justifyContent: "space-between" }}
-    >
-      <Title level={4} style={{ margin: 0 }}>
-        Company Management
-      </Title>
-      <Space>
-        {/* Filter status */}
-        <Select
-          value={statusFilter}
-          onChange={onChangeStatusFilter}
-          options={STATUS_OPTIONS}
-          style={{ minWidth: 150 }}
-          size="middle"
-        />
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={onAdd}
-          disabled={loading}
-        >
-          Add Company
-        </Button>
+    <div className="company-right">    {/* 🔥 chỉ dùng company-right, bỏ accounts-toolbar */}
+      {/* FILTER STATUS */}
+      <Select
+        value={statusFilter}
+        onChange={onChangeStatusFilter}
+        options={STATUS_OPTIONS}
+        size="middle"
+        style={{ minWidth: 150 }}
+        className="toolbar-select"
+        dropdownClassName="system-role-dropdown"
+      />
 
-        <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
-          Refresh
-        </Button>
-      </Space>
-    </Space>
+      {/* ADD COMPANY */}
+      <Button
+        icon={<PlusOutlined />}
+        className="accounts-new-btn"
+        onClick={onAdd}
+        disabled={loading}
+      >
+        Add Company
+      </Button>
+    </div>
   );
 }

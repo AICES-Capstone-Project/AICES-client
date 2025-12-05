@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Form, Typography, message } from "antd";
+import { Card, Form, message } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
 
 import type { RecruitmentType } from "../../../types/recruitmentType.types";
@@ -8,8 +8,6 @@ import { recruitmentTypeService } from "../../../services/recruitmentTypeService
 import RecruitmentTypeToolbar from "./components/recruitment-type/RecruitmentTypeToolbar";
 import RecruitmentTypeTable from "./components/recruitment-type/RecruitmentTypeTable";
 import RecruitmentTypeModal from "./components/recruitment-type/RecruitmentTypeModal";
-
-const { Title, Text } = Typography;
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -43,12 +41,11 @@ export default function RecruitmentTypeList() {
       });
 
       setRecruitmentTypes(items);
-      setPagination((prev) => ({
-        ...prev,
+      setPagination({
         current: page,
         pageSize,
         total,
-      }));
+      });
     } catch (error: any) {
       message.error(
         error?.response?.data?.message ||
@@ -61,7 +58,6 @@ export default function RecruitmentTypeList() {
 
   useEffect(() => {
     fetchData(1, DEFAULT_PAGE_SIZE);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTableChange = (pag: TablePaginationConfig) => {
@@ -115,7 +111,7 @@ export default function RecruitmentTypeList() {
         pagination.pageSize || DEFAULT_PAGE_SIZE
       );
     } catch (error: any) {
-      if (error?.errorFields) return; // lỗi form, không show toast API
+      if (error?.errorFields) return;
 
       message.error(
         error?.response?.data?.message ||
@@ -143,44 +139,41 @@ export default function RecruitmentTypeList() {
     }
   };
 
-  const filteredRecruitmentTypes = recruitmentTypes.filter((item) =>
+  const filteredData = recruitmentTypes.filter((item) =>
     item.name.toLowerCase().includes(keyword.toLowerCase())
   );
 
   return (
-    <Card
-      title={
-        <div>
-          <Title level={3} style={{ margin: 0 }}>
-            Recruitment Types
-          </Title>
-          <Text type="secondary">
-            Manage employment types used in job postings (Full-time, Part-time,
-            Contract, Temporary, etc.).
-          </Text>
+    <div>
+      <Card className="aices-card">
+        {/* TOP BAR trong card */}
+        <div className="company-header-row">
+          <div className="company-left">
+            <RecruitmentTypeToolbar
+              keyword={keyword}
+              onKeywordChange={setKeyword}
+              onSearch={handleSearch}
+              onReset={handleReset}
+              onCreate={openCreateModal}
+            />
+          </div>
         </div>
-      }
-      extra={
-        <RecruitmentTypeToolbar
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-          onSearch={handleSearch}
-          onReset={handleReset}
-          onCreate={openCreateModal}
-        />
-      }
-    >
-      <RecruitmentTypeTable
-        loading={loading}
-        data={filteredRecruitmentTypes}
-        pagination={{
-          ...pagination,
-          total: filteredRecruitmentTypes.length, // 👈 tổng theo filter
-        }}
-        onChangePage={handleTableChange}
-        onEdit={openEditModal}
-        onDelete={handleDelete}
-      />
+
+        {/* TABLE */}
+        <div className="accounts-table-wrapper">
+          <RecruitmentTypeTable
+            loading={loading}
+            data={filteredData}
+            pagination={{
+              ...pagination,
+              total: filteredData.length,
+            }}
+            onChangePage={handleTableChange}
+            onEdit={openEditModal}
+            onDelete={handleDelete}
+          />
+        </div>
+      </Card>
 
       <RecruitmentTypeModal
         open={isModalOpen}
@@ -193,6 +186,6 @@ export default function RecruitmentTypeList() {
         }}
         onOk={handleModalOk}
       />
-    </Card>
+    </div>
   );
 }

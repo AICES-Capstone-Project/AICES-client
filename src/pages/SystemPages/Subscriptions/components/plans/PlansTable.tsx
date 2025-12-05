@@ -1,6 +1,5 @@
-// src/pages/SystemPages/Subscriptions/components/plans/PlansTable.tsx
-
-import { Button, Popconfirm, Space, Table, Typography } from "antd";
+import { Button, Popconfirm, Space, Table, Typography, Tooltip } from "antd";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { SubscriptionPlan } from "../../../../../types/subscription.types";
 
@@ -24,38 +23,34 @@ export default function PlansTable({
       title: "ID",
       dataIndex: "subscriptionId",
       width: 70,
+      align: "center",
     },
+
     {
-      title: "Plan Name",
+      title: "Plan",
       dataIndex: "name",
       render: (value, record) => (
-        <div>
+        <div style={{ minWidth: 200 }}>
           <Text strong>{value}</Text>
           {record.description && (
-            <div>
-              <Text type="secondary" style={{ fontSize: 12 }}>
-                {record.description}
-              </Text>
+            <div style={{ fontSize: 12, color: "#6b7280" }}>
+              {record.description}
             </div>
           )}
         </div>
       ),
     },
+
     {
       title: "Price",
       dataIndex: "price",
-      width: 140,
-      render: (value: number) => {
-        const dollars = value / 100; // cents -> USD
-
-        return (
-          <Text>
-            {dollars.toLocaleString("en-US", {
-              style: "currency",
-              currency: "USD",
-            })}
-          </Text>
-        );
+      width: 120,
+      render: (v: number) => {
+        const usd = v / 100;
+        return usd.toLocaleString("en-US", {
+          style: "currency",
+          currency: "USD",
+        });
       },
     },
 
@@ -63,38 +58,49 @@ export default function PlansTable({
       title: "Duration",
       dataIndex: "durationDays",
       width: 120,
-      render: (days) => <Text>{days} days</Text>,
+      render: (days) => `${days} days`,
     },
+
     {
       title: "Limit",
-      key: "limit",
       width: 200,
-      render: (_, record) => (
+      render: (_, r) => (
         <Text>
-          {record.resumeLimit} resumes / {record.hoursLimit}h
+          {r.resumeLimit} resumes / {r.hoursLimit}h
         </Text>
       ),
     },
 
     {
       title: "Actions",
-      key: "actions",
       width: 160,
+      align: "center",
       render: (_, record) => (
-        <Space>
-          <Button size="small" type="link" onClick={() => onEdit(record)}>
-            Edit
-          </Button>
+        <Space size="small">
+          <Tooltip title="Edit plan">
+            <Button
+              size="small"
+              shape="circle"
+              icon={<EditOutlined />}
+              onClick={() => onEdit(record)}
+            />
+          </Tooltip>
+
           <Popconfirm
             title="Delete this plan?"
             description="This action cannot be undone."
-            okText="Yes"
-            cancelText="No"
+            okText="Delete"
+            cancelText="Cancel"
             onConfirm={() => onDelete(record)}
           >
-            <Button size="small" type="link" danger>
-              Delete
-            </Button>
+            <Tooltip title="Delete">
+              <Button
+                size="small"
+                shape="circle"
+                danger
+                icon={<DeleteOutlined />}
+              />
+            </Tooltip>
           </Popconfirm>
         </Space>
       ),
@@ -107,6 +113,8 @@ export default function PlansTable({
       loading={loading}
       columns={columns}
       dataSource={plans}
+      className="accounts-table"
+      pagination={false}
     />
   );
 }

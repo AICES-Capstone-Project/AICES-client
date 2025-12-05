@@ -72,7 +72,7 @@ export default function BannerList() {
   };
 
   const handleSearch = () => {
-    // reset về page 1 rồi fetch lại
+    // reset về page 1 rồi effect fetch lại
     setPagination((prev) => ({
       ...prev,
       current: 1,
@@ -94,32 +94,43 @@ export default function BannerList() {
   };
 
   return (
-    <Card style={{ borderRadius: 16 }} bodyStyle={{ padding: 16 }}>
-      <BannerToolbar
-        keyword={keyword}
-        onKeywordChange={setKeyword}
-        onSearch={handleSearch}
-        onReload={handleReload}
-        onCreate={handleOpenCreate}
-      />
+    <div>
+      <Card className="aices-card">
+        {/* 🔥 TOP BAR CHUẨN SYSTEM */}
+        <div className="company-header-row">
+          <div className="company-left">
+            <BannerToolbar
+              keyword={keyword}
+              onKeywordChange={setKeyword}
+              onSearch={handleSearch}
+              onReload={handleReload}
+              onCreate={handleOpenCreate}
+            />
+          </div>
+        </div>
 
-      <BannerTable
-        loading={loading}
-        data={banners}
-        pagination={pagination}
-        onChangePage={handleTableChange}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-      />
+        {/* TABLE */}
+        <div className="accounts-table-wrapper">
+          <BannerTable
+            loading={loading}
+            data={banners}
+            pagination={pagination}
+            onChangePage={handleTableChange}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        </div>
 
-      {open && (
-        <BannerModal
-          open={open}
-          onClose={() => setOpen(false)}
-          fetchData={fetchData}
-          editData={editData}
-        />
-      )}
-    </Card>
+        {/* MODAL */}
+        {open && (
+          <BannerModal
+            open={open}
+            onClose={() => setOpen(false)}
+            fetchData={fetchData}
+            editData={editData}
+          />
+        )}
+      </Card>
+    </div>
   );
 }

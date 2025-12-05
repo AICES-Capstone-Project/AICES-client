@@ -1,5 +1,9 @@
+// src/pages/SystemPages/Companies/CompanyList.tsx
+
 import { useEffect, useState } from "react";
-import { Card, Form } from "antd";
+import { Card, Form, Button, Select } from "antd"; // ⭐ thêm Button
+import { PlusOutlined } from "@ant-design/icons"; // ⭐ thêm icon
+
 import type { TablePaginationConfig } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 
@@ -11,8 +15,8 @@ import {
   toastSuccess,
   toastWarning,
 } from "../../../components/UI/Toast";
+import { useAppSelector } from "../../../hooks/redux";
 
-import CompanyToolbar from "./components/CompanyToolbar";
 import CompanySearchBar from "./components/CompanySearchBar";
 import CompanyTable from "./components/CompanyTable";
 import RejectCompanyModal from "./components/RejectCompanyModal";
@@ -45,20 +49,17 @@ export default function CompanyList() {
 
   const nav = useNavigate();
 
-  // ================== CORE HELPERS ==================
+  // ================== FILTER PAGING ==================
   const applyFilterAndPaging = (
     source: Company[],
     kw: string,
     page: number,
     pageSize: number
   ) => {
-    const keywordLower = kw.trim().toLowerCase();
+    const kwLower = kw.trim().toLowerCase();
 
-    const filtered = keywordLower
-      ? source.filter((c) => {
-          const name = (c.name || "").toLowerCase();
-          return name.includes(keywordLower);
-        })
+    const filtered = kwLower
+      ? source.filter((c) => (c.name || "").toLowerCase().includes(kwLower))
       : source;
 
     const start = (page - 1) * pageSize;
@@ -71,38 +72,6 @@ export default function CompanyList() {
       current: page,
       pageSize,
     }));
-  };
-
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const res = await companyService.getAll({
-        page: 1,
-        pageSize: 1000, // lấy nhiều 1 chút để admin search thoải mái
-      });
-
-      if (res?.status === "Success" && res?.data) {
-        const d = res.data as any;
-        const rawList = (d.companies ?? []) as Company[];
-
-        setAllCompanies(rawList);
-
-        const page = pagination.current || 1;
-        const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
-
-        const source = statusFilter
-          ? rawList.filter((c) => (c.companyStatus || "") === statusFilter)
-          : rawList;
-
-        applyFilterAndPaging(source, keyword, page, pageSize);
-      } else {
-        toastError("Failed to fetch companies", res?.message);
-      }
-    } catch (err) {
-      toastError("Failed to fetch companies");
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleChangeStatusFilter = (value: string) => {
@@ -119,12 +88,46 @@ export default function CompanyList() {
     applyFilterAndPaging(source, keyword, page, pageSize);
   };
 
+  // ================== FETCH ==================
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const res = await companyService.getAll({
+        page: 1,
+        pageSize: 1000,
+      });
+
+      if (res?.status === "Success" && res?.data) {
+        const rawList = (res.data as any).companies ?? [];
+
+        setAllCompanies(rawList);
+
+        const page = pagination.current || 1;
+        const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
+
+        const source = statusFilter
+          ? rawList.filter(
+              (c: Company) => (c.companyStatus || "") === statusFilter
+            )
+          : rawList;
+
+        applyFilterAndPaging(source, keyword, page, pageSize);
+      } else {
+        toastError("Failed to fetch companies", res?.message);
+      }
+    } catch {
+      toastError("Failed to fetch companies");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ================== ACTION HANDLERS ==================
+  // ================== STATUS HANDLERS ==================
   const updateCompanyStatus = async (
     companyId: number,
     status: "Approved" | "Rejected",
@@ -147,13 +150,31 @@ export default function CompanyList() {
       } else {
         toastError("Failed to update company status", res?.message);
       }
-    } catch (e) {
+    } catch {
       toastError("Failed to update company status");
     } finally {
       setLoading(false);
     }
   };
 
+  const handleConfirmReject = async () => {
+    if (!rejectionReason.trim()) {
+      toastWarning("Please input rejection reason");
+      return;
+    }
+    if (!rejectingCompany) return;
+
+    await updateCompanyStatus(
+      rejectingCompany.companyId,
+      "Rejected",
+      rejectionReason
+    );
+
+    setRejectingCompany(null);
+    setRejectionReason("");
+  };
+
+  // ================== CREATE ==================
   const handleCreate = async () => {
     try {
       const values = await form.validateFields();
@@ -161,23 +182,20 @@ export default function CompanyList() {
 
       const formData = new FormData();
 
-      // ⚠️ dùng giống y MyApartment.tsx: tên field viết thường
       formData.append("name", values.name || "");
       formData.append("description", values.description || "");
       formData.append("address", values.address || "");
       formData.append("website", values.websiteUrl || "");
       formData.append("taxCode", values.taxCode || "");
 
-      // Logo (giữ Upload như cũ nhưng key phải là logoFile)
       const logoList = values.logoFile as UploadFile[] | undefined;
-      if (logoList && logoList.length > 0) {
+      if (logoList?.length) {
         const logoFile = logoList[0].originFileObj as File;
         if (logoFile) {
           formData.append("logoFile", logoFile, logoFile.name);
         }
       }
 
-      // Documents: lấy từ Form.List documents (type + file)
       const documents = (values.documents || []) as {
         type?: string;
         file?: File;
@@ -194,12 +212,9 @@ export default function CompanyList() {
       }
 
       validDocs.forEach((doc, idx) => {
-        formData.append(`documentTypes[${idx}]`, doc.type as string);
-        formData.append("documentFiles", doc.file as File);
+        formData.append(`documentTypes[${idx}]`, doc.type!);
+        formData.append("documentFiles", doc.file!);
       });
-
-      // debug (nếu cần)
-      // for (const p of formData.entries()) console.log(p[0], p[1]);
 
       const res = await companyService.createAdminForm(formData);
 
@@ -219,6 +234,7 @@ export default function CompanyList() {
     }
   };
 
+  // ================== DELETE ==================
   const handleDeleteCompany = async (companyId: number) => {
     setLoading(true);
     try {
@@ -251,34 +267,18 @@ export default function CompanyList() {
     }
   };
 
-  const handleConfirmReject = async () => {
-    if (!rejectionReason.trim()) {
-      toastWarning("Please input rejection reason");
-      return;
-    }
-    if (!rejectingCompany) return;
-
-    await updateCompanyStatus(
-      rejectingCompany.companyId,
-      "Rejected",
-      rejectionReason
-    );
-
-    setRejectingCompany(null);
-    setRejectionReason("");
-  };
-
-  const handleApprove = (companyId: number) => {
+  const handleApprove = (companyId: number) =>
     updateCompanyStatus(companyId, "Approved");
-  };
 
-  const handleOpenDetail = (companyId: number) => {
-    nav(`/system/company/${companyId}`);
-  };
+  const companiesByStatus = statusFilter
+    ? allCompanies.filter((c) => (c.companyStatus || "") === statusFilter)
+    : allCompanies;
 
+  // ================== TABLE PAGING ==================
   const handleChangeTable = (p: TablePaginationConfig) => {
     const page = p.current || 1;
     const pageSize = p.pageSize || DEFAULT_PAGE_SIZE;
+
     setPagination(p);
 
     const source = statusFilter
@@ -287,53 +287,84 @@ export default function CompanyList() {
 
     applyFilterAndPaging(source, keyword, page, pageSize);
   };
-  const companiesByStatus = statusFilter
-    ? allCompanies.filter((c) => (c.companyStatus || "") === statusFilter)
-    : allCompanies;
+  const handleOpenCreate = () => {
+    setIsCreateOpen(true);
+    form.resetFields(); // nếu không cần reset thì có thể bỏ dòng này
+  };
+
+  // ==================================================
+  const { user } = useAppSelector((state) => state.auth);
+  const normalizedRole = (user?.roleName || "")
+    .replace(/_/g, " ")
+    .toLowerCase();
+  const isStaff = normalizedRole === "system staff";
 
   return (
-    <div>
-      <CompanyToolbar
-        loading={loading}
-        onAdd={() => {
-          form.resetFields();
-          setIsCreateOpen(true);
-        }}
-        onRefresh={fetchData}
-        statusFilter={statusFilter}
-        onChangeStatusFilter={handleChangeStatusFilter}
-      />
+    <div className="page-layout">
+      <Card className="aices-card">
+        {/* 🔥 HÀNG TOP: Search + Search/Reset + Status + Add Company */}
+        <div className="company-header-row">
+          {/* LEFT - Search */}
+          <div className="company-left">
+            <CompanySearchBar
+              keyword={keyword}
+              setKeyword={setKeyword}
+              loading={loading}
+              allCompanies={companiesByStatus}
+              pagination={pagination}
+              defaultPageSize={DEFAULT_PAGE_SIZE}
+              applyFilterAndPaging={applyFilterAndPaging}
+            />
+          </div>
 
-      <Card style={{ marginTop: 12 }}>
-        <CompanySearchBar
-          keyword={keyword}
-          setKeyword={setKeyword}
-          loading={loading}
-          allCompanies={companiesByStatus}
-          pagination={pagination}
-          defaultPageSize={DEFAULT_PAGE_SIZE}
-          applyFilterAndPaging={applyFilterAndPaging}
-        />
+          {/* RIGHT - Status + Add Company */}
+          <div className="company-right">
+            {/* ⭐ Dropdown filter status */}
+            <Select
+              value={statusFilter || ""} // "" = All
+              onChange={handleChangeStatusFilter}
+              style={{ width: 140 }}
+            >
+              <Select.Option value="">All status</Select.Option>
+              <Select.Option value="Pending">Pending</Select.Option>
+              <Select.Option value="Approved">Approved</Select.Option>
+              <Select.Option value="Rejected">Rejected</Select.Option>
+              <Select.Option value="Suspended">Suspended</Select.Option>
+            </Select>
+             {/* Add Company chỉ cho Manager/Admin */}
+            {!isStaff && (
+              <Button
+                icon={<PlusOutlined />}
+                className="accounts-new-btn"
+                onClick={handleOpenCreate}
+              >
+                Add Company
+              </Button>
+            )}
+          </div>
+        </div>
 
-        <CompanyTable
-          loading={loading}
-          companies={companies}
-          pagination={pagination}
-          total={total}
-          keyword={keyword}
-          allCompanies={allCompanies}
-          defaultPageSize={DEFAULT_PAGE_SIZE}
-          onChangePagination={handleChangeTable}
-          onOpenDetail={handleOpenDetail}
-          onApprove={handleApprove}
-          onOpenReject={(c) => {
-            setRejectingCompany(c);
-            setRejectionReason("");
-          }}
-          onDelete={handleDeleteCompany}
-        />
+        {/* TABLE */}
+        <div className="accounts-table-wrapper">
+          <CompanyTable
+            loading={loading}
+            companies={companies}
+            pagination={pagination}
+            total={total}
+            defaultPageSize={DEFAULT_PAGE_SIZE}
+            onChangePagination={handleChangeTable}
+            onOpenDetail={(id) => nav(`/system/company/${id}`)}
+            onApprove={handleApprove}
+            onOpenReject={(c) => {
+              setRejectingCompany(c);
+              setRejectionReason("");
+            }}
+            onDelete={handleDeleteCompany}
+          />
+        </div>
       </Card>
 
+      {/* MODALS */}
       <RejectCompanyModal
         open={!!rejectingCompany}
         loading={loading}

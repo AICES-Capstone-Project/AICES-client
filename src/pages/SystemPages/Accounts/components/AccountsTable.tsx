@@ -1,7 +1,16 @@
-import { Button, Space, Table, Tag, Tooltip, Popconfirm, Avatar } from "antd";
+import { Button, Space, Table, Tag, Tooltip, Popconfirm, Avatar  } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  LockOutlined,
+  UnlockOutlined,
+} from "@ant-design/icons";
 import type { User } from "../../../../types/user.types";
+import { CrownOutlined } from "@ant-design/icons";
+
+
 
 interface AccountsTableProps {
   loading: boolean;
@@ -30,75 +39,111 @@ export default function AccountsTable({
   const columns: ColumnsType<User> = [
     { title: "ID", dataIndex: "userId", width: 80 },
     {
-      title: "",
-      dataIndex: "avatarUrl",
-      width: 56,
-      render: (url: string, record) => (
-        <Avatar src={url} alt={record.fullName || record.email} size="small">
-          {(record.fullName || record.email)?.charAt(0).toUpperCase()}
-        </Avatar>
+      title: "User",
+      dataIndex: "email",
+      render: (_: any, record) => (
+        <div className="accounts-user-cell">
+          <Avatar
+            src={record.avatarUrl}
+            alt={record.fullName || record.email}
+            size="large"
+            className="accounts-user-avatar"
+          >
+            {(record.fullName || record.email)?.charAt(0).toUpperCase()}
+          </Avatar>
+
+          <div className="accounts-user-text">
+            <div className="name">{record.fullName || "—"}</div>
+            <div className="email">{record.email}</div>
+          </div>
+        </div>
       ),
     },
+    {
+  title: "Role",
+  dataIndex: "roleName",
+  width: 160,
+  render: (role: string) => {
+    const isSystem = role.startsWith("System");
+    const isSuperAdmin =
+      role === "System_Admin" || role === "System Admin";
 
-    { title: "Email", dataIndex: "email" },
-    {
-      title: "Full name",
-      dataIndex: "fullName",
-      render: (v: string | null) => v || "—",
-    },
-    {
-      title: "Role",
-      dataIndex: "roleName",
-      width: 160,
-      render: (r: string) => <Tag>{r}</Tag>,
-    },
-    
+    const type = isSystem ? "system" : "hr";
+
+    // Hiển thị đẹp hơn: đổi "_" thành " "
+    const label = role.replace(/_/g, " ");
+
+    return (
+      <Tag
+        className={`role-tag role-tag-${type} ${
+          isSuperAdmin ? "role-tag-super-admin" : ""
+        }`}
+      >
+        {isSuperAdmin && (
+          <CrownOutlined className="role-tag-icon" />
+        )}
+        {label}
+      </Tag>
+    );
+  },
+},
+
+
     {
       title: "Status",
       dataIndex: "userStatus",
       width: 120,
-      render: (status: User["userStatus"]) => {
-        let color: string = "default";
-        if (status === "Verified") color = "green";
-        else if (status === "Unverified") color = "orange";
-        else if (status === "Locked") color = "red";
-
-        return <Tag color={color}>{status}</Tag>;
-      },
+      render: (status: User["userStatus"]) => (
+        <Tag className={`status-tag status-tag-${status.toLowerCase()}`}>
+          {status}
+        </Tag>
+      ),
     },
 
     {
       title: "Actions",
       key: "actions",
-      width: 320,
+      width: 220,
       render: (_, record) => (
-        <Space>
+        <Space size="small">
           {/* View */}
           <Tooltip title="View details">
-            <Button icon={<EyeOutlined />} onClick={() => onViewDetail(record)}>
-              View
-            </Button>
+            <Button
+              size="small"
+              shape="circle"
+              icon={<EyeOutlined />}
+              onClick={() => onViewDetail(record)}
+            />
           </Tooltip>
 
           {/* Edit */}
           <Tooltip title="Edit user">
-            <Button icon={<EditOutlined />} onClick={() => onEdit(record)}>
-              Edit
-            </Button>
+            <Button
+              size="small"
+              shape="circle"
+              icon={<EditOutlined />}
+              onClick={() => onEdit(record)}
+            />
           </Tooltip>
 
           {/* Lock / Unlock */}
           {record.userStatus !== "Locked" ? (
             <Tooltip title="Lock user">
-              <Button danger onClick={() => onChangeStatus(record, "Locked")}>
-                Lock
-              </Button>
+              <Button
+                size="small"
+                shape="circle"
+                icon={<LockOutlined />}
+                onClick={() => onChangeStatus(record, "Locked")}
+              />
             </Tooltip>
           ) : (
             <Tooltip title="Unlock user">
-              <Button onClick={() => onChangeStatus(record, "Verified")}>
-                Unlock
-              </Button>
+              <Button
+                size="small"
+                shape="circle"
+                icon={<UnlockOutlined />}
+                onClick={() => onChangeStatus(record, "Verified")}
+              />
             </Tooltip>
           )}
 
@@ -112,7 +157,12 @@ export default function AccountsTable({
             onConfirm={() => onDelete(record)}
           >
             <Tooltip title="Delete user">
-              <Button icon={<DeleteOutlined />} danger />
+              <Button
+                size="small"
+                shape="circle"
+                danger
+                icon={<DeleteOutlined />}
+              />
             </Tooltip>
           </Popconfirm>
         </Space>
@@ -122,6 +172,7 @@ export default function AccountsTable({
 
   return (
     <Table<User>
+      className="accounts-table"
       rowKey="userId"
       loading={loading}
       dataSource={data}

@@ -1,7 +1,7 @@
-import { Button, Input, Space } from "antd";
-import type { TablePaginationConfig } from "antd/es/table";
-import { SearchOutlined } from "@ant-design/icons";
+import { Button, Input } from "antd";
+import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 
+import type { TablePaginationConfig } from "antd/es/table";
 import type { Company } from "../../../../types/company.types";
 
 interface CompanySearchBarProps {
@@ -28,64 +28,50 @@ export default function CompanySearchBar({
   defaultPageSize,
   applyFilterAndPaging,
 }: CompanySearchBarProps) {
-  const currentPageSize = pagination.pageSize || defaultPageSize;
+  const pageSize = pagination.pageSize || defaultPageSize;
+
+  const doSearch = () =>
+    applyFilterAndPaging(allCompanies, keyword, 1, pageSize);
+
+  const doReset = () => {
+    setKeyword("");
+    applyFilterAndPaging(allCompanies, "", 1, pageSize);
+  };
 
   return (
-    <Space style={{ marginBottom: 16 }} wrap>
-      <Input
-        placeholder="Search by company name"
-        allowClear
-        value={keyword}
-        onChange={(e) => {
-          const value = e.target.value;
-          setKeyword(value);
+    <div className="accounts-searchbar">
+      <div className="accounts-toolbar-left">
+        <Input
+          placeholder="Search by company name"
+          allowClear
+          value={keyword}
+          onChange={(e) => {
+            const v = e.target.value;
+            setKeyword(v);
+            applyFilterAndPaging(allCompanies, v, 1, pageSize);
+          }}
+          onPressEnter={doSearch}
+          style={{ width: 360 }}
+          prefix={<SearchOutlined />}
+        />
 
-          applyFilterAndPaging(
-            allCompanies,
-            value,
-            1,
-            currentPageSize
-          );
-        }}
-        onPressEnter={() =>
-          applyFilterAndPaging(
-            allCompanies,
-            keyword,
-            1,
-            currentPageSize
-          )
-        }
-        style={{ width: 320 }}
-        prefix={<SearchOutlined />}
-      />
-      <Button
-        type="primary"
-        onClick={() =>
-          applyFilterAndPaging(
-            allCompanies,
-            keyword,
-            1,
-            currentPageSize
-          )
-        }
-        loading={loading}
-      >
-        Search
-      </Button>
-      <Button
-        onClick={() => {
-          setKeyword("");
-          applyFilterAndPaging(
-            allCompanies,
-            "",
-            1,
-            currentPageSize
-          );
-        }}
-        disabled={loading}
-      >
-        Reset
-      </Button>
-    </Space>
+        <Button
+          icon={<SearchOutlined />}
+          className="btn-search"
+          onClick={doSearch}
+        >
+          Search
+        </Button>
+
+        <Button
+          className="accounts-reset-btn"
+          icon={<ReloadOutlined />}
+          onClick={doReset}
+          loading={loading}
+        >
+          Reset
+        </Button>
+      </div>
+    </div>
   );
 }

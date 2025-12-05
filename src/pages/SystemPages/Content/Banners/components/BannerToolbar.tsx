@@ -1,11 +1,9 @@
-import { Button, Input, Space, Typography } from "antd";
+import { Button, Input } from "antd";
 import {
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-
-const { Title } = Typography;
 
 interface BannerToolbarProps {
   keyword: string;
@@ -23,10 +21,8 @@ export default function BannerToolbar({
   onCreate,
 }: BannerToolbarProps) {
   return (
-    <div className="flex justify-between mb-4">
-      <Title level={3}>Banners</Title>
-
-      <Space>
+    <div className="accounts-toolbar">
+      <div className="accounts-toolbar-left">
         <Input
           allowClear
           prefix={<SearchOutlined />}
@@ -34,13 +30,34 @@ export default function BannerToolbar({
           value={keyword}
           onChange={(e) => onKeywordChange(e.target.value)}
           onPressEnter={onSearch}
+          style={{ width: 320 }}
         />
-        <Button icon={<ReloadOutlined />} onClick={onReload} />
 
-        <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>
-          Create
+        <Button
+          icon={<SearchOutlined />}
+          className="btn-search"
+          onClick={onSearch}
+        >
+          Search
         </Button>
-      </Space>
+
+        <Button
+          icon={<ReloadOutlined />}
+          className="accounts-reset-btn"
+          onClick={onReload}
+        >
+          Reload
+        </Button>
+      </div>
+
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={onCreate}
+        className="accounts-new-btn"
+      >
+        New Banner
+      </Button>
     </div>
   );
 }

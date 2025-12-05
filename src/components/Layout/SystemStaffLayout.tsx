@@ -1,5 +1,6 @@
 import React from "react";
 import { Layout, Menu, Button, Typography, ConfigProvider } from "antd";
+import "../../assets/styles/system.css";
 import {
   DashboardOutlined,
   // FileDoneOutlined,
@@ -143,36 +144,6 @@ export default function SystemStaffLayout() {
         },
       ],
     },
-    // // Notifications (gửi thông báo hệ thống)
-    // {
-    //   key: "notifications",
-    //   icon: <BellOutlined />,
-    //   label: "Notifications",
-    //   children: [
-    //     {
-    //       key: toStaffPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES),
-    //       label: (
-    //         <Link to={toStaffPath(APP_ROUTES.SYSTEM_NOTIFICATION_TEMPLATES)}>
-    //           Notification Templates
-    //         </Link>
-    //       ),
-    //     },
-    //     {
-    //       key: toStaffPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES),
-    //       label: (
-    //         <Link to={toStaffPath(APP_ROUTES.SYSTEM_EMAIL_TEMPLATES)}>
-    //           Email Templates
-    //         </Link>
-    //       ),
-    //     },
-    //   ],
-    // },
-    // // Reports (xuất báo cáo)
-    // {
-    //   key: toStaffPath(APP_ROUTES.SYSTEM_REPORTS),
-    //   icon: <FileDoneOutlined />,
-    //   label: <Link to={toStaffPath(APP_ROUTES.SYSTEM_REPORTS)}>Reports</Link>,
-    // },
   ];
 
   const handleLogout = () => {
@@ -245,50 +216,122 @@ export default function SystemStaffLayout() {
       }}
     >
       <style>{`
-        .aices-header {
-          background: linear-gradient(90deg, #FFFFFF, ${GOLD.cream});
-          border-bottom: 1px solid #f0f0f0;
-          box-shadow: 0 2px 10px ${GOLD.shadow};
-        }
-        .aices-sider {
-          background: #fff !important;
-          border-right: 1px solid #f0f0f0 !important;
-        }
-        .aices-brand {
-          letter-spacing: 0.2px;
-          background: linear-gradient(90deg, ${GOLD.primary}, ${GOLD.hover});
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          text-shadow: 0 1px 0 rgba(0,0,0,0.04);
-        }
-        .ant-menu-item {
-          transition: background-color .18s ease, transform .12s ease;
-          border-radius: 8px !important;
-        }
-        .ant-menu-item:hover {
-          background: ${GOLD.cream};
-          transform: translateX(2px);
-        }
-        .ant-btn-text:hover {
-          background: ${GOLD.cream};
-        }
-        .ant-table-tbody > tr.ant-table-row:hover > td {
-          background: ${GOLD.cream2} !important;
-        }
-        *::-webkit-scrollbar { width: 10px; height: 10px; }
-        *::-webkit-scrollbar-track { background: #ffffff; }
-        *::-webkit-scrollbar-thumb {
-          background: ${GOLD.border};
-          border-radius: 10px;
-          border: 2px solid #ffffff;
-        }
-        *::-webkit-scrollbar-thumb:hover { background: ${GOLD.hover}; }
-        .ant-input:focus, .ant-input-focused,
-        .ant-select-focused .ant-select-selector,
-        .ant-picker-focused, .ant-btn:focus-visible {
-          box-shadow: 0 0 0 2px rgba(245,196,0,0.25) !important;
-        }
+.aices-header {
+  background: linear-gradient(
+    180deg,
+    #c8e8d7 0%,
+    #e7f4ed 55%,
+    #ffffff 100%
+  );
+  border-bottom: 1px solid #d7eee3;
+  box-shadow: 0 2px 10px rgba(15, 32, 39, 0.12);
+}
+
+.ant-layout-sider-trigger {
+  background: linear-gradient(90deg, #0F2027 0%, #28623A 100%) !important;
+  color: #E9F5EC !important;
+  border-top: 1px solid #1A302E;
+}
+
+.aices-sider {
+  background: linear-gradient(90deg, #0F2027 0%, #16392E 40%, #1F4A38 75%, #28623A 100%) !important;
+  border-right: 1px solid rgba(255,255,255,0.06) !important;
+  box-shadow: 4px 0 18px rgba(0, 0, 0, 0.45);
+  overflow: hidden; /* không cho pill tràn ra ngoài */
+}
+
+.aices-brand {
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #FFD500;
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.aices-sider .ant-menu {
+  background: transparent !important;
+}
+
+.aices-sider .ant-menu-item,
+.aices-sider .ant-menu-submenu-title {
+  transition: background-color .18s ease, transform .12s ease;
+  border-radius: 999px !important;
+  margin: 4px 6px !important;
+  color: #E9F5EC !important;
+}
+
+.aices-sider .ant-menu-sub .ant-menu-item {
+  border-radius: 999px !important;
+  margin: 2px 10px !important;
+  padding-left: 40px !important;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+.aices-sider .ant-menu-item-icon,
+.aices-sider .ant-menu-submenu-arrow {
+  color: #9CC5A1 !important;
+}
+
+.aices-sider .ant-menu-item:hover,
+.aices-sider .ant-menu-submenu-title:hover {
+  background: rgba(40, 98, 58, 0.18) !important;
+  transform: translateX(2px);
+}
+
+.aices-sider .ant-menu-item-selected {
+  background: rgba(40, 98, 58, 0.28) !important;
+  color: #E9F5EC !important;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.32);
+}
+
+.aices-sider .ant-menu-item-selected .ant-menu-item-icon {
+  color: #E9F5EC !important;
+}
+
+/* Hover chung cho button text (Logout + nút toggle) */
+.ant-btn-text:hover {
+  background: rgba(40, 98, 58, 0.25) !important;
+  color: #E9F5EC !important;
+}
+
+/* Table hover */
+.ant-table-tbody > tr.ant-table-row:hover > td {
+  background: ${GOLD.cream2} !important;
+}
+
+/* Scrollbar */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: #ffffff; }
+*::-webkit-scrollbar-thumb {
+  background: ${GOLD.border};
+  border-radius: 10px;
+  border: 2px solid #ffffff;
+}
+*::-webkit-scrollbar-thumb:hover { background: ${GOLD.hover}; }
+
+/* Focus states */
+.ant-input:focus, .ant-input-focused,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused, .ant-btn:focus-visible {
+  box-shadow: 0 0 0 2px rgba(245,196,0,0.25) !important;
+}
+
+/* Logout section */
+.aices-sider .logout-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.aices-sider .logout-section .ant-btn-text {
+  color: #9CC5A1;
+  opacity: 0.85;
+}
+
+.aices-sider .logout-section .ant-btn-text:hover {
+  opacity: 1;
+  background: rgba(40, 98, 58, 0.28) !important;
+}
       `}</style>
 
       <Layout style={{ minHeight: "100vh" }}>
@@ -314,14 +357,23 @@ export default function SystemStaffLayout() {
               height: 64,
               display: "flex",
               alignItems: "center",
-              justifyContent: collapsed ? "center" : "flex-start",
-              paddingInline: 16,
-              fontWeight: 800,
-              fontSize: 18,
+              justifyContent: "center",
+              paddingInline: 12,
+              cursor: "pointer",
             }}
-            className="aices-brand"
+            onClick={() => navigate("/")}
           >
-            {collapsed ? "S" : "System Staff"}
+            {collapsed ? (
+              <img
+                src="/src/assets/logo/logo_long.png"
+                style={{ height: 28, objectFit: "contain" }}
+              />
+            ) : (
+              <img
+                src="/src/assets/logo/logo_long.png"
+                style={{ height: 36, objectFit: "contain" }}
+              />
+            )}
           </div>
 
           <Menu
@@ -331,7 +383,7 @@ export default function SystemStaffLayout() {
             style={{ flex: 1 }}
           />
 
-          <div style={{ padding: 16, borderTop: "1px solid #f0f0f0" }}>
+          <div className="logout-section" style={{ padding: 16 }}>
             <Button
               type="text"
               onClick={handleLogout}
@@ -339,7 +391,6 @@ export default function SystemStaffLayout() {
               style={{
                 width: "100%",
                 textAlign: "left",
-                color: GOLD.primary,
               }}
             >
               Logout
@@ -372,7 +423,7 @@ export default function SystemStaffLayout() {
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             />
             <Title level={4} style={{ margin: 0 }}>
-              System Panel
+              System Staff
             </Title>
           </Header>
 
@@ -381,6 +432,7 @@ export default function SystemStaffLayout() {
               padding: 24,
               height: "calc(100vh - 64px)", // 64 = chiều cao header
               overflowY: "auto",
+              background: "#f6fbf8",
             }}
           >
             <Outlet />

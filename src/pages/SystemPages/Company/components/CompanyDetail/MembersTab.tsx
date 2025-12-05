@@ -16,6 +16,18 @@ export default function MembersTab({
   total,
   onChangePagination,
 }: MembersTabProps) {
+  const renderJoinStatus = (s?: string | null) => {
+    const status = (s || "").trim();
+    if (!status) return "—";
+
+    let cls = "status-tag";
+    if (status === "Approved") cls += " status-tag-verified";
+    else if (status === "Pending") cls += " status-tag-unverified";
+    else cls += " status-tag-locked";
+
+    return <Tag className={cls}>{status}</Tag>;
+  };
+
   const memberCols: ColumnsType<CompanyMember> = [
     {
       title: "Avatar",
@@ -26,6 +38,7 @@ export default function MembersTab({
           <img
             src={url}
             alt="avatar"
+            className="accounts-user-avatar"
             style={{
               width: 32,
               height: 32,
@@ -35,38 +48,47 @@ export default function MembersTab({
           />
         ) : (
           <div
+            className="accounts-user-avatar"
             style={{
               width: 32,
               height: 32,
               borderRadius: "50%",
-              background: "#f0f0f0",
+              background: "#f3f4f6",
             }}
           />
         ),
     },
-    { title: "User ID", dataIndex: "userId", width: 90 },
+    {
+      title: "User ID",
+      dataIndex: "userId",
+      width: 90,
+    },
     {
       title: "Name",
       dataIndex: "fullName",
       render: (v: string | null) => v || "—",
     },
-    { title: "Email", dataIndex: "email" },
+    {
+      title: "Email",
+      dataIndex: "email",
+    },
     {
       title: "Phone",
       dataIndex: "phoneNumber",
       width: 140,
       render: (v?: string | null) => v || "—",
     },
-    { title: "Role", dataIndex: "roleName", width: 160 },
+    {
+      title: "Role",
+      dataIndex: "roleName",
+      width: 160,
+      render: (v?: string | null) => v || "—",
+    },
     {
       title: "Status",
       dataIndex: "joinStatus",
-      width: 120,
-      render: (s: string) => {
-        const color =
-          s === "Approved" ? "green" : s === "Pending" ? "gold" : "red";
-        return <Tag color={color}>{s}</Tag>;
-      },
+      width: 130,
+      render: (s?: string) => renderJoinStatus(s),
     },
     {
       title: "Joined At",
@@ -77,9 +99,10 @@ export default function MembersTab({
   ];
 
   return (
-    <Card>
+    <Card className="aices-card">
       <Table<CompanyMember>
         rowKey="comUserId"
+        className="accounts-table"
         dataSource={members}
         columns={memberCols}
         pagination={{

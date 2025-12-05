@@ -1,6 +1,5 @@
 import { Form, Input, Modal } from "antd";
 import type { FormInstance } from "antd/es/form";
-
 import type { Skill } from "../../../../../types/skill.types";
 
 interface SkillFormValues {
@@ -26,14 +25,18 @@ export default function SkillModal({
 }: SkillModalProps) {
   return (
     <Modal
-      title={editingSkill ? "Edit Skill" : "Create Skill"}
       open={open}
+      title={editingSkill ? "Edit Skill" : "Create Skill"}
       onCancel={onCancel}
-      okText={editingSkill ? "Save changes" : "Create"}
+      okText={editingSkill ? "Save Changes" : "Create"}
       onOk={() => form.submit()}
       confirmLoading={submitting}
       destroyOnClose
+      centered
+      className="system-modal"
     >
+      <div className="system-modal-section-title">Basic Information</div>
+
       <Form
         form={form}
         layout="vertical"
@@ -41,14 +44,14 @@ export default function SkillModal({
         preserve={false}
       >
         <Form.Item
-          label="Name"
+          label="Skill Name"
           name="name"
           rules={[
             { required: true, message: "Please enter skill name" },
-            { max: 200, message: "Name is too long" },
+            { max: 200 },
           ]}
         >
-          <Input placeholder="e.g. Communication, Leadership" />
+          <Input placeholder="e.g. Communication, Leadership, NodeJS" />
         </Form.Item>
       </Form>
     </Modal>

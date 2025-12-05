@@ -1,9 +1,6 @@
-// src/pages/SystemPages/Subscriptions/components/subscribed-companies/SubscribedCompaniesToolbar.tsx
-
-import { Input, Space, Typography } from "antd";
-
-const { Title } = Typography;
-const { Search } = Input;
+import { Input, Space, Button } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
 interface SubscribedCompaniesToolbarProps {
   onSearch: (value: string) => void;
@@ -12,6 +9,15 @@ interface SubscribedCompaniesToolbarProps {
 export default function SubscribedCompaniesToolbar({
   onSearch,
 }: SubscribedCompaniesToolbarProps) {
+  const [value, setValue] = useState("");
+
+  // Realtime search
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setValue(val);
+    onSearch(val);
+  };
+
   return (
     <Space
       style={{
@@ -21,16 +27,23 @@ export default function SubscribedCompaniesToolbar({
         alignItems: "center",
       }}
     >
-      <Title level={4} style={{ margin: 0 }}>
-        Subscription History
-      </Title>
+      {/* Input + Button giống Company */}
+      <Space>
+        <div className="search-input-wrapper">
+          <SearchOutlined className="search-input-icon" />
+          <Input
+            placeholder="Search companies or plans..."
+            value={value}
+            onChange={handleChange}
+            className="search-input"
+          />
+        </div>
 
-      <Search
-        allowClear
-        placeholder="Search by company or plan..."
-        style={{ width: 260 }}
-        onSearch={onSearch}
-      />
+        <Button className="btn-search">
+          <SearchOutlined />
+          Search
+        </Button>
+      </Space>
     </Space>
   );
 }

@@ -19,17 +19,19 @@ export default function SpecializationModal({
 }: SpecializationModalProps) {
   return (
     <Modal
-      title={
-        editingSpecialization
-          ? "Edit Specialization"
-          : "Create Specialization"
-      }
       open={open}
+      title={
+        editingSpecialization ? "Edit Specialization" : "Create Specialization"
+      }
       onOk={onOk}
       onCancel={onCancel}
-      okText="Save"
+      okText={editingSpecialization ? "Save changes" : "Create"}
       destroyOnClose
+      centered
+      className="system-modal"
     >
+      <div className="system-modal-section-title">Specialization Information</div>
+
       <Form
         form={form}
         layout="vertical"
@@ -54,10 +56,7 @@ export default function SpecializationModal({
             { type: "number", min: 1, message: "Category ID must be > 0" },
           ]}
         >
-          <InputNumber
-            style={{ width: "100%" }}
-            placeholder="Enter category ID"
-          />
+          <InputNumber placeholder="Enter category ID" style={{ width: "100%" }} />
         </Form.Item>
       </Form>
     </Modal>

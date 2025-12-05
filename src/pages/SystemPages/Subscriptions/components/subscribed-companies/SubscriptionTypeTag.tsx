@@ -3,19 +3,26 @@
 import { Tag } from "antd";
 
 interface SubscriptionTypeTagProps {
-  status: string;
+  status?: string | null;
 }
 
-export default function SubscriptionTypeTag({
-  status,
-}: SubscriptionTypeTagProps) {
+export default function SubscriptionTypeTag({ status }: SubscriptionTypeTagProps) {
+  if (!status) return <Tag>—</Tag>;
+
   const lower = status.toLowerCase();
 
-  let color: "green" | "gold" | "default" | "red" = "default";
+  // map sang tone AICES (verified / unverified / locked)
+  if (lower === "active") {
+    return <span className="status-tag status-tag-verified">{status}</span>;
+  }
 
-  if (lower === "active") color = "green";
-  else if (lower === "pending") color = "gold";
-  else if (lower === "expired" || lower === "cancelled") color = "red";
+  if (lower === "pending") {
+    return <span className="status-tag status-tag-unverified">{status}</span>;
+  }
 
-  return <Tag color={color}>{status}</Tag>;
+  if (lower === "expired" || lower === "cancelled" || lower === "canceled") {
+    return <span className="status-tag status-tag-locked">{status}</span>;
+  }
+
+  return <Tag>{status}</Tag>;
 }

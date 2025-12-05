@@ -1,9 +1,7 @@
 import { Button, Popconfirm, Space, Table } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { RecruitmentType } from "../../../../../types/recruitmentType.types";
-
 
 interface RecruitmentTypeTableProps {
   loading: boolean;
@@ -27,40 +25,46 @@ export default function RecruitmentTypeTable({
       title: "ID",
       dataIndex: "recruitmentTypeId",
       width: 80,
+      align: "center",
     },
     {
       title: "Name",
       dataIndex: "name",
+      render: (value) => <span style={{ fontWeight: 500 }}>{value}</span>,
     },
     {
       title: "Created At",
       dataIndex: "createdAt",
-      width: 220,
+      width: 200,
       render: (value: string) =>
         value ? new Date(value).toLocaleString() : "-",
     },
     {
       title: "Actions",
       key: "actions",
-      width: 140,
-      render: (_: unknown, record: RecruitmentType) => (
-        <Space>
+      width: 160,
+      align: "center",
+      render: (_, record) => (
+        <Space size="small">
           <Button
-            icon={<EditOutlined />}
             size="small"
+            shape="circle"
+            icon={<EditOutlined />}
             onClick={() => onEdit(record)}
-          >
-            Edit
-          </Button>
+          />
+
           <Popconfirm
-            title="Are you sure to delete this recruitment type?"
-            onConfirm={() => onDelete(record.recruitmentTypeId)}
+            title="Delete recruitment type?"
             okText="Yes"
             cancelText="No"
+            onConfirm={() => onDelete(record.recruitmentTypeId)}
           >
-            <Button danger icon={<DeleteOutlined />} size="small">
-              Delete
-            </Button>
+            <Button
+              size="small"
+              shape="circle"
+              danger
+              icon={<DeleteOutlined />}
+            />
           </Popconfirm>
         </Space>
       ),
@@ -68,13 +72,14 @@ export default function RecruitmentTypeTable({
   ];
 
   return (
-    <Table<RecruitmentType>
+    <Table
       rowKey="recruitmentTypeId"
       loading={loading}
-      columns={columns}
       dataSource={data}
+      columns={columns}
       pagination={pagination}
-      onChange={(pag) => onChangePage(pag)}
+      onChange={(p) => onChangePage(p)}
+      className="accounts-table"
     />
   );
 }

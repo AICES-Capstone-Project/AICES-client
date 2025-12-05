@@ -1,4 +1,4 @@
-import { Button, Input, Space } from "antd";
+import { Button, Input } from "antd";
 import {
   PlusOutlined,
   ReloadOutlined,
@@ -21,22 +21,35 @@ export default function SkillToolbar({
   onCreate,
 }: SkillToolbarProps) {
   return (
-    <Space>
-      <Input
-        allowClear
-        placeholder="Search by name..."
-        value={keyword}
-        onChange={(e) => onKeywordChange(e.target.value)}
-        onPressEnter={onSearch}
-        prefix={<SearchOutlined />}
-        style={{ width: 260 }}
-      />
-      <Button onClick={onReset} icon={<ReloadOutlined />}>
-        Reset
-      </Button>
-      <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>
+    <div className="accounts-toolbar">
+      <div className="accounts-toolbar-left">
+        <Input
+          allowClear
+          placeholder="Search skills..."
+          value={keyword}
+          prefix={<SearchOutlined />}
+          onChange={(e) => onKeywordChange(e.target.value)}
+          onPressEnter={onSearch}
+          style={{ width: 260 }}
+        />
+
+        <Button className="btn-search" icon={<SearchOutlined />} onClick={onSearch}>
+          Search
+        </Button>
+
+        <Button className="accounts-reset-btn" icon={<ReloadOutlined />} onClick={onReset}>
+          Reset
+        </Button>
+      </div>
+
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        className="accounts-new-btn"
+        onClick={onCreate}
+      >
         New Skill
       </Button>
-    </Space>
+    </div>
   );
 }

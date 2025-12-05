@@ -1,7 +1,7 @@
 // src/pages/SystemPages/Content/Blogs/BlogList.tsx
 
 import { useCallback, useEffect, useState } from "react";
-import { message } from "antd";
+import { Card, message } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
 
 import { blogService } from "../../../../services/blogService";
@@ -98,7 +98,6 @@ export default function BlogList() {
       setLoading(true);
       const res = await blogService.deleteBlog(id);
       message.success(res.data.message || "Blog deleted successfully");
-      // reload giữ trang hiện tại
       fetchBlogs(pagination.current ?? 1, pagination.pageSize ?? 10);
     } catch (error: any) {
       const errMsg =
@@ -126,7 +125,6 @@ export default function BlogList() {
       setModalOpen(false);
       setCurrentBlog(null);
 
-      // Sau khi create/update thì load lại trang hiện tại
       fetchBlogs(pagination.current ?? 1, pagination.pageSize ?? 10);
     } catch (error: any) {
       const errMsg =
@@ -146,17 +144,28 @@ export default function BlogList() {
 
   return (
     <div>
-      <BlogToolbar onCreate={handleOpenCreate} />
+      <Card className="aices-card">
+        {/* 🔥 TOP BAR CHUẨN AICES */}
+        <div className="company-header-row">
+          <div className="company-left">
+            <BlogToolbar onCreate={handleOpenCreate} />
+          </div>
+        </div>
 
-      <BlogTable
-        loading={loading}
-        data={blogs}
-        pagination={pagination}
-        onChangePage={handleChangePage}
-        onEdit={handleOpenEdit}
-        onDelete={handleDelete}
-      />
+        {/* TABLE */}
+        <div className="accounts-table-wrapper">
+          <BlogTable
+            loading={loading}
+            data={blogs}
+            pagination={pagination}
+            onChangePage={handleChangePage}
+            onEdit={handleOpenEdit}
+            onDelete={handleDelete}
+          />
+        </div>
+      </Card>
 
+      {/* MODAL */}
       <BlogModal
         open={modalOpen}
         mode={modalMode}

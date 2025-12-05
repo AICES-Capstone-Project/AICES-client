@@ -1,7 +1,15 @@
-import { Button, Popconfirm, Space, Table, Tag } from "antd";
-import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Button, Popconfirm, Space, Table } from "antd";
+import { useAppSelector } from "../../../../hooks/redux";
 
+
+import {
+  EyeOutlined,
+  CheckOutlined,
+  CloseOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
+
+import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { Company } from "../../../../types/company.types";
 
 interface CompanyTableProps {
@@ -9,8 +17,6 @@ interface CompanyTableProps {
   companies: Company[];
   pagination: TablePaginationConfig;
   total: number;
-  keyword: string;
-  allCompanies: Company[];
   defaultPageSize: number;
   onChangePagination: (p: TablePaginationConfig) => void;
   onOpenDetail: (companyId: number) => void;
@@ -31,132 +37,153 @@ export default function CompanyTable({
   onOpenReject,
   onDelete,
 }: CompanyTableProps) {
+  const { user } = useAppSelector((state) => state.auth);
+  const normalizedRole = (user?.roleName || "")
+    .replace(/_/g, " ")
+    .toLowerCase();
+  const isStaff = normalizedRole === "system staff";
+
   const columns: ColumnsType<Company> = [
-    { title: "ID", dataIndex: "companyId", width: 80 },
+    {
+      title: "ID",
+      dataIndex: "companyId",
+      width: 60,
+      align: "center",
+    },
+
     {
       title: "Company",
       dataIndex: "name",
-      render: (v, r: Company) => (
-        <Space>
-          {r.logoUrl ? (
-            <img
-              src={r.logoUrl}
-              alt="logo"
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 6,
-                objectFit: "cover",
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: 28,
-                height: 28,
-                borderRadius: 6,
-                background: "#f0f0f0",
-              }}
-            />
-          )}
-          <span>{v}</span>
-        </Space>
+      render: (_, r) => (
+        <div className="accounts-user-cell">
+          <img src={r.logoUrl || ""} alt="logo" className="company-logo" />
+
+          <div className="accounts-user-text">
+            <div className="name">{r.name}</div>
+            <div className="email">{r.address || "—"}</div>
+          </div>
+        </div>
       ),
     },
 
     {
-      title: "Company Status",
-      render: (_, r: Company) => {
-        const s = r.companyStatus as string | undefined;
-        const color =
-          s === "Approved" ? "green" : s === "Pending" ? "gold" : "red";
-        return s ? <Tag color={color}>{s}</Tag> : "—";
+      title: "Status",
+      dataIndex: "companyStatus",
+      width: 140,
+      render: (status: string | undefined) => {
+        if (!status) return "—";
+
+        const cls =
+          status === "Approved"
+            ? "company-status company-status-approved"
+            : status === "Pending"
+            ? "company-status company-status-pending"
+            : status === "Rejected"
+            ? "company-status company-status-rejected"
+            : status === "Suspended"
+            ? "company-status company-status-suspended"
+            : "company-status company-status-canceled";
+
+        return <span className={cls}>{status}</span>;
       },
-      width: 150,
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      width: 150,
-      render: (v: Company["address"]) =>
-        v ? (
-          <Tag
-            style={{
-              maxWidth: 140,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {v}
-          </Tag>
-        ) : (
-          "—"
-        ),
     },
 
     {
       title: "Created By",
       dataIndex: "createdBy",
-      render: (v: Company["createdBy"]) => v || "—",
-      width: 140,
+      width: 120,
+      render: (v) => v || "—",
     },
+
     {
       title: "Approval By",
       dataIndex: "approvalBy",
-      render: (v: Company["approvalBy"]) => v || "—",
-      width: 140,
+      width: 120,
+      render: (v) => v || "—",
     },
 
     {
       title: "Created",
-      render: (_, r: Company) =>
-        r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
       width: 170,
+      render: (_, r) =>
+        r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
     },
+
     {
       title: "Actions",
-      key: "actions",
-      width: 260,
-      render: (_, record: Company) => (
-        <Space>
-          <Button type="primary" onClick={() => onOpenDetail(record.companyId)}>
-            Open
-          </Button>
+      width: 150,
+      align: "center",
+      render: (_, record) => {
+        const disabledApprove = record.companyStatus === "Approved";
+        const disabledReject = record.companyStatus === "Rejected";
 
-          <Button
-            size="small"
-            disabled={record.companyStatus === "Approved"}
-            onClick={() => onApprove(record.companyId)}
-          >
-            Approve
-          </Button>
+        // ⭐ System Staff: CHỈ ĐƯỢC XEM
+        if (isStaff) {
+          return (
+            <Space size="small">
+              <Button
+                size="small"
+                shape="circle"
+                icon={<EyeOutlined />}
+                onClick={() => onOpenDetail(record.companyId)}
+              />
+            </Space>
+          );
+        }
 
-          <Button
-            size="small"
-            danger
-            disabled={record.companyStatus === "Rejected"}
-            onClick={() => onOpenReject(record)}
-          >
-            Reject
-          </Button>
+        // ⭐ Admin + Manager: FULL ACTION
+        return (
+          <Space size="small">
+            {/* View */}
+            <Button
+              size="small"
+              shape="circle"
+              icon={<EyeOutlined />}
+              onClick={() => onOpenDetail(record.companyId)}
+            />
 
-          <Popconfirm
-            title="Delete company?"
-            description="Are you sure you want to delete this company?"
-            okText="Delete"
-            okType="danger"
-            cancelText="Cancel"
-            onConfirm={() => onDelete(record.companyId)}
-          >
-            <Button size="small" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </Space>
-      ),
+            {/* Approve */}
+            <Button
+              size="small"
+              shape="circle"
+              disabled={disabledApprove}
+              icon={<CheckOutlined />}
+              onClick={() => onApprove(record.companyId)}
+            />
+
+            {/* Reject */}
+            <Button
+              size="small"
+              shape="circle"
+              disabled={disabledReject}
+              icon={<CloseOutlined />}
+              onClick={() => onOpenReject(record)}
+            />
+
+            {/* Delete */}
+            <Popconfirm
+              title="Delete company?"
+              okText="Delete"
+              okType="danger"
+              cancelText="Cancel"
+              onConfirm={() => onDelete(record.companyId)}
+            >
+              <Button
+                size="small"
+                danger
+                shape="circle"
+                icon={<DeleteOutlined />}
+              />
+            </Popconfirm>
+          </Space>
+        );
+      },
     },
   ];
 
   return (
     <Table<Company>
+      className="accounts-table"
       rowKey="companyId"
       loading={loading}
       dataSource={companies}
@@ -167,17 +194,13 @@ export default function CompanyTable({
         total,
         showSizeChanger: true,
       }}
-      onChange={(p) => {
-        const page = p.current || 1;
-        const pageSize = p.pageSize || defaultPageSize;
-
-        // parent sẽ applyFilterAndPaging
+      onChange={(p) =>
         onChangePagination({
           ...p,
-          current: page,
-          pageSize,
-        });
-      }}
+          current: p.current || 1,
+          pageSize: p.pageSize || defaultPageSize,
+        })
+      }
     />
   );
 }

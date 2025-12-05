@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card, Tabs, Typography, Space, Button, message } from "antd";
+import { Card, Tabs, Typography, Space, Button } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
-
 import { LeftOutlined } from "@ant-design/icons";
 
 import { companyService } from "../../../../../services/companyService";
+import { companySubscriptionService } from "../../../../../services/companySubscriptionService";
 import type {
   Company,
   CompanyMember,
   Job,
 } from "../../../../../types/company.types";
-import { companySubscriptionService } from "../../../../../services/companySubscriptionService";
 import type { CompanySubscription } from "../../../../../types/companySubscription.types";
+import {
+  toastError,
+} from "../../../../../components/UI/Toast";
 
 import OverviewTab from "./OverviewTab";
 import JobsTab from "./JobsTab";
@@ -49,98 +51,126 @@ export default function CompanyDetail() {
     null
   );
 
-  // ====== LOADERS ======
+  // ================== LOADERS ==================
   const loadCompany = async () => {
-    const res = await companyService.getSystemCompanyById(id);
+    if (Number.isNaN(id)) return;
 
-    if (res.status === "Success" && res.data) {
-      const d: any = res.data;
+    try {
+      const res = await companyService.getSystemCompanyById(id);
 
-      setCompany({
-        companyId: d.companyId,
-        name: d.name,
-        description: d.description ?? null,
-        address: d.address ?? null,
-        websiteUrl: d.websiteUrl ?? null,
-        taxCode: d.taxCode ?? null,
-        logoUrl: d.logoUrl ?? null,
-        companyStatus: d.companyStatus ?? null,
-        rejectionReason: d.rejectionReason ?? null,
-        createdBy: d.createdBy ?? null,
-        approvalBy: d.approvalBy ?? null,
-        createdAt: d.createdAt ?? null,
-        documents: Array.isArray(d.documents) ? d.documents : [],
-      });
-    } else {
-      message.error(res.message || "Failed to load company");
+      if (res.status === "Success" && res.data) {
+        const d: any = res.data;
+
+        setCompany({
+          companyId: d.companyId,
+          name: d.name,
+          description: d.description ?? null,
+          address: d.address ?? null,
+          websiteUrl: d.websiteUrl ?? null,
+          taxCode: d.taxCode ?? null,
+          logoUrl: d.logoUrl ?? null,
+          companyStatus: d.companyStatus ?? null,
+          rejectionReason: d.rejectionReason ?? null,
+          createdBy: d.createdBy ?? null,
+          approvalBy: d.approvalBy ?? null,
+          createdAt: d.createdAt ?? null,
+          documents: Array.isArray(d.documents) ? d.documents : [],
+        });
+      } else {
+        toastError("Failed to load company", res.message);
+      }
+    } catch {
+      toastError("Failed to load company");
     }
   };
 
   const loadMembers = async () => {
-    const res = await companyService.getMembers(id, {
-      page: membersPg.current,
-      pageSize: membersPg.pageSize,
-    });
+    if (Number.isNaN(id)) return;
 
-    if (res.status === "Success" && res.data) {
-      const d: any = res.data;
+    const pageSize = membersPg.pageSize || DEFAULT_PAGE_SIZE;
 
-      let items: CompanyMember[] = [];
-      let totalPages = 1;
+    try {
+      const res = await companyService.getMembers(id, {
+        page: membersPg.current,
+        pageSize: membersPg.pageSize,
+      });
 
-      if (Array.isArray(d)) {
-        items = d;
-      } else {
-        if (Array.isArray(d.items)) {
+      if (res.status === "Success" && res.data) {
+        const d: any = res.data;
+
+        let items: CompanyMember[] = [];
+        if (Array.isArray(d)) {
+          items = d;
+        } else if (Array.isArray(d.items)) {
           items = d.items;
         } else if (Array.isArray(d.members)) {
           items = d.members;
         }
-        totalPages = d.totalPages ?? 1;
-      }
 
-      setMembers(items);
-      setMembersTotal(totalPages * (membersPg.pageSize || DEFAULT_PAGE_SIZE));
-    } else {
+        const total =
+          d.totalItems ??
+          d.totalCount ??
+          (d.totalPages ? d.totalPages * pageSize : items.length);
+
+        setMembers(items);
+        setMembersTotal(total);
+      } else {
+        setMembers([]);
+        setMembersTotal(0);
+        toastError("Failed to load members", res.message);
+      }
+    } catch {
       setMembers([]);
       setMembersTotal(0);
-      message.error(res.message || "Failed to load members");
+      toastError("Failed to load members");
     }
   };
 
   const loadJobs = async () => {
-    const res = await companyService.getJobs(id, {
-      page: jobsPg.current,
-      pageSize: jobsPg.pageSize,
-    });
+    if (Number.isNaN(id)) return;
 
-    if (res.status === "Success" && res.data) {
-      const d: any = res.data;
+    const pageSize = jobsPg.pageSize || DEFAULT_PAGE_SIZE;
 
-      let items: Job[] = [];
-      let totalPages = 1;
+    try {
+      const res = await companyService.getJobs(id, {
+        page: jobsPg.current,
+        pageSize: jobsPg.pageSize,
+      });
 
-      if (Array.isArray(d)) {
-        items = d;
-      } else {
-        if (Array.isArray(d.items)) {
+      if (res.status === "Success" && res.data) {
+        const d: any = res.data;
+
+        let items: Job[] = [];
+        if (Array.isArray(d)) {
+          items = d;
+        } else if (Array.isArray(d.items)) {
           items = d.items;
         } else if (Array.isArray(d.jobs)) {
           items = d.jobs;
         }
-        totalPages = d.totalPages ?? 1;
-      }
 
-      setJobs(items);
-      setJobsTotal(totalPages * (jobsPg.pageSize || DEFAULT_PAGE_SIZE));
-    } else {
+        const total =
+          d.totalItems ??
+          d.totalCount ??
+          (d.totalPages ? d.totalPages * pageSize : items.length);
+
+        setJobs(items);
+        setJobsTotal(total);
+      } else {
+        setJobs([]);
+        setJobsTotal(0);
+        toastError("Failed to load jobs", res.message);
+      }
+    } catch {
       setJobs([]);
       setJobsTotal(0);
-      message.error(res.message || "Failed to load jobs");
+      toastError("Failed to load jobs");
     }
   };
 
   const loadSubscription = async () => {
+    if (Number.isNaN(id)) return;
+
     try {
       const data = await companySubscriptionService.getList({
         page: 1,
@@ -154,34 +184,41 @@ export default function CompanyDetail() {
           : null;
 
       setSubscription(first);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setSubscription(null);
     }
   };
 
-  // ====== EFFECTS ======
+  // ================== EFFECTS ==================
   useEffect(() => {
     loadCompany();
     loadSubscription();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
-    loadMembers(); // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [membersPg.current, membersPg.pageSize]);
 
   useEffect(() => {
-    loadJobs(); // eslint-disable-next-line react-hooks/exhaustive-deps
+    loadJobs();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jobsPg.current, jobsPg.pageSize]);
 
-  // ====== RENDER ======
+  // ================== RENDER ==================
   return (
-    <div>
+    <div className="page-layout">
+      {/* HEADER */}
       <Space
         align="center"
         style={{ width: "100%", justifyContent: "space-between" }}
       >
-        <Button icon={<LeftOutlined />} onClick={() => nav(-1)}>
+        <Button
+          icon={<LeftOutlined />}
+          className="accounts-reset-btn"
+          onClick={() => nav(-1)}
+        >
           Back
         </Button>
 
@@ -190,7 +227,7 @@ export default function CompanyDetail() {
         </Title>
       </Space>
 
-
+      {/* TABS */}
       <Tabs
         style={{ marginTop: 16 }}
         items={[
@@ -198,7 +235,7 @@ export default function CompanyDetail() {
             key: "overview",
             label: "Overview",
             children: (
-              <Card>
+              <Card className="aices-card">
                 <OverviewTab company={company} subscription={subscription} />
               </Card>
             ),
@@ -230,11 +267,7 @@ export default function CompanyDetail() {
               />
             ),
           },
-          {
-            key: "activity",
-            label: "Activity",
-            children: <Card>Activity log coming soon…</Card>,
-          },
+          
         ]}
       />
     </div>

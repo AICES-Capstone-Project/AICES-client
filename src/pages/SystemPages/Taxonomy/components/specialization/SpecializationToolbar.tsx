@@ -1,11 +1,9 @@
-import { Button, Input, Space, Typography } from "antd";
+import { Button, Input } from "antd";
 import {
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-
-const { Title, Text } = Typography;
 
 interface SpecializationToolbarProps {
   keyword: string;
@@ -23,23 +21,8 @@ export default function SpecializationToolbar({
   onCreate,
 }: SpecializationToolbarProps) {
   return (
-    <Space
-      style={{
-        marginBottom: 16,
-        width: "100%",
-        justifyContent: "space-between",
-      }}
-    >
-      <div>
-        <Title level={4} style={{ marginBottom: 0 }}>
-          Specializations
-        </Title>
-        <Text type="secondary">
-          Manage specialization taxonomy used by skills and jobs.
-        </Text>
-      </div>
-
-      <Space>
+    <div className="accounts-toolbar">
+      <div className="accounts-toolbar-left">
         <Input
           placeholder="Search by name or category..."
           allowClear
@@ -47,18 +30,34 @@ export default function SpecializationToolbar({
           value={keyword}
           onChange={(e) => onKeywordChange(e.target.value)}
           onPressEnter={onSearch}
-          style={{ width: 260 }}
+          style={{ width: 320 }}
         />
-        <Button icon={<SearchOutlined />} onClick={onSearch}>
+
+        <Button
+          icon={<SearchOutlined />}
+          className="btn-search"
+          onClick={onSearch}
+        >
           Search
         </Button>
-        <Button icon={<ReloadOutlined />} onClick={onReset}>
+
+        <Button
+          icon={<ReloadOutlined />}
+          className="accounts-reset-btn"
+          onClick={onReset}
+        >
           Reset
         </Button>
-        <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>
-          New Specialization
-        </Button>
-      </Space>
-    </Space>
+      </div>
+
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        className="accounts-new-btn"
+        onClick={onCreate}
+      >
+        New Specialization
+      </Button>
+    </div>
   );
 }

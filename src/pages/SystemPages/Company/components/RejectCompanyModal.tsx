@@ -1,4 +1,4 @@
-import { Modal, Input } from "antd";
+import { Modal, Input, Button } from "antd";
 import type { Company } from "../../../../types/company.types";
 
 interface RejectCompanyModalProps {
@@ -23,20 +23,48 @@ export default function RejectCompanyModal({
   return (
     <Modal
       open={open}
-      title={company ? `Reject company #${company.companyId}` : "Reject company"}
+      title={
+        <div className="system-modal-title">
+          Reject Company {company ? `#${company.companyId}` : ""}
+        </div>
+      }
       onCancel={onCancel}
-      onOk={onConfirm}
-      confirmLoading={loading}
+      footer={null}
+      className="system-modal"
+      destroyOnClose
     >
-      <div style={{ marginBottom: 8 }}>
-        <b>Rejection reason</b>
-      </div>
+      {/* SECTION TITLE */}
+      <div className="system-modal-section-title">Rejection Reason</div>
+
+      {/* TEXTAREA */}
       <Input.TextArea
         rows={4}
         value={reason}
         onChange={(e) => onReasonChange(e.target.value)}
-        placeholder="Nhập lý do từ chối công ty này..."
+        placeholder="Enter the reason for rejecting this company..."
+        className="reject-textarea"
+        maxLength={500}
+        showCount
       />
+
+      {/* FOOTER */}
+      <div className="system-modal-footer">
+        <Button
+          className="system-modal-btn system-modal-btn-cancel"
+          onClick={onCancel}
+        >
+          Cancel
+        </Button>
+
+        <Button
+          className="system-modal-btn system-modal-btn-danger"
+          danger
+          loading={loading}
+          onClick={onConfirm}
+        >
+          Reject
+        </Button>
+      </div>
     </Modal>
   );
 }

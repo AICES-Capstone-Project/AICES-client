@@ -4,7 +4,6 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 import type { Specialization } from "../../../../../types/specialization.types";
 
-
 interface SpecializationTableProps {
   loading: boolean;
   data: Specialization[];
@@ -26,59 +25,60 @@ export default function SpecializationTable({
     {
       title: "ID",
       dataIndex: "specializationId",
-      key: "specializationId",
       width: 80,
+      align: "center",
     },
     {
       title: "Name",
       dataIndex: "name",
-      key: "name",
       ellipsis: true,
+      render: (value) => <span style={{ fontWeight: 500 }}>{value}</span>,
     },
     {
       title: "Category",
       dataIndex: "categoryName",
-      key: "categoryName",
       ellipsis: true,
     },
     {
       title: "Category ID",
       dataIndex: "categoryId",
-      key: "categoryId",
       width: 120,
+      align: "center",
     },
     {
       title: "Created At",
       dataIndex: "createdAt",
-      key: "createdAt",
-      width: 220,
+      width: 200,
       render: (value: string) =>
         value ? new Date(value).toLocaleString() : "-",
     },
     {
       title: "Actions",
       key: "actions",
+      width: 140,
+      align: "center",
       fixed: "right",
-      width: 150,
       render: (_, record) => (
-        <Space>
+        <Space size="small">
           <Button
             size="small"
+            shape="circle"
             icon={<EditOutlined />}
             onClick={() => onEdit(record)}
-          >
-            Edit
-          </Button>
+          />
 
           <Popconfirm
-            title="Are you sure to delete this specialization?"
-            onConfirm={() => onDelete(record)}
+            title="Delete this specialization?"
             okText="Yes"
             cancelText="No"
+            onConfirm={() => onDelete(record)}
           >
-            <Button size="small" danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
+            <Button
+              size="small"
+              shape="circle"
+              danger
+              icon={<DeleteOutlined />}
+            />
           </Popconfirm>
         </Space>
       ),
@@ -94,6 +94,7 @@ export default function SpecializationTable({
       pagination={pagination}
       onChange={(pag) => onChangePage(pag)}
       scroll={{ x: 900 }}
+      className="accounts-table"
     />
   );
 }

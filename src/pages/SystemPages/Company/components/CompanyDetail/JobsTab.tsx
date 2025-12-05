@@ -19,28 +19,38 @@ export default function JobsTab({
   onChangePagination,
   onViewJob,
 }: JobsTabProps) {
+  const renderStatusTag = (raw?: string | null) => {
+    const s = (raw || "").trim();
+    if (!s) return "—";
+
+    const normalized = s.toLowerCase();
+    let cls = "status-tag";
+
+    if (["open", "published"].includes(normalized)) {
+      cls += " status-tag-verified";
+    } else if (["draft", "pending"].includes(normalized)) {
+      cls += " status-tag-unverified";
+    } else if (["closed", "cancelled", "canceled"].includes(normalized)) {
+      cls += " status-tag-locked";
+    }
+
+    return <Tag className={cls}>{s}</Tag>;
+  };
+
   const jobCols: ColumnsType<Job> = [
-    { title: "Job ID", dataIndex: "jobId", width: 90 },
-    { title: "Title", dataIndex: "title" },
+    {
+      title: "Job ID",
+      dataIndex: "jobId",
+      width: 90,
+    },
+    {
+      title: "Title",
+      dataIndex: "title",
+    },
     {
       title: "Status",
-      width: 140,
-      render: (_, r) => {
-        const s = (r.status || r.jobStatus || "") as string;
-        if (!s) return "—";
-
-        const normalized = s.toLowerCase();
-        let color: "green" | "gold" | "red" | "blue" = "blue";
-
-        if (normalized === "open" || normalized === "published")
-          color = "green";
-        else if (normalized === "draft" || normalized === "pending")
-          color = "gold";
-        else if (normalized === "closed" || normalized === "cancelled")
-          color = "red";
-
-        return <Tag color={color}>{s}</Tag>;
-      },
+      width: 160,
+      render: (_, r) => renderStatusTag(r.status || r.jobStatus),
     },
     {
       title: "Created",
@@ -48,13 +58,16 @@ export default function JobsTab({
       render: (_, r) =>
         r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
     },
-
     {
       title: "Actions",
       key: "actions",
-      width: 120,
+      width: 130,
       render: (_, r) => (
-        <Button icon={<EyeOutlined />} onClick={() => onViewJob(r.jobId)}>
+        <Button
+          icon={<EyeOutlined />}
+          className="btn-search"
+          onClick={() => onViewJob(r.jobId)}
+        >
           View
         </Button>
       ),
@@ -62,9 +75,10 @@ export default function JobsTab({
   ];
 
   return (
-    <Card>
+    <Card className="aices-card">
       <Table<Job>
         rowKey="jobId"
+        className="accounts-table"
         dataSource={jobs}
         columns={jobCols}
         pagination={{

@@ -1,5 +1,9 @@
-import { Input, Button, Space } from "antd";
-import { SearchOutlined, ReloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { Input, Button } from "antd";
+import {
+  SearchOutlined,
+  ReloadOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
 
 interface AccountsToolbarProps {
   keyword: string;
@@ -17,25 +21,48 @@ export default function AccountsToolbar({
   onOpenCreate,
 }: AccountsToolbarProps) {
   return (
-    <Space style={{ marginBottom: 16 }} wrap>
-      <Input
-        placeholder="Search by email or name"
-        allowClear
-        value={keyword}
-        onChange={(e) => onKeywordChange(e.target.value)}
-        onPressEnter={onSearch}
-        style={{ width: 280 }}
-        prefix={<SearchOutlined />}
-      />
-      <Button type="primary" onClick={onSearch}>
-        Search
-      </Button>
-      <Button onClick={onReset} icon={<ReloadOutlined />}>
-        Reset
-      </Button>
-      <Button type="primary" icon={<PlusOutlined />} onClick={onOpenCreate}>
+    <div className="accounts-toolbar">
+      <div
+        className="accounts-toolbar-left"
+        style={{ display: "flex", gap: 8 }}
+      >
+        {/* Search */}
+        <Input
+          placeholder="Search by email or name"
+          allowClear
+          value={keyword}
+          onChange={(e) => onKeywordChange(e.target.value)}
+          onPressEnter={onSearch}
+          style={{ width: 260 }}
+          prefix={<SearchOutlined />}
+        />
+
+        {/* Buttons */}
+        <Button
+          icon={<SearchOutlined />}
+          onClick={onSearch}
+          className="btn-search"
+        >
+          Search
+        </Button>
+
+        <Button
+          className="accounts-reset-btn"
+          icon={<ReloadOutlined />}
+          onClick={onReset}
+        >
+          Reset
+        </Button>
+      </div>
+
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        onClick={onOpenCreate}
+        className="accounts-new-btn"
+      >
         New User
       </Button>
-    </Space>
+    </div>
   );
 }

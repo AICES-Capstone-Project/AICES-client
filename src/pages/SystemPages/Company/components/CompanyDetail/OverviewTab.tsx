@@ -1,4 +1,4 @@
-import { Space, Tag, Typography } from "antd";
+import {Tag, Typography } from "antd";
 import type { Company } from "../../../../../types/company.types";
 import type { CompanySubscription } from "../../../../../types/companySubscription.types";
 
@@ -15,143 +15,210 @@ export default function OverviewTab({
 }: OverviewTabProps) {
   if (!company) {
     return (
-      <Text type="secondary">General information of the company will appear here.</Text>
+      <div className="company-overview-empty">
+        <Text type="secondary">
+          General information of the company will appear here.
+        </Text>
+      </div>
     );
   }
 
+  const status = company.companyStatus || "";
+  const statusClass =
+    status === "Approved"
+      ? "status-tag status-tag-verified"
+      : status === "Pending"
+      ? "status-tag status-tag-unverified"
+      : status
+      ? "status-tag status-tag-locked"
+      : "";
+
+  const subscriptionStatus = subscription?.subscriptionStatus || "";
+  const subStatusClass =
+    subscriptionStatus === "Active"
+      ? "status-tag status-tag-verified"
+      : subscriptionStatus === "Cancelled"
+      ? "status-tag status-tag-locked"
+      : subscriptionStatus
+      ? "status-tag status-tag-unverified"
+      : "";
+
   return (
-    <Space direction="vertical" style={{ width: "100%" }} size="middle">
-      {/* Header */}
-      <Space align="center">
-        {company.logoUrl ? (
-          <img
-            src={company.logoUrl}
-            alt="logo"
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: 10,
-              objectFit: "cover",
-            }}
-          />
-        ) : null}
-        <div>
-          <Title level={5} style={{ margin: 0 }}>
-            {company.name}
-          </Title>
-          {company.companyStatus && (
-            <Tag
-              color={
-                company.companyStatus === "Approved"
-                  ? "green"
-                  : company.companyStatus === "Pending"
-                  ? "gold"
-                  : "red"
-              }
-            >
-              {company.companyStatus}
-            </Tag>
+    <div className="company-overview-layout">
+      {/* ==== HEADER STRIP ==== */}
+      <div className="company-overview-header">
+        <div className="company-overview-header-left">
+          {company.logoUrl ? (
+            <img
+              src={company.logoUrl}
+              alt="logo"
+              className="company-overview-logo"
+            />
+          ) : (
+            <div className="company-overview-logo placeholder">
+              {company.name?.charAt(0)?.toUpperCase() || "C"}
+            </div>
           )}
+
+          <div>
+            <Title level={5} style={{ margin: 0 }}>
+              {company.name}
+            </Title>
+
+            <div className="company-overview-header-tags">
+              {status && <span className={statusClass}>{status}</span>}
+
+              {subscription && (
+                <Tag className="role-tag role-tag-hr">
+                  {subscription.subscriptionName}
+                </Tag>
+              )}
+            </div>
+          </div>
         </div>
-      </Space>
 
-      {/* Basic info */}
-      <div>
-        <Text strong>Description: </Text>
-        <Text>{company.description || "—"}</Text>
+        <div className="company-overview-header-meta">
+          <div className="meta-item">
+            <span className="label">Created by</span>
+            <span className="value">{company.createdBy ?? "—"}</span>
+          </div>
+          <div className="meta-item">
+            <span className="label">Approved by</span>
+            <span className="value">{company.approvalBy ?? "—"}</span>
+          </div>
+          <div className="meta-item">
+            <span className="label">Created at</span>
+            <span className="value">
+              {company.createdAt
+                ? new Date(company.createdAt).toLocaleString()
+                : "—"}
+            </span>
+          </div>
+        </div>
       </div>
 
-      <div>
-        <Text strong>Address: </Text>
-        <Text>{company.address || "—"}</Text>
-      </div>
+      {/* ==== TWO-COLUMN BODY ==== */}
+      <div className="company-overview-grid">
+        {/* LEFT: GENERAL INFO */}
+        <div className="company-overview-card">
+          <div className="company-overview-card-title">Company profile</div>
 
-      <div>
-        <Text strong>Website: </Text>
-        {company.websiteUrl ? (
-          <a href={company.websiteUrl} target="_blank" rel="noreferrer">
-            {company.websiteUrl}
-          </a>
-        ) : (
-          <Text>—</Text>
-        )}
-      </div>
+          <div className="company-overview-fields">
+            <div className="field">
+              <span className="label">Description</span>
+              <span className="value">
+                {company.description || "—"}
+              </span>
+            </div>
 
-      <div>
-        <Text strong>Tax Code: </Text>
-        <Text>{company.taxCode || "—"}</Text>
-      </div>
+            <div className="field">
+              <span className="label">Address</span>
+              <span className="value">
+                {company.address || "—"}
+              </span>
+            </div>
 
-      <div>
-        <Text strong>Subscription: </Text>
-        {subscription ? (
-          <>
-            <Text>
-              {subscription.subscriptionName} (
-              {new Date(subscription.startDate).toLocaleDateString()} -{" "}
-              {new Date(subscription.endDate).toLocaleDateString()})
-            </Text>
-            <Tag
-              style={{ marginLeft: 8 }}
-              color={
-                subscription.subscriptionStatus === "Active"
-                  ? "green"
-                  : subscription.subscriptionStatus === "Cancelled"
-                  ? "red"
-                  : "gold"
-              }
-            >
-              {subscription.subscriptionStatus}
-            </Tag>
-          </>
-        ) : (
-          <Text>—</Text>
-        )}
-      </div>
-
-      <div>
-        <Text strong>Created by: </Text>
-        <Text>{company.createdBy ?? "—"}</Text>
-      </div>
-
-      <div>
-        <Text strong>Approved by: </Text>
-        <Text>{company.approvalBy ?? "—"}</Text>
-      </div>
-
-      <div>
-        <Text strong>Created at: </Text>
-        <Text>
-          {company.createdAt
-            ? new Date(company.createdAt).toLocaleString()
-            : "—"}
-        </Text>
-      </div>
-
-      <div>
-        <Text strong>Rejection reason: </Text>
-        <Text>{company.rejectionReason || "—"}</Text>
-      </div>
-
-      <div>
-        <Text strong>Documents: </Text>
-        {company.documents && company.documents.length > 0 ? (
-          <ul style={{ marginTop: 4, paddingLeft: 20 }}>
-            {company.documents.map((doc, idx) => (
-              <li key={idx}>
-                <Text>
-                  {doc.documentType}{" "}
-                  <a href={doc.fileUrl} target="_blank" rel="noreferrer">
-                    View
+            <div className="field">
+              <span className="label">Website</span>
+              <span className="value">
+                {company.websiteUrl ? (
+                  <a
+                    href={company.websiteUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {company.websiteUrl}
                   </a>
-                </Text>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <Text type="secondary">No documents</Text>
-        )}
+                ) : (
+                  "—"
+                )}
+              </span>
+            </div>
+
+            <div className="field">
+              <span className="label">Tax code</span>
+              <span className="value">
+                {company.taxCode || "—"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT: SUBSCRIPTION + SYSTEM INFO */}
+        <div className="company-overview-card">
+          <div className="company-overview-card-title">
+            Subscription & system info
+          </div>
+
+          <div className="company-overview-fields">
+            <div className="field">
+              <span className="label">Subscription</span>
+              <span className="value">
+                {subscription ? (
+                  <>
+                    {subscription.subscriptionName}{" "}
+                    {subscription.startDate && subscription.endDate && (
+                      <>
+                        (
+                        {new Date(
+                          subscription.startDate
+                        ).toLocaleDateString()}{" "}
+                        -{" "}
+                        {new Date(
+                          subscription.endDate
+                        ).toLocaleDateString()}
+                        )
+                      </>
+                    )}
+                    {subscriptionStatus && (
+                      <span className={subStatusClass}>
+                        {subscriptionStatus}
+                      </span>
+                    )}
+                  </>
+                ) : (
+                  "—"
+                )}
+              </span>
+            </div>
+
+            <div className="field">
+              <span className="label">Rejection reason</span>
+              <span className="value">
+                {company.rejectionReason || "—"}
+              </span>
+            </div>
+
+            <div className="field field-docs">
+              <span className="label">Documents</span>
+              <span className="value">
+                {company.documents && company.documents.length > 0 ? (
+                  <ul className="company-doc-list">
+                    {company.documents.map((doc, idx) => (
+                      <li key={idx}>
+                        <span className="doc-name">
+                          {doc.documentType || "Document"}
+                        </span>
+                        {doc.fileUrl && (
+                          <a
+                            href={doc.fileUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            View
+                          </a>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <span className="text-muted">No documents</span>
+                )}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-    </Space>
+    </div>
   );
 }

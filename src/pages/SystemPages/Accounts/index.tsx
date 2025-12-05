@@ -1,6 +1,6 @@
 // pages/SystemPages/Accounts/index.tsx
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Form, message } from "antd";
+import { Card, Form, message } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
 import { userService } from "../../../services/userService";
 import type {
@@ -22,6 +22,7 @@ export default function Accounts() {
   const [users, setUsers] = useState<User[]>([]);
   const [total, setTotal] = useState(0);
   const [keyword, setKeyword] = useState("");
+
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: DEFAULT_PAGE_SIZE,
@@ -77,20 +78,28 @@ export default function Accounts() {
         const rawList =
           d.users ?? d.items ?? d.data?.users ?? d.data?.items ?? [];
 
-        const list: User[] = rawList.map((x: any) => ({
-          userId: x.userId ?? x.id ?? x.user_id ?? 0,
-          email: x.email ?? x.mail ?? "",
-          fullName: x.fullName ?? x.fullname ?? x.name ?? "",
-          roleName: x.roleName ?? x.role ?? x.role_name ?? "",
-          userStatus: x.userStatus ?? "Unverified",
+        const list: User[] = rawList.map((x: any) => {
+          const rawRoleName = x.roleName ?? x.role ?? x.role_name ?? "";
+          const normalizedRoleName = String(rawRoleName || "").replace(
+            /_/g,
+            " "
+          );
 
-          address: x.address ?? "",
-          dateOfBirth: x.dateOfBirth ?? x.dob ?? null,
-          avatarUrl: x.avatarUrl ?? x.avatar ?? "",
-          phoneNumber: x.phoneNumber ?? x.phone ?? "",
-          loginProviders: x.loginProviders ?? [],
-          createdAt: x.createdAt ?? x.created_at ?? new Date().toISOString(),
-        }));
+          return {
+            userId: x.userId ?? x.id ?? x.user_id ?? 0,
+            email: x.email ?? x.mail ?? "",
+            fullName: x.fullName ?? x.fullname ?? x.name ?? "",
+            roleName: normalizedRoleName,
+            userStatus: x.userStatus ?? "Unverified",
+
+            address: x.address ?? "",
+            dateOfBirth: x.dateOfBirth ?? x.dob ?? null,
+            avatarUrl: x.avatarUrl ?? x.avatar ?? "",
+            phoneNumber: x.phoneNumber ?? x.phone ?? "",
+            loginProviders: x.loginProviders ?? [],
+            createdAt: x.createdAt ?? x.created_at ?? new Date().toISOString(),
+          };
+        });
 
         const totalRecords: number =
           d.totalRecords ??
@@ -177,10 +186,18 @@ export default function Accounts() {
 
   const onEdit = (user: User) => {
     setEditingUser(user);
+
+    // chuẩn hoá roleName: "System_Admin" -> "System Admin"
+    const normalizedRoleName = (user.roleName || "").replace(/_/g, " ");
+
+    const roleId =
+      (user as any).roleId ?? ROLE_NAME_TO_ID[normalizedRoleName] ?? 0;
+
     editForm.setFieldsValue({
       fullName: user.fullName || "",
-      roleId: (user as any).roleId ?? ROLE_NAME_TO_ID[user.roleName] ?? 0,
+      roleId,
     } as any);
+
     setIsEditOpen(true);
   };
 
@@ -252,25 +269,32 @@ export default function Accounts() {
   };
 
   return (
-    <div>
-      <AccountsToolbar
-        keyword={keyword}
-        onKeywordChange={setKeyword}
-        onSearch={onSearch}
-        onReset={onReset}
-        onOpenCreate={() => setIsCreateOpen(true)}
-      />
+    <div className="page-layout">
+      {/* ⬇⬇ Toolbar chuyển vào trong Card */}
+      <Card className="aices-card">
+        <div className="accounts-toolbar">
+          <AccountsToolbar
+            keyword={keyword}
+            onKeywordChange={setKeyword}
+            onSearch={onSearch}
+            onReset={onReset}
+            onOpenCreate={() => setIsCreateOpen(true)}
+          />
+        </div>
 
-      <AccountsTable
-        loading={loading}
-        data={users}
-        pagination={paginationConfig}
-        onChangePage={onChangePage}
-        onViewDetail={onViewDetail}
-        onEdit={onEdit}
-        onChangeStatus={onChangeStatus}
-        onDelete={onDelete}
-      />
+        <div className="accounts-table-wrapper">
+          <AccountsTable
+            loading={loading}
+            data={users}
+            pagination={paginationConfig}
+            onChangePage={onChangePage}
+            onViewDetail={onViewDetail}
+            onEdit={onEdit}
+            onChangeStatus={onChangeStatus}
+            onDelete={onDelete}
+          />
+        </div>
+      </Card>
 
       <UserCreateModal
         open={isCreateOpen}

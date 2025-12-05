@@ -32,7 +32,6 @@ export default function CategoryList() {
       const res = await categoryService.getAllSystem({ page, pageSize });
 
       if (res.status !== "Success" || !res.data) {
-        // status trả về không phải "Success" => báo lỗi
         message.error(res.message || "Failed to load categories");
         setCategories([]);
         setPagination((prev) => ({
@@ -88,7 +87,7 @@ export default function CategoryList() {
     import("antd").then(({ Modal }) =>
       Modal.confirm({
         title: "Deactivate this category?",
-        content: `Category: "${record.name}" sẽ bị deactivate.`,
+        content: `Category "${record.name}" will be deactivated.`,
         okText: "Yes",
         cancelText: "No",
         onOk: async () => {
@@ -150,7 +149,6 @@ export default function CategoryList() {
         pagination.pageSize || DEFAULT_PAGE_SIZE
       );
     } catch (err: any) {
-      // err này chủ yếu là error validate Form của antd
       console.error(err);
     }
   };
@@ -160,31 +158,39 @@ export default function CategoryList() {
   );
 
   return (
-    <Card
-      title="Categories"
-      extra={
-        <CategoryToolbar
-          onReload={() =>
-            fetchData(
-              pagination.current || 1,
-              pagination.pageSize || DEFAULT_PAGE_SIZE
-            )
-          }
-          onCreate={openCreateModal}
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-        />
-      }
-    >
-      <CategoryTable
-        loading={loading}
-        data={filteredData}
-        pagination={pagination}
-        onChangePage={handleTableChange}
-        onEdit={openEditModal}
-        onDelete={handleDelete}
-      />
+    <div>
+      <Card className="aices-card">
+        {/* HÀNG TOP — Search + Reset + New Category */}
+        <div className="company-header-row">
+          <div className="company-left">
+            <CategoryToolbar
+              keyword={keyword}
+              onKeywordChange={setKeyword}
+              onReload={() =>
+                fetchData(
+                  pagination.current || 1,
+                  pagination.pageSize || DEFAULT_PAGE_SIZE
+                )
+              }
+              onCreate={openCreateModal}
+            />
+          </div>
+        </div>
 
+        {/* TABLE WRAPPER */}
+        <div className="accounts-table-wrapper">
+          <CategoryTable
+            loading={loading}
+            data={filteredData}
+            pagination={pagination}
+            onChangePage={handleTableChange}
+            onEdit={openEditModal}
+            onDelete={handleDelete}
+          />
+        </div>
+      </Card>
+
+      {/* MODAL (giữ nguyên) */}
       <CategoryModal
         open={isModalOpen}
         form={form}
@@ -192,6 +198,6 @@ export default function CategoryList() {
         onCancel={() => setIsModalOpen(false)}
         onSubmit={handleSubmit}
       />
-    </Card>
+    </div>
   );
 }

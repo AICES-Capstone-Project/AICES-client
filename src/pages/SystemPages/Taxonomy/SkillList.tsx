@@ -1,9 +1,8 @@
 // src/pages/SystemPages/Taxonomy/SkillList.tsx
 
 import { useEffect, useState } from "react";
-import { Card, Form, Typography, message } from "antd";
+import { Card, Form, message } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
-
 import dayjs from "dayjs";
 
 import type { Skill } from "../../../types/skill.types";
@@ -13,10 +12,9 @@ import SkillToolbar from "./components/skill/SkillToolbar";
 import SkillTable from "./components/skill/SkillTable";
 import SkillModal from "./components/skill/SkillModal";
 
-const { Title, Text } = Typography;
 const DEFAULT_PAGE_SIZE = 10;
 
-interface SkillFormValues {
+export interface SkillFormValues {
   name: string;
 }
 
@@ -47,10 +45,9 @@ export default function SkillList() {
       const response = await skillService.getSkillsSystem({
         page,
         pageSize,
-        // keyword: currentKeyword || undefined,  // ❌ bỏ dòng này
       });
 
-      const apiRes = response.data; // ApiResponse<Skill[]>
+      const apiRes = response.data;
 
       if (apiRes.status !== "Success" || !apiRes.data) {
         message.error(
@@ -94,7 +91,7 @@ export default function SkillList() {
   };
 
   const handleSearch = () => {
-    // realtime rồi nên chỉ cần refetch nếu bạn thích, hoặc để trống cũng được
+    // search đang filter ở FE nên chỉ cần refetch nếu bạn muốn làm mới list
     fetchSkills(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
   };
 
@@ -172,39 +169,39 @@ export default function SkillList() {
   };
 
   return (
-    <Card
-      title={
-        <div>
-          <Title level={4} style={{ margin: 0 }}>
-            Skill Management
-          </Title>
-          <Text type="secondary">Manage global skills taxonomy</Text>
+    <div>
+      <Card className="aices-card">
+        {/* TOP BAR CHUẨN AICES trong Card */}
+        <div className="company-header-row">
+          <div className="company-left">
+            <SkillToolbar
+              keyword={keyword}
+              onKeywordChange={setKeyword}
+              onSearch={handleSearch}
+              onReset={handleResetSearch}
+              onCreate={openCreateModal}
+            />
+          </div>
         </div>
-      }
-      extra={
-        <SkillToolbar
-          keyword={keyword}
-          onKeywordChange={setKeyword}
-          onSearch={handleSearch}
-          onReset={handleResetSearch}
-          onCreate={openCreateModal}
-        />
-      }
-    >
-      <SkillTable
-        loading={loading}
-        data={filteredSkills}
-        pagination={{
-          ...pagination,
-          total: filteredSkills.length, // 👈 cho phân trang theo search
-        }}
-        onChangePage={handleTableChange}
-        onEdit={openEditModal}
-        onDelete={handleDelete}
-        formatDate={(value: string) =>
-          value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "-"
-        }
-      />
+
+        {/* BẢNG */}
+        <div className="accounts-table-wrapper">
+          <SkillTable
+            loading={loading}
+            data={filteredSkills}
+            pagination={{
+              ...pagination,
+              total: filteredSkills.length,
+            }}
+            onChangePage={handleTableChange}
+            onEdit={openEditModal}
+            onDelete={handleDelete}
+            formatDate={(value: string) =>
+              value ? dayjs(value).format("YYYY-MM-DD HH:mm") : "-"
+            }
+          />
+        </div>
+      </Card>
 
       <SkillModal
         open={isModalOpen}
@@ -214,6 +211,6 @@ export default function SkillList() {
         onCancel={handleModalCancel}
         onSubmit={handleSubmit}
       />
-    </Card>
+    </div>
   );
 }

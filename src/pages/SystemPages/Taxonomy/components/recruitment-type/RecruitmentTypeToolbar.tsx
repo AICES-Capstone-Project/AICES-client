@@ -1,11 +1,9 @@
-import { Button, Input, Space } from "antd";
+import { Button, Input } from "antd";
 import {
   PlusOutlined,
   ReloadOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-
-const { Search } = Input;
 
 interface RecruitmentTypeToolbarProps {
   keyword: string;
@@ -23,22 +21,39 @@ export default function RecruitmentTypeToolbar({
   onCreate,
 }: RecruitmentTypeToolbarProps) {
   return (
-    <Space>
-      <Search
-        allowClear
-        placeholder="Search by name"
-        prefix={<SearchOutlined />}
-        onSearch={onSearch}
-        onChange={(e) => onKeywordChange(e.target.value)}
-        value={keyword}
-        style={{ width: 260 }}
-      />
-      <Button icon={<ReloadOutlined />} onClick={onReset}>
-        Reset
+    <div className="accounts-toolbar">
+      <div className="accounts-toolbar-left">
+        <Input
+          placeholder="Search recruitment types..."
+          allowClear
+          prefix={<SearchOutlined />}
+          value={keyword}
+          onChange={(e) => onKeywordChange(e.target.value)}
+          onPressEnter={(e: any) => onSearch(e.target.value)}
+          style={{ width: 320 }}
+        />
+
+        <Button className="btn-search" icon={<SearchOutlined />} onClick={() => onSearch(keyword)}>
+          Search
+        </Button>
+
+        <Button
+          className="accounts-reset-btn"
+          icon={<ReloadOutlined />}
+          onClick={onReset}
+        >
+          Reset
+        </Button>
+      </div>
+
+      <Button
+        type="primary"
+        icon={<PlusOutlined />}
+        className="accounts-new-btn"
+        onClick={onCreate}
+      >
+        New Type
       </Button>
-      <Button type="primary" icon={<PlusOutlined />} onClick={onCreate}>
-        New Recruitment Type
-      </Button>
-    </Space>
+    </div>
   );
 }

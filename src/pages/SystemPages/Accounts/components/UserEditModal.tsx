@@ -15,31 +15,40 @@ export default function UserEditModal({
   open,
   form,
   roleOptions,
-  email,
   onCancel,
   onUpdate,
 }: UserEditModalProps) {
   return (
     <Modal
       open={open}
-      title={`Edit user: ${email || ""}`}
+      title={`Edit user`}
       onCancel={onCancel}
       onOk={onUpdate}
       okText="Save"
+      cancelText="Cancel"
       destroyOnClose
+      centered
+      className="system-modal" // 🔹 dùng chung style với create
     >
-      <Form form={form} layout="vertical">
-        <Form.Item
-          name="fullName"
-          label="Full name"
-          rules={[{ required: true }]}
-        >
-          <Input />
-        </Form.Item>
+      <div className="system-modal-section-title">ACCOUNT INFORMATION</div>
 
-        <Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
-          <Select options={roleOptions} />
-        </Form.Item>
+      <Form form={form} layout="vertical">
+        <div className="system-modal-grid-2">
+          <Form.Item
+            name="fullName"
+            label="Full name"
+            rules={[{ required: true }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
+            <Select
+              options={roleOptions}
+              className="system-role-select"
+            />
+          </Form.Item>
+        </div>
       </Form>
     </Modal>
   );

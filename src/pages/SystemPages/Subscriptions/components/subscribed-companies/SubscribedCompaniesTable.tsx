@@ -4,7 +4,6 @@ import { Table, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { CompanySubscription } from "../../../../../types/companySubscription.types";
 
-
 const { Text } = Typography;
 
 interface SubscribedCompaniesTableProps {
@@ -68,11 +67,11 @@ export default function SubscribedCompaniesTable({
         );
       },
     },
-
   ];
 
   return (
     <Table
+      className="accounts-table"
       rowKey="comSubId"
       loading={loading}
       columns={columns}

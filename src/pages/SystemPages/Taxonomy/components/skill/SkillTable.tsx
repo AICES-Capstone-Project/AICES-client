@@ -4,7 +4,6 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 
 import type { Skill } from "../../../../../types/skill.types";
 
-
 interface SkillTableProps {
   loading: boolean;
   data: Skill[];
@@ -28,40 +27,46 @@ export default function SkillTable({
     {
       title: "ID",
       dataIndex: "skillId",
-      key: "skillId",
       width: 80,
+      align: "center",
     },
     {
       title: "Name",
       dataIndex: "name",
-      key: "name",
+      render: (value) => <span style={{ fontWeight: 500 }}>{value}</span>,
     },
     {
       title: "Created At",
       dataIndex: "createdAt",
-      key: "createdAt",
       width: 220,
       render: (value: string) => formatDate(value),
     },
     {
       title: "Actions",
       key: "actions",
-      width: 200,
+      width: 120,
+      align: "center",
       render: (_, record) => (
-        <Space>
-          <Button icon={<EditOutlined />} onClick={() => onEdit(record)}>
-            Edit
-          </Button>
+        <Space size="small">
+          <Button
+            shape="circle"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => onEdit(record)}
+          />
+
           <Popconfirm
             title="Delete this skill?"
-            description="This action cannot be undone."
-            okText="Delete"
-            okType="danger"
+            okText="Yes"
+            cancelText="No"
             onConfirm={() => onDelete(record.skillId)}
           >
-            <Button danger icon={<DeleteOutlined />}>
-              Delete
-            </Button>
+            <Button
+              shape="circle"
+              size="small"
+              danger
+              icon={<DeleteOutlined />}
+            />
           </Popconfirm>
         </Space>
       ),
@@ -76,6 +81,7 @@ export default function SkillTable({
       dataSource={data}
       pagination={pagination}
       onChange={(pag) => onChangePage(pag)}
+      className="accounts-table"
     />
   );
 }

@@ -25,25 +25,27 @@ export default function BannerTable({
       title: "ID",
       dataIndex: "bannerId",
       width: 80,
+      align: "center",
       render: (id: number) => <span style={{ fontWeight: 500 }}>{id}</span>,
     },
     {
       title: "Image",
       dataIndex: "source",
-      width: 120,
+      width: 140,
       render: (src: string) => (
         <div
           style={{
-            width: 80,
-            height: 48,
-            borderRadius: 8,
+            width: 96,
+            height: 54,
+            borderRadius: 10,
             overflow: "hidden",
-            border: "1px solid #f0f0f0",
+            border: "1px solid #e5e7eb",
             background: "#fafafa",
           }}
         >
           <img
             src={src}
+            alt="banner"
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </div>
@@ -67,13 +69,11 @@ export default function BannerTable({
                 width: 18,
                 height: 18,
                 borderRadius: "999px",
-                border: "1px solid #f0f0f0",
+                border: "1px solid #e5e7eb",
                 backgroundColor: c,
               }}
             />
-            <Tag style={{ marginInlineStart: 0 }} color="gold">
-              {c}
-            </Tag>
+            <Tag style={{ marginInlineStart: 0 }}>{c}</Tag>
           </Space>
         ) : (
           <Tag color="default">No color</Tag>
@@ -81,22 +81,31 @@ export default function BannerTable({
     },
     {
       title: "Actions",
-      align: "right",
+      key: "actions",
+      width: 140,
+      align: "center",
       render: (_: unknown, record: BannerConfig) => (
-        <Space size="middle">
+        <Space size="small">
           <Button
             type="default"
             shape="circle"
+            size="small"
             icon={<EditOutlined />}
             onClick={() => onEdit(record)}
           />
           <Popconfirm
             title="Delete this banner?"
             okText="Delete"
+            cancelText="Cancel"
             okButtonProps={{ danger: true }}
             onConfirm={() => onDelete(record.bannerId)}
           >
-            <Button danger shape="circle" icon={<DeleteOutlined />} />
+            <Button
+              danger
+              shape="circle"
+              size="small"
+              icon={<DeleteOutlined />}
+            />
           </Popconfirm>
         </Space>
       ),
@@ -107,7 +116,6 @@ export default function BannerTable({
     <Table<BannerConfig>
       rowKey="bannerId"
       size="middle"
-      style={{ marginTop: 12 }}
       loading={loading}
       dataSource={data}
       columns={columns}
@@ -116,6 +124,7 @@ export default function BannerTable({
         showSizeChanger: false,
       }}
       onChange={(p) => onChangePage(p)}
+      className="accounts-table"
     />
   );
 }

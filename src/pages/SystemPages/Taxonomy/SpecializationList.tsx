@@ -187,26 +187,36 @@ export default function SpecializationList() {
   );
 
   return (
-    <Card>
-      <SpecializationToolbar
-        keyword={keyword}
-        onKeywordChange={setKeyword}
-        onSearch={handleSearch}
-        onReset={handleReset}
-        onCreate={openCreateModal}
-      />
+    <div>
+      <Card className="aices-card">
+        {/* 🔥 TOP BAR CHUẨN SYSTEM */}
+        <div className="company-header-row">
+          <div className="company-left">
+            <SpecializationToolbar
+              keyword={keyword}
+              onKeywordChange={setKeyword}
+              onSearch={handleSearch}
+              onReset={handleReset}
+              onCreate={openCreateModal}
+            />
+          </div>
+        </div>
 
-      <SpecializationTable
-        loading={loading}
-        data={filteredSpecializations}
-        pagination={{
-          ...pagination,
-          total: filteredSpecializations.length, // tổng sau filter
-        }}
-        onChangePage={handleTableChange}
-        onEdit={openEditModal}
-        onDelete={handleDelete}
-      />
+        {/* TABLE */}
+        <div className="accounts-table-wrapper">
+          <SpecializationTable
+            loading={loading}
+            data={filteredSpecializations}
+            pagination={{
+              ...pagination,
+              total: filteredSpecializations.length,
+            }}
+            onChangePage={handleTableChange}
+            onEdit={openEditModal}
+            onDelete={handleDelete}
+          />
+        </div>
+      </Card>
 
       <SpecializationModal
         open={isModalVisible}
@@ -215,6 +225,6 @@ export default function SpecializationList() {
         onOk={handleModalOk}
         onCancel={handleModalCancel}
       />
-    </Card>
+    </div>
   );
 }

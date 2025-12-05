@@ -1,4 +1,4 @@
-import { Form, Input, Modal } from "antd";
+import { Form, Input, Modal, Button } from "antd";
 import type { FormInstance } from "antd/es/form";
 import type { Category } from "../../../../../types/category.types";
 
@@ -22,10 +22,14 @@ export default function CategoryModal({
       open={open}
       title={editing ? "Edit Category" : "Create Category"}
       onCancel={onCancel}
-      onOk={onSubmit}
+      footer={null}
       destroyOnClose
+      centered
+      className="system-modal"
     >
-      <Form form={form} layout="vertical" preserve={false}>
+      <div className="system-modal-section-title">CATEGORY INFORMATION</div>
+
+      <Form form={form} layout="vertical">
         <Form.Item
           label="Name"
           name="name"
@@ -34,8 +38,22 @@ export default function CategoryModal({
             { max: 255, message: "Max length is 255 characters" },
           ]}
         >
-          <Input placeholder="Ex: Software Development" />
+          <Input placeholder="e.g. Software Development" />
         </Form.Item>
+
+        <div className="system-modal-footer">
+          <Button className="system-modal-btn system-modal-btn-cancel" onClick={onCancel}>
+            Cancel
+          </Button>
+
+          <Button
+            type="primary"
+            className="system-modal-btn system-modal-btn-primary"
+            onClick={onSubmit}
+          >
+            {editing ? "Save changes" : "Create"}
+          </Button>
+        </div>
       </Form>
     </Modal>
   );

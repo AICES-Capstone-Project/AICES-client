@@ -1,8 +1,5 @@
-// src/pages/SystemPages/Subscriptions/components/plans/PlansToolbar.tsx
-
-import { Button, Space, Typography } from "antd";
-
-const { Title } = Typography;
+import { Input, Button } from "antd";
+import { ReloadOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 
 interface PlansToolbarProps {
   onReload: () => void;
@@ -11,23 +8,41 @@ interface PlansToolbarProps {
 
 export default function PlansToolbar({ onReload, onCreate }: PlansToolbarProps) {
   return (
-    <Space
-      style={{
-        marginBottom: 16,
-        width: "100%",
-        justifyContent: "space-between",
-      }}
-    >
-      <Title level={4} style={{ margin: 0 }}>
-        Subscription Plans
-      </Title>
+    <div className="accounts-toolbar">
+      <div className="accounts-toolbar-left">
+        <Input
+          placeholder="Search plans..."
+          allowClear
+          prefix={<SearchOutlined />}
+          className="toolbar-search-input"
+          style={{ width: 300 }}
+        />
 
-      <Space>
-        <Button onClick={onReload}>Reload</Button>
-        <Button type="primary" onClick={onCreate}>
-          New Plan
+        <Button
+          className="btn-search"
+          icon={<SearchOutlined />}
+          onClick={onReload}
+        >
+          Search
         </Button>
-      </Space>
-    </Space>
+
+        <Button
+          className="accounts-reset-btn"
+          icon={<ReloadOutlined />}
+          onClick={onReload}
+        >
+          Reset
+        </Button>
+      </div>
+
+      <Button
+        type="primary"
+        className="accounts-new-btn"
+        icon={<PlusOutlined />}
+        onClick={onCreate}
+      >
+        New Plan
+      </Button>
+    </div>
   );
 }

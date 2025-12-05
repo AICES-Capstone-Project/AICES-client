@@ -1,5 +1,6 @@
 import React from "react";
 import { Layout, Menu, Button, Typography, ConfigProvider } from "antd";
+import "../../assets/styles/system.css";
 import {
   DashboardOutlined,
   TeamOutlined,
@@ -264,34 +265,88 @@ export default function SystemAdminLayout() {
       }}
     >
       <style>{`
-        .aices-header {
-          background: linear-gradient(90deg, #FFFFFF, ${GOLD.cream});
-          border-bottom: 1px solid #f0f0f0;
-          box-shadow: 0 2px 10px ${GOLD.shadow};
-        }
+.aices-header {
+  background: linear-gradient(
+    180deg,
+    #c8e8d7 0%,     /* đậm nhất - dưới */
+    #e7f4ed 55%,    /* trung gian mềm */
+    #ffffff 100%    /* nhạt nhất - trên */
+  );
+  border-bottom: 1px solid #d7eee3;
+  box-shadow: 0 2px 10px rgba(15, 32, 39, 0.12);
+}
+
+  .ant-layout-sider-trigger {
+    background: linear-gradient(90deg, #0F2027 0%, #28623A 100%) !important;
+    color: #E9F5EC !important;
+    border-top: 1px solid #1A302E;
+  }
+
+
         .aices-sider {
-          background: #fff !important;
-          border-right: 1px solid #f0f0f0 !important;
-        }
+    background: linear-gradient(90deg, #0F2027 0%, #16392E 40%, #1F4A38 75%, #28623A 100%) !important;
+    border-right: 1px solid rgba(255,255,255,0.06) !important;
+    box-shadow: 4px 0 18px rgba(0, 0, 0, 0.45); /* thêm dòng này */
+  }
+
+
         .aices-brand {
-          letter-spacing: 0.2px;
-          background: linear-gradient(90deg, ${GOLD.primary}, ${GOLD.hover});
-          -webkit-background-clip: text;
-          background-clip: text;
-          color: transparent;
-          text-shadow: 0 1px 0 rgba(0,0,0,0.04);
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  font-size: 14px;
+  color: #FFD500;
+
+  font-weight: 800;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* giúp nổi trên nền xanh */
+}
+
+
+        .aices-sider .ant-menu {
+          background: transparent !important;
         }
-        .ant-menu-item {
+
+        .aices-sider .ant-menu-item,
+        .aices-sider .ant-menu-submenu-title {
           transition: background-color .18s ease, transform .12s ease;
-          border-radius: 8px !important;
+          border-radius: 999px !important;
+          margin: 4px 6px !important;
+          color: #E9F5EC !important;
         }
-        .ant-menu-item:hover {
-          background: ${GOLD.cream};
+          .aices-sider .ant-menu-sub .ant-menu-item {
+  border-radius: 999px !important;
+  margin: 2px 10px !important;
+  padding-left: 40px !important; /* vẫn thụt vào nhẹ */
+  font-size: 13px;
+  opacity: 0.9;
+}
+        .aices-sider .ant-menu-item-icon,
+        .aices-sider .ant-menu-submenu-arrow {
+          color: #9CC5A1 !important;
+        }
+
+        .aices-sider .ant-menu-item:hover,
+        .aices-sider .ant-menu-submenu-title:hover {
+          background: rgba(40, 98, 58, 0.18) !important;
           transform: translateX(2px);
         }
-        .ant-btn-text:hover {
-          background: ${GOLD.cream};
+
+        .aices-sider .ant-menu-item-selected {
+          background: rgba(40, 98, 58, 0.28) !important;
+          color: #E9F5EC !important;
+          box-shadow: 0 6px 18px rgba(0,0,0,0.32);
         }
+
+        .aices-sider .ant-menu-item-selected .ant-menu-item-icon {
+          color: #E9F5EC !important;
+        }
+
+        /* Hover chung cho button text (Logout + nút toggle) */
+        .ant-btn-text:hover {
+          background: rgba(40, 98, 58, 0.25) !important;
+          color: #E9F5EC !important;
+        }
+
+        /* Phần còn lại giữ nguyên */
         .ant-table-tbody > tr.ant-table-row:hover > td {
           background: ${GOLD.cream2} !important;
         }
@@ -308,6 +363,23 @@ export default function SystemAdminLayout() {
         .ant-picker-focused, .ant-btn:focus-visible {
           box-shadow: 0 0 0 2px rgba(245,196,0,0.25) !important;
         }
+            .aices-sider .logout-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .aices-sider .logout-section .ant-btn-text {
+    color: #9CC5A1;
+    opacity: 0.85;
+  }
+
+  .aices-sider .logout-section .ant-btn-text:hover {
+    opacity: 1;
+    background: rgba(40, 98, 58, 0.28) !important;
+  }
+.aices-sider {
+  overflow: hidden; /* ⭐ KHÔNG CHO PILL TRÀN RA NGOÀI */
+}
+
       `}</style>
 
       <Layout style={{ minHeight: "100vh" }}>
@@ -333,14 +405,23 @@ export default function SystemAdminLayout() {
               height: 64,
               display: "flex",
               alignItems: "center",
-              justifyContent: collapsed ? "center" : "flex-start",
-              paddingInline: 16,
-              fontWeight: 800,
-              fontSize: 18,
+              justifyContent: "center",
+              paddingInline: 12,
+              cursor: "pointer",
             }}
-            className="aices-brand"
+            onClick={() => navigate("/")} // điều hướng về trang chủ admin
           >
-            {collapsed ? "S" : "System Admin"}
+            {collapsed ? (
+              <img
+                src="/src/assets/logo/logo_long.png"
+                style={{ height: 28, objectFit: "contain" }}
+              />
+            ) : (
+              <img
+                src="/src/assets/logo/logo_long.png"
+                style={{ height: 36, objectFit: "contain" }}
+              />
+            )}
           </div>
 
           <Menu
@@ -350,7 +431,7 @@ export default function SystemAdminLayout() {
             style={{ flex: 1 }}
           />
 
-          <div style={{ padding: 16, borderTop: "1px solid #f0f0f0" }}>
+          <div className="logout-section" style={{ padding: 16 }}>
             <Button
               type="text"
               onClick={handleLogout}
@@ -358,7 +439,7 @@ export default function SystemAdminLayout() {
               style={{
                 width: "100%",
                 textAlign: "left",
-                color: GOLD.primary,
+                // ❌ bỏ color ở đây để CSS mới ăn
               }}
             >
               Logout
@@ -391,7 +472,7 @@ export default function SystemAdminLayout() {
               icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             />
             <Title level={4} style={{ margin: 0 }}>
-              System Panel
+              System Admin
             </Title>
           </Header>
 
@@ -400,6 +481,7 @@ export default function SystemAdminLayout() {
               padding: 24,
               height: "calc(100vh - 64px)", // 64 = height header
               overflowY: "auto",
+              background: "#f6fbf8",
             }}
           >
             <Outlet />

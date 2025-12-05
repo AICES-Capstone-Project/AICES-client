@@ -294,9 +294,20 @@ export default function CompanyList() {
 
   // ==================================================
   const { user } = useAppSelector((state) => state.auth);
+
   const normalizedRole = (user?.roleName || "")
     .replace(/_/g, " ")
     .toLowerCase();
+
+  // ⭐ Base path theo từng role
+  let baseSystemPath = "/system"; // mặc định: System Admin
+
+  if (normalizedRole === "system manager") {
+    baseSystemPath = "/system_manager";
+  } else if (normalizedRole === "system staff") {
+    baseSystemPath = "/system_staff";
+  }
+
   const isStaff = normalizedRole === "system staff";
 
   return (
@@ -331,7 +342,7 @@ export default function CompanyList() {
               <Select.Option value="Rejected">Rejected</Select.Option>
               <Select.Option value="Suspended">Suspended</Select.Option>
             </Select>
-             {/* Add Company chỉ cho Manager/Admin */}
+            {/* Add Company chỉ cho Manager/Admin */}
             {!isStaff && (
               <Button
                 icon={<PlusOutlined />}
@@ -353,7 +364,7 @@ export default function CompanyList() {
             total={total}
             defaultPageSize={DEFAULT_PAGE_SIZE}
             onChangePagination={handleChangeTable}
-            onOpenDetail={(id) => nav(`/system/company/${id}`)}
+            onOpenDetail={(id) => nav(`${baseSystemPath}/company/${id}`)} // ⭐ sửa ở đây
             onApprove={handleApprove}
             onOpenReject={(c) => {
               setRejectingCompany(c);
@@ -378,13 +389,15 @@ export default function CompanyList() {
         onConfirm={handleConfirmReject}
       />
 
-      <CreateCompanyModal
-        open={isCreateOpen}
-        loading={loading}
-        form={form}
-        onCancel={() => setIsCreateOpen(false)}
-        onCreate={handleCreate}
-      />
+      {!isStaff && (
+        <CreateCompanyModal
+          open={isCreateOpen}
+          loading={loading}
+          form={form}
+          onCancel={() => setIsCreateOpen(false)}
+          onCreate={handleCreate}
+        />
+      )}
     </div>
   );
 }

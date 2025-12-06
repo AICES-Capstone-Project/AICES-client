@@ -118,28 +118,22 @@ export default function CompanyTable({
       render: (_, record) => {
         const status = (record.companyStatus || "").toString();
 
-        // ===== RULE CHUYỂN TRẠNG THÁI =====
-        // Pending  -> Approved / Rejected / Suspended
-        // Approved -> Suspended
-        // Rejected -> Approved / Suspended
-        // Suspended-> Approved
-        // Canceled -> (không cho chuyển)
+        // ===== RULE CHUYỂN TRẠNG THÁI (VERSION MỚI) =====
+        // Pending   -> Approved / Rejected / Suspended
+        // Approved  -> Suspended
+        // Suspended -> Approved
+        // Rejected  -> (terminal, giống Canceled)
+        // Canceled  -> (terminal)
 
-        const isCanceled = status === "Canceled";
+        const isTerminal = status === "Rejected" || status === "Canceled";
 
         const canApprove =
-          (status === "Pending" ||
-            status === "Rejected" ||
-            status === "Suspended") &&
-          !isCanceled;
+          (status === "Pending" || status === "Suspended") && !isTerminal;
 
-        const canReject = status === "Pending" && !isCanceled;
+        const canReject = status === "Pending" && !isTerminal;
 
         const canSuspend =
-          (status === "Pending" ||
-            status === "Approved" ||
-            status === "Rejected") &&
-          !isCanceled;
+          (status === "Pending" || status === "Approved") && !isTerminal;
 
         const disabledApprove = !canApprove;
         const disabledReject = !canReject;

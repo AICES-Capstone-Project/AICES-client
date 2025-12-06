@@ -1,19 +1,19 @@
-import MainBanner from "../Homepage/partials/Banner";
-import BannerSecond from "../Homepage/partials/BannerSecond";
-import BenefitSection from "../Homepage/partials/BenefitSection";
-import ComplianceSection from "../Homepage/partials/ComplianceSection";
-import Testimonials from "../Homepage/partials/Testimonials";
-import ProcessSteps from "../Homepage/partials/ProcessSteps";
+import Hero from "./partials/hero/Hero";
+import WhyAicesSection from "./partials/why/WhyAicesSection";
+import StepsSection from "./partials/steps/StepsSection";
+import BlogSection from "./partials/blog/BlogSection";
+import VideoTipsSection from "./partials/video/VideoTipsSection";
+import ArticleExpand from "./partials/article/ArticleExpand";
 
 export default function Homepage() {
-	return (
-		<>
-			<MainBanner />
-			<BenefitSection />
-			<ComplianceSection />
-			<BannerSecond />
-			<Testimonials />
-			<ProcessSteps />
-		</>
-	);
+  return (
+    <>
+      <Hero />
+      <WhyAicesSection />
+      <StepsSection />
+      <BlogSection />
+      <VideoTipsSection />
+      <ArticleExpand />
+    </>
+  );
 }

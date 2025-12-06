@@ -17,6 +17,7 @@ import {
   PoweroffOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import logoLong from "../../assets/logo/logo_long.png";
 
 import { APP_ROUTES } from "../../services/config";
 
@@ -413,12 +414,12 @@ export default function SystemAdminLayout() {
           >
             {collapsed ? (
               <img
-                src="/src/assets/logo/logo_long.png"
+                src={logoLong}
                 style={{ height: 28, objectFit: "contain" }}
               />
             ) : (
               <img
-                src="/src/assets/logo/logo_long.png"
+                src={logoLong}
                 style={{ height: 36, objectFit: "contain" }}
               />
             )}

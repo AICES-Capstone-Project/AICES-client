@@ -19,6 +19,7 @@ export default function Homepage() {
       <Feedback />
       <RecruiterDesigned />
       <Compliance />
+      {/* nothing */}
     </>
   );
 }

@@ -169,21 +169,34 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
         <Form.Item
           name="title"
           label="Title"
-          rules={[{ required: true, message: "Please input title" }]}
+          rules={[
+            { required: true, message: "Please input title" },
+            { max: 70, message: "Title must not exceed 70 characters" }
+          ]}
         >
-          <Input />
+          <Input maxLength={70} showCount />
         </Form.Item>
 
-        <Form.Item name="description" label="Description" rules={[{ required: true, message: "Please input description" }]}>
-          <Input.TextArea rows={4} />
+        <Form.Item name="description" label="Description" rules={[
+          { required: true, message: "Please input description" },
+          { max: 300, message: "Description must not exceed 300 characters" }
+        ]}>
+          <Input.TextArea rows={3} maxLength={300} showCount />
         </Form.Item>
 
-        <Form.Item name="requirements" label="Requirements" rules={[{ required: true, message: "Please input requirements" }]}>
-          <Input.TextArea rows={3} />
+        <Form.Item name="requirements" label="Requirements" rules={[
+          { required: true, message: "Please input requirements" },
+          { max: 300, message: "Requirements must not exceed 300 characters" }
+        ]}>
+          <Input.TextArea rows={3} maxLength={300} showCount />
         </Form.Item>
 
-        <Form.Item name="targetQuantity" label="Target Quantity" rules={[{ required: true, message: "Please input target quantity" }]}>
-          <InputNumber min={1} style={{ width: "100%" }} placeholder="Number of positions" />
+        <Form.Item name="targetQuantity" label="Target Quantity" rules={[
+          { required: true, message: "Please input target quantity" },
+          { type: "number", min: 1, message: "Target quantity must be at least 1" },
+          { type: "number", max: 9999, message: "Target quantity must not exceed 9999" }
+        ]}>
+          <InputNumber min={1} max={9999} style={{ width: "100%" }} placeholder="Number of positions" />
         </Form.Item>
 
         <div style={{ display: "flex", gap: "16px" }}>
@@ -248,23 +261,30 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
                       <Form.Item
                         {...restField}
                         name={[field.name, "name"]}
-                        rules={[{ required: true, message: "Please input criteria name" }]}
+                        rules={[
+                          { required: true, message: "Please input criteria name" },
+                          { max: 70, message: "Criteria name must not exceed 70 characters" }
+                        ]}
                         style={{ flex: 1, marginBottom: 0 }}
                       >
-                        <Input placeholder="Criteria name" />
+                        <Input placeholder="Criteria name" maxLength={70} showCount />
                       </Form.Item>
 
                       {/* Weight */}
                       <Form.Item
                         {...restField}
                         name={[field.name, "weight"]}
-                        rules={[{ required: true, message: "Please input weight (0-1)" }]}
+                        rules={[
+                          { required: true, message: "Please input weight (0-1)" },
+                          { type: "number", min: 0, max: 1, message: "Weight must be between 0 and 1" }
+                        ]}
                         style={{ width: 150, marginBottom: 0 }}
                       >
                         <InputNumber
                           min={0}
                           max={1}
-                          step={0.1}
+                          step={0.01}
+                          precision={2}
                           placeholder="Criteria weight"
                           style={{ width: "100%" }}
                         />

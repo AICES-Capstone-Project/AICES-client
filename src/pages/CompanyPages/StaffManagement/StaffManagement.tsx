@@ -86,6 +86,27 @@ const StaffManagement = () => {
 		}
 	}, [isHrManager]);
 
+	// Polling fallback for realtime updates: refresh pending requests and members periodically
+	useEffect(() => {
+		if (!isHrManager) return; // only poll for HR managers
+		let mounted = true;
+		const intervalMs = 10000; // 10 seconds
+		const id = setInterval(async () => {
+			if (!mounted) return;
+			try {
+				await fetchJoinRequests();
+				await fetchMembers();
+			} catch (e) {
+				// ignore polling errors
+			}
+		}, intervalMs);
+
+		return () => {
+			mounted = false;
+			clearInterval(id);
+		};
+	}, [isHrManager]);
+
 	const handleDelete = (member: CompanyMember) => {
 		setMembers((prev) => prev.filter((m) => m.comUserId !== member.comUserId));
 		setFilteredMembers((prev) =>

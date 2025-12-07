@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Form, Input, Button, Card, Row, Col, Modal, Select, Spin } from "antd";
 import { useNavigate } from "react-router-dom";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
@@ -29,6 +29,7 @@ interface CompanyFormValues {
 export default function CompanyCreate() {
   const [loading, setLoading] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const logoutTimerRef = useRef<number | null>(null);
   const [form] = Form.useForm();
   const navigate = useNavigate();
 
@@ -114,8 +115,23 @@ export default function CompanyCreate() {
 
       if (String(resp?.status).toLowerCase() === "success") {
         toastSuccess("Company request submitted", "Company account creation request submitted successfully.");
+        // Inform user they will need to re-login and schedule an auto-logout in 10 seconds
+        toastWarning("Session refresh required", "You will be logged out in 10 seconds. Please log in again to refresh your session.");
         // Navigate to pending approval screen
         navigate("/company/pending-approval");
+        // Schedule auto-logout after 10 seconds
+        if (typeof window !== "undefined") {
+          // store timer id so we can clear it on unmount
+          logoutTimerRef.current = window.setTimeout(() => {
+            try {
+              localStorage.removeItem("access_token");
+              localStorage.removeItem("refresh_token");
+            } catch (err) {
+              // ignore
+            }
+            navigate("/login");
+          }, 10 * 1000);
+        }
       } else {
         toastError("Failed to submit request", resp?.message);
       }
@@ -187,6 +203,16 @@ export default function CompanyCreate() {
       toastError("An error occurred while joining the company");
     }
   };
+
+  // Clear scheduled logout timer if component unmounts
+  useEffect(() => {
+    return () => {
+      if (logoutTimerRef.current) {
+        clearTimeout(logoutTimerRef.current);
+        logoutTimerRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <>

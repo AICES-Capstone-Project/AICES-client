@@ -185,7 +185,7 @@ const Dashboard: React.FC = () => {
             <Col xs={24} sm={12} lg={6}>
               <Card size="small" hoverable>
                 <Statistic
-                  title="Total Candidates"
+                  title="Total Members"
                   value={summary?.totalMembers || 0}
                   prefix={<UserOutlined />}
                   valueStyle={{ color: "#1890ff" }}

@@ -231,6 +231,21 @@ button {
 		color: white !important;
 	}
 }
+.pricing-carousel .slick-list {
+  padding: 20px 0 !important;
+}
+
+.pricing-carousel .slick-track {
+  display: flex !important;
+  justify-content: center;
+}
+
+.pricing-carousel .slick-slide {
+  padding: 0 15px;
+  display: flex !important;
+  justify-content: center;
+}
+
 
 /* --- ACTIVE HEADER ITEM FIX --- */
 .active-header-item {

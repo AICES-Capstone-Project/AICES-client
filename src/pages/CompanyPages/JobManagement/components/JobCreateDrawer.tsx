@@ -182,6 +182,10 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
           <Input.TextArea rows={3} />
         </Form.Item>
 
+        <Form.Item name="targetQuantity" label="Target Quantity" rules={[{ required: true, message: "Please input target quantity" }]}>
+          <InputNumber min={1} style={{ width: "100%" }} placeholder="Number of positions" />
+        </Form.Item>
+
         <Form.Item name="categoryId" label="Category" rules={[{ required: true, message: "Please select a category" }]}>
           <Select
             placeholder={loadingCats ? "Loading categories..." : "Select category"}

@@ -190,6 +190,7 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
             }}
           >
             <Button
+            className="company-btn"
               onClick={() => {
                 setDeleteModalOpen(false);
                 setConfirmInput("");

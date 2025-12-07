@@ -1,27 +1,33 @@
-import { useState } from "react"; 
-import { Layout, Menu } from "antd";
+import { useState, useEffect } from "react"; 
+import { Layout, Menu, Avatar, Dropdown, Typography, Button } from "antd";
+import type { MenuProps } from "antd";
+import { PanelLeft } from "lucide-react";
 import {
     LineChartOutlined,
     TeamOutlined,
     AppstoreOutlined,
     LogoutOutlined,
     SettingOutlined,
-    MenuUnfoldOutlined,
-    MenuFoldOutlined,
     ApartmentOutlined,
     RobotOutlined,
-    StarOutlined
+    StarOutlined,
+    UserOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo/logo_long.png";
+import defaultAvatar from "../../assets/images/Avatar_Default.jpg";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { logoutUser } from "../../stores/slices/authSlice";
 import { APP_ROUTES, ROLES } from "../../services/config";
+import { companySubscriptionService } from "../../services/companySubscriptionService";
+
+const { Text } = Typography;
 
 const { Sider, Content } = Layout;
 
 export default function CompanyLayout() {
     const [collapsed, setCollapsed] = useState(false);
+    const [subscriptionName, setSubscriptionName] = useState<string>("");
     const location = useLocation();
 
     const dispatch = useAppDispatch();
@@ -45,8 +51,29 @@ export default function CompanyLayout() {
         : defaultCompanyRoute;
 
     const iconStyle = { color: "var(--color-primary-medium)", fontWeight: "bold" };
+    
+    // Fetch current subscription
+    useEffect(() => {
+        const fetchSubscription = async () => {
+            try {
+                const response = await companySubscriptionService.getCurrentSubscription();
+                console.log("Subscription API response:", response);
+                if (response.status === "Success" && response.data) {
+                    console.log("Setting subscription:", response.data.subscriptionName);
+                    setSubscriptionName(response.data.subscriptionName);
+                }
+            } catch (error) {
+                console.error("Failed to fetch subscription:", error);
+            }
+        };
 
-    const items = [
+        if (hasCompany) {
+            fetchSubscription();
+        }
+    }, [hasCompany]);
+
+    // Main navigation items (Dashboard -> AI CV Review)
+    const mainMenuItems = [
         // 1. Dashboard (Only if has company)
         ...(hasCompany ? [
             {
@@ -86,61 +113,37 @@ export default function CompanyLayout() {
                 icon: <RobotOutlined style={iconStyle} />,
                 label: <Link to={APP_ROUTES.COMPANY_AI_SCREENING}>AI CV Review</Link>,
             },
-            // Subscriptions (Nested check inside hasCompany)
-            ...(userRole?.toLowerCase() === ROLES.Hr_Manager?.toLowerCase()
-                ? [
-                    {
-                        key: APP_ROUTES.COMPANY_SUBSCRIPTIONS,
-                        icon: <StarOutlined style={iconStyle} />,
-                        label: <Link to={APP_ROUTES.COMPANY_SUBSCRIPTIONS}>Subscription Plans</Link>,
-                    },
-                ] : []),
-        ] : []), // <--- Đã thêm đóng ngoặc ] : []) ở đây
-
-        // 5. Settings (Thường nên để ngoài hasCompany hoặc tùy logic của bạn)
-        {
-            key: APP_ROUTES.COMPANY_SETTINGS,
-            icon: <SettingOutlined style={iconStyle} />,
-            label: <Link to={APP_ROUTES.COMPANY_SETTINGS}>Settings</Link>,
-        },
-
-        // 6. Logout (Luôn hiển thị)
-        {
-            key: "logout",
-            icon: <LogoutOutlined style={iconStyle} />,
-            label: (
-                <a
-                    onClick={(e) => {
-                        e.preventDefault();
-                        handleLogout();
-                    }}
-                    href="#"
-                >
-                    Logout
-                </a>
-            ),
-        },
+        ] : []),
     ];
 
-    const CustomTrigger = (
-        <div
-            onClick={() => setCollapsed(!collapsed)}
-            style={{
-                height: 48,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                borderTop: "1px solid #f0f0f0",
-                color: "var(--color-primary-dark)",
-                background: "#fafafa",
-                transition: "all 0.3s ease",
-                fontWeight: "bold",
-            }}
-        >
-            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-        </div>
-    );
+    // Dropdown menu items for user menu at bottom
+    const userMenuItems: MenuProps['items'] = [
+        // Subscription Plans (Only for HR Manager)
+        ...(userRole?.toLowerCase() === ROLES.Hr_Manager?.toLowerCase() && hasCompany
+            ? [
+                {
+                    key: APP_ROUTES.COMPANY_SUBSCRIPTIONS,
+                    icon: <StarOutlined />,
+                    label: <Link to={APP_ROUTES.COMPANY_SUBSCRIPTIONS}>Subscription Plans</Link>,
+                },
+            ]
+            : []),
+        {
+            key: APP_ROUTES.COMPANY_SETTINGS,
+            icon: <SettingOutlined />,
+            label: <Link to={APP_ROUTES.COMPANY_SETTINGS}>Settings</Link>,
+        },
+        {
+            type: 'divider',
+        },
+        {
+            key: "logout",
+            icon: <LogoutOutlined />,
+            danger: true,
+            label: "Logout",
+            onClick: () => handleLogout(),
+        },
+    ];
 
     return (
         <Layout style={{ minHeight: "100vh", paddingRight: "8px" }}>
@@ -149,7 +152,7 @@ export default function CompanyLayout() {
                 collapsed={collapsed}
                 onCollapse={setCollapsed}
                 breakpoint="lg"
-                trigger={CustomTrigger}
+                trigger={null}
                 style={{
                     position: "fixed",
                     left: 0,
@@ -161,39 +164,165 @@ export default function CompanyLayout() {
                     width: collapsed ? "6%" : "15%",
                     transition: "width 200ms ease",
                     zIndex: 100,
+                    display: "flex",
+                    flexDirection: "column",
                 }}
             >
+                {/* Header: Logo + Collapse Button (10% height when expanded) */}
                 <div
+                    className="sidebar-header"
                     style={{
-                        height: 64,
+                        height: collapsed ? 64 : "10vh",
+                        minHeight: 64,
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",
-                        paddingInline: 16,
-                        cursor: "pointer",
+                        paddingInline: collapsed ? 12 : 16,
+                        borderBottom: "1px solid #f0f0f0",
+                        position: "relative",
                     }}
                 >
-                    <Link to="/" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    <Link
+                        to="/"
+                        className="sidebar-logo"
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "100%",
+                            flex: "none",
+                            opacity: 1,
+                            transition: "opacity 0.2s",
+                        }}
+                    >
                         <img
                             src={logo}
                             alt="AICES"
                             style={{
+                                height: 32,
+                                maxWidth: collapsed ? "48px" : "70%",
+                                objectFit: "contain",
                                 display: "block",
                                 margin: "0 auto",
-                                height: collapsed ? 28 : 36,
-                                maxWidth: collapsed ? "100%" : "80%",
-                                objectFit: "contain",
                             }}
                         />
                     </Link>
+                    <div
+                        onClick={() => setCollapsed(!collapsed)}
+                        className="collapse-trigger"
+                        style={{
+                            cursor: "pointer",
+                            color: "var(--color-primary-light)",
+                            fontSize: 14,
+                            padding: 6,
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            opacity: collapsed ? 0 : 1,
+                            transition: "opacity 0.2s, transform 0.15s, background 0.15s",
+                            position: "absolute",
+                            top: "50%",
+                            left: collapsed ? "50%" : "auto",
+                            right: collapsed ? "auto" : 12,
+                            transform: collapsed ? "translate(-50%, -50%)" : "translateY(-50%)",
+                            zIndex: 5,
+                        }}
+                    >
+                        <PanelLeft size={16} />
+                    </div>
+                    {collapsed && (
+                        <style>{`
+                            .sidebar-header:hover .sidebar-logo {
+                                opacity: 0 !important;
+                            }
+                            .sidebar-header:hover .collapse-trigger {
+                                opacity: 1 !important;
+                            }
+                            .collapse-trigger {
+                                opacity: 0;
+                            }
+                        `}</style>
+                    )}
                 </div>
-                <Menu
-                    mode="inline"
-                    className="custom-menu"
-                    selectedKeys={[selectedKey]}
-                    items={items}
-                    style={{ height: "100%" }}
-                />
+
+                {/* Main Menu (70% height when expanded, scrollable) */}
+                <div style={{ height: collapsed ? "calc(100vh - 64px - 80px)" : "77vh", overflow: "auto" }}>
+                    <Menu
+                        mode="inline"
+                        className="custom-menu"
+                        selectedKeys={[selectedKey]}
+                        items={mainMenuItems}
+                        style={{ 
+                            borderRight: 0,
+                            paddingTop: 8,
+                        }}
+                    />
+                </div>
+
+                {/* User Menu (footer) - 20% height when expanded */}
+                <div
+                    style={{
+                        height: collapsed ? 80 : "13vh",
+                        padding: collapsed ? "4px" : "4px",
+                        boxSizing: "border-box",
+                        background: "transparent",
+                    }}
+                >
+                    <Dropdown 
+                        menu={{ items: userMenuItems }} 
+                        trigger={['click']}
+                        placement="topLeft"
+                    >
+                        <div
+                            style={
+                                collapsed
+                                    ? { display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 8 }
+                                    : { display: "flex", alignItems: "center", gap: 5, cursor: "pointer", padding: 8, borderRadius: 8, transition: "background 0.2s" }
+                            }
+                            onMouseEnter={(e) => e.currentTarget.style.background = "#f5f5f5"}
+                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                        >
+                            <Avatar 
+                                src={user?.avatarUrl || defaultAvatar}
+                                icon={<UserOutlined />}
+                                size={collapsed ? 40 : 27}
+                            />
+                            {!collapsed && (
+                                <div style={{ flex: 1, minWidth: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                                    <div style={{ minWidth: 0 }}>
+                                        <Text 
+                                            strong 
+                                            style={{ 
+                                                display: "block",
+                                                fontSize: 14,
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                                whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {user?.fullName || user?.email || "User"}
+                                        </Text>
+                                        <Text type="secondary" style={{ fontSize: 12 }}>
+                                            {subscriptionName || 'Upgrade'}
+                                        </Text>
+                                    </div>
+
+                                    {subscriptionName?.toLowerCase() === 'free' && (
+                                        <Button
+                                            className="company-btn"
+                                            size="small"
+                                            onClick={() => navigate('/subscriptions')}
+                                            style={{ padding: '1px 4px', borderRadius: 12, whiteSpace: 'nowrap', fontSize: 12, height: 25, lineHeight: '20px' }}
+                                        >
+                                            Upgrade
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
+                            {/* Dropdown chevron removed per UI update */}
+                        </div>
+                    </Dropdown>
+                </div>
             </Sider>
 
             <Layout

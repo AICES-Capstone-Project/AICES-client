@@ -70,6 +70,7 @@ export interface Job {
   description?: string;
   slug?: string;
   requirements?: string;
+  targetQuantity?: number;
   categoryName?: string;
   specializationName?: string;
   employmentTypes?: string[];

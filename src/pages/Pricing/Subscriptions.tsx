@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import PricingHeader from "./components/PricingHeader";
 import PlansGrid from "./components/PlansGrid";
 import FAQSection from "./components/FAQSection";
 import PricingCTA from "./components/PricingCTA";
 import type { PlanType, FAQItem } from "../../types/subscription.types";
 import { usePricingPlans } from "./usePricingPlans";
+import { companySubscriptionService } from "../../services/companySubscriptionService";
 
 const faqs: FAQItem[] = [
 	{
@@ -30,6 +31,12 @@ const faqs: FAQItem[] = [
 ];
 
 function mapApiPlanToPlanType(apiPlan: any): PlanType {
+	const periodMap: Record<string, string> = {
+		Daily: "/day",
+		Monthly: "/month",
+		Yearly: "/year",
+	};
+
 	return {
 		title: apiPlan.name,
 		price:
@@ -39,12 +46,13 @@ function mapApiPlanToPlanType(apiPlan: any): PlanType {
 						minimumFractionDigits: 2,
 						maximumFractionDigits: 2,
 				  })}`,
-		period: apiPlan.duration === "monthly" ? "/month" : `/day`,
+		period: periodMap[apiPlan.duration] || "/month",
 		description: apiPlan.description,
 		features: [
-			`Resume Limit: ${apiPlan.resumeLimit}`,
-			`Hours Limit: ${apiPlan.hoursLimit}`,
-			`Duration: ${apiPlan.duration}`,
+			`${apiPlan.resumeLimit} Resume Limit / ${apiPlan.hoursLimit} Hours`,
+			`Export reports (PDF, Excel)`,
+			`Retry failed CV screening`,
+			`Advanced CV filtering & search`,
 		],
 		subscriptionId: apiPlan.subscriptionId,
 		buttonType: "primary" as PlanType["buttonType"],
@@ -54,7 +62,42 @@ function mapApiPlanToPlanType(apiPlan: any): PlanType {
 
 const PricingPage: React.FC = () => {
 	const { plans, loading, error } = usePricingPlans();
+	const [currentSubscriptionName, setCurrentSubscriptionName] = useState<
+		string | null
+	>(null);
+
+	useEffect(() => {
+		const fetchCurrentSubscription = async () => {
+			try {
+				const response =
+					await companySubscriptionService.getCurrentSubscription();
+				if (response.status === "Success" && response.data) {
+					setCurrentSubscriptionName(response.data.subscriptionName);
+				}
+			} catch (err) {
+				// User might not have a subscription yet, which is fine
+				console.log("No current subscription");
+			}
+		};
+		fetchCurrentSubscription();
+	}, []);
+
+	// Map plans and filter based on current subscription
 	const mappedPlans: PlanType[] = plans.map(mapApiPlanToPlanType);
+	const filteredPlans: PlanType[] = mappedPlans.filter((plan) => {
+		// If user has a non-free subscription, hide both current plan and Free plan
+		if (
+			currentSubscriptionName &&
+			currentSubscriptionName.toLowerCase() !== "free"
+		) {
+			return (
+				plan.title !== currentSubscriptionName &&
+				plan.title.toLowerCase() !== "free"
+			);
+		}
+		// Otherwise show all plans
+		return true;
+	});
 
 	return (
 		<div className="bg-white text-slate-800 min-h-screen pt-20 pb-24 px-6 md:px-24">
@@ -64,7 +107,10 @@ const PricingPage: React.FC = () => {
 			) : error ? (
 				<div className="text-center py-12 text-red-600">{error}</div>
 			) : (
-				<PlansGrid plans={mappedPlans} />
+				<PlansGrid
+					plans={filteredPlans}
+					currentSubscriptionName={currentSubscriptionName}
+				/>
 			)}
 			<FAQSection faqs={faqs} />
 			<PricingCTA />

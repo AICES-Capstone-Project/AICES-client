@@ -1,0 +1,171 @@
+/* SECTION BACKGROUND – pastel giống Brainner */
+.compliance-section {
+  width: 100%;
+  padding: 120px 0 140px;
+    background:
+
+    /* ⭐ Lớp trắng phía trên (để top sáng hơn) */
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      rgba(255, 255, 255, 0.75) 12%,
+      rgba(255, 255, 255, 0) 22%
+    ),
+
+/* Emerald bên trái – nhẹ hơn */
+radial-gradient(
+  60% 60% at 20% 0%,
+  rgba(18, 118, 37, 0.25) 0%,
+  rgba(18, 118, 37, 0.25) 25%,
+  rgba(15, 32, 39, 0) 70%
+),
+
+/* Emerald bên phải – nhẹ hơn */
+radial-gradient(
+  60% 60% at 80% 0%,
+  rgba(18, 118, 37, 0.25) 0%,
+  rgba(18, 118, 37, 0.25) 25%,
+  rgba(0, 111, 35, 0) 70%
+),
+
+
+
+    /* Base nhạt */
+    linear-gradient(
+      180deg,
+      #f9faff 0%,
+      #ffffff 60%
+    );
+
+  position: relative;
+  overflow: hidden;
+}
+
+
+/* INNER WRAPPER */
+.compliance-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+/* TITLE */
+.compliance-title {
+  font-size: 36px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #0f2027;
+  margin-bottom: 14px;
+}
+
+.compliance-title-accent {
+  background: linear-gradient(90deg, #0f2027, #28623a);
+
+  /* BẮT BUỘC phải có cả prefix + non-prefix */
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  /* Firefox cần color: transparent */
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+
+/* SUBTITLE */
+.compliance-subtitle {
+  font-size: 16px;
+  color: rgba(15, 32, 39, 0.7);
+  max-width: 680px;
+  margin: 0 auto 46px auto;
+}
+
+/* CARD GRID */
+.compliance-cards {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+/* SINGLE CARD */
+.compliance-card {
+  flex: 1;
+  min-width: 260px;
+  max-width: 340px;
+  background: #ffffff;
+  border-radius: 26px;
+  padding: 40px 32px 38px;
+  box-shadow:
+    0 26px 60px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ICON CIRCLE */
+.compliance-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+
+  background:
+    radial-gradient(circle at 30% 30%, #ffffff 0, #ffffff 45%, transparent 60%),
+    radial-gradient(circle at 70% 70%, #4169e1 0, #4169e1 55%, #3554c1 80%);
+  box-shadow: 0 10px 22px rgba(65, 105, 225, 0.35);
+}
+
+.compliance-icon-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* CARD TEXT */
+.compliance-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #0f2027;
+  margin-bottom: 10px;
+}
+
+.compliance-card-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(15, 32, 39, 0.72);
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .compliance-section {
+    padding: 96px 0 110px;
+  }
+
+  .compliance-title {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 575px) {
+  .compliance-title {
+    font-size: 26px;
+  }
+
+  .compliance-inner {
+    padding: 0 18px;
+  }
+
+  .compliance-cards {
+    gap: 20px;
+  }
+
+  .compliance-card {
+    padding: 32px 24px 30px;
+  }
+}

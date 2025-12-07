@@ -1,19 +1,25 @@
-import Hero from "./partials/hero/Hero";
-import WhyAicesSection from "./partials/why/WhyAicesSection";
-import StepsSection from "./partials/steps/StepsSection";
-import BlogSection from "./partials/blog/BlogSection";
-import VideoTipsSection from "./partials/video/VideoTipsSection";
-import ArticleExpand from "./partials/article/ArticleExpand";
+
+import Hero from "./partials/Hero/Hero";
+import TimeSaving from "./partials/TimeSaving/TimeSaving";
+import Integration from "./partials/Integration/Integration";
+import HowItWorks from "./partials/HowItWorks/HowItWorks";
+import ValueSection from "./partials/ValueSection/ValueSection";    
+import Feedback from "./partials/Feedback/Feedback";
+import RecruiterDesigned from "./partials/RecruiterDesigned/RecruiterDesigned";
+import Compliance from "./partials/Compliance/Compliance";
 
 export default function Homepage() {
   return (
     <>
       <Hero />
-      <WhyAicesSection />
-      <StepsSection />
-      <BlogSection />
-      <VideoTipsSection />
-      <ArticleExpand />
+      <TimeSaving />
+      <Integration />
+      <HowItWorks />
+      <ValueSection />  
+      <Feedback />
+      <RecruiterDesigned />
+      <Compliance />
+      {/* nothing */}
     </>
   );
 }

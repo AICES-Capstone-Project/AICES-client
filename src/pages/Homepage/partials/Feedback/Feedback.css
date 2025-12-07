@@ -1,0 +1,112 @@
+.fb-section {
+  width: 100%;
+  padding: 100px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.fb-title {
+  font-size: 40px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 10px;
+  color: #0f2027;
+}
+
+.fb-accent {
+  background: linear-gradient(90deg, #0f2027, #28623a);
+
+  /* MUST HAVE — bản chuẩn + bản webkit */
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  /* Fix Firefox + Safari */
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+
+.fb-subtitle {
+  font-size: 16px;
+  color: #777;
+  text-align: center;
+  max-width: 600px;
+  margin-bottom: 60px;
+}
+
+.fb-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.fb-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 36px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  /* GIẢI QUYẾT VẤN ĐỀ CARD TRỐNG */
+  min-height: 360px;
+}
+
+.fb-company {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 18px;
+  color: #0f2027;
+}
+
+.fb-quote {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #444;
+  flex-grow: 1;
+  margin-bottom: 28px;
+}
+
+.fb-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fb-avatar {
+  width: 42px;
+  height: 42px;
+  background: #28623a;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.fb-author-name {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.fb-author-role {
+  font-size: 13px;
+  color: #777;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .fb-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fb-card {
+    min-height: auto;
+  }
+}

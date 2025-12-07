@@ -1,0 +1,170 @@
+/* SECTION WRAPPER */
+.how-section {
+  width: 100%;
+  padding: 120px 0;
+  background: #ffffff;
+}
+
+/* SCROLL CONTAINER (scroll trong partial) */
+.how-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  height: 520px; /* chiều cao cố định của partial */
+  border-radius: 32px;
+  background: #ffffff;
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.06);
+
+  overflow-y: auto;
+  scroll-snap-type: y mandatory; /* snap từng step */
+}
+
+/* mỗi STEP chiếm full chiều cao container */
+.how-step {
+  display: flex;
+  align-items: center;
+  gap: 64px;
+
+  padding: 56px 40px 72px;
+  min-height: 520px;
+  scroll-snap-align: start;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.how-step:last-child {
+  border-bottom: none;
+}
+
+/* LEFT COLUMN */
+.how-step-left {
+  flex: 1.1;
+}
+
+.how-step-label {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(15, 32, 39, 0.6);
+  margin-bottom: 16px;
+}
+
+.how-step-title {
+  font-size: 36px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #0f2027;
+  margin-bottom: 24px;
+}
+
+.how-accent {
+  background: linear-gradient(90deg, #0f2027, #28623a);
+  background-clip: text;
+  -webkit-background-clip: text; /* Safari */
+  color: transparent;
+  -webkit-text-fill-color: transparent; /* Safari */
+}
+
+
+/* BULLET LIST */
+.how-step-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.how-step-list li {
+  position: relative;
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(15, 32, 39, 0.78);
+  margin-bottom: 12px;
+  padding-left: 26px;
+}
+
+.how-step-list li::before {
+  content: "✔";
+  position: absolute;
+  left: 0;
+  top: 2px;
+  font-size: 14px;
+  color: #28623a;
+}
+
+/* RIGHT COLUMN – IMAGE CARD */
+.how-step-right {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.how-image-card {
+  position: relative;
+  max-width: 540px;
+  border-radius: 26px;
+  overflow: hidden;
+  box-shadow:
+    0 26px 60px rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(255, 255, 255, 0.4),
+    0 0 28px rgba(136, 255, 210, 0.25);
+}
+
+.how-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Badge số 1 / 2 / 3 */
+.how-step-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(255, 210, 220, 0.98);
+  color: #0f2027;
+  font-weight: 600;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .how-section {
+    padding: 96px 0;
+  }
+
+  .how-inner {
+    height: 540px;
+  }
+
+  .how-step {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 32px;
+    padding: 40px 24px 60px;
+  }
+
+  .how-step-right {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .how-step-title {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 575px) {
+  .how-inner {
+    height: 520px;
+  }
+
+  .how-step-title {
+    font-size: 26px;
+  }
+}

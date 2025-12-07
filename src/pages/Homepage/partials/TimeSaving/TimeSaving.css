@@ -1,0 +1,210 @@
+/* src/pages/Homepage/partials/TimeSaving/TimeSaving.css */
+
+.time-section {
+  width: 100%;
+  padding: 140px 0 160px;
+  text-align: center;
+  background: #ffffff; /* nền trắng sạch, không dùng gradient */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* ⭐ CĂN GIỮA NGANG */
+}
+
+/* ---------- LAYER 1: SOCIAL PROOF ---------- */
+
+.time-social {
+  max-width: 900px;
+  margin: 0 auto 48px auto; /* bớt khoảng trắng dưới */
+  padding: 0 24px;
+  text-align: center;
+}
+
+.time-eyebrow {
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(15, 32, 39, 0.65);
+  margin-bottom: 18px;
+}
+
+.time-logos {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 32px;
+}
+
+.time-logo {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  color: rgba(15, 32, 39, 0.8);
+  opacity: 0.9;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.time-logo:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+/* ---------- LAYER 2: SPOTLIGHT + ICON ---------- */
+
+.time-spotlight-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 48px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.time-spotlight {
+  position: absolute;
+  inset: -160px; /* tỏa ra rộng */
+  border-radius: 50%;
+  z-index: -1;
+
+  background: radial-gradient(
+    circle,
+    rgba(40, 98, 58, 0.4) 0%, /* đậm trung tâm */
+    rgba(40, 98, 58, 0.25) 30%,
+    rgba(40, 98, 58, 0.1) 55%,
+    rgba(40, 98, 58, 0.03) 75%,
+    rgba(40, 98, 58, 0) 100%
+  );
+
+  filter: blur(55px); /* tỏa mờ cực đẹp */
+}
+
+.time-icon {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow:
+    0 20px 40px rgba(40, 98, 58, 0.35),
+    inset 0 8px 12px rgba(255, 255, 255, 0.6);
+
+  position: relative;
+  z-index: 2;
+}
+
+.time-icon-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.time-icon-glyph img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.18));
+}
+
+/* ---------- LAYER 3: COPY + CTA ---------- */
+
+.time-copy {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.time-title {
+  font-size: 42px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #0f2027;
+  margin-bottom: 18px;
+}
+
+.time-title-accent {
+  background: linear-gradient(90deg, #0f2027, #28623a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.time-title-accent-soft {
+  background: linear-gradient(90deg, #28623a, #6fd08a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.time-subtext {
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(15, 32, 39, 0.7);
+  max-width: 620px;
+  margin: 0 auto 32px auto;
+}
+
+/* CTA BUTTON – nhỏ hơn Hero, nhưng cùng palette Emerald */
+.time-cta-btn {
+  height: 44px;
+  padding: 0 28px !important;
+  border-radius: 999px !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+
+  background: linear-gradient(90deg, #0f2027, #28623a) !important;
+  border: none !important;
+  color: #ffffff !important;
+
+  box-shadow: 0 14px 34px rgba(40, 98, 58, 0.45) !important;
+  transition: all 0.22s ease !important;
+}
+
+.time-cta-btn:hover {
+  background: linear-gradient(90deg, #28623a, #3a7f50) !important;
+  box-shadow: 0 18px 42px rgba(40, 98, 58, 0.55) !important;
+  transform: translateY(-1px);
+}
+
+.time-cta-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 10px 26px rgba(40, 98, 58, 0.35) !important;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 992px) {
+  .time-section {
+    padding: 96px 0 110px;
+  }
+
+  .time-title {
+    font-size: 32px;
+  }
+
+  .time-spotlight-wrapper {
+    width: 220px;
+    height: 220px;
+    margin-bottom: 56px;
+  }
+}
+
+@media (max-width: 575px) {
+  .time-title {
+    font-size: 26px;
+  }
+
+  .time-social {
+    margin-bottom: 56px;
+  }
+
+  .time-logos {
+    gap: 20px;
+  }
+
+  .time-logo {
+    font-size: 14px;
+  }
+}

@@ -27,32 +27,21 @@ import resumeService from "../../../../services/resumeService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 
 interface Resume {
-  resumeId: number;
-  queueJobId?: string;
-  fileUrl: string;
-  status: "Completed" | "Pending" | "Failed" | string;
-  createdAt?: string;
-  candidateId?: number;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  aiScores: AiScore[];
-}
-
-interface AiScore {
-  scoreId: number;
-  totalResumeScore: number;
-  aiExplanation: string;
-  createdAt: string;
-  scoreDetails: ScoreDetail[];
-}
-
-interface ScoreDetail {
-  criteriaId: number;
-  criteriaName: string;
-  matched: number;
-  score: number;
-  aiNote: string;
+	resumeId: number;
+	fullName: string;
+	status: string;
+	totalResumeScore: number | null;
+	email?: string;
+	phoneNumber?: string;
+	fileUrl?: string;
+	aiExplanation?: string;
+	scoreDetails?: Array<{
+		criteriaId: number;
+		criteriaName: string;
+		matched: number;
+		score: number;
+		aiNote: string;
+	}>;
 }
 
 const ResumeList: React.FC = () => {
@@ -73,19 +62,33 @@ const ResumeList: React.FC = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [jobTitle, setJobTitle] = useState<string>("");
+	const [scoreFilter, setScoreFilter] = useState<{ min: number | null; max: number | null }>({ min: null, max: null });
 
 	// Ensure displayed order is always by score desc (nulls last)
 	const sortedResumes = useMemo(() => {
-		return resumes.slice().sort((a, b) => {
-			const aS = a.aiScores?.[0]?.totalResumeScore;
-			const bS = b.aiScores?.[0]?.totalResumeScore;
+		let filtered = resumes.slice();
+
+		// Apply score filter
+		if (scoreFilter.min !== null || scoreFilter.max !== null) {
+			filtered = filtered.filter((r) => {
+				const score = r.totalResumeScore;
+				if (score == null) return false;
+				if (scoreFilter.min !== null && score < scoreFilter.min) return false;
+				if (scoreFilter.max !== null && score > scoreFilter.max) return false;
+				return true;
+			});
+		}
+
+		return filtered.sort((a, b) => {
+			const aS = a.totalResumeScore;
+			const bS = b.totalResumeScore;
 			if (aS == null && bS == null) return a.resumeId - b.resumeId;
 			if (aS == null) return 1;
 			if (bS == null) return -1;
 			if (bS !== aS) return bS - aS;
 			return a.resumeId - b.resumeId;
 		});
-	}, [resumes]);
+	}, [resumes, scoreFilter]);
 
 	useEffect(() => {
 		if (jobId) {
@@ -116,51 +119,22 @@ const ResumeList: React.FC = () => {
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
 				const raw = Array.isArray(resp.data) ? resp.data : resp.data.items || [];
 				const resumeList = (Array.isArray(raw) ? raw : []) as any[];
-				
-				// Debug: log first resume to see structure
-				if (resumeList.length > 0) {
-					console.log("🔍 First resume data structure:", resumeList[0]);
-					console.log("🔍 aiScores:", resumeList[0]?.aiScores);
-					console.log("🔍 totalResumeScore:", resumeList[0]?.totalResumeScore);
-					console.log("🔍 score:", resumeList[0]?.score);
-				}
-				
-				const mapped: Resume[] = resumeList.map((r) => {
-					// Try multiple ways to get aiScores
-					let aiScores = r.aiScores ?? [];
-					
-					// If aiScores is empty but we have score data, try to construct it
-					if (aiScores.length === 0) {
-						// Check if score is directly on the object
-						if (r.totalResumeScore != null || r.score != null) {
-							const scoreValue = r.totalResumeScore ?? r.score;
-							aiScores = [{
-								scoreId: r.scoreId || 0,
-								totalResumeScore: Number(scoreValue),
-								aiExplanation: r.aiExplanation || "",
-								createdAt: r.createdAt || new Date().toISOString(),
-								scoreDetails: r.scoreDetails || [],
-							}];
-						}
-					}
-					
-					return {
-						resumeId: r.resumeId,
-						fullName: r.fullName || r.candidateName || "Unknown",
-						status: r.status || r.stage || "Processing",
-						aiScores: aiScores,
-						email: r.email,
-						phoneNumber: r.phone || r.phoneNumber,
-						fileUrl: r.fileUrl,
-						aiExplanation: r.aiExplanation,
-						scoreDetails: r.scoreDetails,
-					};
-				});
+				const mapped: Resume[] = resumeList.map((r) => ({
+					resumeId: r.resumeId,
+					fullName: r.fullName || r.candidateName || "Unknown",
+					status: r.status || r.stage || "Processing",
+					totalResumeScore: r.totalResumeScore ?? null,
+					email: r.email,
+					phoneNumber: r.phone || r.phoneNumber,
+					fileUrl: r.fileUrl,
+					aiExplanation: r.aiExplanation,
+					scoreDetails: r.scoreDetails,
+				}));
 				// Sort by totalResumeScore descending (highest first). Place null/undefined scores last.
 				// For equal scores, fallback to resumeId ascending for stable order.
 				const sortedList = mapped.slice().sort((a, b) => {
-					const aS = a.aiScores?.[0]?.totalResumeScore;
-					const bS = b.aiScores?.[0]?.totalResumeScore;
+					const aS = a.totalResumeScore;
+					const bS = b.totalResumeScore;
 					if (aS == null && bS == null) return a.resumeId - b.resumeId;
 					if (aS == null) return 1; // a should come after b
 					if (bS == null) return -1; // b should come after a
@@ -193,8 +167,8 @@ const ResumeList: React.FC = () => {
 	const scoreCounts = useMemo(() => {
 		const m = new Map<number, number>();
 		for (const r of sortedResumes) {
-			if (r.aiScores?.[0]?.totalResumeScore != null) {
-				m.set(r.aiScores[0].totalResumeScore, (m.get(r.aiScores[0].totalResumeScore) || 0) + 1);
+			if (r.totalResumeScore != null) {
+				m.set(r.totalResumeScore, (m.get(r.totalResumeScore) || 0) + 1);
 			}
 		}
 		return m;
@@ -363,53 +337,25 @@ const ResumeList: React.FC = () => {
 			),
 		},
 		{
-            title: "Score",
-            key: "score", 
-            width: 120,
-            align: "center" as const,
-            render: (_: any, record: Resume) => {
-                // Try multiple ways to get score
-                let score: number | null | undefined = null;
-                
-                // Method 1: From aiScores array
-                if (record.aiScores && Array.isArray(record.aiScores) && record.aiScores.length > 0) {
-                    score = record.aiScores[0]?.totalResumeScore;
-                }
-                
-                // Method 2: Direct score property (fallback)
-                if (score == null && (record as any).score != null) {
-                    score = (record as any).score;
-                }
-                
-                // Method 3: Direct totalResumeScore property (fallback)
-                if (score == null && (record as any).totalResumeScore != null) {
-                    score = (record as any).totalResumeScore;
-                }
-
-                if (score != null && score !== undefined && !isNaN(Number(score))) {
-                    // Làm tròn điểm số đến 1 chữ số thập phân
-                    const roundedScore = Math.round(Number(score) * 10) / 10;
-                    return (
-                        <Tag 
-                            color={roundedScore >= 70 ? "green" : roundedScore >= 40 ? "orange" : "red"}
-                            style={{ textAlign: "center" }}
-                        >
-                            {roundedScore}
-                        </Tag>
-                    );
-                }
-                
-                return (
-                    <span style={{ color: "#9ca3af", fontSize: 14 }}>—</span>
-                );
-            },
-        },
+			title: "Score",
+			dataIndex: "totalResumeScore",
+			width: 120,
+			align: "center" as const,
+			render: (score: number | null) =>
+				score != null ? (
+					<Tag color={score >= 70 ? "green" : score >= 40 ? "orange" : "red"}>
+						{score}
+					</Tag>
+				) : (
+					<span>—</span>
+				),
+		},
 		{
 			title: "Ties",
 			width: 100,
 			align: "center" as const,
 			render: (_: any, record: Resume) => {
-				const score = record.aiScores?.[0]?.totalResumeScore;
+				const score = record.totalResumeScore;
 				if (score == null || score === 0)
 					return <span style={{ color: "#9ca3af" }}>—</span>;
 				const count = scoreCounts.get(score) || 0;
@@ -486,7 +432,7 @@ const ResumeList: React.FC = () => {
 							<Button
 								type="text"
 								icon={<ReloadOutlined />}
-								style={{ color: "var(--color-primary)" }}
+								style={{ color: "#096dd9" }}
 								loading={retryingIds.includes(record.resumeId)}
 								onClick={async () => handleRetry(record.resumeId)}
 							/>
@@ -510,13 +456,45 @@ const ResumeList: React.FC = () => {
 							/>
 							<span className="font-semibold">{jobTitle || `Job #${jobId}`}</span>
 						</div>
+						<div style={{ marginBottom: 16, display: "flex", gap: 8, alignItems: "center" }}>
+							<span>Filter by score:</span>
+							<Input
+								type="number"
+								placeholder="Min"
+								style={{ width: 100 }}
+								value={scoreFilter.min ?? ""}
+								onChange={(e) => {
+									const val = e.target.value === "" ? null : Number(e.target.value);
+									setScoreFilter((prev) => ({ ...prev, min: val }));
+								}}
+							/>
+							<span>to</span>
+							<Input
+								type="number"
+								placeholder="Max"
+								style={{ width: 100 }}
+								value={scoreFilter.max ?? ""}
+								onChange={(e) => {
+									const val = e.target.value === "" ? null : Number(e.target.value);
+									setScoreFilter((prev) => ({ ...prev, max: val }));
+								}}
+							/>
+							{(scoreFilter.min !== null || scoreFilter.max !== null) && (
+								<Button
+									size="small"
+									onClick={() => setScoreFilter({ min: null, max: null })}
+								>
+									Clear
+								</Button>
+							)}
+						</div>
 						<div className="flex gap-2 items-center">
 							{/* Buttons visible only in edit mode */}
 							{editMode && (
 								<>
 									{canRetrySelected && (
 										<Button
-											className="company-btn--filled"
+											type="primary"
 											onClick={() => handleRetrySelected()}
 											disabled={!canRetrySelected || deletingMultiple}
 											style={{ marginRight: 8 }}
@@ -527,19 +505,17 @@ const ResumeList: React.FC = () => {
 
 									{selectedRowKeys.length > 0 && (
 										<Button
-											className="company-btn--danger"
 											type="primary"
 											danger
 											onClick={() => setDeleteModalOpen(true)}
 											style={{ marginRight: 8 }}
 										>
-											({selectedRowKeys.length}) Delete resumes
+											Delete resumes ({selectedRowKeys.length})
 										</Button>
 									)}
 
 									{/* Done / Exit edit mode */}
 									<Button
-										className="company-btn"
 										onClick={() => {
 											setEditMode(false);
 											setSelectedRowKeys([]);
@@ -598,41 +574,21 @@ const ResumeList: React.FC = () => {
 
 			{/* Delete selected confirmation modal requiring exact job title */}
 			<Modal
+				title={`Confirm delete ${selectedRowKeys.length} resumes`}
 				open={deleteModalOpen}
 				onCancel={() => {
 					setDeleteModalOpen(false);
 					setConfirmInput("");
 				}}
-				footer={
-					<div
-						style={{
-							display: "flex",
-							justifyContent: "space-between",
-							width: "100%",
-						}}
-					>
-						<Button
-							onClick={() => {
-								setDeleteModalOpen(false);
-								setConfirmInput("");
-							}}
-						>
-							Cancel
-						</Button>
-
-						<Button
-							className="company-btn--danger"
-							danger
-							onClick={handleDeleteSelected}
-							disabled={confirmInput !== (jobTitle || "")}
-						>
-							Delete
-						</Button>
-					</div>
-				}
+				onOk={handleDeleteSelected}
+				okButtonProps={{
+					disabled: confirmInput !== (jobTitle || "") || deletingMultiple,
+					loading: deletingMultiple,
+				}}
+				cancelButtonProps={{ disabled: deletingMultiple }}
 			>
 				<div>
-					<p style={{ textAlign: "center", fontSize: 16, marginTop: 8 }}>
+					<p>
 						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có thể gây
 						ra những bất tiện cho bạn trong quá trình sử dụng hệ thống. Vui lòng nhập
 						chính xác tiêu đề công việc{" "}
@@ -645,7 +601,6 @@ const ResumeList: React.FC = () => {
 						placeholder="Type job title here"
 					/>
 				</div>
-
 			</Modal>
 
 			<Drawer
@@ -705,24 +660,24 @@ const ResumeList: React.FC = () => {
 							<Space direction="vertical" style={{ width: "100%" }}>
 								<div>
 									<strong>Total Score:</strong>{" "}
-									{selectedResume.aiScores?.[0]?.totalResumeScore != null ? (
+									{selectedResume.totalResumeScore != null ? (
 										<Tag
 											color={
-												selectedResume.aiScores?.[0]?.totalResumeScore >= 70
+												selectedResume.totalResumeScore >= 70
 													? "green"
-													: selectedResume.aiScores?.[0]?.totalResumeScore >= 40
+													: selectedResume.totalResumeScore >= 40
 														? "orange"
 														: "red"
 											}
 											style={{ fontSize: 16, padding: "4px 12px" }}
 										>
-											{selectedResume.aiScores?.[0]?.totalResumeScore}
+											{selectedResume.totalResumeScore}
 										</Tag>
 									) : (
 										<span>—</span>
 									)}
 								</div>
-								{selectedResume.aiScores?.[0]?.aiExplanation && (
+								{selectedResume.aiExplanation && (
 									<div>
 										<strong>AI Explanation:</strong>
 										<p
@@ -733,17 +688,17 @@ const ResumeList: React.FC = () => {
 												borderRadius: 4,
 											}}
 										>
-											{selectedResume.aiScores?.[0]?.aiExplanation.replace(/\\u0027/g, "'")}
+											{selectedResume.aiExplanation.replace(/\\u0027/g, "'")}
 										</p>
 									</div>
 								)}
 							</Space>
 						</Card>
 
-						{selectedResume.aiScores?.[0]?.scoreDetails && selectedResume.aiScores[0].scoreDetails.length > 0 && (
+						{selectedResume.scoreDetails && selectedResume.scoreDetails.length > 0 && (
 							<Card size="small" title="Criteria Scores">
 								<Space direction="vertical" style={{ width: "100%" }} size="middle">
-									{selectedResume.aiScores?.[0]?.scoreDetails.map((detail) => (
+									{selectedResume.scoreDetails.map((detail) => (
 										<div
 											key={detail.criteriaId}
 											style={{

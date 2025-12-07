@@ -56,7 +56,7 @@ const Form: React.FC = () => {
 				} else navigate(APP_ROUTES.HOME);
 			} else {
 				toastError(
-					`Login failed ${res.status}`,
+					`Login failed `,
 					res.message || "Failed to login"
 				);
 			}

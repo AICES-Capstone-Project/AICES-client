@@ -6,7 +6,7 @@ export interface ApiPlan {
   name: string;
   description: string;
   price: number;
-  durationDays: number;
+  duration: string; // "Monthly", "Yearly", "Daily"
   resumeLimit: number;
   hoursLimit: number;
   createdAt: string;

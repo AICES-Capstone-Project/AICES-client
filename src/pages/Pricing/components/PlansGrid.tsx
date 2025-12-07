@@ -1,24 +1,108 @@
-import React from "react";
-import { Row, Col } from "antd";
+import React, { useRef } from "react";
+import { Carousel, Button } from "antd";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
+import type { CarouselRef } from "antd/es/carousel";
 import PlanCard from "./PlanCard";
 import type { PlanType } from "../../../types/subscription.types";
 
 type Props = {
   plans: PlanType[];
+  currentSubscriptionName?: string | null;
 };
 
-const PlansGrid: React.FC<Props> = ({ plans }) => {
+const PlansGrid: React.FC<Props> = ({ plans, currentSubscriptionName }) => {
+  const carouselRef = useRef<CarouselRef>(null);
   const featuredIndex = Math.floor(plans.length / 2);
 
+  const handlePrev = () => {
+    carouselRef.current?.prev();
+  };
+
+  const handleNext = () => {
+    carouselRef.current?.next();
+  };
+
   return (
-    <div style={{ padding: "10px 20px" }}>
-      <Row gutter={[32, 32]} justify="center" align="stretch">
+    <div style={{ position: "relative", padding: "10px 60px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", position: "relative" }}>
+        <Button
+          type="text"
+          icon={<LeftOutlined />}
+          onClick={handlePrev}
+          style={{
+            position: "absolute",
+            left: -20,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            background: "white",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        />
+
+        <Carousel
+          ref={carouselRef}
+          dots={true}
+          slidesToShow={3}
+          slidesToScroll={1}
+          infinite={true}
+          className="pricing-carousel"
+          responsive={[
+            {
+              breakpoint: 1024,
+              settings: {
+                slidesToShow: 2,
+              },
+            },
+            {
+              breakpoint: 768,
+              settings: {
+                slidesToShow: 1,
+              },
+            },
+          ]}
+          style={{ width: "100%" }}
+        >
         {plans.map((plan, idx) => (
-          <Col xs={24} sm={12} md={8} lg={6} key={plan.title} style={{ display: "flex" }}>
-            <PlanCard plan={plan} featured={idx === featuredIndex} />
-          </Col>
+          <div key={plan.title} style={{ padding: "0 10px", display: "flex", justifyContent: "center" }}>
+            <div style={{ width: 350, maxWidth: "100%" }}>
+              <PlanCard 
+                plan={plan} 
+                featured={idx === featuredIndex} 
+                isCurrentPlan={plan.title === currentSubscriptionName}
+              />
+            </div>
+          </div>
         ))}
-      </Row>
+        </Carousel>
+
+        <Button
+          type="text"
+          icon={<RightOutlined />}
+          onClick={handleNext}
+          style={{
+            position: "absolute",
+            right: -20,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 10,
+            width: 40,
+            height: 40,
+            borderRadius: "50%",
+            background: "white",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        />
+      </div>
     </div>
   );
 };

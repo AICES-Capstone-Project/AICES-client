@@ -59,14 +59,14 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
         console.log("📦 Full Categories API response:", JSON.stringify(catsResp, null, 2));
         console.log("📊 Categories data field:", catsResp?.data);
         console.log("📋 Type of data:", typeof catsResp?.data, Array.isArray(catsResp?.data));
-        
+
         const [skillsResp, empResp] = await Promise.all([
           systemService.getSkills(),
           systemService.getEmploymentTypes(),
         ]);
-        
+
         if (!mounted) return;
-        
+
         // Extract categories array from response
         let categoriesData: any[] = [];
         if (catsResp?.data) {
@@ -78,7 +78,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
         }
         console.log("✅ Final extracted categories:", categoriesData);
         console.log("📝 Categories count:", categoriesData.length);
-        
+
         setCategories(categoriesData);
         setSkills(skillsResp?.data || []);
         setEmploymentTypes(empResp?.data || []);
@@ -186,32 +186,48 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
           <InputNumber min={1} style={{ width: "100%" }} placeholder="Number of positions" />
         </Form.Item>
 
-        <Form.Item name="categoryId" label="Category" rules={[{ required: true, message: "Please select a category" }]}>
-          <Select
-            placeholder={loadingCats ? "Loading categories..." : "Select category"}
-            loading={loadingCats}
-            allowClear
-            onChange={(v) => handleCategoryChange(Number(v))}
-            options={categories.map((c: any) => ({
-              label: c.name,
-              value: c.categoryId,
-            }))}
-          />
-        </Form.Item>
+        <div style={{ display: "flex", gap: "16px" }}>
+          <Form.Item
+            name="categoryId"
+            label="Category"
+            style={{ width: "50%" }}
+            rules={[{ required: true, message: "Please select a category" }]}
+          >
+            <Select
+              placeholder={loadingCats ? "Loading categories..." : "Select category"}
+              loading={loadingCats}
+              allowClear
+              onChange={(v) => handleCategoryChange(Number(v))}
+              options={categories.map((c: any) => ({
+                label: c.name,
+                value: c.categoryId,
+              }))}
+            />
+          </Form.Item>
 
-        <Form.Item name="specializationId" label="Specialization" rules={[{ required: true, message: "Please select a specialization" }]}>
-          <Select
-            placeholder={loadingSpecs ? "Loading specializations..." : "Select specialization"}
-            loading={loadingSpecs}
-            allowClear
-            options={specializations.map((s: any) => ({ label: s.name, value: s.specializationId }))}
-          />
-        </Form.Item>
+          <Form.Item
+            name="specializationId"
+            label="Specialization"
+            style={{ width: "50%" }}
+            rules={[{ required: true, message: "Please select a specialization" }]}
+          >
+            <Select
+              placeholder={loadingSpecs ? "Loading specializations..." : "Select specialization"}
+              loading={loadingSpecs}
+              allowClear
+              options={specializations.map((s: any) => ({
+                label: s.name,
+                value: s.specializationId,
+              }))}
+            />
+          </Form.Item>
+        </div>
+
 
         <Form.Item name="criteria" label="Criteria">
           <Form.List
             name="criteria"
-            initialValue={[{ name: "", weight: 0 }]}
+            initialValue={[{ name: "", weight: "" }]}
           >
             {(fields, { add, remove }) => (
               <>
@@ -249,7 +265,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
                           min={0}
                           max={1}
                           step={0.1}
-                          placeholder="Weight"
+                          placeholder="Criteria weight"
                           style={{ width: "100%" }}
                         />
                       </Form.Item>
@@ -283,16 +299,6 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
                     </div>
                   );
                 })}
-                <Form.Item noStyle dependencies={["criteria"]}>
-                  {() => {
-                    const criteria = form.getFieldValue("criteria") || [];
-                    const total = (criteria || []).reduce((acc: number, c: any) => acc + Number(c?.weight || 0), 0);
-                    if ((criteria?.length || 0) > 0 && Math.abs(total - 1) > 1e-6) {
-                      return <div style={{ color: "red", marginTop: 4 }}>Total weight must equal 1</div>;
-                    }
-                    return null;
-                  }}
-                </Form.Item>
                 <div style={{ marginTop: 6, color: "rgba(0,0,0,0.45)", fontSize: 12 }}>
                   At least 2 criteria required; weights must sum to 1.
                 </div>

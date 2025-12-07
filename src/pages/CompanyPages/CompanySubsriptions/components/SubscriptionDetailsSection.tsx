@@ -13,31 +13,16 @@ interface SubscriptionDetailsSectionProps {
 const SubscriptionDetailsSection: React.FC<SubscriptionDetailsSectionProps> = ({
   startDate,
   endDate,
-  price,
   onCancel,
   cancelling,
 }) => {
   return (
     <div
       style={{
-        background: "#f9fafb",
-        padding: "24px",
         borderRadius: 12,
-        marginBottom: 24,
       }}
     >
-      <h3
-        style={{
-          margin: "0 0 24px 0",
-          fontSize: 16,
-          fontWeight: 600,
-          color: "#374151",
-          textAlign: 'center',
-        }}
-      >
-        Subscription Details
-      </h3>
-      <div style={{ background: "#fff", padding: 12, borderRadius: 8 }}>
+      <div style={{ background: "#f8f8f8ff", padding: 12, borderRadius: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap', justifyContent: 'center' }}>
           <div style={{ flex: '1 1 220px', padding: '12px 16px', borderRight: '1px solid rgba(15,23,36,0.06)' }}>
             <div style={{ color: '#6b7280', fontWeight: 500, fontSize: 13 }}>Start Date</div>
@@ -58,15 +43,6 @@ const SubscriptionDetailsSection: React.FC<SubscriptionDetailsSectionProps> = ({
                 month: 'long',
                 day: 'numeric',
               })}
-            </div>
-          </div>
-
-          <div style={{ flex: '1 1 220px', padding: '12px 16px', borderRight: '1px solid rgba(15,23,36,0.06)'}}>
-            <div style={{ color: '#6b7280', fontWeight: 500, fontSize: 13 }}>Total Price</div>
-            <div style={{ color: 'var(--color-primary-dark)', fontWeight: 700, fontSize: 16, marginTop: 6 }}>
-              {price === 0
-                ? 'Free'
-                : `$${(price / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
             </div>
           </div>
 

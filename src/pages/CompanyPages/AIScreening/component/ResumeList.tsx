@@ -256,7 +256,7 @@ const ResumeList: React.FC = () => {
 			fullName: string;
 			totalResumeScore?: number | null;
 			timestamp: string;
-			data?: any;
+			data?: unknown;
 		}) => {
 			console.log("📨 ResumeUpdated received in handler:", data);
 			console.log("📨 Current jobId from params:", jobId);
@@ -375,7 +375,7 @@ const ResumeList: React.FC = () => {
 			// Reload the entire list when list changes
 			loadResumes();
 		},
-		[loadResumes, jobId]
+		[loadResumes] // jobId not needed as loadResumes already depends on it
 	);
 
 	// Connect to SignalR ResumeHub
@@ -417,7 +417,56 @@ const ResumeList: React.FC = () => {
 			const resp = await resumeService.getById(Number(jobId), resumeId);
 			console.debug("[ResumeList] resumeService.getById response", resp);
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
-				setSelectedResume(resp.data as any as Resume);
+				const data = resp.data as unknown as {
+					resumeId: number;
+					fullName: string;
+					email?: string;
+					phoneNumber?: string;
+					status: string;
+					fileUrl?: string;
+					aiScores?: Array<{
+						scoreId?: number;
+						totalResumeScore: number;
+						aiExplanation?: string;
+						createdAt?: string;
+						scoreDetails?: Array<{
+							criteriaId: number;
+							criteriaName: string;
+							matched: number;
+							score: number;
+							aiNote: string;
+						}>;
+					}>;
+				};
+
+				// Map response to Resume interface
+				// Extract data from aiScores[0] if available
+				const latestScore =
+					data.aiScores && data.aiScores.length > 0
+						? data.aiScores[data.aiScores.length - 1] // Get the latest score
+						: null;
+
+				const mappedResume: Resume = {
+					resumeId: data.resumeId,
+					fullName: data.fullName,
+					status: data.status,
+					totalResumeScore: latestScore?.totalResumeScore ?? null,
+					email: data.email,
+					phoneNumber: data.phoneNumber,
+					fileUrl: data.fileUrl,
+					aiExplanation: latestScore?.aiExplanation,
+					scoreDetails: latestScore?.scoreDetails,
+					aiScores: data.aiScores?.map((score) => ({
+						scoreId: score.scoreId || 0,
+						totalResumeScore: score.totalResumeScore,
+						aiExplanation: score.aiExplanation,
+						createdAt: score.createdAt,
+						scoreDetails: score.scoreDetails,
+					})), // Map to match interface structure
+				};
+
+				console.debug("[ResumeList] Mapped resume detail:", mappedResume);
+				setSelectedResume(mappedResume);
 			} else {
 				message.error(resp?.message || "Unable to load resume details");
 			}
@@ -534,7 +583,7 @@ const ResumeList: React.FC = () => {
 			} else {
 				toastError("Upload failed", resp?.message);
 			}
-		} catch (e: any) {
+		} catch (e: unknown) {
 			console.error("Upload error:", e);
 			const errorMessage = e instanceof Error ? e.message : "Unknown error";
 			toastError("Upload failed", errorMessage);
@@ -549,7 +598,7 @@ const ResumeList: React.FC = () => {
 			title: "No",
 			width: 80,
 			align: "center" as const,
-			render: (_: any, __: any, index: number) =>
+			render: (_: unknown, __: unknown, index: number) =>
 				(currentPage - 1) * pageSize + index + 1,
 		},
 		{
@@ -595,7 +644,7 @@ const ResumeList: React.FC = () => {
 			title: "Ties",
 			width: 100,
 			align: "center" as const,
-			render: (_: any, record: Resume) => {
+			render: (_: unknown, record: Resume) => {
 				const score = record.totalResumeScore;
 				if (score == null || score === 0)
 					return <span style={{ color: "#9ca3af" }}>—</span>;

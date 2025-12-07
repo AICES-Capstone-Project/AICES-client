@@ -287,6 +287,27 @@ const JobManagement = () => {
     fetchCategories(); 
   }, []);
 
+  // Polling fallback for realtime updates (refresh jobs and pending jobs periodically)
+  useEffect(() => {
+    if (!isHrManager) return; // only poll for HR managers who care about pending
+    let mounted = true;
+    const intervalMs = 10000; // 10 seconds
+    const id = setInterval(async () => {
+      if (!mounted) return;
+      try {
+        await fetchPendingJobs();
+        await fetchJobs();
+      } catch (e) {
+        // ignore polling errors
+      }
+    }, intervalMs);
+
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, [isHrManager]);
+
   // Filter Logic
   useEffect(() => {
     let result = [...jobs];

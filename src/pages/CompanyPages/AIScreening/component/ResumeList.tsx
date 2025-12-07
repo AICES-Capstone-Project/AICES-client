@@ -7,31 +7,25 @@ import React, {
 } from "react";
 import {
 	Card,
-	Table,
 	Tag,
 	Button,
 	Drawer,
 	Space,
-	Upload,
 	message,
-	Popover,
 	Modal,
 	Input,
-	Tooltip,
 } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
 import {
 	ArrowLeftOutlined,
-	InboxOutlined,
-	TeamOutlined,
-	EyeOutlined,
-	EditOutlined,
-	ReloadOutlined,
+	SearchOutlined,
 } from "@ant-design/icons";
-import type { ColumnsType } from "antd/es/table";
 import resumeService from "../../../../services/resumeService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
 import { useResumeSignalR } from "../../../../hooks/useResumeSignalR";
+import ScoreFilter from "./ScoreFilter";
+import ResumeTable from "./ResumeTable";
+import UploadDrawer from "./UploadDrawer";
 
 interface Resume {
 	resumeId: number;
@@ -83,6 +77,8 @@ const ResumeList: React.FC = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [jobTitle, setJobTitle] = useState<string>("");
+	const [targetQuantity, setTargetQuantity] = useState<number | undefined>(undefined);
+	const [searchText, setSearchText] = useState<string>("");
 	const [scoreFilter, setScoreFilter] = useState<{
 		min: number | null;
 		max: number | null;
@@ -92,6 +88,21 @@ const ResumeList: React.FC = () => {
 	// Ensure displayed order is always by score desc (nulls last)
 	const sortedResumes = useMemo(() => {
 		let filtered = resumes.slice();
+
+		// Apply search filter
+		if (searchText.trim()) {
+			const searchLower = searchText.toLowerCase().trim();
+			filtered = filtered.filter((r) => {
+				const fullName = (r.fullName || "").toLowerCase();
+				const email = (r.email || "").toLowerCase();
+				const phone = (r.phoneNumber || "").toLowerCase();
+				return (
+					fullName.includes(searchLower) ||
+					email.includes(searchLower) ||
+					phone.includes(searchLower)
+				);
+			});
+		}
 
 		// Apply score filter
 		if (scoreFilter.min !== null || scoreFilter.max !== null) {
@@ -113,7 +124,7 @@ const ResumeList: React.FC = () => {
 			if (bS !== aS) return bS - aS;
 			return a.resumeId - b.resumeId;
 		});
-	}, [resumes, scoreFilter]);
+	}, [resumes, scoreFilter, searchText]);
 
 	const loadJobInfo = useCallback(async () => {
 		if (!jobId) return;
@@ -122,6 +133,7 @@ const ResumeList: React.FC = () => {
 			const resp = await jobService.getJobById(Number(jobId));
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
 				setJobTitle(resp.data.title || "");
+				setTargetQuantity(resp.data.targetQuantity);
 			}
 		} catch (e) {
 			console.error("Failed to load job info:", e);
@@ -593,150 +605,6 @@ const ResumeList: React.FC = () => {
 		return false;
 	};
 
-	const columns: ColumnsType<Resume> = [
-		{
-			title: "No",
-			width: 80,
-			align: "center" as const,
-			render: (_: unknown, __: unknown, index: number) =>
-				(currentPage - 1) * pageSize + index + 1,
-		},
-		{
-			title: "Full Name",
-			dataIndex: "fullName",
-			align: "center" as const,
-			render: (text: string) => <strong>{text || "Unknown"}</strong>,
-		},
-		{
-			title: "Screening Status",
-			dataIndex: "status",
-			align: "center" as const,
-			width: 150,
-			render: (status: string) => (
-				<Tag
-					color={
-						status === "Completed"
-							? "green"
-							: status === "Pending"
-							? "blue"
-							: "default"
-					}
-				>
-					{status || "Processing"}
-				</Tag>
-			),
-		},
-		{
-			title: "Score",
-			dataIndex: "totalResumeScore",
-			width: 120,
-			align: "center" as const,
-			render: (score: number | null) =>
-				score != null ? (
-					<Tag color={score >= 70 ? "green" : score >= 40 ? "orange" : "red"}>
-						{score}
-					</Tag>
-				) : (
-					<span>—</span>
-				),
-		},
-		{
-			title: "Ties",
-			width: 100,
-			align: "center" as const,
-			render: (_: unknown, record: Resume) => {
-				const score = record.totalResumeScore;
-				if (score == null || score === 0)
-					return <span style={{ color: "#9ca3af" }}>—</span>;
-				const count = scoreCounts.get(score) || 0;
-				if (count <= 1) return <span style={{ color: "#9ca3af" }}>—</span>;
-				const content = (
-					<div style={{ maxWidth: 290 }}>
-						<div>There are {count} candidates with the same score.</div>
-					</div>
-				);
-
-				// choose tag color based on number of ties
-				let bgColor = "var(--color-primary-light)";
-				let textColor = "#fff";
-				if (count < 5) {
-					bgColor = "#f472b6"; // pink
-					textColor = "#fff";
-				} else if (count < 10) {
-					bgColor = "#f59e0b"; // amber/yellow
-					textColor = "#000";
-				} else {
-					bgColor = "#ef4444"; // red
-					textColor = "#fff";
-				}
-
-				return (
-					<Popover content={content} trigger={["hover"]}>
-						<Tag
-							style={{
-								cursor: "pointer",
-								backgroundColor: bgColor,
-								color: textColor,
-							}}
-							onClick={() =>
-								navigate(
-									`/company/ai-screening/compare?jobId=${jobId}&score=${score}`
-								)
-							}
-						>
-							{count}{" "}
-							<TeamOutlined style={{ marginLeft: 6, color: textColor }} />
-						</Tag>
-					</Popover>
-				);
-			},
-		},
-		{
-			title: "Actions",
-			key: "actions",
-			width: 120,
-			align: "center" as const,
-			render: (_, record) => (
-				<Space size="middle">
-					<Button
-						type="text"
-						icon={<EyeOutlined />}
-						aria-label="View detail"
-						onClick={async () => {
-							setDrawerOpen(true);
-							await loadResumeDetail(record.resumeId);
-						}}
-					/>
-					{/* Always show edit icon — clicking enters edit mode */}
-					<Tooltip title="Enter edit mode (select resumes)">
-						<Button
-							type="text"
-							icon={<EditOutlined />}
-							style={{ color: "#096dd9" }}
-							onClick={() => {
-								// enter edit mode; keep existing selection if any
-								setEditMode(true);
-							}}
-						/>
-					</Tooltip>
-
-					{/* Per-row retry button (optional) - show only for Failed */}
-					{String(record.status) === "Failed" && (
-						<Tooltip title="Retry processing">
-							<Button
-								type="text"
-								icon={<ReloadOutlined />}
-								style={{ color: "#096dd9" }}
-								loading={retryingIds.includes(record.resumeId)}
-								onClick={async () => handleRetry(record.resumeId)}
-							/>
-						</Tooltip>
-					)}
-				</Space>
-			),
-		},
-	];
-
 	return (
 		<>
 			<Card
@@ -752,50 +620,23 @@ const ResumeList: React.FC = () => {
 								{jobTitle || `Job #${jobId}`}
 							</span>
 						</div>
-						<div
-							style={{
-								marginBottom: 16,
-								display: "flex",
-								gap: 8,
-								alignItems: "center",
-							}}
-						>
-							<span>Filter by score:</span>
-							<Input
-								type="number"
-								placeholder="Min"
-								style={{ width: 100 }}
-								value={scoreFilter.min ?? ""}
-								onChange={(e) => {
-									const val =
-										e.target.value === "" ? null : Number(e.target.value);
-									setScoreFilter((prev) => ({ ...prev, min: val }));
-								}}
-							/>
-							<span>to</span>
-							<Input
-								type="number"
-								placeholder="Max"
-								style={{ width: 100 }}
-								value={scoreFilter.max ?? ""}
-								onChange={(e) => {
-									const val =
-										e.target.value === "" ? null : Number(e.target.value);
-									setScoreFilter((prev) => ({ ...prev, max: val }));
-								}}
-							/>
-							{(scoreFilter.min !== null || scoreFilter.max !== null) && (
-								<Button
-									size="small"
-									onClick={() => setScoreFilter({ min: null, max: null })}
-								>
-									Clear
-								</Button>
-							)}
-						</div>
-						<div className="flex gap-2 items-center">
-							{/* Buttons visible only in edit mode */}
-							{editMode && (
+					<div className="flex gap-3 items-center">
+						<Input
+							placeholder="Search by name, email, or phone"
+							prefix={<SearchOutlined />}
+							value={searchText}
+							onChange={(e) => setSearchText(e.target.value)}
+							allowClear
+							style={{ width: 280 }}
+						/>
+						<ScoreFilter
+							scoreFilter={scoreFilter}
+							onFilterChange={setScoreFilter}
+						/>
+					</div>
+					<div className="flex gap-2 items-center">
+						{/* Buttons visible only in edit mode */}
+						{editMode && (
 								<>
 									{canRetrySelected && (
 										<Button
@@ -847,37 +688,30 @@ const ResumeList: React.FC = () => {
 					borderRadius: 12,
 				}}
 			>
-				<Table
-					rowKey="resumeId"
+				<ResumeTable
 					loading={loading}
 					dataSource={sortedResumes}
-					rowSelection={
-						editMode
-							? {
-									selectedRowKeys,
-									onChange: (keys) => setSelectedRowKeys(keys),
-									type: "checkbox",
-							  }
-							: undefined
-					}
-					columns={columns}
-					scroll={{ y: "67vh" }}
-					pagination={{
-						current: currentPage,
-						pageSize: pageSize,
-						total: resumes.length,
-						showSizeChanger: true,
-						showTotal: (total) => `Total ${total} resumes`,
-						pageSizeOptions: ["10", "20", "50", "100"],
-						onChange: (page, size) => {
-							setCurrentPage(page);
-							setPageSize(size);
-						},
+					editMode={editMode}
+					selectedRowKeys={selectedRowKeys}
+					onSelectedRowKeysChange={setSelectedRowKeys}
+					currentPage={currentPage}
+					pageSize={pageSize}
+					onPageChange={(page, size) => {
+						setCurrentPage(page);
+						setPageSize(size);
 					}}
-				/>
-			</Card>
-
-			{/* Delete selected confirmation modal requiring exact job title */}
+					onViewDetail={async (resumeId) => {
+						setDrawerOpen(true);
+						await loadResumeDetail(resumeId);
+					}}
+					onEnterEditMode={() => setEditMode(true)}
+					onRetry={handleRetry}
+					retryingIds={retryingIds}
+				scoreCounts={scoreCounts}
+				jobId={jobId}
+				targetQuantity={targetQuantity}
+			/>
+		</Card>			{/* Delete selected confirmation modal requiring exact job title */}
 			<Modal
 				title={`Confirm delete ${selectedRowKeys.length} resumes`}
 				open={deleteModalOpen}
@@ -1059,31 +893,14 @@ const ResumeList: React.FC = () => {
 				)}
 			</Drawer>
 
-			<Drawer
-				title={`Upload CV - ${jobTitle || `Job #${jobId}`}`}
-				width={500}
-				onClose={() => setUploadDrawerOpen(false)}
+			<UploadDrawer
 				open={uploadDrawerOpen}
-				destroyOnClose
-			>
-				<Upload.Dragger
-					multiple
-					beforeUpload={handleUpload}
-					accept=".pdf,.doc,.docx"
-					disabled={uploading}
-					showUploadList={false}
-					style={{ padding: 12 }}
-				>
-					<p className="ant-upload-drag-icon">
-						<InboxOutlined />
-					</p>
-					<p className="ant-upload-text">Click or drag CV files here</p>
-					<p className="ant-upload-hint">
-						Supports PDF / DOC / DOCX. The AI system will automatically analyze
-						and evaluate resumes.
-					</p>
-				</Upload.Dragger>
-			</Drawer>
+				onClose={() => setUploadDrawerOpen(false)}
+				jobTitle={jobTitle}
+				jobId={jobId!}
+				onUpload={handleUpload}
+				uploading={uploading}
+			/>
 		</>
 	);
 };

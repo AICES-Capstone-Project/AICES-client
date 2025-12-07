@@ -139,15 +139,17 @@ const CompanySubscription: React.FC = () => {
 						subscriptionName={currentSubscription.subscriptionName}
 						resumeLimit={currentSubscription.resumeLimit}
 						hoursLimit={currentSubscription.hoursLimit}
-						duration={currentSubscription.duration}
+            description={currentSubscription.description}
 					/>
-					<SubscriptionDetailsSection
-						startDate={currentSubscription.startDate}
-						endDate={currentSubscription.endDate}
-						price={currentSubscription.price}
-						onCancel={handleCancelSubscription}
-						cancelling={cancelling}
-					/>
+					{currentSubscription.subscriptionName?.toLowerCase() !== "free" && (
+						<SubscriptionDetailsSection
+							startDate={currentSubscription.startDate}
+							endDate={currentSubscription.endDate}
+							price={currentSubscription.price}
+							onCancel={handleCancelSubscription}
+							cancelling={cancelling}
+						/>
+					)}
 				</div>
 			) : (
 				<div

@@ -9,6 +9,7 @@ export interface CompanyJob {
   slug?: string;
   requirements?: string;
   createdAt: string;
+  targetQuantity?: number;
   categoryName?: string | null;
   specializationName?: string | null;
   employmentTypes?: any[];

@@ -1,245 +1,298 @@
-/* src/pages/Homepage/partials/hero/hero.css */
+/* src/pages/Homepage/partials/Hero/Hero.css */
 
-/* ================= HERO WRAPPER ================= */
-
-.hero-wrapper {
+/* SECTION BACKGROUND – giống style Brainner hơn */
+.hero-section {
   width: 100%;
-  min-height: 880px;
-  /* Emerald Depth background thay cho đỏ/đen */
+  padding: 120px 0 160px;
+
   background:
-    radial-gradient(circle at center, #143831 0%, #0F2027 40%, #05090b 85%);
-  padding-top: 80px;
-  text-align: center;
-  color: white;
+
+    /* ⭐ Lớp trắng phía trên (để top sáng hơn) */
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      rgba(255, 255, 255, 0.75) 12%,
+      rgba(255, 255, 255, 0) 22%
+    ),
+
+/* Emerald bên trái – nhẹ hơn */
+radial-gradient(
+  60% 60% at 20% 0%,
+  rgba(18, 118, 37, 0.25) 0%,
+  rgba(18, 118, 37, 0.25) 25%,
+  rgba(15, 32, 39, 0) 70%
+),
+
+/* Emerald bên phải – nhẹ hơn */
+radial-gradient(
+  60% 60% at 80% 0%,
+  rgba(18, 118, 37, 0.25) 0%,
+  rgba(18, 118, 37, 0.25) 25%,
+  rgba(0, 111, 35, 0) 70%
+),
+
+
+
+    /* Base nhạt */
+    linear-gradient(
+      180deg,
+      #f9faff 0%,
+      #ffffff 60%
+    );
+
+  position: relative;
+  overflow: hidden;
 }
 
-/* ================= TITLE & SUBTEXT ================= */
+
+
+/* Các blob cũ – làm nhẹ lại cho giống nền mờ Brainner */
+.hero-bg-blob {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+.hero-bg-blob-left {
+  top: -160px;
+  left: -140px;
+  background: radial-gradient(circle, #c6c0ff, transparent 70%);
+  filter: blur(70px);
+}
+
+.hero-bg-blob-right {
+  top: -130px;
+  right: -150px;
+  background: radial-gradient(circle, #c8ecff, transparent 70%);
+  filter: blur(80px);
+}
+
+/* CONTENT TEXT */
+.hero-content {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
 
 .hero-title {
   font-size: 48px;
-  font-weight: 800;
-  line-height: 1.3;
+  font-weight: 700;
+  line-height: 1.2;
+  color: #0F2027; /* xanh đậm sang trọng */
+  margin-bottom: 20px;
 }
 
-/* "CV IT" highlight – đổi sang gradient Emerald */
-.highlight {
-  background: linear-gradient(90deg, #0F2027, #28623A);
-  -webkit-background-clip: text;
-  color: transparent;
+
+.hero-title-accent {
+  background: linear-gradient(90deg, #0f2027, #28623a);
+
+  /* Bắt buộc phải có đủ 4 dòng để không cảnh báo */
+  background-clip: text;                 /* chuẩn */
+  -webkit-background-clip: text;         /* Chrome / Safari */
+  
+  color: transparent;                    /* Firefox */
+  -webkit-text-fill-color: transparent;  /* Safari */
 }
 
-/* "AICES" highlight – cũng Emerald nhưng đảo chiều nhẹ cho đẹp */
-.aices {
-  background: linear-gradient(90deg, #28623A, #0F2027);
-  -webkit-background-clip: text;
-  color: transparent;
-}
+
 
 .hero-subtext {
-  margin-top: 16px;
-  font-size: 16px;
-  opacity: 0.85;
-  max-width: 650px;
-  margin-left: auto;
-  margin-right: auto;
+  font-size: 18px;
+  color: rgba(40, 98, 58, 0.75); /* xanh lá nhạt, vẫn readable */
+  max-width: 620px;
+  margin: 0 auto 32px auto;
 }
 
-/* ================= CTA BUTTONS ================= */
 
-.hero-buttons {
-  margin-top: 28px;
-  display: flex;
-  justify-content: center;
-  gap: 20px;
+/* CTA BUTTON */
+.hero-cta-btn {
+  height: 48px;
+  padding: 0 30px !important;
+  border-radius: 14px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 10px;
+
+  /* MÀU CHÍNH — Xanh Emerald */
+  background: linear-gradient(90deg, #0F2027, #28623A) !important;
+  border: none !important;
+  color: #ffffff !important;
+
+  /* Đổ bóng xanh lá */
+  box-shadow: 0 16px 40px rgba(40, 98, 58, 0.45) !important;
+
+  transition: all 0.25s ease !important;
 }
 
-/* Primary = Emerald gradient */
-.btn-primary {
-  background: linear-gradient(135deg, #0F2027, #28623A);
-  border: none;
-  padding: 14px 32px;
-  border-radius: 6px;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    opacity 0.2s ease;
-  box-shadow: 0 8px 22px rgba(40, 98, 58, 0.45);
-}
-
-.btn-primary:hover {
-  opacity: 0.95;
+/* Hover: sáng hơn và nổi khối hơn */
+.hero-cta-btn:hover {
+  background: linear-gradient(90deg, #28623A, #3A7F50) !important;
+  box-shadow: 0 20px 50px rgba(40, 98, 58, 0.55) !important;
   transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(40, 98, 58, 0.6);
 }
 
-/* Secondary = viền Emerald, nền trong suốt */
-.btn-secondary {
-  border: 1px solid #28623A;
-  background: transparent;
-  padding: 14px 32px;
-  border-radius: 6px;
-  color: #E9F5EC;
-  font-size: 16px;
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
+/* Active: nhấn xuống */
+.hero-cta-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 12px 30px rgba(40, 98, 58, 0.35) !important;
 }
 
-.btn-secondary:hover {
-  background: rgba(40, 98, 58, 0.18);
-  box-shadow: 0 8px 22px rgba(15, 32, 39, 0.65);
-}
 
-/* ================= CV SLIDER (3D / STACKED CARDS) ================= */
 
-.cv-slider {
-  position: relative;
+/* MOCKUP ZONE */
+.hero-mockups {
   margin-top: 80px;
-  height: 460px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  perspective: 1400px; /* tạo hiệu ứng 3D */
-}
-
-.cv-slider-wrapper {
   position: relative;
-  width: 720px;
-  height: 440px;
-  transform-style: preserve-3d;
-}
-
-/* ----- CARD BASE ----- */
-/* card base – nhỏ lại để không phóng quá ảnh gốc */
-.slider-item {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  width: 240px;
-  height: 340px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-  transform-origin: center bottom;
-  transform: translateX(-50%) scale(0.6);
-  opacity: 0;
-  transition:
-    transform 0.35s ease,
-    opacity 0.25s ease,
-    box-shadow 0.25s ease;
-  cursor: pointer;
-  pointer-events: none;
-}
-
-.slider-item img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;        /* giữ đúng tỷ lệ ảnh */
-  background: #00000010;      /* thêm nền nhẹ để đẹp */
-  padding: 6px;               /* tránh mép bị cắt */
-  border-radius: 12px;
-}
-
-/* Active = ở giữa, to & rõ nhất – KHÔNG scale quá 1 */
-.slider-item--active {
-  transform: translateX(-50%) translateZ(0) scale(1);
-  opacity: 1;
-  z-index: 3;
-  pointer-events: auto;
-}
-
-/* Prev = trái */
-.slider-item--prev {
-  transform: translateX(-150%) translateZ(-60px) scale(0.85) rotateY(18deg);
-  opacity: 0.65;
-  z-index: 2;
-  pointer-events: auto;
-}
-
-/* Next = phải */
-.slider-item--next {
-  transform: translateX(50%) translateZ(-60px) scale(0.85) rotateY(-18deg);
-  opacity: 0.65;
-  z-index: 2;
-  pointer-events: auto;
-}
-
-/* hover: nhích nhẹ, không đổi màu brand */
-.slider-item--active:hover,
-.slider-item--prev:hover,
-.slider-item--next:hover {
-  opacity: 1;
-  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.75);
-  z-index: 5;
-}
-
-/* ================= NAVIGATION ARROWS ================= */
-
-.slider-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 46px;
-  height: 46px;
-  border-radius: 999px;
-  border: none;
-  /* đổi sang Emerald glass */
-  background: rgba(40, 98, 58, 0.95);
-  color: #ffffff;
-  font-size: 24px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-  transition:
-    transform 0.18s ease,
-    box-shadow 0.18s ease,
-    background 0.18s ease;
+  align-items: flex-start;
+  gap: 40px;
 }
 
-.slider-arrow--left {
-  left: calc(50% - 420px);
-}
-
-.slider-arrow--right {
-  right: calc(50% - 420px);
-}
-
-.slider-arrow:hover {
-  transform: translateY(-50%) scale(1.06);
-  background: #28623A;
-  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
-}
-
-/* ================= DOTS ================= */
-
-.slider-dots {
+/* Nền mờ phía sau (block lớn nhạt dưới mockups) */
+.hero-mockups::before {
+  content: "";
   position: absolute;
-  bottom: 10px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
+  width: 980px;
+  height: 260px;
+  border-radius: 32px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(247, 247, 255, 0.75)
+  );
+  filter: blur(6px);
+  z-index: 0;
+}
+
+/* Ảnh lớn bên trái */
+.hero-mockup-main {
+  position: relative;
+  width: 720px;
+  max-width: 100%;
+  border-radius: 26px;
+  z-index: 1;
+}
+
+/* Base chung cho tất cả mockup – cho phép vẽ layer hiệu ứng */
+.hero-mockup-main,
+.hero-mockup-small {
+  position: relative;
+  display: block;
+  border-radius: 24px;          /* bo cong mềm hơn xíu */
+  overflow: hidden;             /* để inner shadow không tràn ra ngoài */
+
+  /* ⭐ Viền mỏng + glow nhẹ + shadow dưới chân */
+  box-shadow:
+    0 26px 60px rgba(0, 0, 0, 0.22),        /* drop shadow chính */
+    0 0 0 1px rgba(255, 255, 255, 0.40),    /* stroke ngoài rất mỏng */
+    0 0 28px rgba(136, 255, 210, 0.25);     /* glow xanh teal nhẹ */
+}
+
+/* ⭐ Inner shadow + viền gradient subtle */
+.hero-mockup-main::before,
+.hero-mockup-small::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.35);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 255, 255, 0.22), transparent 55%),
+    radial-gradient(circle at 100% 100%, rgba(0, 0, 0, 0.35), transparent 65%);
+}
+
+/* ⭐ Layer outline mảnh bên ngoài (cho cảm giác “card nổi” hơn) */
+.hero-mockup-main::after,
+.hero-mockup-small::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  mix-blend-mode: screen;
+}
+
+/* Cột bên phải (2 ảnh nhỏ) */
+.hero-mockup-column {
+  position: relative;
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 40px;
+  z-index: 2;
 }
 
-.slider-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  border: none;
-  background: rgba(255, 255, 255, 0.35);
-  cursor: pointer;
-  transition: 0.2s ease;
+/* Ảnh nhỏ bên phải */
+.hero-mockup-small {
+  width: 280px;
+  background: #ffffff;
+  /* KHÔNG cần box-shadow ở đây nữa, đã có ở rule chung bên trên */
 }
 
-/* Dot active = Emerald */
-.slider-dot--active {
-  width: 18px;
-  background: #28623A;
+/* tạo cảm giác lệch tự nhiên */
+.hero-mockup-top {
+  transform: translateX(16px);
+}
+
+.hero-mockup-bottom {
+  transform: translateX(-8px);
+}
+
+
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+  .hero-title {
+    font-size: 36px;
+  }
+
+  .hero-mockups {
+    margin-top: 56px;
+    height: 360px;
+  }
+
+  .hero-mockups::before {
+    width: 90%;
+    max-width: 640px;
+    height: 220px;
+  }
+
+  .hero-mockup-main {
+    width: 90%;
+    max-width: 640px;
+  }
+
+  .hero-mockup-right,
+  .hero-mockup-small {
+    display: none;
+  }
+}
+
+@media (max-width: 575px) {
+  .hero-section {
+    padding: 90px 0 120px;
+  }
+
+  .hero-title {
+    font-size: 30px;
+  }
+
+  .hero-subtext {
+    font-size: 16px;
+  }
 }

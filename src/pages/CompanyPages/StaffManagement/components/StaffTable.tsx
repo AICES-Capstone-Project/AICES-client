@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Table, Tag, Space, Button, Empty, Avatar, Modal } from "antd";
-import { UserOutlined, DeleteOutlined } from "@ant-design/icons";
+import { UserOutlined, UserDeleteOutlined } from "@ant-design/icons";
 import { companyService } from "../../../../services/companyService";
 import type { ColumnsType } from "antd/es/table";
 import type { CompanyMember } from "../../../../types/company.types";
@@ -98,7 +98,7 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
           ) : (
             <Button
               type="text"
-              icon={<DeleteOutlined style={{ color: '#ff4d4f', fontSize: 16 }} />}
+              icon={<UserDeleteOutlined  style={{ color: '#ff4d4f', fontSize: 16 }} />}
               onClick={() => {
                 Modal.confirm({
                   className: 'ant-confirm-spread',

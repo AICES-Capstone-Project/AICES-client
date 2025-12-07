@@ -4,14 +4,14 @@ interface SubscriptionStatsCardProps {
 	subscriptionName: string;
 	resumeLimit: number;
 	hoursLimit: number;
-	duration: string;
+	description?: string;
 }
 
 const SubscriptionStatsCard: React.FC<SubscriptionStatsCardProps> = ({
 	subscriptionName,
 	resumeLimit,
 	hoursLimit,
-	duration,
+	description,
 }) => {
 	return (
 		<div
@@ -23,6 +23,8 @@ const SubscriptionStatsCard: React.FC<SubscriptionStatsCardProps> = ({
 				marginBottom: 24,
 				color: "white",
 				boxShadow: "0 8px 24px rgba(9, 37, 22, 0.18)",
+				maxWidth: "50%",
+				margin: "0 auto 24px",
 			}}
 		>
 			<div style={{ marginBottom: 24, textAlign: "center" }}>
@@ -35,107 +37,62 @@ const SubscriptionStatsCard: React.FC<SubscriptionStatsCardProps> = ({
 				>
 					{subscriptionName || "Premium subscription plan"}
 				</h2>
+				{description && (
+					<p
+						style={{
+							color: "rgba(255,255,255,0.7)",
+							fontSize: 14,
+							marginTop: 8,
+							marginBottom: 0,
+						}}
+					>
+						{description}
+					</p>
+				)}
 			</div>
 
-			{/* Stats Grid */}
 			<div
 				style={{
-					display: "grid",
-					gridTemplateColumns: "repeat(3, 1fr)",
-					gap: "16px",
 					marginTop: 24,
+					padding: "20px",
+					background: "rgba(255,255,255,0.1)",
+					borderRadius: 8,
 				}}
 			>
-				<div
-					style={{
-						background: "rgba(255,255,255,0.15)",
-						backdropFilter: "blur(10px)",
-						padding: "16px",
-						borderRadius: 8,
-						textAlign: "center",
-					}}
-				>
-					<div
-						style={{
-							fontSize: 12,
-							color: "rgba(255,255,255,0.8)",
-							marginBottom: 8,
-							textTransform: "uppercase",
-							letterSpacing: "1px",
-						}}
-					>
-						Resume Limit
-					</div>
-					<div
-						style={{
-							fontSize: 32,
-							fontWeight: "bold",
-							color: "white",
-						}}
-					>
-						{resumeLimit}
-					</div>
+				<div style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, textAlign: "center" }}>
+					Included Features:
 				</div>
-
 				<div
 					style={{
-						background: "rgba(255,255,255,0.15)",
-						backdropFilter: "blur(10px)",
-						padding: "16px",
-						borderRadius: 8,
-						textAlign: "center",
+						display: "flex",
+						flexDirection: "column",
+						gap: "12px",
+						alignItems: "center",
 					}}
 				>
-					<div
-						style={{
-							fontSize: 12,
-							color: "rgba(255,255,255,0.8)",
-							marginBottom: 8,
-							textTransform: "uppercase",
-							letterSpacing: "1px",
-						}}
-					>
-						Hours Limit
+					<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+						<span style={{ fontSize: 16 }}>✓</span>
+						<span style={{ fontSize: 14 }}>{resumeLimit} Resume Limit / {hoursLimit} Hours</span>
 					</div>
-					<div
-						style={{
-							fontSize: 32,
-							fontWeight: "bold",
-							color: "white",
-						}}
-					>
-						{hoursLimit}
+					<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+						<span style={{ fontSize: 16 }}>✓</span>
+						<span style={{ fontSize: 14 }}>Retry failed CV screening</span>
 					</div>
-				</div>
-
-				<div
-					style={{
-						background: "rgba(255,255,255,0.15)",
-						backdropFilter: "blur(10px)",
-						padding: "16px",
-						borderRadius: 8,
-						textAlign: "center",
-					}}
-				>
-					<div
-						style={{
-							fontSize: 12,
-							color: "rgba(255,255,255,0.8)",
-							marginBottom: 8,
-							textTransform: "uppercase",
-							letterSpacing: "1px",
-						}}
-					>
-						Days Left
-					</div>
-					<div
-						style={{
-							fontSize: 32,
-							fontWeight: "bold",
-							color: "white",
-						}}
-					>
-						{duration}
+					{subscriptionName?.toLowerCase() !== "free" && (
+						<>
+							<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+								<span style={{ fontSize: 16 }}>✓</span>
+								<span style={{ fontSize: 14 }}>Export reports (PDF, Excel)</span>
+							</div>
+							<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+								<span style={{ fontSize: 16 }}>✓</span>
+								<span style={{ fontSize: 14 }}>Advanced CV filtering & search</span>
+							</div>
+						</>
+					)}
+					<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+						<span style={{ fontSize: 16 }}>✓</span>
+						<span style={{ fontSize: 14 }}>Priority support</span>
 					</div>
 				</div>
 			</div>

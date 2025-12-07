@@ -82,6 +82,9 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
           <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Requirements</div>}>
             <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.requirements || '-'}</div>
           </Descriptions.Item>
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Target Candidate Quantity</div>}>
+            <div style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.targetQuantity || '-'}</div>
+          </Descriptions.Item>
           <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Criteria</div>}>
             {Array.isArray((job as any).criteria) && (job as any).criteria.length > 0 ? (
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

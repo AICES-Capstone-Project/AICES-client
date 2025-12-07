@@ -8,17 +8,17 @@ import RecruiterDesigned from "./partials/RecruiterDesigned/RecruiterDesigned";
 import Compliance from "./partials/Compliance/Compliance";
 
 export default function Homepage() {
-  return (
-    <>
-      <Hero />
-      <TimeSaving />
-      <Integration />
-      <HowItWorks />
-      <ValueSection />
-      <Feedback />
-      <RecruiterDesigned />
-      <Compliance />
-      {/* nothing */}
-    </>
-  );
+	return (
+		<>
+			<Hero />
+			<TimeSaving />
+			<Integration />
+			<HowItWorks />
+			<ValueSection />
+			<Feedback />
+			<RecruiterDesigned />
+			<Compliance />
+			{/* nothing */}
+		</>
+	);
 }

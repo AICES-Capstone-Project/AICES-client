@@ -49,6 +49,20 @@ interface Resume {
 		score: number;
 		aiNote: string;
 	}>;
+	// For SignalR updates - temporary structure
+	aiScores?: Array<{
+		scoreId: number;
+		totalResumeScore: number;
+		aiExplanation?: string;
+		createdAt?: string;
+		scoreDetails?: Array<{
+			criteriaId: number;
+			criteriaName: string;
+			matched: number;
+			score: number;
+			aiNote: string;
+		}>;
+	}>;
 }
 
 const ResumeList: React.FC = () => {
@@ -69,7 +83,10 @@ const ResumeList: React.FC = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [jobTitle, setJobTitle] = useState<string>("");
-	const [scoreFilter, setScoreFilter] = useState<{ min: number | null; max: number | null }>({ min: null, max: null });
+	const [scoreFilter, setScoreFilter] = useState<{
+		min: number | null;
+		max: number | null;
+	}>({ min: null, max: null });
 	const resumesRef = useRef<Resume[]>([]);
 
 	// Ensure displayed order is always by score desc (nulls last)
@@ -122,7 +139,26 @@ const ResumeList: React.FC = () => {
 				const raw = Array.isArray(resp.data)
 					? resp.data
 					: resp.data.items || [];
-				const resumeList = (Array.isArray(raw) ? raw : []) as any[];
+				const resumeList = (Array.isArray(raw) ? raw : []) as Array<{
+					resumeId: number;
+					fullName?: string;
+					candidateName?: string;
+					status?: string;
+					stage?: string;
+					totalResumeScore?: number | null;
+					email?: string;
+					phone?: string;
+					phoneNumber?: string;
+					fileUrl?: string;
+					aiExplanation?: string;
+					scoreDetails?: Array<{
+						criteriaId: number;
+						criteriaName: string;
+						matched: number;
+						score: number;
+						aiNote: string;
+					}>;
+				}>;
 				const mapped: Resume[] = resumeList.map((r) => ({
 					resumeId: r.resumeId,
 					fullName: r.fullName || r.candidateName || "Unknown",
@@ -220,7 +256,7 @@ const ResumeList: React.FC = () => {
 			fullName: string;
 			totalResumeScore?: number | null;
 			timestamp: string;
-			data?: unknown;
+			data?: any;
 		}) => {
 			console.log("📨 ResumeUpdated received in handler:", data);
 			console.log("📨 Current jobId from params:", jobId);
@@ -234,7 +270,7 @@ const ResumeList: React.FC = () => {
 			} = data;
 
 			// Verify this event is for the current job
-			if (eventJobId && Number(jobId) !== eventJobId) {
+			if (eventJobId && jobId && Number(jobId) !== eventJobId) {
 				console.log(
 					`⚠️ Ignoring event for different job: eventJobId=${eventJobId}, currentJobId=${jobId}`
 				);
@@ -299,25 +335,10 @@ const ResumeList: React.FC = () => {
 						...updated[existingIndex],
 						status: status || updated[existingIndex].status,
 						fullName: fullName || updated[existingIndex].fullName,
-						aiScores:
+						totalResumeScore:
 							totalResumeScore != null
-								? [
-										{
-											scoreId:
-												updated[existingIndex].aiScores?.[0]?.scoreId || 0,
-											totalResumeScore: totalResumeScore,
-											aiExplanation:
-												updated[existingIndex].aiScores?.[0]?.aiExplanation ||
-												"",
-											createdAt:
-												updated[existingIndex].aiScores?.[0]?.createdAt ||
-												new Date().toISOString(),
-											scoreDetails:
-												updated[existingIndex].aiScores?.[0]?.scoreDetails ||
-												[],
-										},
-								  ]
-								: updated[existingIndex].aiScores,
+								? totalResumeScore
+								: updated[existingIndex].totalResumeScore,
 					};
 					return updated;
 				} else {
@@ -345,7 +366,7 @@ const ResumeList: React.FC = () => {
 				});
 			}
 		},
-		[loadResumes]
+		[loadResumes, jobId]
 	);
 
 	const handleResumeListUpdated = useCallback(
@@ -354,7 +375,7 @@ const ResumeList: React.FC = () => {
 			// Reload the entire list when list changes
 			loadResumes();
 		},
-		[loadResumes]
+		[loadResumes, jobId]
 	);
 
 	// Connect to SignalR ResumeHub
@@ -396,7 +417,7 @@ const ResumeList: React.FC = () => {
 			const resp = await resumeService.getById(Number(jobId), resumeId);
 			console.debug("[ResumeList] resumeService.getById response", resp);
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
-				setSelectedResume(resp.data as unknown as Resume);
+				setSelectedResume(resp.data as any as Resume);
 			} else {
 				message.error(resp?.message || "Unable to load resume details");
 			}
@@ -424,7 +445,8 @@ const ResumeList: React.FC = () => {
 			}
 		} catch (e) {
 			console.error("Retry analysis failed:", e);
-			toastError("Retry failed", (e as any)?.message);
+			const errorMessage = e instanceof Error ? e.message : "Unknown error";
+			toastError("Retry failed", errorMessage);
 		} finally {
 			setRetryingIds((s) => s.filter((id) => id !== resumeId));
 		}
@@ -514,7 +536,8 @@ const ResumeList: React.FC = () => {
 			}
 		} catch (e: any) {
 			console.error("Upload error:", e);
-			toastError("Upload failed", e?.message);
+			const errorMessage = e instanceof Error ? e.message : "Unknown error";
+			toastError("Upload failed", errorMessage);
 		} finally {
 			setUploading(false);
 		}
@@ -680,7 +703,14 @@ const ResumeList: React.FC = () => {
 								{jobTitle || `Job #${jobId}`}
 							</span>
 						</div>
-						<div style={{ marginBottom: 16, display: "flex", gap: 8, alignItems: "center" }}>
+						<div
+							style={{
+								marginBottom: 16,
+								display: "flex",
+								gap: 8,
+								alignItems: "center",
+							}}
+						>
 							<span>Filter by score:</span>
 							<Input
 								type="number"
@@ -688,7 +718,8 @@ const ResumeList: React.FC = () => {
 								style={{ width: 100 }}
 								value={scoreFilter.min ?? ""}
 								onChange={(e) => {
-									const val = e.target.value === "" ? null : Number(e.target.value);
+									const val =
+										e.target.value === "" ? null : Number(e.target.value);
 									setScoreFilter((prev) => ({ ...prev, min: val }));
 								}}
 							/>
@@ -699,7 +730,8 @@ const ResumeList: React.FC = () => {
 								style={{ width: 100 }}
 								value={scoreFilter.max ?? ""}
 								onChange={(e) => {
-									const val = e.target.value === "" ? null : Number(e.target.value);
+									const val =
+										e.target.value === "" ? null : Number(e.target.value);
 									setScoreFilter((prev) => ({ ...prev, max: val }));
 								}}
 							/>
@@ -813,9 +845,9 @@ const ResumeList: React.FC = () => {
 			>
 				<div>
 					<p>
-						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có thể gây
-						ra những bất tiện cho bạn trong quá trình sử dụng hệ thống. Vui lòng nhập
-						chính xác tiêu đề công việc{" "}
+						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có
+						thể gây ra những bất tiện cho bạn trong quá trình sử dụng hệ thống.
+						Vui lòng nhập chính xác tiêu đề công việc{" "}
 						<strong>{jobTitle || "(job title)"}</strong> để xác nhận xoá.
 					</p>
 
@@ -899,9 +931,6 @@ const ResumeList: React.FC = () => {
 												selectedResume.totalResumeScore >= 70
 													? "green"
 													: selectedResume.totalResumeScore >= 40
-														? "orange"
-														: "red"
-													: selectedResume.aiScores?.[0]?.totalResumeScore >= 40
 													? "orange"
 													: "red"
 											}
@@ -931,44 +960,52 @@ const ResumeList: React.FC = () => {
 							</Space>
 						</Card>
 
-						{selectedResume.scoreDetails && selectedResume.scoreDetails.length > 0 && (
-							<Card size="small" title="Criteria Scores">
-								<Space direction="vertical" style={{ width: "100%" }} size="middle">
-									{selectedResume.scoreDetails.map((detail) => (
-										<div
-											key={detail.criteriaId}
-											style={{
-												padding: 12,
-												border: "1px solid #d9d9d9",
-												borderRadius: 4,
-											}}
-										>
-											<div style={{ marginBottom: 8 }}>
-												<strong>{detail.criteriaName}</strong>
-												<Tag
-													color={
-														detail.score >= 70
-															? "green"
-															: detail.score >= 40
+						{selectedResume.scoreDetails &&
+							selectedResume.scoreDetails.length > 0 && (
+								<Card size="small" title="Criteria Scores">
+									<Space
+										direction="vertical"
+										style={{ width: "100%" }}
+										size="middle"
+									>
+										{selectedResume.scoreDetails.map((detail) => (
+											<div
+												key={detail.criteriaId}
+												style={{
+													padding: 12,
+													border: "1px solid #d9d9d9",
+													borderRadius: 4,
+												}}
+											>
+												<div style={{ marginBottom: 8 }}>
+													<strong>{detail.criteriaName}</strong>
+													<Tag
+														color={
+															detail.score >= 70
+																? "green"
+																: detail.score >= 40
 																? "orange"
 																: "red"
-													}
-													style={{ marginLeft: 8 }}
-												>
-													Score: {detail.score}
-												</Tag>
-												<Tag color={detail.matched ? "success" : "default"} style={{ marginLeft: 4 }}>
-													{detail.matched ? "Matched" : "Not Matched"}
-												</Tag>
+														}
+														style={{ marginLeft: 8 }}
+													>
+														Score: {detail.score}
+													</Tag>
+													<Tag
+														color={detail.matched ? "success" : "default"}
+														style={{ marginLeft: 4 }}
+													>
+														{detail.matched ? "Matched" : "Not Matched"}
+													</Tag>
+												</div>
+												<div style={{ color: "#666" }}>
+													<em>{detail.aiNote}</em>
+												</div>
 											</div>
-											<div style={{ color: "#666" }}>
-												<em>{detail.aiNote}</em>
-											</div>
-										</div>
-									))}
-								</Space>
-							</Card>
-						)}
+										))}
+									</Space>
+								</Card>
+							)}
 					</Space>
 				)}
 			</Drawer>

@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, {
+	useEffect,
+	useState,
+	useMemo,
+	useCallback,
+	useRef,
+} from "react";
 import {
 	Card,
 	Table,
@@ -25,34 +31,35 @@ import {
 import type { ColumnsType } from "antd/es/table";
 import resumeService from "../../../../services/resumeService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
+import { useResumeSignalR } from "../../../../hooks/useResumeSignalR";
 
 interface Resume {
-  resumeId: number;
-  queueJobId?: string;
-  fileUrl: string;
-  status: "Completed" | "Pending" | "Failed" | string;
-  createdAt?: string;
-  candidateId?: number;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  aiScores: AiScore[];
+	resumeId: number;
+	queueJobId?: string;
+	fileUrl: string;
+	status: "Completed" | "Pending" | "Failed" | string;
+	createdAt?: string;
+	candidateId?: number;
+	fullName: string;
+	email: string;
+	phoneNumber: string;
+	aiScores: AiScore[];
 }
 
 interface AiScore {
-  scoreId: number;
-  totalResumeScore: number;
-  aiExplanation: string;
-  createdAt: string;
-  scoreDetails: ScoreDetail[];
+	scoreId: number;
+	totalResumeScore: number;
+	aiExplanation: string;
+	createdAt: string;
+	scoreDetails: ScoreDetail[];
 }
 
 interface ScoreDetail {
-  criteriaId: number;
-  criteriaName: string;
-  matched: number;
-  score: number;
-  aiNote: string;
+	criteriaId: number;
+	criteriaName: string;
+	matched: number;
+	score: number;
+	aiNote: string;
 }
 
 const ResumeList: React.FC = () => {
@@ -73,6 +80,7 @@ const ResumeList: React.FC = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [jobTitle, setJobTitle] = useState<string>("");
+	const resumesRef = useRef<Resume[]>([]);
 
 	// Ensure displayed order is always by score desc (nulls last)
 	const sortedResumes = useMemo(() => {
@@ -87,14 +95,8 @@ const ResumeList: React.FC = () => {
 		});
 	}, [resumes]);
 
-	useEffect(() => {
-		if (jobId) {
-			loadJobInfo();
-			loadResumes();
-		}
-	}, [jobId]);
-
-	const loadJobInfo = async () => {
+	const loadJobInfo = useCallback(async () => {
+		if (!jobId) return;
 		try {
 			const { jobService } = await import("../../../../services/jobService");
 			const resp = await jobService.getJobById(Number(jobId));
@@ -104,9 +106,9 @@ const ResumeList: React.FC = () => {
 		} catch (e) {
 			console.error("Failed to load job info:", e);
 		}
-	};
+	}, [jobId]);
 
-	const loadResumes = async () => {
+	const loadResumes = useCallback(async () => {
 		setLoading(true);
 		try {
 			console.debug("[ResumeList] calling resumeService.getByJob", { jobId });
@@ -114,9 +116,11 @@ const ResumeList: React.FC = () => {
 			console.debug("[ResumeList] resumeService.getByJob response", resp);
 
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
-				const raw = Array.isArray(resp.data) ? resp.data : resp.data.items || [];
+				const raw = Array.isArray(resp.data)
+					? resp.data
+					: resp.data.items || [];
 				const resumeList = (Array.isArray(raw) ? raw : []) as any[];
-				
+
 				// Debug: log first resume to see structure
 				if (resumeList.length > 0) {
 					console.log("🔍 First resume data structure:", resumeList[0]);
@@ -124,26 +128,28 @@ const ResumeList: React.FC = () => {
 					console.log("🔍 totalResumeScore:", resumeList[0]?.totalResumeScore);
 					console.log("🔍 score:", resumeList[0]?.score);
 				}
-				
+
 				const mapped: Resume[] = resumeList.map((r) => {
 					// Try multiple ways to get aiScores
 					let aiScores = r.aiScores ?? [];
-					
+
 					// If aiScores is empty but we have score data, try to construct it
 					if (aiScores.length === 0) {
 						// Check if score is directly on the object
 						if (r.totalResumeScore != null || r.score != null) {
 							const scoreValue = r.totalResumeScore ?? r.score;
-							aiScores = [{
-								scoreId: r.scoreId || 0,
-								totalResumeScore: Number(scoreValue),
-								aiExplanation: r.aiExplanation || "",
-								createdAt: r.createdAt || new Date().toISOString(),
-								scoreDetails: r.scoreDetails || [],
-							}];
+							aiScores = [
+								{
+									scoreId: r.scoreId || 0,
+									totalResumeScore: Number(scoreValue),
+									aiExplanation: r.aiExplanation || "",
+									createdAt: r.createdAt || new Date().toISOString(),
+									scoreDetails: r.scoreDetails || [],
+								},
+							];
 						}
 					}
-					
+
 					return {
 						resumeId: r.resumeId,
 						fullName: r.fullName || r.candidateName || "Unknown",
@@ -168,6 +174,7 @@ const ResumeList: React.FC = () => {
 					return a.resumeId - b.resumeId;
 				});
 				setResumes(sortedList);
+				resumesRef.current = sortedList; // Update ref
 			} else {
 				message.error(resp?.message || "Unable to load resumes");
 			}
@@ -177,7 +184,214 @@ const ResumeList: React.FC = () => {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [jobId]);
+
+	useEffect(() => {
+		if (jobId) {
+			loadJobInfo();
+			loadResumes();
+		}
+	}, [jobId, loadJobInfo, loadResumes]);
+
+	// Update ref whenever resumes change
+	useEffect(() => {
+		resumesRef.current = resumes;
+	}, [resumes]);
+
+	// Polling fallback: Check for status changes every 5 seconds if there are Pending resumes
+	useEffect(() => {
+		if (!jobId) return;
+
+		console.log("⏰ Setting up polling for pending resumes...");
+		let pollCount = 0;
+		const maxPolls = 60; // Stop after 5 minutes (60 * 5 seconds)
+
+		const pollInterval = setInterval(() => {
+			// Check if there are any Pending resumes before polling (use ref for latest value)
+			const currentResumes = resumesRef.current;
+			const hasPendingResumes = currentResumes.some(
+				(r) => r.status === "Pending" || r.status === "pending"
+			);
+
+			if (!hasPendingResumes) {
+				console.log("✅ No pending resumes, stopping polling");
+				clearInterval(pollInterval);
+				return;
+			}
+
+			pollCount++;
+			if (pollCount > maxPolls) {
+				console.log("⏱️ Max polling time reached, stopping");
+				clearInterval(pollInterval);
+				return;
+			}
+
+			console.log(
+				`🔄 Polling (${pollCount}/${maxPolls}): Checking for status updates...`
+			);
+			loadResumes();
+		}, 5000); // Poll every 5 seconds
+
+		return () => {
+			console.log("🛑 Stopping polling");
+			clearInterval(pollInterval);
+		};
+	}, [jobId, loadResumes]); // Only depend on jobId and loadResumes, not resumes
+
+	// SignalR handlers for real-time updates
+	const handleResumeUpdated = useCallback(
+		(data: {
+			eventType: string;
+			jobId: number;
+			resumeId: number;
+			status: string;
+			fullName: string;
+			totalResumeScore?: number | null;
+			timestamp: string;
+			data?: unknown;
+		}) => {
+			console.log("📨 ResumeUpdated received in handler:", data);
+			console.log("📨 Current jobId from params:", jobId);
+			const {
+				resumeId,
+				status,
+				fullName,
+				totalResumeScore,
+				eventType,
+				jobId: eventJobId,
+			} = data;
+
+			// Verify this event is for the current job
+			if (eventJobId && Number(jobId) !== eventJobId) {
+				console.log(
+					`⚠️ Ignoring event for different job: eventJobId=${eventJobId}, currentJobId=${jobId}`
+				);
+				return;
+			}
+
+			// If status changed to Completed, Failed, or Invalid, reload the entire list
+			// to get full updated data (scores, details, etc.)
+			if (
+				eventType === "status_changed" &&
+				(status === "Completed" || status === "Failed" || status === "Invalid")
+			) {
+				console.log(
+					`🔄 Status changed to ${status} for resume ${resumeId}, reloading resume list...`
+				);
+				// Reload the entire list to get fresh data
+				setTimeout(() => {
+					loadResumes();
+				}, 500); // Small delay to ensure backend has updated
+
+				// Show notification
+				const statusMessages: Record<string, string> = {
+					Completed: "✅ Resume analysis completed",
+					Failed: "❌ Resume analysis failed",
+					Invalid: "⚠️ Invalid resume file",
+					Pending: "⏳ Resume analysis in progress",
+				};
+				const statusMessage =
+					statusMessages[status] || `Resume status changed to ${status}`;
+				message.info({
+					content: `${statusMessage}: ${fullName || `Resume #${resumeId}`}`,
+					duration: 3,
+				});
+				return;
+			}
+
+			// Also reload for any status change from Pending
+			if (eventType === "status_changed") {
+				console.log(
+					`🔄 Status changed from Pending to ${status}, reloading resume list...`
+				);
+				setTimeout(() => {
+					loadResumes();
+				}, 500);
+			}
+
+			setResumes((prevResumes) => {
+				// If resume was deleted, remove it from the list
+				if (eventType === "deleted") {
+					return prevResumes.filter((r) => r.resumeId !== resumeId);
+				}
+
+				// Check if resume already exists
+				const existingIndex = prevResumes.findIndex(
+					(r) => r.resumeId === resumeId
+				);
+
+				if (existingIndex >= 0) {
+					// Update existing resume
+					const updated = [...prevResumes];
+					updated[existingIndex] = {
+						...updated[existingIndex],
+						status: status || updated[existingIndex].status,
+						fullName: fullName || updated[existingIndex].fullName,
+						aiScores:
+							totalResumeScore != null
+								? [
+										{
+											scoreId:
+												updated[existingIndex].aiScores?.[0]?.scoreId || 0,
+											totalResumeScore: totalResumeScore,
+											aiExplanation:
+												updated[existingIndex].aiScores?.[0]?.aiExplanation ||
+												"",
+											createdAt:
+												updated[existingIndex].aiScores?.[0]?.createdAt ||
+												new Date().toISOString(),
+											scoreDetails:
+												updated[existingIndex].aiScores?.[0]?.scoreDetails ||
+												[],
+										},
+								  ]
+								: updated[existingIndex].aiScores,
+					};
+					return updated;
+				} else {
+					// New resume uploaded - reload the list to get full data
+					if (eventType === "uploaded") {
+						loadResumes();
+					}
+					return prevResumes;
+				}
+			});
+
+			// Show notification for other status changes (not Completed/Failed/Invalid)
+			if (eventType === "status_changed") {
+				const statusMessages: Record<string, string> = {
+					Completed: "✅ Resume analysis completed",
+					Failed: "❌ Resume analysis failed",
+					Invalid: "⚠️ Invalid resume file",
+					Pending: "⏳ Resume analysis in progress",
+				};
+				const statusMessage =
+					statusMessages[status] || `Resume status changed to ${status}`;
+				message.info({
+					content: `${statusMessage}: ${fullName || `Resume #${resumeId}`}`,
+					duration: 3,
+				});
+			}
+		},
+		[loadResumes]
+	);
+
+	const handleResumeListUpdated = useCallback(
+		(data: { eventType: string; jobId: number; timestamp: string }) => {
+			console.log("📋 ResumeListUpdated received:", data);
+			// Reload the entire list when list changes
+			loadResumes();
+		},
+		[loadResumes]
+	);
+
+	// Connect to SignalR ResumeHub
+	useResumeSignalR({
+		onResumeUpdated: handleResumeUpdated,
+		onResumeListUpdated: handleResumeListUpdated,
+		enabled: !!jobId,
+		jobId: jobId ? Number(jobId) : null,
+	});
 
 	// canRetrySelected: true only when at least one selected and ALL selected have status === "Failed"
 	const canRetrySelected = useMemo(() => {
@@ -194,7 +408,10 @@ const ResumeList: React.FC = () => {
 		const m = new Map<number, number>();
 		for (const r of sortedResumes) {
 			if (r.aiScores?.[0]?.totalResumeScore != null) {
-				m.set(r.aiScores[0].totalResumeScore, (m.get(r.aiScores[0].totalResumeScore) || 0) + 1);
+				m.set(
+					r.aiScores[0].totalResumeScore,
+					(m.get(r.aiScores[0].totalResumeScore) || 0) + 1
+				);
 			}
 		}
 		return m;
@@ -296,7 +513,10 @@ const ResumeList: React.FC = () => {
 		setConfirmInput("");
 		// Optionally exit edit mode after delete:
 		setEditMode(false);
-		toastSuccess("Delete completed", `${success} of ${ids.length} resumes deleted`);
+		toastSuccess(
+			"Delete completed",
+			`${success} of ${ids.length} resumes deleted`
+		);
 	};
 
 	const handleUpload = async (file: File) => {
@@ -315,7 +535,10 @@ const ResumeList: React.FC = () => {
 			const resp = await resumeService.uploadToJob(formData);
 			console.debug("[ResumeList] uploadToJob response", resp);
 			if (String(resp?.status || "").toLowerCase() === "success") {
-				toastSuccess("Upload successful", `Uploaded ${file.name} successfully!`);
+				toastSuccess(
+					"Upload successful",
+					`Uploaded ${file.name} successfully!`
+				);
 				await loadResumes();
 			} else {
 				toastError("Upload failed", resp?.message);
@@ -354,8 +577,8 @@ const ResumeList: React.FC = () => {
 						status === "Completed"
 							? "green"
 							: status === "Pending"
-								? "blue"
-								: "default"
+							? "blue"
+							: "default"
 					}
 				>
 					{status || "Processing"}
@@ -363,47 +586,55 @@ const ResumeList: React.FC = () => {
 			),
 		},
 		{
-            title: "Score",
-            key: "score", 
-            width: 120,
-            align: "center" as const,
-            render: (_: any, record: Resume) => {
-                // Try multiple ways to get score
-                let score: number | null | undefined = null;
-                
-                // Method 1: From aiScores array
-                if (record.aiScores && Array.isArray(record.aiScores) && record.aiScores.length > 0) {
-                    score = record.aiScores[0]?.totalResumeScore;
-                }
-                
-                // Method 2: Direct score property (fallback)
-                if (score == null && (record as any).score != null) {
-                    score = (record as any).score;
-                }
-                
-                // Method 3: Direct totalResumeScore property (fallback)
-                if (score == null && (record as any).totalResumeScore != null) {
-                    score = (record as any).totalResumeScore;
-                }
+			title: "Score",
+			key: "score",
+			width: 120,
+			align: "center" as const,
+			render: (_: any, record: Resume) => {
+				// Try multiple ways to get score
+				let score: number | null | undefined = null;
 
-                if (score != null && score !== undefined && !isNaN(Number(score))) {
-                    // Làm tròn điểm số đến 1 chữ số thập phân
-                    const roundedScore = Math.round(Number(score) * 10) / 10;
-                    return (
-                        <Tag 
-                            color={roundedScore >= 70 ? "green" : roundedScore >= 40 ? "orange" : "red"}
-                            style={{ textAlign: "center" }}
-                        >
-                            {roundedScore}
-                        </Tag>
-                    );
-                }
-                
-                return (
-                    <span style={{ color: "#9ca3af", fontSize: 14 }}>—</span>
-                );
-            },
-        },
+				// Method 1: From aiScores array
+				if (
+					record.aiScores &&
+					Array.isArray(record.aiScores) &&
+					record.aiScores.length > 0
+				) {
+					score = record.aiScores[0]?.totalResumeScore;
+				}
+
+				// Method 2: Direct score property (fallback)
+				if (score == null && (record as any).score != null) {
+					score = (record as any).score;
+				}
+
+				// Method 3: Direct totalResumeScore property (fallback)
+				if (score == null && (record as any).totalResumeScore != null) {
+					score = (record as any).totalResumeScore;
+				}
+
+				if (score != null && score !== undefined && !isNaN(Number(score))) {
+					// Làm tròn điểm số đến 1 chữ số thập phân
+					const roundedScore = Math.round(Number(score) * 10) / 10;
+					return (
+						<Tag
+							color={
+								roundedScore >= 70
+									? "green"
+									: roundedScore >= 40
+									? "orange"
+									: "red"
+							}
+							style={{ textAlign: "center" }}
+						>
+							{roundedScore}
+						</Tag>
+					);
+				}
+
+				return <span style={{ color: "#9ca3af", fontSize: 14 }}>—</span>;
+			},
+		},
 		{
 			title: "Ties",
 			width: 100,
@@ -437,7 +668,11 @@ const ResumeList: React.FC = () => {
 				return (
 					<Popover content={content} trigger={["hover"]}>
 						<Tag
-							style={{ cursor: "pointer", backgroundColor: bgColor, color: textColor }}
+							style={{
+								cursor: "pointer",
+								backgroundColor: bgColor,
+								color: textColor,
+							}}
 							onClick={() =>
 								navigate(
 									`/company/ai-screening/compare?jobId=${jobId}&score=${score}`
@@ -508,7 +743,9 @@ const ResumeList: React.FC = () => {
 								icon={<ArrowLeftOutlined />}
 								onClick={() => navigate("/company/ai-screening")}
 							/>
-							<span className="font-semibold">{jobTitle || `Job #${jobId}`}</span>
+							<span className="font-semibold">
+								{jobTitle || `Job #${jobId}`}
+							</span>
 						</div>
 						<div className="flex gap-2 items-center">
 							{/* Buttons visible only in edit mode */}
@@ -573,10 +810,10 @@ const ResumeList: React.FC = () => {
 					rowSelection={
 						editMode
 							? {
-								selectedRowKeys,
-								onChange: (keys) => setSelectedRowKeys(keys),
-								type: "checkbox",
-							}
+									selectedRowKeys,
+									onChange: (keys) => setSelectedRowKeys(keys),
+									type: "checkbox",
+							  }
 							: undefined
 					}
 					columns={columns}
@@ -633,9 +870,9 @@ const ResumeList: React.FC = () => {
 			>
 				<div>
 					<p style={{ textAlign: "center", fontSize: 16, marginTop: 8 }}>
-						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có thể gây
-						ra những bất tiện cho bạn trong quá trình sử dụng hệ thống. Vui lòng nhập
-						chính xác tiêu đề công việc{" "}
+						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có
+						thể gây ra những bất tiện cho bạn trong quá trình sử dụng hệ thống.
+						Vui lòng nhập chính xác tiêu đề công việc{" "}
 						<strong>{jobTitle || "(job title)"}</strong> để xác nhận xoá.
 					</p>
 
@@ -645,11 +882,14 @@ const ResumeList: React.FC = () => {
 						placeholder="Type job title here"
 					/>
 				</div>
-
 			</Modal>
 
 			<Drawer
-				title={selectedResume ? `Resume Detail - ${selectedResume.fullName}` : "Resume Detail"}
+				title={
+					selectedResume
+						? `Resume Detail - ${selectedResume.fullName}`
+						: "Resume Detail"
+				}
 				width={720}
 				onClose={() => {
 					setDrawerOpen(false);
@@ -664,7 +904,8 @@ const ResumeList: React.FC = () => {
 						<Card size="small" title="Basic Information">
 							<Space direction="vertical" style={{ width: "100%" }}>
 								<div>
-									<strong>Full Name:</strong> {selectedResume.fullName || "Unknown"}
+									<strong>Full Name:</strong>{" "}
+									{selectedResume.fullName || "Unknown"}
 								</div>
 								{selectedResume.email && (
 									<div>
@@ -683,8 +924,8 @@ const ResumeList: React.FC = () => {
 											selectedResume.status === "Completed"
 												? "green"
 												: selectedResume.status === "Pending"
-													? "blue"
-													: "default"
+												? "blue"
+												: "default"
 										}
 									>
 										{selectedResume.status || "Processing"}
@@ -693,7 +934,11 @@ const ResumeList: React.FC = () => {
 								{selectedResume.fileUrl && (
 									<div>
 										<strong>Resume File:</strong>{" "}
-										<Button type="link" href={selectedResume.fileUrl} target="_blank">
+										<Button
+											type="link"
+											href={selectedResume.fileUrl}
+											target="_blank"
+										>
 											View PDF
 										</Button>
 									</div>
@@ -711,8 +956,8 @@ const ResumeList: React.FC = () => {
 												selectedResume.aiScores?.[0]?.totalResumeScore >= 70
 													? "green"
 													: selectedResume.aiScores?.[0]?.totalResumeScore >= 40
-														? "orange"
-														: "red"
+													? "orange"
+													: "red"
 											}
 											style={{ fontSize: 16, padding: "4px 12px" }}
 										>
@@ -733,51 +978,64 @@ const ResumeList: React.FC = () => {
 												borderRadius: 4,
 											}}
 										>
-											{selectedResume.aiScores?.[0]?.aiExplanation.replace(/\\u0027/g, "'")}
+											{selectedResume.aiScores?.[0]?.aiExplanation.replace(
+												/\\u0027/g,
+												"'"
+											)}
 										</p>
 									</div>
 								)}
 							</Space>
 						</Card>
 
-						{selectedResume.aiScores?.[0]?.scoreDetails && selectedResume.aiScores[0].scoreDetails.length > 0 && (
-							<Card size="small" title="Criteria Scores">
-								<Space direction="vertical" style={{ width: "100%" }} size="middle">
-									{selectedResume.aiScores?.[0]?.scoreDetails.map((detail) => (
-										<div
-											key={detail.criteriaId}
-											style={{
-												padding: 12,
-												border: "1px solid #d9d9d9",
-												borderRadius: 4,
-											}}
-										>
-											<div style={{ marginBottom: 8 }}>
-												<strong>{detail.criteriaName}</strong>
-												<Tag
-													color={
-														detail.score >= 70
-															? "green"
-															: detail.score >= 40
-																? "orange"
-																: "red"
-													}
-													style={{ marginLeft: 8 }}
+						{selectedResume.aiScores?.[0]?.scoreDetails &&
+							selectedResume.aiScores[0].scoreDetails.length > 0 && (
+								<Card size="small" title="Criteria Scores">
+									<Space
+										direction="vertical"
+										style={{ width: "100%" }}
+										size="middle"
+									>
+										{selectedResume.aiScores?.[0]?.scoreDetails.map(
+											(detail) => (
+												<div
+													key={detail.criteriaId}
+													style={{
+														padding: 12,
+														border: "1px solid #d9d9d9",
+														borderRadius: 4,
+													}}
 												>
-													Score: {detail.score}
-												</Tag>
-												<Tag color={detail.matched ? "success" : "default"} style={{ marginLeft: 4 }}>
-													{detail.matched ? "Matched" : "Not Matched"}
-												</Tag>
-											</div>
-											<div style={{ color: "#666" }}>
-												<em>{detail.aiNote}</em>
-											</div>
-										</div>
-									))}
-								</Space>
-							</Card>
-						)}
+													<div style={{ marginBottom: 8 }}>
+														<strong>{detail.criteriaName}</strong>
+														<Tag
+															color={
+																detail.score >= 70
+																	? "green"
+																	: detail.score >= 40
+																	? "orange"
+																	: "red"
+															}
+															style={{ marginLeft: 8 }}
+														>
+															Score: {detail.score}
+														</Tag>
+														<Tag
+															color={detail.matched ? "success" : "default"}
+															style={{ marginLeft: 4 }}
+														>
+															{detail.matched ? "Matched" : "Not Matched"}
+														</Tag>
+													</div>
+													<div style={{ color: "#666" }}>
+														<em>{detail.aiNote}</em>
+													</div>
+												</div>
+											)
+										)}
+									</Space>
+								</Card>
+							)}
 					</Space>
 				)}
 			</Drawer>
@@ -802,7 +1060,8 @@ const ResumeList: React.FC = () => {
 					</p>
 					<p className="ant-upload-text">Click or drag CV files here</p>
 					<p className="ant-upload-hint">
-						Supports PDF / DOC / DOCX. The AI system will automatically analyze and evaluate resumes.
+						Supports PDF / DOC / DOCX. The AI system will automatically analyze
+						and evaluate resumes.
 					</p>
 				</Upload.Dragger>
 			</Drawer>

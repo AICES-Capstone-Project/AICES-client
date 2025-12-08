@@ -65,6 +65,15 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 }) => {
 	const navigate = useNavigate();
 
+	const isQualifiedCandidate = React.useCallback((index: number, record: Resume) => {
+		// Must have score >= 50
+		if (record.totalResumeScore == null || record.totalResumeScore < 50) {
+			return false;
+		}
+		// Check if this candidate is within the top qualified range
+		return targetQuantity ? index < targetQuantity : false;
+	}, [targetQuantity]);
+
 	const columns: ColumnsType<Resume> = [
 		{
 			title: "No",
@@ -77,8 +86,9 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 			title: "Full Name",
 			dataIndex: "fullName",
 			align: "center" as const,
-			render: (text: string, _record: Resume, index: number) => {
-				const isTopCandidate = targetQuantity && index < targetQuantity;
+			render: (text: string, record: Resume, index: number) => {
+				const isTopCandidate = isQualifiedCandidate(index, record);
+				
 				return (
 					<Space>
 						{isTopCandidate && (

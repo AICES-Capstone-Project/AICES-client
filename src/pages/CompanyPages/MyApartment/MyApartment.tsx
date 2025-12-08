@@ -630,7 +630,7 @@ export default function CompanyCreate() {
                   rows={2}
                   placeholder="Short introduction about the company (minimum 20 characters)"
                   showCount
-                  maxLength={120}
+                  maxLength={150}
                 />
               </Form.Item>
 

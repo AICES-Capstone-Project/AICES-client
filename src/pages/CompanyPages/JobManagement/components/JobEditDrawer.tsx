@@ -81,6 +81,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
         title: job.title,
         description: job.description,
         requirements: job.requirements,
+        targetQuantity: job.targetQuantity,
         employmentTypes: Array.isArray(job.employmentTypes)
           ? job.employmentTypes.map((t: any) => {
             const found = employmentTypes.find(
@@ -152,6 +153,17 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
           console.log("✅ onFinish called", values);
           if (!Array.isArray(values.criteria)) values.criteria = [];
           const crit = values.criteria || [];
+          // require at least 2 criteria
+          if (crit.length < 2) {
+            form.setFields([
+              {
+                name: ["criteria"],
+                errors: ["Please add at least 2 criteria"],
+              },
+            ]);
+            return;
+          }
+          // validate weights sum to 1
           const sum = crit.reduce((acc: number, c: any) => acc + Number(c?.weight || 0), 0);
           if (Math.abs(sum - 1) > 1e-6) {
             // set error and abort
@@ -169,47 +181,78 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
         <Form.Item
           name="title"
           label="Title"
-          rules={[{ required: true, message: "Please input title" }]}
+          rules={[
+            { required: true, message: "Please input title" },
+            { max: 70, message: "Title must not exceed 70 characters" }
+          ]}
         >
-          <Input />
+          <Input maxLength={70} showCount />
         </Form.Item>
 
-        <Form.Item name="description" label="Description" rules={[{ required: true, message: "Please input description" }]}>
-          <Input.TextArea rows={4} />
+        <Form.Item name="description" label="Description" rules={[
+          { required: true, message: "Please input description" },
+          { max: 300, message: "Description must not exceed 300 characters" }
+        ]}>
+          <Input.TextArea rows={3} maxLength={300} showCount />
         </Form.Item>
 
-        <Form.Item name="requirements" label="Requirements" rules={[{ required: true, message: "Please input requirements" }]}>
-          <Input.TextArea rows={3} />
+        <Form.Item name="requirements" label="Requirements" rules={[
+          { required: true, message: "Please input requirements" },
+          { max: 2000, message: "Requirements must not exceed 2000 characters" }
+        ]}>
+          <Input.TextArea rows={3} maxLength={2000} showCount />
         </Form.Item>
 
-        <Form.Item name="categoryId" label="Category" rules={[{ required: true, message: "Please select a category" }]}>
-          <Select
-            placeholder={loadingCats ? "Loading categories..." : "Select category"}
-            loading={loadingCats}
-            allowClear
-            onChange={(v) => handleCategoryChange(Number(v))}
-            options={categories.map((c: any) => ({
-              label: c.name,
-              value: c.categoryId,
-            }))}
-          />
+        <Form.Item name="targetQuantity" label="Target Quantity" rules={[
+          { required: true, message: "Please input target quantity" },
+          { type: "number", min: 1, message: "Target quantity must be at least 1" },
+          { type: "number", max: 9999, message: "Target quantity must not exceed 9999" }
+        ]}>
+          <InputNumber className="number-input" min={1} max={9999} placeholder="Number of positions" style={{ width: "100%" }} />
         </Form.Item>
 
-        <Form.Item name="specializationId" label="Specialization" rules={[{ required: true, message: "Please select a specialization" }]}>
-          <Select
-            placeholder={
-              loadingSpecs ? "Loading specializations..." : "Select specialization"
-            }
-            loading={loadingSpecs}
-            allowClear
-            options={specializations.map((s: any) => ({
-              label: s.name,
-              value: s.specializationId,
-            }))}
-          />
-        </Form.Item>
+        <div style={{ display: "flex", gap: "16px" }}>
+          <Form.Item
+            name="categoryId"
+            label="Category"
+            style={{ width: "50%" }}
+            rules={[{ required: true, message: "Please select a category" }]}
+          >
+            <Select
+              className="company-select"
+              placeholder={loadingCats ? "Loading categories..." : "Select category"}
+              loading={loadingCats}
+              allowClear
+              onChange={(v) => handleCategoryChange(Number(v))}
+              options={categories.map((c: any) => ({
+                label: c.name,
+                value: c.categoryId,
+              }))}
+            />
+          </Form.Item>
 
-        <Form.Item name="criteria" label="Criteria" rules={[{ required: true, message: "Please select a criteria" }]}>
+          <Form.Item
+            name="specializationId"
+            label="Specialization"
+            style={{ width: "50%" }}
+            rules={[{ required: true, message: "Please select a specialization" }]}
+          >
+            <Select
+              className="company-select"
+              placeholder={
+                loadingSpecs ? "Loading specializations..." : "Select specialization"
+              }
+              loading={loadingSpecs}
+              allowClear
+              options={specializations.map((s: any) => ({
+                label: s.name,
+                value: s.specializationId,
+              }))}
+            />
+          </Form.Item>
+        </div>
+
+        <Form.Item name="criteria" label="Criteria">
           <Form.List name="criteria" initialValue={[{ name: "", weight: 0 }]}>
             {(fields, { add, remove }) => (
               <>
@@ -229,46 +272,58 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
                       <Form.Item
                         {...restField}
                         name={[field.name, "name"]}
-                        rules={[{ required: true, message: "Please input criteria name" }]}
+                        rules={[
+                          { required: true, message: "Please input criteria name" },
+                          { max: 70, message: "Criteria name must not exceed 70 characters" }
+                        ]}
                         style={{ flex: 1, marginBottom: 0 }}
                       >
-                        <Input placeholder="Criteria name" />
+                        <Input placeholder="Criteria name" maxLength={70} showCount />
                       </Form.Item>
 
                       <Form.Item
                         {...restField}
                         name={[field.name, "weight"]}
-                        rules={[{ required: true, message: "Please input weight (0-1)" }]}
+                        rules={[
+                          { required: true, message: "Please input weight" },
+                          { type: "number", min: 0, max: 1, message: "Weight must be between 0 and 1" }
+                        ]}
                         style={{ width: 150, marginBottom: 0 }}
                       >
-                        <InputNumber min={0} max={1} step={0.1} placeholder="Weight" style={{ width: "100%" }} />
+                        <InputNumber
+                          className="number-input"
+                          min={0}
+                          max={1}
+                          step={0.01}
+                          precision={2}
+                          placeholder="Criteria weight"
+                          style={{ width: "100%" }}
+                        />
                       </Form.Item>
 
                       {index === fields.length - 1 ? (
                         <PlusCircleOutlined
-                          onClick={() => add()}
+                          onClick={() => {
+                            add();
+                            form.setFields([{ name: ["criteria"], errors: [] }]);
+                          }}
                           style={{ color: "var(--color-primary-light)", cursor: "pointer", fontSize: 18 }}
                         />
                       ) : (
                         <MinusCircleOutlined
-                          onClick={() => remove(field.name)}
+                          onClick={() => {
+                            remove(field.name);
+                            form.setFields([{ name: ["criteria"], errors: [] }]);
+                          }}
                           style={{ color: "red", cursor: "pointer", fontSize: 18 }}
                         />
                       )}
                     </div>
                   );
                 })}
-
-                <Form.Item noStyle dependencies={["criteria"]}>
-                  {() => {
-                    const criteria = form.getFieldValue("criteria") || [];
-                    const total = (criteria || []).reduce((acc: number, c: any) => acc + Number(c?.weight || 0), 0);
-                    if ((criteria?.length || 0) > 0 && Math.abs(total - 1) > 1e-6) {
-                      return <div style={{ color: "red", marginTop: 4 }}>Total weight must equal 1</div>;
-                    }
-                    return null;
-                  }}
-                </Form.Item>
+                <div style={{ marginTop: 6, color: "rgba(0,0,0,0.45)", fontSize: 12 }}>
+                  At least 2 criteria required; weights must sum to 1.
+                </div>
               </>
             )}
           </Form.List>
@@ -276,6 +331,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
 
         <Form.Item name="employmentTypes" label="Employment Types" rules={[{ required: true, message: "Please select employment types" }]}>
           <Select
+            className="company-select"
             mode="multiple"
             placeholder={
               loadingEmployment ? "Loading employment types..." : "Select employment types"
@@ -291,6 +347,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
 
         <Form.Item name="skills" label="Skills" rules={[{ required: true, message: "Please select skills" }]}>
           <Select
+            className="company-select"
             mode="multiple"
             placeholder={loadingSkills ? "Loading skills..." : "Select skills"}
             loading={loadingSkills}

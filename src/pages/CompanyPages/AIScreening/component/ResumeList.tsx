@@ -14,6 +14,7 @@ import {
 	message,
 	Modal,
 	Input,
+	Tooltip,
 } from "antd";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -620,23 +621,9 @@ const ResumeList: React.FC = () => {
 								{jobTitle || `Job #${jobId}`}
 							</span>
 						</div>
-					<div className="flex gap-3 items-center">
-						<Input
-							placeholder="Search by name, email, or phone"
-							prefix={<SearchOutlined />}
-							value={searchText}
-							onChange={(e) => setSearchText(e.target.value)}
-							allowClear
-							style={{ width: 280 }}
-						/>
-						<ScoreFilter
-							scoreFilter={scoreFilter}
-							onFilterChange={setScoreFilter}
-						/>
-					</div>
-					<div className="flex gap-2 items-center">
-						{/* Buttons visible only in edit mode */}
-						{editMode && (
+						<div className="flex gap-2 items-center">
+							{/* Buttons visible only in edit mode */}
+							{editMode && (
 								<>
 									{canRetrySelected && (
 										<Button
@@ -662,6 +649,7 @@ const ResumeList: React.FC = () => {
 
 									{/* Done / Exit edit mode */}
 									<Button
+										className="company-btn"
 										onClick={() => {
 											setEditMode(false);
 											setSelectedRowKeys([]);
@@ -673,12 +661,14 @@ const ResumeList: React.FC = () => {
 								</>
 							)}
 
-							<Button
-								className="company-btn--filled"
-								onClick={() => setUploadDrawerOpen(true)}
-							>
-								Upload CV
-							</Button>
+							{!editMode && (
+								<Button
+									className="company-btn--filled"
+									onClick={() => setUploadDrawerOpen(true)}
+								>
+									Upload CV
+								</Button>
+							)}
 						</div>
 					</div>
 				}
@@ -688,6 +678,32 @@ const ResumeList: React.FC = () => {
 					borderRadius: 12,
 				}}
 			>
+				<div className="flex gap-3 items-center justify-center" style={{ marginBottom: 16 }}>
+					<Input
+						placeholder="Search by name, email, or phone"
+						prefix={<SearchOutlined />}
+						value={searchText}
+						onChange={(e) => setSearchText(e.target.value)}
+						allowClear
+						style={{ width: 280 }}
+					/>
+					<ScoreFilter
+						scoreFilter={scoreFilter}
+						onFilterChange={setScoreFilter}
+					/>
+					{targetQuantity && (() => {
+						const qualifiedCount = sortedResumes.filter(
+							r => r.totalResumeScore != null && r.totalResumeScore >= 50
+						).length;
+						return qualifiedCount < targetQuantity ? (
+							<Tooltip title={`Not enough qualified candidates. Need ${targetQuantity}, only ${qualifiedCount} with score ≥ 50`}>
+								<Tag color="var(--color-primary)" style={{ fontSize: 14, padding: "4px 12px" }}>
+									Insufficient candidates ({qualifiedCount}/{targetQuantity})
+								</Tag>
+							</Tooltip>
+						) : null;
+					})()}
+				</div>
 				<ResumeTable
 					loading={loading}
 					dataSource={sortedResumes}
@@ -707,11 +723,11 @@ const ResumeList: React.FC = () => {
 					onEnterEditMode={() => setEditMode(true)}
 					onRetry={handleRetry}
 					retryingIds={retryingIds}
-				scoreCounts={scoreCounts}
-				jobId={jobId}
-				targetQuantity={targetQuantity}
-			/>
-		</Card>			{/* Delete selected confirmation modal requiring exact job title */}
+					scoreCounts={scoreCounts}
+					jobId={jobId}
+					targetQuantity={targetQuantity}
+				/>
+			</Card>			{/* Delete selected confirmation modal requiring exact job title */}
 			<Modal
 				title={`Confirm delete ${selectedRowKeys.length} resumes`}
 				open={deleteModalOpen}
@@ -782,8 +798,8 @@ const ResumeList: React.FC = () => {
 											selectedResume.status === "Completed"
 												? "green"
 												: selectedResume.status === "Pending"
-												? "blue"
-												: "default"
+													? "blue"
+													: "default"
 										}
 									>
 										{selectedResume.status || "Processing"}
@@ -814,8 +830,8 @@ const ResumeList: React.FC = () => {
 												selectedResume.totalResumeScore >= 70
 													? "green"
 													: selectedResume.totalResumeScore >= 40
-													? "orange"
-													: "red"
+														? "orange"
+														: "red"
 											}
 											style={{ fontSize: 16, padding: "4px 12px" }}
 										>
@@ -867,8 +883,8 @@ const ResumeList: React.FC = () => {
 															detail.score >= 70
 																? "green"
 																: detail.score >= 40
-																? "orange"
-																: "red"
+																	? "orange"
+																	: "red"
 														}
 														style={{ marginLeft: 8 }}
 													>

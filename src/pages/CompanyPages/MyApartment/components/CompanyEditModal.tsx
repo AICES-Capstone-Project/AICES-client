@@ -126,10 +126,10 @@ const CompanyEditModal: React.FC<Props> = ({ open, onClose, company, onUpdated }
           label="Description"
           name="description"
           rules={[
-            { max: 120, message: 'Description cannot exceed 120 characters' },
+            { max: 150, message: 'Description cannot exceed 150 characters' },
           ]}
         >
-          <Input.TextArea rows={3} maxLength={120} showCount />
+          <Input.TextArea rows={3} maxLength={150} showCount />
         </Form.Item>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 12 }}>

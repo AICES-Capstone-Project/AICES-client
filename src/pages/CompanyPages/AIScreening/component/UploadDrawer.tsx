@@ -36,7 +36,7 @@ const UploadDrawer: React.FC<UploadDrawerProps> = ({
 				style={{ padding: 12 }}
 			>
 				<p className="ant-upload-drag-icon">
-					<InboxOutlined />
+					<InboxOutlined style={{ color: "var(--color-primary-light)" }} />
 				</p>
 				<p className="ant-upload-text">Click or drag CV files here</p>
 				<p className="ant-upload-hint">

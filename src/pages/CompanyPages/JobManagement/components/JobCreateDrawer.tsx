@@ -186,9 +186,9 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
 
         <Form.Item name="requirements" label="Requirements" rules={[
           { required: true, message: "Please input requirements" },
-          { max: 300, message: "Requirements must not exceed 300 characters" }
+          { max: 2000, message: "Requirements must not exceed 2000 characters" }
         ]}>
-          <Input.TextArea rows={3} maxLength={300} showCount />
+          <Input.TextArea rows={3} maxLength={2000} showCount />
         </Form.Item>
 
         <Form.Item name="targetQuantity" label="Target Quantity" rules={[
@@ -196,7 +196,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
           { type: "number", min: 1, message: "Target quantity must be at least 1" },
           { type: "number", max: 9999, message: "Target quantity must not exceed 9999" }
         ]}>
-          <InputNumber min={1} max={9999} style={{ width: "100%" }} placeholder="Number of positions" />
+          <InputNumber className="number-input" min={1} max={9999} style={{ width: "100%" }} placeholder="Number of positions" />
         </Form.Item>
 
         <div style={{ display: "flex", gap: "16px" }}>
@@ -207,6 +207,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
             rules={[{ required: true, message: "Please select a category" }]}
           >
             <Select
+              className="company-select"
               placeholder={loadingCats ? "Loading categories..." : "Select category"}
               loading={loadingCats}
               allowClear
@@ -225,6 +226,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
             rules={[{ required: true, message: "Please select a specialization" }]}
           >
             <Select
+              className="company-select"
               placeholder={loadingSpecs ? "Loading specializations..." : "Select specialization"}
               loading={loadingSpecs}
               allowClear
@@ -240,7 +242,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
         <Form.Item name="criteria" label="Criteria">
           <Form.List
             name="criteria"
-            initialValue={[{ name: "", weight: "" }]}
+            initialValue={[{ name: "", weight: "" }, { name: "", weight: "" }]}
           >
             {(fields, { add, remove }) => (
               <>
@@ -275,7 +277,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
                         {...restField}
                         name={[field.name, "weight"]}
                         rules={[
-                          { required: true, message: "Please input weight (0-1)" },
+                          { required: true, message: "Please input weight" },
                           { type: "number", min: 0, max: 1, message: "Weight must be between 0 and 1" }
                         ]}
                         style={{ width: 150, marginBottom: 0 }}
@@ -286,6 +288,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
                           step={0.01}
                           precision={2}
                           placeholder="Criteria weight"
+                          className="number-input"
                           style={{ width: "100%" }}
                         />
                       </Form.Item>
@@ -329,6 +332,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
 
         <Form.Item name="employmentTypes" label="Employment Types" rules={[{ required: true, message: "Please select employment types" }]}>
           <Select
+            className="company-select"
             mode="multiple"
             placeholder={loadingEmployment ? "Loading employment types..." : "Select employment types"}
             loading={loadingEmployment}
@@ -338,7 +342,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
         </Form.Item>
 
         <Form.Item name="skills" label="Skills" rules={[{ required: true, message: "Please select skills" }]}>
-          <Select mode="multiple" placeholder={loadingSkills ? "Loading skills..." : "Select skills"} loading={loadingSkills} options={skills.map((s: any) => ({ label: s.name, value: s.skillId }))} allowClear />
+          <Select className="company-select" mode="multiple" placeholder={loadingSkills ? "Loading skills..." : "Select skills"} loading={loadingSkills} options={skills.map((s: any) => ({ label: s.name, value: s.skillId }))} allowClear />
         </Form.Item>
 
         <Form.Item>

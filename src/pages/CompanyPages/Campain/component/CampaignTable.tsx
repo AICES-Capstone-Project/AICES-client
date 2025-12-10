@@ -37,11 +37,12 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
     { title: 'End Date', dataIndex: 'endDate', key: 'endDate', align: 'center', width: 120, ellipsis: true, render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
     {
       title: 'Jobs',
-      dataIndex: 'jobIds',
       align: 'center',
-      key: 'jobIds',
+      key: 'jobs',
       width: 100,
       render: (_: any, record: any) => {
+        const jobsArr = record?.jobs;
+        if (Array.isArray(jobsArr)) return jobsArr.length;
         const jobIds = record?.jobIds || [];
         return Array.isArray(jobIds) ? jobIds.length : 0;
       },
@@ -53,8 +54,21 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
       align: 'center',
       width: 160,
       render: (_: any, record: any) => {
-        const totalTarget = record?.totalTarget || 0;
-        const totalHired = record?.totalHired || 0;
+        // Prefer computing totals from record.jobs (array of { jobId, targetQuantity/target, filled })
+        const jobsArr = Array.isArray(record?.jobs) ? record.jobs : [];
+        let totalTarget = 0;
+        let totalHired = 0;
+        if (jobsArr.length) {
+          jobsArr.forEach((j: any) => {
+            const t = Number(j?.target ?? j?.targetQuantity ?? j?.targetQty ?? 0) || 0;
+            const f = Number(j?.filled ?? j?.hired ?? 0) || 0;
+            totalTarget += t;
+            totalHired += f;
+          });
+        } else {
+          totalTarget = Number(record?.totalTarget ?? 0) || 0;
+          totalHired = Number(record?.totalHired ?? 0) || 0;
+        }
         const percent = totalTarget ? Math.round((totalHired / totalTarget) * 100) : 0;
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'center' }}>

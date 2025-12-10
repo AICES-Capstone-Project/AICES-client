@@ -494,7 +494,7 @@ export const APP_ROUTES = {
   COMPANY_SETTINGS: "/company/settings",
   COMPANY_MY_APARTMENTS: "/company/my-apartments",
   COMPANY_PENDING_APPROVAL: "/company/pending-approval",
-  COMPANY_CAMPAIN: "/company/campain",
+  COMPANY_CAMPAIN: "/company/campaign",
   COMPANY_NOTIFICATION: "/company/notification",
   COMPANY_AI_SCREENING: "/company/ai-screening",
   COMPANY_AI_SCREENING_RESUMES: "/company/ai-screening/:jobId/resumes",

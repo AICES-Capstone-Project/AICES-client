@@ -135,9 +135,15 @@ export const campaignService = {
     }
   },
 
-  // Add jobs to campaign
-  addJobsToCampaign: async (campaignId: number, jobIds: number[]) => {
+  // Add jobs to campaign. Accepts either an array of jobIds (number[])
+  // or an array of job objects [{ jobId, targetQuantity }].
+  addJobsToCampaign: async (campaignId: number, jobsOrIds: any[]) => {
     try {
+      const isPrimitive = (arr: any[]) => arr.length > 0 && (typeof arr[0] === 'number' || typeof arr[0] === 'string');
+      const body = isPrimitive(jobsOrIds)
+        ? { jobIds: jobsOrIds.map((v: any) => Number(v)).filter((n: number) => !isNaN(n)) }
+        : { jobs: (jobsOrIds || []).map((j: any) => ({ jobId: Number(j.jobId), targetQuantity: Number(j.targetQuantity) || 1 })) };
+
       const response = await fetch(
         `${API_CONFIG.BASE_URL}${API_ENDPOINTS.CAMPAIGN.COMPANY_ADD_JOBS(campaignId)}`,
         {
@@ -146,7 +152,7 @@ export const campaignService = {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("access_token")}`,
           },
-          body: JSON.stringify({ jobIds }),
+          body: JSON.stringify(body),
         }
       );
       return await response.json();

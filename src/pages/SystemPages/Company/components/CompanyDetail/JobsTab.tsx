@@ -58,20 +58,20 @@ export default function JobsTab({
       render: (_, r) =>
         r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
     },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 130,
-      render: (_, r) => (
-        <Button
-          icon={<EyeOutlined />}
-          className="btn-search"
-          onClick={() => onViewJob(r.jobId)}
-        >
-          View
-        </Button>
-      ),
-    },
+    // {
+    //   title: "Actions",
+    //   key: "actions",
+    //   width: 130,
+    //   render: (_, r) => (
+    //     <Button
+    //       icon={<EyeOutlined />}
+    //       className="btn-search"
+    //       onClick={() => onViewJob(r.jobId)}
+    //     >
+    //       View
+    //     </Button>
+    //   ),
+    // },
   ];
 
   return (

@@ -1392,3 +1392,11 @@
   background-color: #f3f7f5 !important;   /* xanh siêu nhạt */
   color: var(--aices-green-dark) !important;
 }
+.action-btn.enabled {
+  opacity: 1;
+}
+
+.action-btn.disabled {
+  opacity: 0.35; /* mờ icon */
+  cursor: not-allowed !important;
+}

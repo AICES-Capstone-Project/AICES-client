@@ -39,12 +39,7 @@ export default function SpecializationTable({
       dataIndex: "categoryName",
       ellipsis: true,
     },
-    {
-      title: "Category ID",
-      dataIndex: "categoryId",
-      width: 120,
-      align: "center",
-    },
+
     {
       title: "Created At",
       dataIndex: "createdAt",

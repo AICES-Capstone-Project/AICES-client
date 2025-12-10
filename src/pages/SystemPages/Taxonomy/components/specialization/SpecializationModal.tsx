@@ -1,6 +1,9 @@
-import { Form, Input, InputNumber, Modal } from "antd";
+import { Form, Input, Select, Modal } from "antd";
 import type { FormInstance } from "antd/es/form";
 import type { Specialization } from "../../../../../types/specialization.types";
+import type { Category } from "../../../../../types/category.types";
+import { useEffect, useState } from "react";
+import { categoryService } from "../../../../../services/categoryService";
 
 interface SpecializationModalProps {
   open: boolean;
@@ -17,6 +20,34 @@ export default function SpecializationModal({
   onOk,
   onCancel,
 }: SpecializationModalProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+  // 👉 Mở modal thì load Category list
+  useEffect(() => {
+    if (!open) return;
+
+    const fetchCategories = async () => {
+      try {
+        const res = await categoryService.getAllSystem({
+          page: 1,
+          pageSize: 1000,
+        });
+
+        if (res.status !== "Success" || !res.data) {
+          setCategories([]);
+          return;
+        }
+
+        const payload = res.data;
+        setCategories(payload.categories || []);
+      } catch (error) {
+        console.error("Failed to load categories", error);
+        setCategories([]);
+      }
+    };
+
+    fetchCategories();
+  }, [open]);
+
   return (
     <Modal
       open={open}
@@ -30,7 +61,9 @@ export default function SpecializationModal({
       centered
       className="system-modal"
     >
-      <div className="system-modal-section-title">Specialization Information</div>
+      <div className="system-modal-section-title">
+        Specialization Information
+      </div>
 
       <Form
         form={form}
@@ -48,15 +81,21 @@ export default function SpecializationModal({
           <Input placeholder="e.g. Backend Development" />
         </Form.Item>
 
+        {/* 🔽 ĐÃ ĐỔI: Category ID -> Select Category Name */}
         <Form.Item
           name="categoryId"
-          label="Category ID"
-          rules={[
-            { required: true, message: "Category ID is required" },
-            { type: "number", min: 1, message: "Category ID must be > 0" },
-          ]}
+          label="Category"
+          rules={[{ required: true, message: "Please select category" }]}
         >
-          <InputNumber placeholder="Enter category ID" style={{ width: "100%" }} />
+          <Select
+            placeholder="Select category"
+            showSearch
+            optionFilterProp="label"
+            options={categories.map((cate) => ({
+              label: cate.name,
+              value: cate.categoryId,
+            }))}
+          />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,4 +1,4 @@
-import { Button, Popconfirm, Space, Table } from "antd";
+import { Button, Popconfirm, Space, Table, Tooltip } from "antd";
 import { useAppSelector } from "../../../../hooks/redux";
 
 import {
@@ -105,13 +105,6 @@ export default function CompanyTable({
     },
 
     {
-      title: "Created",
-      width: 170,
-      render: (_, r) =>
-        r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
-    },
-
-    {
       title: "Actions",
       width: 180,
       align: "center",
@@ -143,12 +136,14 @@ export default function CompanyTable({
         if (isStaff) {
           return (
             <Space size="small">
-              <Button
-                size="small"
-                shape="circle"
-                icon={<EyeOutlined />}
-                onClick={() => onOpenDetail(record.companyId)}
-              />
+              <Tooltip title="View company detail">
+                <Button
+                  size="small"
+                  shape="circle"
+                  icon={<EyeOutlined />}
+                  onClick={() => onOpenDetail(record.companyId)}
+                />
+              </Tooltip>
             </Space>
           );
         }
@@ -157,41 +152,58 @@ export default function CompanyTable({
         return (
           <Space size="small">
             {/* View */}
-            <Button
-              size="small"
-              shape="circle"
-              icon={<EyeOutlined />}
-              onClick={() => onOpenDetail(record.companyId)}
-            />
+            <Tooltip title="View company detail">
+              <Button
+                size="small"
+                shape="circle"
+                className="action-btn enabled"
+                icon={<EyeOutlined />}
+                onClick={() => onOpenDetail(record.companyId)}
+              />
+            </Tooltip>
 
             {/* Approve */}
-            <Button
-              size="small"
-              shape="circle"
-              disabled={disabledApprove}
-              icon={<CheckOutlined />}
-              onClick={() => onApprove(record.companyId)}
-            />
+            <Tooltip title="Approve company">
+              <Button
+                size="small"
+                shape="circle"
+                disabled={disabledApprove}
+                className={
+                  disabledApprove ? "action-btn disabled" : "action-btn enabled"
+                }
+                icon={<CheckOutlined />}
+                onClick={() => onApprove(record.companyId)}
+              />
+            </Tooltip>
 
-            {/* Reject (chỉ từ Pending) */}
-            <Button
-              size="small"
-              shape="circle"
-              disabled={disabledReject}
-              icon={<CloseOutlined />}
-              onClick={() => onOpenReject(record)}
-            />
+            {/* Reject */}
+            <Tooltip title="Reject company">
+              <Button
+                size="small"
+                shape="circle"
+                disabled={disabledReject}
+                className={
+                  disabledReject ? "action-btn disabled" : "action-btn enabled"
+                }
+                icon={<CloseOutlined />}
+                onClick={() => onOpenReject(record)}
+              />
+            </Tooltip>
 
-            {/* Suspend */}
-            <Button
-              size="small"
-              shape="circle"
-              disabled={disabledSuspend}
-              icon={<PauseCircleOutlined />}
-              onClick={() => onSuspend(record.companyId)}
-            />
+            <Tooltip title="Suspend company">
+              <Button
+                size="small"
+                shape="circle"
+                disabled={disabledSuspend}
+                className={
+                  disabledSuspend ? "action-btn disabled" : "action-btn enabled"
+                }
+                icon={<PauseCircleOutlined />}
+                onClick={() => onSuspend(record.companyId)}
+              />
+            </Tooltip>
 
-            {/* Delete */}
+            {/* Delete (giữ nguyên, dùng Popconfirm) */}
             <Popconfirm
               title="Delete company?"
               okText="Delete"

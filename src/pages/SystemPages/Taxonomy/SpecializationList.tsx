@@ -18,9 +18,7 @@ export default function SpecializationList() {
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: DEFAULT_PAGE_SIZE,
-    total: 0,
     showSizeChanger: true,
-    pageSizeOptions: ["5", "10", "20", "50"],
   });
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -28,59 +26,55 @@ export default function SpecializationList() {
     useState<Specialization | null>(null);
   const [form] = Form.useForm();
 
-  const fetchData = async (
-    page = pagination.current || 1,
-    pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE,
-    currentKeyword = keyword
-  ) => {
+  const fetchData = async (page = 1, pageSize = DEFAULT_PAGE_SIZE) => {
+    setLoading(true);
     try {
-      setLoading(true);
-
       const response = await specializationService.getSpecializationsSystem({
-        page,
-        pageSize,
-        keyword: currentKeyword || undefined,
+      page: 1,
+      pageSize: 1000,
       });
 
-      const payload = response.data?.data;
+      const apiRes = response.data;
 
-      if (!payload) {
+      if (apiRes.status !== "Success" || !apiRes.data) {
+        message.error(
+          apiRes.message || "Failed to load specializations. Please try again."
+        );
         setSpecializations([]);
         setPagination((prev) => ({
           ...prev,
           current: page,
           pageSize,
-          total: 0,
         }));
         return;
       }
 
-      const list = payload.specializations ?? [];
-      const total =
-        typeof payload.totalCount === "number"
-          ? payload.totalCount
-          : list.length;
+      // apiRes.data có thể là mảng hoặc object { specializations: [] }
+      const payload = apiRes.data as any;
+      const list: Specialization[] = Array.isArray(payload)
+        ? payload
+        : payload.specializations ?? [];
 
       setSpecializations(list);
       setPagination((prev) => ({
         ...prev,
         current: page,
         pageSize,
-        total,
       }));
-    } catch (error: any) {
+    } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("Failed to fetch specializations", error);
-      const msg =
-        error?.response?.data?.message || "Failed to fetch specializations.";
-      message.error(msg);
+      console.error(error);
+      message.error("Failed to load specializations. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData(
+      pagination.current || 1,
+      pagination.pageSize || DEFAULT_PAGE_SIZE
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -89,12 +83,12 @@ export default function SpecializationList() {
   };
 
   const handleSearch = () => {
-    fetchData(1, pagination.pageSize, keyword);
+    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
   };
 
   const handleReset = () => {
     setKeyword("");
-    fetchData(1, DEFAULT_PAGE_SIZE, "");
+    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
   };
 
   const openCreateModal = () => {

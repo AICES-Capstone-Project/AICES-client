@@ -1,6 +1,6 @@
-import { Card, Table, Tag, Button } from "antd";
+import { Card, Table, Tag } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { EyeOutlined } from "@ant-design/icons";
+
 
 import type { Job } from "../../../../../types/company.types";
 
@@ -17,7 +17,7 @@ export default function JobsTab({
   pagination,
   total,
   onChangePagination,
-  onViewJob,
+
 }: JobsTabProps) {
   const renderStatusTag = (raw?: string | null) => {
     const s = (raw || "").trim();
@@ -58,20 +58,20 @@ export default function JobsTab({
       render: (_, r) =>
         r.createdAt ? new Date(r.createdAt).toLocaleString() : "—",
     },
-    {
-      title: "Actions",
-      key: "actions",
-      width: 130,
-      render: (_, r) => (
-        <Button
-          icon={<EyeOutlined />}
-          className="btn-search"
-          onClick={() => onViewJob(r.jobId)}
-        >
-          View
-        </Button>
-      ),
-    },
+    // {
+    //   title: "Actions",
+    //   key: "actions",
+    //   width: 130,
+    //   render: (_, r) => (
+    //     <Button
+    //       icon={<EyeOutlined />}
+    //       className="btn-search"
+    //       onClick={() => onViewJob(r.jobId)}
+    //     >
+    //       View
+    //     </Button>
+    //   ),
+    // },
   ];
 
   return (

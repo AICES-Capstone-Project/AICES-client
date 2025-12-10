@@ -1,7 +1,7 @@
 // src/pages/SystemPages/Subscriptions/SubscribedCompaniesPage.tsx
 
-import { useEffect, useState } from "react";
-import { Card, Input, Button } from "antd";
+import { useEffect, useMemo, useState } from "react";
+import { Card, Input, Button, Select, Space } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import type { TablePaginationConfig } from "antd/es/table";
 
@@ -33,9 +33,26 @@ export default function SubscribedCompaniesPage() {
   });
 
   const [search, setSearch] = useState("");
+  const [planFilter, setPlanFilter] = useState<string | undefined>(undefined);
+
+  // ====== options cho Select plan (Test 1, Pro, ...) ======
+  const planOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          data
+            .map((item) => item.subscriptionName)
+            .filter((x): x is string => Boolean(x))
+        )
+      ).map((name) => ({ label: name, value: name })),
+    [data]
+  );
 
   // ================= FETCH =================
-  const fetchData = async (params?: CompanySubscriptionQuery) => {
+  const fetchData = async (
+    params?: CompanySubscriptionQuery,
+    selectedPlan?: string
+  ) => {
     try {
       setLoading(true);
 
@@ -68,6 +85,15 @@ export default function SubscribedCompaniesPage() {
         });
       }
 
+      // 🔥 Filter theo Subscription plan (Test 1, Pro, ...)
+      const planToUse = selectedPlan ?? planFilter;
+      if (planToUse) {
+        const normalizedPlan = normalize(planToUse);
+        items = items.filter(
+          (item) => normalize(item.subscriptionName) === normalizedPlan
+        );
+      }
+
       setData(items);
       setPagination({ current, pageSize: size, total: items.length });
     } catch {
@@ -87,19 +113,28 @@ export default function SubscribedCompaniesPage() {
     const size = pag.pageSize ?? DEFAULT_PAGE_SIZE;
 
     setPagination({ ...pagination, current, pageSize: size });
-    fetchData({ page: current, pageSize: size, search });
+    fetchData({ page: current, pageSize: size, search }, planFilter);
   };
 
   const handleSearchChange = (value: string) => {
     setSearch(value);
     setPagination({ ...pagination, current: 1 });
-    fetchData({ page: 1, pageSize: pagination.pageSize, search: value });
+    fetchData({ page: 1, pageSize: pagination.pageSize, search: value }, planFilter);
+  };
+
+  const handlePlanChange = (value?: string) => {
+    setPlanFilter(value);
+    setPagination({ ...pagination, current: 1 });
+    fetchData(
+      { page: 1, pageSize: pagination.pageSize, search },
+      value // truyền plan mới vào fetchData
+    );
   };
 
   return (
     <div className="page-layout">
       <Card className="aices-card">
-        {/* 🔥 Search nằm trong card (như User/Company list) */}
+        {/* 🔥 Search + Filter nằm trong card */}
         <div className="company-header-row">
           <div className="company-left">
             <Input
@@ -113,9 +148,21 @@ export default function SubscribedCompaniesPage() {
           </div>
 
           <div className="company-right">
-            <Button className="btn-search" onClick={() => fetchData()}>
-              <SearchOutlined /> Search
-            </Button>
+            <Space size="middle">
+              {/* Select filter Subscription plan */}
+              <Select
+                allowClear
+                placeholder="Subscription plan"
+                value={planFilter}
+                options={planOptions}
+                onChange={(value) => handlePlanChange(value)}
+                style={{ minWidth: 160 }}
+              />
+
+              <Button className="btn-search" onClick={() => fetchData()}>
+                <SearchOutlined /> Search
+              </Button>
+            </Space>
           </div>
         </div>
 

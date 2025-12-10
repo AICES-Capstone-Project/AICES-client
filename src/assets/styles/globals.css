@@ -79,14 +79,14 @@ button {
 		left: 0;
 		top: 0;
 		height: 100%;
-		width: 3px;
+		width: 7px;
 		background-color: var(--color-primary);
 		border-radius: 0 4px 4px 0;
 	}
 
-	/* Không tô nền khi active */
+	/* Không tô nền khi active - chỉ nhẹ 10% tint để không quá chói */
 	.custom-menu.ant-menu-inline .ant-menu-item-selected {
-		background-color: transparent !important;
+		background-color: color-mix(in srgb, var(--color-primary-light) 10%, transparent) !important;
 	}
 
 	/* Màu chữ & icon khi active */
@@ -609,6 +609,34 @@ button {
 
 .company-btn--filled .anticon {
 	color: inherit !important;
+}
+
+/* Slider brand customization: make the track and handle use the primary light color */
+.ant-slider {
+	touch-action: pan-y;
+}
+.ant-slider .ant-slider-rail {
+	background: rgba(0,0,0,0.06) !important;
+}
+
+.ant-slider .ant-slider-dot {
+    border-color: var(--color-primary-light) !important;
+    background-color: #fff; /* Nền trắng */
+}
+
+/* Chấm tròn khi đã trượt qua (active) */
+.ant-slider .ant-slider-dot-active {
+    border-color: var(--color-primary-light) !important;
+    /* Nếu bạn muốn chấm active nó tô màu đặc luôn thì thêm dòng dưới: */
+    /* background-color: var(--color-primary-light) !important; */
+} 
+
+.ant-slider .ant-slider-track {
+	background: var(--color-primary-light) !important;
+}
+.ant-slider .ant-slider-handle {
+	border-color: var(--color-primary-light) !important;
+	background: #fff !important;
 }
 
 /* =================== CUSTOM PAGINATION COLORS =================== */

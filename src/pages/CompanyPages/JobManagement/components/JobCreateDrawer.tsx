@@ -1,8 +1,10 @@
-import { Drawer, Form, Input, Button, Space, InputNumber, Select, Typography } from "antd";
-import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
+import { Drawer, Form, Input, Button, Select, Typography, Slider } from "antd";
+import { PlusCircleOutlined, MinusCircleOutlined, } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { systemService } from "../../../../services/systemService";
 import { categoryService } from "../../../../services/categoryService";
+import { languageService } from "../../../../services/languageService";
+import { levelService } from "../../../../services/levelService";
 import { useAppSelector } from "../../../../hooks/redux";
 import { ROLES } from "../../../../services/config";
 
@@ -15,14 +17,22 @@ type Props = {
 
 const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
   const [form] = Form.useForm();
+
+  // [Added] Watch criteria to calculate percentage in real-time
+  const criteriaValues = Form.useWatch('criteria', form);
+
   const [categories, setCategories] = useState<Array<any>>([]);
   const [specializations, setSpecializations] = useState<Array<any>>([]);
   const [skills, setSkills] = useState<Array<any>>([]);
   const [employmentTypes, setEmploymentTypes] = useState<Array<any>>([]);
+  const [languages, setLanguages] = useState<Array<any>>([]);
+  const [levels, setLevels] = useState<Array<any>>([]);
   const [loadingCats, setLoadingCats] = useState(false);
   const [loadingSpecs, setLoadingSpecs] = useState(false);
   const [loadingSkills, setLoadingSkills] = useState(false);
   const [loadingEmployment, setLoadingEmployment] = useState(false);
+  const [loadingLangs, setLoadingLangs] = useState(false);
+  const [loadingLevels, setLoadingLevels] = useState(false);
   const [savedAndPending, setSavedAndPending] = useState(false);
   const { user } = useAppSelector((s) => s.auth);
   const isRecruiter = (user?.roleName || "").toLowerCase() === (ROLES.Hr_Recruiter || "").toLowerCase();
@@ -53,6 +63,8 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
       setLoadingCats(true);
       setLoadingSkills(true);
       setLoadingEmployment(true);
+      setLoadingLangs(true);
+      setLoadingLevels(true);
       try {
         console.log("🔄 Starting to fetch categories...");
         const catsResp = await categoryService.getAll({ page: 1, pageSize: 100 });
@@ -60,9 +72,11 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
         console.log("📊 Categories data field:", catsResp?.data);
         console.log("📋 Type of data:", typeof catsResp?.data, Array.isArray(catsResp?.data));
 
-        const [skillsResp, empResp] = await Promise.all([
+        const [skillsResp, empResp, langsResp, levelsResp] = await Promise.all([
           systemService.getSkills(),
           systemService.getEmploymentTypes(),
+          languageService.getPublicLanguages(),
+          levelService.getPublicLevels(),
         ]);
 
         if (!mounted) return;
@@ -79,9 +93,21 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
         console.log("✅ Final extracted categories:", categoriesData);
         console.log("📝 Categories count:", categoriesData.length);
 
+        const normalizeList = (d: any) => {
+          if (!d) return [];
+          if (Array.isArray(d)) return d;
+          if (Array.isArray(d.items)) return d.items;
+          if (Array.isArray(d.data)) return d.data;
+          if (Array.isArray(d.levels)) return d.levels;
+          if (Array.isArray(d.languages)) return d.languages;
+          return [];
+        };
+
         setCategories(categoriesData);
-        setSkills(skillsResp?.data || []);
-        setEmploymentTypes(empResp?.data || []);
+        setSkills(normalizeList(skillsResp?.data));
+        setEmploymentTypes(normalizeList(empResp?.data));
+        setLanguages(normalizeList(langsResp?.data));
+        setLevels(normalizeList(levelsResp?.data));
       } catch (error) {
         console.error("❌ Error loading categories:", error);
         setCategories([]);
@@ -89,6 +115,8 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
         setLoadingCats(false);
         setLoadingSkills(false);
         setLoadingEmployment(false);
+        setLoadingLangs(false);
+        setLoadingLevels(false);
       }
     };
     load();
@@ -123,6 +151,12 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
     };
   }, [open, form]);
 
+  // [Added] Helper function to calculate total score for UI display
+  const calculateTotalScore = () => {
+    return (criteriaValues || []).reduce((sum: number, item: any) => sum + (item?.importance || 0), 0);
+  };
+  const totalScore = calculateTotalScore();
+
   return (
     <Drawer title="Create Job" width={640} open={open} onClose={onClose}>
       <Form
@@ -141,25 +175,45 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
             ]);
             return;
           }
-          // validate weights sum to 1
-          const sum = crit.reduce((acc: number, c: any) => acc + Number(c?.weight || 0), 0);
-          if (Math.abs(sum - 1) > 1e-6) {
-            // set error on the criteria field and abort submit
-            form.setFields([
-              {
-                name: ["criteria"],
-                errors: ["Total weight must equal 1"],
-              },
-            ]);
+          const totalImportance = crit.reduce((acc: number, c: any) => acc + (c?.importance || 0), 0);
+
+          if (totalImportance === 0) {
             return;
           }
 
-          // call parent submit and wait for success boolean
-          const result = await onSubmit(values);
-          // if current user is HR_RECRUITER and creation succeeded, show pending message
+          let runningWeight = 0;
+          const processedCriteria = crit.map((c: any, index: number) => {
+            let weight = 0;
+            if (index === crit.length - 1) {
+              // Last item takes the remainder to ensure sum is exactly 1
+              weight = Number((1 - runningWeight).toFixed(2));
+            } else {
+              weight = Number((c.importance / totalImportance).toFixed(2));
+              runningWeight += weight;
+            }
+
+            return {
+              name: c.name,
+              weight: weight,
+            };
+          });
+
+          // Build payload matching API expectation
+          const payload: any = {
+            title: values.title,
+            description: values.description,
+            requirements: values.requirements,
+            specializationId: values.specializationId,
+            employmentTypeIds: values.employmentTypeIds || [],
+            skillIds: values.skillIds || [],
+            levelId: values.levelId || undefined,
+            languageIds: values.languageIds || [],
+            criteria: processedCriteria,
+          };
+
+          const result = await onSubmit(payload);
           if (isRecruiter && result) {
             setSavedAndPending(true);
-            // keep drawer open so recruiter sees "Chờ duyệt"
             return;
           }
           // otherwise close and reset
@@ -181,7 +235,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
           { required: true, message: "Please input description" },
           { max: 300, message: "Description must not exceed 300 characters" }
         ]}>
-          <Input.TextArea rows={3} maxLength={300} showCount />
+          <Input.TextArea rows={2} maxLength={300} showCount />
         </Form.Item>
 
         <Form.Item name="requirements" label="Requirements" rules={[
@@ -191,13 +245,13 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
           <Input.TextArea rows={3} maxLength={2000} showCount />
         </Form.Item>
 
-        <Form.Item name="targetQuantity" label="Target Quantity" rules={[
+        {/* <Form.Item name="targetQuantity" label="Target Quantity" rules={[
           { required: true, message: "Please input target quantity" },
           { type: "number", min: 1, message: "Target quantity must be at least 1" },
           { type: "number", max: 9999, message: "Target quantity must not exceed 9999" }
         ]}>
           <InputNumber className="number-input" min={1} max={9999} style={{ width: "100%" }} placeholder="Number of positions" />
-        </Form.Item>
+        </Form.Item> */}
 
         <div style={{ display: "flex", gap: "16px" }}>
           <Form.Item
@@ -236,27 +290,56 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
               }))}
             />
           </Form.Item>
+
+          <Form.Item
+            name="levelId"
+            label="Level"
+            style={{ width: "50%" }}
+            rules={[{ required: true, message: "Please select a level" }]}
+          >
+            <Select
+              className="company-select"
+              placeholder={loadingLevels ? "Loading levels..." : "Select level"}
+              loading={loadingLevels}
+              allowClear
+              options={levels.map((l: any) => ({
+                label: l.name,
+                value: l.id ?? l.levelId ?? l.name,
+              }))}
+            />
+          </Form.Item>
         </div>
 
 
-        <Form.Item name="criteria" label="Criteria">
+        <Form.Item name="criteria" label="Criteria Assessment">
+          <div style={{ marginBottom: 8, color: '#666', fontSize: 13 }}>
+            Define importance for each criteria. The system will auto-calculate weights (%).
+          </div>
           <Form.List
             name="criteria"
-            initialValue={[{ name: "", weight: "" }, { name: "", weight: "" }]}
+            // [UPDATED] Initial value now uses 'importance' instead of 'weight'
+            initialValue={[{ name: "", importance: 5 }, { name: "", importance: 5 }]}
           >
             {(fields, { add, remove }) => (
               <>
-                {fields.map((field, index) => {
+                {fields.map((field) => {
                   const { key, ...restField } = field as any;
+                  // Calculate estimated percentage for UI only
+                  const currentImportance = form.getFieldValue(['criteria', field.name, 'importance']) || 0;
+                  const estimatedPercent = totalScore > 0 ? Math.round((currentImportance / totalScore) * 100) : 0;
+
                   return (
                     <div
                       key={key}
                       style={{
                         display: "flex",
-                        alignItems: "center",
+                        alignItems: "flex-start", // changed to flex-start for better alignment with slider label
                         gap: 8,
                         width: "100%",
-                        marginBottom: 8,
+                        marginBottom: 16,
+                        background: '#f9f9f9', // Added light bg to separate items
+                        padding: 10,
+                        borderRadius: 6
                       }}
                     >
                       {/* Criteria name */}
@@ -268,45 +351,40 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
                           { max: 70, message: "Criteria name must not exceed 70 characters" }
                         ]}
                         style={{ flex: 1, marginBottom: 0 }}
+                        label="Criteria Name"
                       >
-                        <Input placeholder="Criteria name" maxLength={70} showCount />
+                        <Input placeholder="e.g. ReactJS Skill" maxLength={70} showCount />
                       </Form.Item>
 
-                      {/* Weight */}
-                      <Form.Item
-                        {...restField}
-                        name={[field.name, "weight"]}
-                        rules={[
-                          { required: true, message: "Please input weight" },
-                          { type: "number", min: 0, max: 1, message: "Weight must be between 0 and 1" }
-                        ]}
-                        style={{ width: 150, marginBottom: 0 }}
-                      >
-                        <InputNumber
-                          min={0}
-                          max={1}
-                          step={0.01}
-                          precision={2}
-                          placeholder="Criteria weight"
-                          className="number-input"
-                          style={{ width: "100%" }}
-                        />
-                      </Form.Item>
+                      {/* [UPDATED] Importance Slider replacing Weight Input */}
+                      <div style={{ flex: 1, paddingLeft: 10 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 0 }}>
+                          <span style={{ fontSize: 12 }}>Importance</span>
+                          <span style={{ fontSize: 12, fontWeight: 'bold', color: 'var(--color-primary)' }}>
+                            ~{estimatedPercent}%
+                          </span>
+                        </div>
+                        <Form.Item
+                          {...restField}
+                          name={[field.name, "importance"]}
+                          initialValue={5}
+                          style={{ marginBottom: 0 }}
+                        >
+                          <Slider
+                            min={0.1}
+                            max={10}
+                            step={0.1}
+                            marks={{ 0.1: '0.1', 5: 'Med', 10: 'High' }}
+                            tipFormatter={(v) => `${(v as number).toFixed(1)}`}
+                          />
+                        </Form.Item>
 
-                      {/* Nút thêm / xóa */}
-                      {index === fields.length - 1 ? (
-                        <PlusCircleOutlined
-                          onClick={() => {
-                            add();
-                            form.setFields([{ name: ["criteria"], errors: [] }]);
-                          }}
-                          style={{
-                            color: "var(--color-primary-light)",
-                            cursor: "pointer",
-                            fontSize: 18,
-                          }}
-                        />
-                      ) : (
+                        {/* Hidden Weight field if you still need to see it in form values for debugging */}
+                        {/* <Form.Item name={[field.name, "weight"]} hidden><InputNumber /></Form.Item> */}
+                      </div>
+
+                      {/* Nút xóa tất cả các mục (mỗi mục có dấu trừ) */}
+                      <div style={{ marginTop: 30 }}>
                         <MinusCircleOutlined
                           onClick={() => {
                             remove(field.name);
@@ -318,19 +396,35 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
                             fontSize: 18,
                           }}
                         />
-                      )}
+                      </div>
                     </div>
                   );
                 })}
-                <div style={{ marginTop: 6, color: "rgba(0,0,0,0.45)", fontSize: 12 }}>
-                  At least 2 criteria required; weights must sum to 1.
+                {/* Add button placed below the list */}
+                <div style={{ marginTop: 6 }}>
+                  <Button
+                    className="company-btn"
+                    style={{ width: "100%" }}
+                    icon={<PlusCircleOutlined />}
+                    onClick={() => {
+                      add();
+                      form.setFields([{ name: ["criteria"], errors: [] }]);
+                    }}
+                  >
+                    Add criteria
+                  </Button>
+
+                  <div style={{ marginTop: 8, color: "rgba(0,0,0,0.45)", fontSize: 12 }}>
+                    At least 2 criteria required.
+                    {/* [Updated text] weights must sum to 1. -> System will normalize weights automatically. */}
+                  </div>
                 </div>
               </>
             )}
           </Form.List>
         </Form.Item>
 
-        <Form.Item name="employmentTypes" label="Employment Types" rules={[{ required: true, message: "Please select employment types" }]}>
+        <Form.Item name="employmentTypeIds" label="Employment Types" rules={[{ required: true, message: "Please select employment types" }]}>
           <Select
             className="company-select"
             mode="multiple"
@@ -341,26 +435,30 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
           />
         </Form.Item>
 
-        <Form.Item name="skills" label="Skills" rules={[{ required: true, message: "Please select skills" }]}>
+        <Form.Item name="skillIds" label="Skills" rules={[{ required: true, message: "Please select skills" }]}>
           <Select className="company-select" mode="multiple" placeholder={loadingSkills ? "Loading skills..." : "Select skills"} loading={loadingSkills} options={skills.map((s: any) => ({ label: s.name, value: s.skillId }))} allowClear />
         </Form.Item>
 
+        <Form.Item name="languageIds" label="Languages" rules={[{ required: true, message: "Please select languages" }]}>
+          <Select className="company-select" mode="multiple" placeholder={loadingLangs ? "Loading languages..." : "Select languages"} loading={loadingLangs} options={languages.map((l: any) => ({ label: l.name, value: l.id ?? l.languageId }))} allowClear />
+        </Form.Item>
+
         <Form.Item>
-          <Space>
+          <div style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
             <Button
+              className="company-btn"
               onClick={() => {
                 onClose();
                 setSavedAndPending(false);
-                // schedule reset to avoid calling before unmount/mount timings
                 Promise.resolve().then(() => form.resetFields());
               }}
             >
               Cancel
             </Button>
             <Button className="company-btn--filled" htmlType="submit" loading={saving}>
-              Save
+              Create
             </Button>
-          </Space>
+          </div>
         </Form.Item>
 
         {savedAndPending && (

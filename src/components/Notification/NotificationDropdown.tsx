@@ -2,10 +2,12 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Popover, Spin, Empty, Button, Avatar, notification as antNotification } from "antd";
 import { BellOutlined, ReloadOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { notificationService } from "../../services/notificationService";
 import { invitationService } from "../../services/invitationService";
 import { useNotificationSignalR } from "../../hooks/useNotificationSignalR";
 import type { Notification } from "../../types/notification.types";
+import { APP_ROUTES } from "../../services/config";
 
 import { getNotificationIcon } from "./parials/notification.utils";
 import NotificationHeader from "./parials/NotificationHeader";
@@ -18,6 +20,7 @@ interface NotificationDropdownProps {
 
 const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ className, style }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -27,6 +30,16 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ className, 
 
   // Tính toán số lượng chưa đọc
   const unreadCount = notifications.filter((n) => !n.isRead).length;
+
+  // Broadcast unread count for other parts of the app (e.g., header badge)
+  useEffect(() => {
+    try {
+      const ev = new CustomEvent("notifications:count", { detail: { count: unreadCount } });
+      window.dispatchEvent(ev as Event);
+    } catch (e) {
+      // ignore environments where CustomEvent may fail
+    }
+  }, [unreadCount]);
 
   // --- HANDLERS ---
 
@@ -132,7 +145,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ className, 
         prev.map((n) => (n.notifId === notif.notifId ? { ...n, isRead: true } : n))
       );
     }
-    setOpen(false);
+    // setOpen(false);
   };
 
   const handleInvitationAction = async (notif: Notification, action: 'accept' | 'decline') => {
@@ -214,6 +227,26 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ className, 
             />
           ))
         )}
+      </div>
+      {/* Footer: view all notifications */}
+      <div className="border-t px-3 py-2">
+        <Button
+          type="link"
+          block
+          onClick={() => {
+            setOpen(false);
+            try {
+              navigate(APP_ROUTES.COMPANY_NOTIFICATION);
+            } catch (e) {
+              // fallback: navigate to hard-coded path
+              // eslint-disable-next-line no-console
+              console.warn("Failed to navigate via APP_ROUTES, falling back", e);
+              navigate("/company/notification");
+            }
+          }}
+        >
+          {t("notification.viewAll", "Xem tất cả thông báo")}
+        </Button>
       </div>
     </div>
   );

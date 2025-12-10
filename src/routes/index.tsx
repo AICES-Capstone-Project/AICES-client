@@ -55,12 +55,23 @@ const JobManagement = lazy(
 const SubmissionPending = lazy(
 	() => import("../pages/CompanyPages/MyApartment/SubmissionPending")
 );
+const Campain = lazy(
+	() => import("../pages/CompanyPages/Campain/CampainManagement")
+);
+const CampaignDetail = lazy(() => import("../pages/CompanyPages/Campain/component/CampaignDetail"));
+const JobResumes = lazy(() => import("../pages/CompanyPages/Campain/component/JobResumes"));
 const AIScreening = lazy(
 	() => import("../pages/CompanyPages/AIScreening/AIScreening")
 );
 const ResumeList = lazy(
 	() => import("../pages/CompanyPages/AIScreening/component/ResumeList")
 );
+const Notification = lazy(
+	() => import("../pages/CompanyPages/Notification/NotificationManager")
+);
+// const CandidateManagement = lazy(
+// 	() => import("../pages/CompanyPages/Candidate/CandidateManagement")
+// );
 const CompareResumes = lazy(
 	() => import("../pages/CompanyPages/AIScreening/component/CompareResumes")
 );
@@ -212,6 +223,8 @@ export const router = createBrowserRouter([
 			{ path: APP_ROUTES.COMPANY_DASHBOARD, element: <CompanyDashboard /> },
 			{ path: APP_ROUTES.COMPANY_STAFFS, element: <CompanyStaffs /> },
 			{ path: APP_ROUTES.COMPANY_JOBS, element: <JobManagement /> },
+			{ path: APP_ROUTES.COMPANY_NOTIFICATION, element: <Notification /> },
+			// { path: APP_ROUTES.COMPANY_CANDIDATE, element: <CandidateManagement /> },
 			{ path: APP_ROUTES.COMPANY_SETTINGS, element: <Setting /> },
 			{
 				path: APP_ROUTES.COMPANY_MY_APARTMENTS,
@@ -224,6 +237,18 @@ export const router = createBrowserRouter([
 			{
 				path: APP_ROUTES.COMPANY_AI_SCREENING,
 				element: <AIScreening />,
+			},
+			{
+				path: APP_ROUTES.COMPANY_CAMPAIN,
+				element: <Campain />,
+			},
+			{
+				path: "/company/campaign/:campaignId",
+				element: <CampaignDetail />,
+			},
+			{
+				path: "/company/campaign/:campaignId/job/:jobId/resumes",
+				element: <JobResumes />,
 			},
 			{
 				path: APP_ROUTES.COMPANY_AI_SCREENING_COMPARE,

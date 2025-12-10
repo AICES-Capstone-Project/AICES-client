@@ -82,9 +82,6 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
           <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Requirements</div>}>
             <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.requirements || '-'}</div>
           </Descriptions.Item>
-          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Target Candidate Quantity</div>}>
-            <div style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.targetQuantity || '-'}</div>
-          </Descriptions.Item>
           <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Criteria</div>}>
             {Array.isArray((job as any).criteria) && (job as any).criteria.length > 0 ? (
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -101,11 +98,14 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
           <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Employment Types</div>}>
             {Array.isArray(job.employmentTypes) && job.employmentTypes.length > 0 ? (
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {job.employmentTypes.map((e: any, i: number) => (
-                  <Tag key={`${e}-${i}`} color={tagColorFor(String(e))} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
-                    {e}
-                  </Tag>
-                ))}
+                {job.employmentTypes.map((e: any, i: number) => {
+                    const label = e && (typeof e === 'object' ? (e.name ?? e.employTypeId ?? String(e)) : String(e));
+                    return (
+                      <Tag key={`${label}-${i}`} color={tagColorFor(String(label))} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                        {label}
+                      </Tag>
+                    );
+                  })}
               </div>
             ) : (
               <span>-</span>
@@ -114,11 +114,14 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
           <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Skills</div>}>
             {Array.isArray(job.skills) && job.skills.length > 0 ? (
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {job.skills.map((s: any, i: number) => (
-                  <Tag key={`${s}-${i}`} color={tagColorFor(String(s))} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
-                    {s}
-                  </Tag>
-                ))}
+                {job.skills.map((s: any, i: number) => {
+                  const label = s && (typeof s === 'object' ? (s.name ?? s.skillId ?? String(s)) : String(s));
+                  return (
+                    <Tag key={`${label}-${i}`} color={tagColorFor(String(label))} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                      {label}
+                    </Tag>
+                  );
+                })}
               </div>
             ) : (
               <span>-</span>

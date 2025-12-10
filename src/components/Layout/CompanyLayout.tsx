@@ -1,18 +1,10 @@
 import { useState, useEffect } from "react"; 
-import { Layout, Menu, Avatar, Dropdown, Typography, Button } from "antd";
+import { Layout, Menu, Avatar, Dropdown, Typography, Button, Badge } from "antd";
+import { notificationService } from "../../services/notificationService";
+import { STORAGE_KEYS } from "../../services/config";
+import { useNotificationSignalR } from "../../hooks/useNotificationSignalR";
 import type { MenuProps } from "antd";
-import { PanelLeft } from "lucide-react";
-import {
-    LineChartOutlined,
-    TeamOutlined,
-    AppstoreOutlined,
-    LogoutOutlined,
-    SettingOutlined,
-    ApartmentOutlined,
-    RobotOutlined,
-    StarOutlined,
-    UserOutlined,
-} from "@ant-design/icons";
+import { FileUser, PanelLeft, Bot, SwatchBook, Users, Building, ChartLine, BadgeDollarSign, Settings, LogOut, UserCog, Rocket, Bell} from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo/logo_long.png";
 import defaultAvatar from "../../assets/images/Avatar_Default.jpg";
@@ -50,7 +42,50 @@ export default function CompanyLayout() {
         ? location.pathname
         : defaultCompanyRoute;
 
-    const iconStyle = { color: "var(--color-primary-medium)", fontWeight: "bold" };
+    const iconStyle = { color: "var(--color-primary-light)", fontWeight: "bold" };
+    const [notifCount, setNotifCount] = useState<number>(0);
+
+    useEffect(() => {
+        const handler = (e: Event) => {
+            const anyE = e as CustomEvent<{ count: number }>;
+            const c = anyE?.detail?.count ?? 0;
+            setNotifCount(Number(c));
+        };
+        window.addEventListener("notifications:count", handler as EventListener);
+        return () => window.removeEventListener("notifications:count", handler as EventListener);
+    }, []);
+
+    // Also subscribe to SignalR notifications directly so sidebar updates in real-time
+    const token = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN) : null;
+    useNotificationSignalR({
+        onNewNotification: (n) => {
+            try {
+                if (!n.isRead) {
+                    setNotifCount((s) => s + 1);
+                }
+            } catch (e) {
+                // ignore
+            }
+        },
+        enabled: !!token,
+    });
+
+    // Also fetch unread count directly so sidebar shows count even when header/dropdown isn't mounted
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const resp = await notificationService.getMyNotifications();
+                if (resp && resp.status === "Success" && Array.isArray(resp.data)) {
+                    const unread = resp.data.filter((n: any) => !n.isRead).length;
+                    setNotifCount(unread);
+                }
+            } catch (e) {
+                // ignore errors here; listener/event will update when possible
+                // console.error("Failed to load notifications for sidebar badge", e);
+            }
+        };
+        load();
+    }, []);
     
     // Fetch current subscription
     useEffect(() => {
@@ -73,12 +108,14 @@ export default function CompanyLayout() {
     }, [hasCompany]);
 
     // Main navigation items (Dashboard -> AI CV Review)
+    const displayBadge = notifCount > 0 ? (notifCount > 99 ? "99+" : notifCount) : undefined;
+
     const mainMenuItems = [
         // 1. Dashboard (Only if has company)
         ...(hasCompany ? [
             {
                 key: APP_ROUTES.COMPANY_DASHBOARD,
-                icon: <LineChartOutlined style={iconStyle} />,
+                icon: <ChartLine size={18} style={iconStyle} />,
                 label: <Link to={APP_ROUTES.COMPANY_DASHBOARD}>Dashboard</Link>,
             },
         ] : []),
@@ -86,8 +123,17 @@ export default function CompanyLayout() {
         // 2. My Company (Always visible)
         {
             key: APP_ROUTES.COMPANY_MY_APARTMENTS,
-            icon: <ApartmentOutlined style={iconStyle} />,
+            icon: <Building size={18} style={iconStyle} />,
             label: <Link to={APP_ROUTES.COMPANY_MY_APARTMENTS}>My Company</Link>,
+        },
+        {
+            key: APP_ROUTES.COMPANY_NOTIFICATION,
+            icon: (
+                <Badge count={displayBadge} size="small" offset={[0, 0]}>
+                    <Bell size={18} style={iconStyle} />
+                </Badge>
+            ),
+            label: <Link to={APP_ROUTES.COMPANY_NOTIFICATION}>Notification</Link>,
         },
 
         // 3. Staffs (Only for HR Manager)
@@ -95,7 +141,7 @@ export default function CompanyLayout() {
             ? [
                 {
                     key: APP_ROUTES.COMPANY_STAFFS,
-                    icon: <TeamOutlined style={iconStyle} />,
+                    icon: <Users size={18} style={iconStyle} />,
                     label: <Link to={APP_ROUTES.COMPANY_STAFFS}>Staffs</Link>,
                 },
             ]
@@ -105,13 +151,23 @@ export default function CompanyLayout() {
         ...(hasCompany ? [
             {
                 key: APP_ROUTES.COMPANY_JOBS,
-                icon: <AppstoreOutlined style={iconStyle} />,
+                icon: <SwatchBook size={18} style={iconStyle} />,
                 label: <Link to={APP_ROUTES.COMPANY_JOBS}>Jobs</Link>,
             },
             {
                 key: APP_ROUTES.COMPANY_AI_SCREENING,
-                icon: <RobotOutlined style={iconStyle} />,
+                icon: <Bot size={18} style={iconStyle} />,
                 label: <Link to={APP_ROUTES.COMPANY_AI_SCREENING}>AI CV Review</Link>,
+            },
+            {
+                key: APP_ROUTES.COMPANY_CAMPAIN,
+                icon: <Rocket size={18}  style={iconStyle} />,
+                label: <Link to={APP_ROUTES.COMPANY_CAMPAIN}>Campain</Link>,
+            },
+            {
+                key: APP_ROUTES.COMPANY_CANDIDATE,
+                icon: <FileUser size={18} style={iconStyle} />,
+                label: <Link to={APP_ROUTES.COMPANY_CANDIDATE}>Candidate</Link>,
             },
         ] : []),
     ];
@@ -123,22 +179,24 @@ export default function CompanyLayout() {
             ? [
                 {
                     key: APP_ROUTES.COMPANY_SUBSCRIPTIONS,
-                    icon: <StarOutlined />,
+                    icon: <BadgeDollarSign size={18} style={iconStyle} />,
                     label: <Link to={APP_ROUTES.COMPANY_SUBSCRIPTIONS}>Subscription Plans</Link>,
+                    title: "",
                 },
             ]
             : []),
         {
             key: APP_ROUTES.COMPANY_SETTINGS,
-            icon: <SettingOutlined />,
+            icon: <Settings size={18} style={iconStyle} />,
             label: <Link to={APP_ROUTES.COMPANY_SETTINGS}>Settings</Link>,
+            title: "",
         },
         {
             type: 'divider',
         },
         {
             key: "logout",
-            icon: <LogoutOutlined />,
+            icon: <LogOut size={18} />,
             danger: true,
             label: "Logout",
             onClick: () => handleLogout(),
@@ -284,7 +342,7 @@ export default function CompanyLayout() {
                         >
                             <Avatar 
                                 src={user?.avatarUrl || defaultAvatar}
-                                icon={<UserOutlined />}
+                                icon={<UserCog  />}
                                 size={collapsed ? 40 : 27}
                             />
                             {!collapsed && (

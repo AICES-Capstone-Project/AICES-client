@@ -148,6 +148,20 @@ export const API_ENDPOINTS = {
     SYSTEM_DELETE: (skillId: number) => `/system/skills/${skillId}`,
   },
 
+  // Language endpoints
+  LANGUAGE: {
+    //------------------------------- PUBLIC -----------------------------------------
+    PUBLIC_GET: "/public/languages",
+    PUBLIC_GET_BY_ID: (languageId: number) => `/public/languages/${languageId}`,
+  },
+
+  // Level endpoints
+  LEVEL: {
+    //------------------------------- PUBLIC -----------------------------------------
+    PUBLIC_GET: "/public/levels",
+    PUBLIC_GET_BY_ID: (levelId: number) => `/public/levels/${levelId}`,
+  },
+
   // Banner Config endpoints
   BANNER_CONFIG: {
     //------------------------------- PUBLIC -----------------------------------------
@@ -319,6 +333,29 @@ export const API_ENDPOINTS = {
     COMPANY_DELETE: (resumeId: number) => `/resumes/${resumeId}`,
   },
 
+  CAMPAIGN: {
+    //------------------------------- COMPANY -----------------------------------------
+
+    COMPANY_GET: "/campaigns",
+    COMPANY_GET_BY_ID: (campaignId: number) =>
+      `/campaigns/${campaignId}`,
+
+    COMPANY_POST: `/campaigns`,
+
+    COMPANY_UPDATE_STATUS: (campaignId: number) =>
+      `/campaigns/${campaignId}/status`,
+
+    COMPANY_DELETE: (campaignId: number) => `/campaigns/${campaignId}`,
+
+    // Manage jobs in a campaign
+    COMPANY_ADD_JOBS: (campaignId: number) =>
+      `/campaigns/${campaignId}/jobs`,
+
+    COMPANY_REMOVE_JOBS: (campaignId: number) =>
+      `/campaigns/${campaignId}/jobs`,
+  },
+
+
   COMPANY_DASHBOARD: {
     TOP_CATE_SPEC: "/dashboard/top-category-spec",
     SUMMARY: "/dashboard/summary",
@@ -457,12 +494,15 @@ export const APP_ROUTES = {
   COMPANY_SETTINGS: "/company/settings",
   COMPANY_MY_APARTMENTS: "/company/my-apartments",
   COMPANY_PENDING_APPROVAL: "/company/pending-approval",
+  COMPANY_CAMPAIN: "/company/campain",
+  COMPANY_NOTIFICATION: "/company/notification",
   COMPANY_AI_SCREENING: "/company/ai-screening",
   COMPANY_AI_SCREENING_RESUMES: "/company/ai-screening/:jobId/resumes",
   COMPANY_AI_SCREENING_COMPARE: "/company/ai-screening/compare",
   COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
   COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
   COMPANY_PAYMENT_HISTORY: "/company/payment-history",
+  COMPANY_CANDIDATE: "/company/candidate",
 } as const;
 
 export const ROLES = {

@@ -29,16 +29,16 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   const menuItems: MenuProps["items"] = !notif.isRead && !isPending
     ? [
-        {
-          key: "markRead",
-          icon: <CheckOutlined />,
-          label: t("notification.markAsRead", "Đánh dấu là đã đọc"),
-          onClick: (info) => {
-            info.domEvent.stopPropagation();
-            onMarkRead(notif.notifId, info.domEvent as unknown as React.MouseEvent);
-          },
+      {
+        key: "markRead",
+        icon: <CheckOutlined />,
+        label: t("notification.markAsRead", "Đánh dấu là đã đọc"),
+        onClick: (info) => {
+          info.domEvent.stopPropagation();
+          onMarkRead(notif.notifId, info.domEvent as unknown as React.MouseEvent);
         },
-      ]
+      },
+    ]
     : [];
 
   return (
@@ -46,10 +46,16 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       className={`group relative flex items-center px-3 py-3 w-full rounded-lg cursor-pointer transition-colors 
         ${!notif.isRead ? "bg-blue-50/50" : "hover:bg-green-100"} 
       `}
-      onClick={() => onClick(notif)}
-      style = {{ margin: '5px 5px 0 5px' }}
+      onClick={(e) => {
+        if (!notif.isRead) {
+          onMarkRead(notif.notifId, e);
+        }
+        onClick(notif);
+      }}
+
+      style={{ margin: '5px 5px 0 5px' }}
     >
-      
+
       {/* --- LEFT COLUMN: Avatar --- */}
       <div className="flex-shrink-0 w-[60px] flex items-center justify-center mr-3">
         <Avatar
@@ -62,7 +68,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
       {/* --- RIGHT COLUMN: Content --- */}
       <div className="flex-1 min-w-0 pr-6">
-        
+
         {/* Message: Bold if unread */}
         <div className={`text-[14px] leading-5 mb-1 ${!notif.isRead ? "text-[#050505] font-bold" : "text-gray-600"}`}>
           <span className="line-clamp-3" dangerouslySetInnerHTML={{ __html: notif.message }} />

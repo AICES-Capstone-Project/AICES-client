@@ -4,7 +4,7 @@ import { notificationService } from "../../services/notificationService";
 import { STORAGE_KEYS } from "../../services/config";
 import { useNotificationSignalR } from "../../hooks/useNotificationSignalR";
 import type { MenuProps } from "antd";
-import { FileUser, PanelLeft, Bot, SwatchBook, Users, Building, ChartLine, BadgeDollarSign, Settings, LogOut, UserCog, Rocket, Bell} from "lucide-react";
+import { FileUser, PanelLeft, SwatchBook, Users, Building, ChartLine, BadgeDollarSign, Settings, LogOut, UserCog, Rocket, Bell} from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo/logo_long.png";
 import defaultAvatar from "../../assets/images/Avatar_Default.jpg";
@@ -42,7 +42,8 @@ export default function CompanyLayout() {
         ? location.pathname
         : defaultCompanyRoute;
 
-    const iconStyle = { color: "var(--color-primary-light)", fontWeight: "bold" };
+    // Use `inherit` so icons follow the surrounding text color (avoids always using the "light" primary variable)
+    const iconStyle = { color: "inherit", fontWeight: "bold" };
     const [notifCount, setNotifCount] = useState<number>(0);
 
     useEffect(() => {
@@ -153,11 +154,6 @@ export default function CompanyLayout() {
                 key: APP_ROUTES.COMPANY_JOBS,
                 icon: <SwatchBook size={18} style={iconStyle} />,
                 label: <Link to={APP_ROUTES.COMPANY_JOBS}>Jobs</Link>,
-            },
-            {
-                key: APP_ROUTES.COMPANY_AI_SCREENING,
-                icon: <Bot size={18} style={iconStyle} />,
-                label: <Link to={APP_ROUTES.COMPANY_AI_SCREENING}>AI CV Review</Link>,
             },
             {
                 key: APP_ROUTES.COMPANY_CAMPAIN,

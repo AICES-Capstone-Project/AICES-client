@@ -21,9 +21,9 @@ import {
 	ArrowLeftOutlined,
 	SearchOutlined,
 } from "@ant-design/icons";
-import resumeService from "../../../../services/resumeService";
-import { toastError, toastSuccess } from "../../../../components/UI/Toast";
-import { useResumeSignalR } from "../../../../hooks/useResumeSignalR";
+import resumeService from "../../../services/resumeService";
+import { toastError, toastSuccess } from "../../../components/UI/Toast";
+import { useResumeSignalR } from "../../../hooks/useResumeSignalR";
 import ScoreFilter from "./ScoreFilter";
 import ResumeTable from "./ResumeTable";
 import UploadDrawer from "./UploadDrawer";
@@ -60,8 +60,13 @@ interface Resume {
 	}>;
 }
 
-const ResumeList: React.FC = () => {
-	const { jobId } = useParams<{ jobId: string }>();
+type ResumeListProps = {
+	jobId?: string | number;
+};
+
+const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
+	const params = useParams<{ jobId: string }>();
+	const jobId = propJobId ?? params.jobId;
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
 	const [resumes, setResumes] = useState<Resume[]>([]);
@@ -130,7 +135,7 @@ const ResumeList: React.FC = () => {
 	const loadJobInfo = useCallback(async () => {
 		if (!jobId) return;
 		try {
-			const { jobService } = await import("../../../../services/jobService");
+			const { jobService } = await import("../../../services/jobService");
 			const resp = await jobService.getJobById(Number(jobId));
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
 				setJobTitle(resp.data.title || "");
@@ -577,7 +582,7 @@ const ResumeList: React.FC = () => {
 		setUploading(true);
 		try {
 			const formData = new FormData();
-			formData.append("JobId", jobId);
+			formData.append("JobId", String(jobId));
 			formData.append("File", file);
 			console.debug("[ResumeList] Upload formData entries:");
 			for (const pair of formData.entries()) {
@@ -615,7 +620,7 @@ const ResumeList: React.FC = () => {
 							<Button
 								className="company-btn"
 								icon={<ArrowLeftOutlined />}
-								onClick={() => navigate("/company/ai-screening")}
+								onClick={() => navigate(-1)}
 							/>
 							<span className="font-semibold">
 								{jobTitle || `Job #${jobId}`}
@@ -724,7 +729,7 @@ const ResumeList: React.FC = () => {
 					onRetry={handleRetry}
 					retryingIds={retryingIds}
 					scoreCounts={scoreCounts}
-					jobId={jobId}
+					jobId={jobId ? String(jobId) : undefined}
 					targetQuantity={targetQuantity}
 				/>
 			</Card>			{/* Delete selected confirmation modal requiring exact job title */}
@@ -913,7 +918,7 @@ const ResumeList: React.FC = () => {
 				open={uploadDrawerOpen}
 				onClose={() => setUploadDrawerOpen(false)}
 				jobTitle={jobTitle}
-				jobId={jobId!}
+				jobId={jobId ? String(jobId) : undefined}
 				onUpload={handleUpload}
 				uploading={uploading}
 			/>

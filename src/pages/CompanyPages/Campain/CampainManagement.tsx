@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, Input, Button, message } from "antd";
 import { SearchOutlined, PlusOutlined } from "@ant-design/icons";
 import CampaignCreateDrawer from './component/CampaignCreateDrawer';
+import CampaignEditDrawer from './component/CampaignEditDrawer';
 import CampaignTable from './component/CampaignTable';
 import { campaignService } from "../../../services/campaignService";
 
@@ -118,10 +119,9 @@ const CampaignManagement = () => {
                     await loadCampaigns();
                 }}
             />
-            <CampaignCreateDrawer
+            <CampaignEditDrawer
                 open={editDrawerOpen}
                 onClose={() => { setEditDrawerOpen(false); setEditingCampaign(null); }}
-                initialValues={editingCampaign || undefined}
                 campaignId={editingCampaign?.campaignId}
                 onUpdated={async () => {
                     await loadCampaigns();
@@ -129,7 +129,6 @@ const CampaignManagement = () => {
                     setEditingCampaign(null);
                 }}
             />
-            
             
             <CampaignTable
                 data={filtered}

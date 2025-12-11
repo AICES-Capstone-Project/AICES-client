@@ -418,7 +418,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
                           <Input placeholder="Criteria name" maxLength={70} />
                         </Form.Item>
                         <div style={{ width: 92, textAlign: 'right', fontSize: 12, color: 'rgba(0,0,0,0.65)' }}>
-                          <div>{Number.isFinite(currentImportance) ? currentImportance.toFixed(1) : '0.0'}</div>
+                          {/* <div>{Number.isFinite(currentImportance) ? currentImportance.toFixed(1) : '0.0'}</div> */}
                           <div style={{ fontWeight: 600 }}>~{Number.isFinite(estimatedPercent) ? estimatedPercent.toFixed(1) : '0.0'}%</div>
                         </div>
                       </div>
@@ -430,7 +430,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
                         rules={[
                           { required: true, message: "Please input importance" },
                         ]}
-                        style={{ width: 220, marginBottom: 0 }}
+                        style={{ width: 220, margin:" 0 10px" }}
                       >
                         <Slider
                           min={0.1}
@@ -500,26 +500,34 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
           />
         </Form.Item>
 
-        <Form.Item name="languageIds" label="Languages" rules={[{ required: false, message: "Please select languages" }]}>
-          <Select
-            className="company-select"
-            mode="multiple"
-            placeholder={loadingLangs ? "Loading languages..." : "Select languages"}
-            loading={loadingLangs}
-            options={languages.map((l: any) => ({ label: l.name, value: l.id ?? l.languageId }))}
-            allowClear
-          />
-        </Form.Item>
+        <div style={{ display: "flex", gap: "16px" }}>
+          <Form.Item name="languageIds" label="Languages" style={{ width: "50%" }} rules={[{ required: false, message: "Please select languages" }]}>
+            <Select
+              className="company-select"
+              mode="multiple"
+              size="middle"
+              maxTagCount={2}
+              maxTagTextLength={12}
+              placeholder={loadingLangs ? "Loading languages..." : "Select languages"}
+              loading={loadingLangs}
+              options={languages.map((l: any) => ({ label: l.name, value: l.id ?? l.languageId }))}
+              allowClear
+              style={{ minHeight: 40 }}
+            />
+          </Form.Item>
 
-        <Form.Item name="levelId" label="Level" rules={[{ required: false, message: "Please select a level" }]}>
-          <Select
-            className="company-select"
-            placeholder={loadingLevels ? "Loading levels..." : "Select level"}
-            loading={loadingLevels}
-            allowClear
-            options={levels.map((l: any) => ({ label: l.name, value: l.id ?? l.levelId }))}
-          />
-        </Form.Item>
+          <Form.Item name="levelId" label="Level" style={{ width: "50%" }} rules={[{ required: false, message: "Please select a level" }]}>
+            <Select
+              className="company-select"
+              size="middle"
+              placeholder={loadingLevels ? "Loading levels..." : "Select level"}
+              loading={loadingLevels}
+              allowClear
+              options={levels.map((l: any) => ({ label: l.name, value: l.id ?? l.levelId }))}
+              style={{ minHeight: 40 }}
+            />
+          </Form.Item>
+        </div>
 
         <Form.Item>
           <Space>

@@ -97,20 +97,20 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
       align: 'center',
       render: (_: any, record: any) => (
         <Space>
-          <Tooltip title="View details">
+          <Tooltip title="View campaign details">
             <Button type="text" icon={<EyeOutlined />} size="small" onClick={() => onView(record)} />
           </Tooltip>
-          <Tooltip title="Edit">
+          <Tooltip title="Edit campaign">
             <Button type="text" icon={<EditOutlined />} size="small" onClick={() => onEdit(record)} />
           </Tooltip>
-          <Tooltip title="Delete">
+          <Tooltip title="Delete campaign">
             <Popconfirm
               title="Delete this campaign?"
               onConfirm={async () => {
                 try {
                   await onDelete(record);
                 } catch (err) {
-                  message.error('Delete failed');
+                  message.error('Delete campaign failed');
                 }
               }}
               okText="Delete"

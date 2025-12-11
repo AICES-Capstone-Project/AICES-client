@@ -16,7 +16,7 @@ import {
 	Input,
 	Tooltip,
 } from "antd";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
 	ArrowLeftOutlined,
 	SearchOutlined,
@@ -24,49 +24,47 @@ import {
 import resumeService from "../../../services/resumeService";
 import { toastError, toastSuccess } from "../../../components/UI/Toast";
 import { useResumeSignalR } from "../../../hooks/useResumeSignalR";
-import ScoreFilter from "./ScoreFilter";
-import ResumeTable from "./ResumeTable";
-import UploadDrawer from "./UploadDrawer";
+import ScoreFilter from "./component/ScoreFilter";
+import ResumeTable from "./component/ResumeTable";
+import type { Resume as ApiResume, ScoreDetail, AiScore } from "../../../types/resume.types";
 
-interface Resume {
+type Resume = Partial<ApiResume> & {
+	// required locally
 	resumeId: number;
 	fullName: string;
 	status: string;
-	totalResumeScore: number | null;
-	email?: string;
-	phoneNumber?: string;
-	fileUrl?: string;
-	aiExplanation?: string;
-	scoreDetails?: Array<{
-		criteriaId: number;
-		criteriaName: string;
-		matched: number;
-		score: number;
-		aiNote: string;
-	}>;
-	// For SignalR updates - temporary structure
-	aiScores?: Array<{
-		scoreId: number;
-		totalResumeScore: number;
-		aiExplanation?: string;
-		createdAt?: string;
-		scoreDetails?: Array<{
-			criteriaId: number;
-			criteriaName: string;
-			matched: number;
-			score: number;
-			aiNote: string;
-		}>;
-	}>;
-}
+	// optional/extensions
+	applicationId?: number;
+	applicationStatus?: string;
+	campaignId?: number;
+	matchSkills?: string;
+	missingSkills?: string;
+	// backend uses `totalScore` / `adjustedScore`; keep `totalResumeScore` for compatibility
+	totalScore?: number | null;
+	adjustedScore?: number | null;
+	totalResumeScore?: number | null;
+	aiExplanation?: string | null;
+	errorMessage?: string | null;
+	scoreDetails?: ScoreDetail[];
+	aiScores?: AiScore[] | undefined;
+};
+import UploadDrawer from "./component/UploadDrawer";
+
+// (using shared `ApiResume` type with local extensions above)
 
 type ResumeListProps = {
 	jobId?: string | number;
 };
 
 const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
-	const params = useParams<{ jobId: string }>();
+	const params = useParams<{ campaignId?: string; jobId?: string }>();
+	const location = useLocation();
 	const jobId = propJobId ?? params.jobId;
+	// campaignId: prefer route param, fall back to query param for compatibility
+	const campaignIdFromParams = params.campaignId ? Number(params.campaignId) : undefined;
+	const search = new URLSearchParams(location.search);
+	const campaignIdFromQuery = search.get("campaignId") ? Number(search.get("campaignId")) : undefined;
+	const campaignId = campaignIdFromParams ?? campaignIdFromQuery;
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
 	const [resumes, setResumes] = useState<Resume[]>([]);
@@ -137,20 +135,35 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 		try {
 			const { jobService } = await import("../../../services/jobService");
 			const resp = await jobService.getJobById(Number(jobId));
-			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
-				setJobTitle(resp.data.title || "");
-				setTargetQuantity(resp.data.targetQuantity);
+
+			let jobData: any = null;
+			if (resp == null) {
+				jobData = null;
+			} else if ((resp as any).data) {
+				// data may itself be the object or an object with `data` inside
+				jobData = (resp as any).data.data ?? (resp as any).data;
+			} else {
+				jobData = resp;
+			}
+
+			if (jobData) {
+				const title = jobData.title ?? jobData.jobTitle ?? jobData.name ?? "";
+				const target = jobData.targetQuantity ?? jobData.target ?? jobData.targetQty ?? undefined;
+				setJobTitle(title || "");
+				if (typeof target !== "undefined") setTargetQuantity(target);
 			}
 		} catch (e) {
 			console.error("Failed to load job info:", e);
 		}
-	}, [jobId]);
+	}, [jobId, campaignId]);
 
 	const loadResumes = useCallback(async () => {
 		setLoading(true);
 		try {
-			console.debug("[ResumeList] calling resumeService.getByJob", { jobId });
-			const resp = await resumeService.getByJob(Number(jobId));
+			console.debug("[ResumeList] calling resumeService.getByJob", { jobId, campaignId });
+			const resp = campaignId
+				? await resumeService.getByJob(Number(campaignId), Number(jobId))
+				: await resumeService.getByJob(Number(jobId));
 			console.debug("[ResumeList] resumeService.getByJob response", resp);
 
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
@@ -158,12 +171,15 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					? resp.data
 					: resp.data.items || [];
 				const resumeList = (Array.isArray(raw) ? raw : []) as Array<{
-					resumeId: number;
+					resumeId?: number;
+					applicationId?: number;
 					fullName?: string;
 					candidateName?: string;
 					status?: string;
 					stage?: string;
-					totalResumeScore?: number | null;
+					applicationStatus?: string;
+					totalScore?: number | null;
+					adjustedScore?: number | null;
 					email?: string;
 					phone?: string;
 					phoneNumber?: string;
@@ -177,11 +193,15 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 						aiNote: string;
 					}>;
 				}>;
+
 				const mapped: Resume[] = resumeList.map((r) => ({
-					resumeId: r.resumeId,
+					// prefer explicit resumeId, otherwise fallback to applicationId
+					resumeId: (r.resumeId ?? r.applicationId) as number,
 					fullName: r.fullName || r.candidateName || "Unknown",
-					status: r.status || r.stage || "Processing",
-					totalResumeScore: r.totalResumeScore ?? null,
+					// prefer applicationStatus (reviewer-friendly) then status/stage
+					status: r.applicationStatus || r.status || r.stage || "Processing",
+					// map backend score fields to UI field
+					totalResumeScore: (r.adjustedScore ?? r.totalScore ?? r.totalScore) ?? null,
 					email: r.email,
 					phoneNumber: r.phone || r.phoneNumber,
 					fileUrl: r.fileUrl,
@@ -432,7 +452,9 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				jobId,
 				resumeId,
 			});
-			const resp = await resumeService.getById(Number(jobId), resumeId);
+			const resp = campaignId
+				? await resumeService.getById(Number(campaignId), Number(jobId), resumeId)
+				: await resumeService.getById(Number(jobId), resumeId);
 			console.debug("[ResumeList] resumeService.getById response", resp);
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
 				const data = resp.data as unknown as {
@@ -466,21 +488,36 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 
 				const mappedResume: Resume = {
 					resumeId: data.resumeId,
+					applicationId: (data as any).applicationId,
+					applicationStatus: (data as any).applicationStatus ?? data.status,
 					fullName: data.fullName,
 					status: data.status,
-					totalResumeScore: latestScore?.totalResumeScore ?? null,
+					queueJobId: (data as any).queueJobId,
+					campaignId: (data as any).campaignId,
+					createdAt: (data as any).createdAt,
+					matchSkills: (data as any).matchSkills,
+					missingSkills: (data as any).missingSkills,
+					totalScore: (data as any).totalScore ?? null,
+					adjustedScore: (data as any).adjustedScore ?? null,
+					// prefer latest ai score, otherwise fall back to top-level adjusted/total score
+					totalResumeScore:
+						latestScore?.totalResumeScore ??
+						((data as any).adjustedScore ?? (data as any).totalScore ?? null),
 					email: data.email,
 					phoneNumber: data.phoneNumber,
 					fileUrl: data.fileUrl,
-					aiExplanation: latestScore?.aiExplanation,
-					scoreDetails: latestScore?.scoreDetails,
-					aiScores: data.aiScores?.map((score) => ({
-						scoreId: score.scoreId || 0,
-						totalResumeScore: score.totalResumeScore,
-						aiExplanation: score.aiExplanation,
-						createdAt: score.createdAt,
-						scoreDetails: score.scoreDetails,
-					})), // Map to match interface structure
+					// prefer per-score explanation when present, otherwise top-level aiExplanation
+					aiExplanation: latestScore?.aiExplanation ?? (data as any).aiExplanation,
+					errorMessage: (data as any).errorMessage ?? null,
+					// prefer detailed score details from latest ai score, else top-level
+					scoreDetails: latestScore?.scoreDetails ?? (data as any).scoreDetails,
+					// aiScores: data.aiScores?.map((score) => ({
+					// 	scoreId: score.scoreId || 0,
+					// 	totalResumeScore: score.totalResumeScore,
+					// 	aiExplanation: score.aiExplanation ?? "",
+					// 	createdAt: score.createdAt ?? "",
+					// 	scoreDetails: score.scoreDetails,
+					// })), // Map to match interface structure
 				};
 
 				console.debug("[ResumeList] Mapped resume detail:", mappedResume);
@@ -583,6 +620,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 		try {
 			const formData = new FormData();
 			formData.append("JobId", String(jobId));
+			if (campaignId) formData.append("CampaignId", String(campaignId));
 			formData.append("File", file);
 			console.debug("[ResumeList] Upload formData entries:");
 			for (const pair of formData.entries()) {
@@ -623,7 +661,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 								onClick={() => navigate(-1)}
 							/>
 							<span className="font-semibold">
-								{jobTitle || `Job #${jobId}`}
+								{jobTitle}
 							</span>
 						</div>
 						<div className="flex gap-2 items-center">
@@ -683,7 +721,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					borderRadius: 12,
 				}}
 			>
-				<div className="flex gap-3 items-center justify-center" style={{ marginBottom: 16 }}>
+				<div className="flex gap-3 items-center justify-center" style={{ marginBottom: 12 }}>
 					<Input
 						placeholder="Search by name, email, or phone"
 						prefix={<SearchOutlined />}
@@ -829,18 +867,18 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 							<Space direction="vertical" style={{ width: "100%" }}>
 								<div>
 									<strong>Total Score:</strong>{" "}
-									{selectedResume.totalResumeScore != null ? (
+									{selectedResume.totalScore != null ? (
 										<Tag
 											color={
-												selectedResume.totalResumeScore >= 70
+												selectedResume.totalScore >= 70
 													? "green"
-													: selectedResume.totalResumeScore >= 40
+													: selectedResume.totalScore >= 40
 														? "orange"
 														: "red"
 											}
 											style={{ fontSize: 16, padding: "4px 12px" }}
 										>
-											{selectedResume.totalResumeScore}
+											{selectedResume.totalScore}
 										</Tag>
 									) : (
 										<span>—</span>

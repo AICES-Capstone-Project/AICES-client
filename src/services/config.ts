@@ -319,9 +319,9 @@ export const API_ENDPOINTS = {
     COMPANY_UPLOAD: "/resumes/upload",
 
     // Get resumes for a job
-    COMPANY_GET: (jobId: number) => `/jobs/${jobId}/resumes`,
-    COMPANY_GET_BY_ID: (jobId: number, resumeId: number) =>
-      `/jobs/${jobId}/resumes/${resumeId}`,
+    COMPANY_GET: (campaignId: number, jobId: number) => `/campaigns/${campaignId}/jobs/${jobId}/resumes`,
+    COMPANY_GET_BY_ID: (campaignId: number, jobId: number, resumeId: number) =>
+      `/campaigns/${campaignId}/jobs/${jobId}/resumes/${resumeId}`,
 
     // Gửi lại resume để AI phân tích lại
     COMPANY_RETRY: (resumeId: number) => `/resumes/${resumeId}/retry`,
@@ -497,7 +497,7 @@ export const APP_ROUTES = {
   COMPANY_CAMPAIN: "/company/campaign",
   COMPANY_NOTIFICATION: "/company/notification",
   COMPANY_AI_SCREENING: "/company/ai-screening",
-  COMPANY_AI_SCREENING_RESUMES: "/company/ai-screening/:jobId/resumes",
+  COMPANY_AI_SCREENING_RESUMES: "/company/ai-screening/:campaignId/:jobId/resumes",
   COMPANY_AI_SCREENING_COMPARE: "/company/ai-screening/compare",
   COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
   COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",

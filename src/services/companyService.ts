@@ -78,25 +78,56 @@ export const companyService = {
   },
 
   // Get resumes for a job
+  // Supports: getResumes(jobId, params?) or getResumes(campaignId, jobId, params?)
   getResumes: async (
-    jobId: number,
-    params?: { page?: number; pageSize?: number }
+    idOrCampaignId: number,
+    maybeJobIdOrParams?: number | { page?: number; pageSize?: number },
+    maybeParams?: { page?: number; pageSize?: number }
   ): Promise<ApiResponse<{ items: any[]; totalPages: number }>> => {
-    const q = params
-      ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}`
-      : "";
-    return await get<{ items: any[]; totalPages: number }>(
-      `${API_ENDPOINTS.RESUME.COMPANY_GET(jobId)}${q}`
-    );
+    let campaignId: number | null = null;
+    let jobId: number;
+    let params: { page?: number; pageSize?: number } | undefined;
+
+    if (typeof maybeJobIdOrParams === "number") {
+      // called as (campaignId, jobId, params?)
+      campaignId = idOrCampaignId;
+      jobId = maybeJobIdOrParams;
+      params = maybeParams;
+    } else {
+      // called as (jobId, params?)
+      jobId = idOrCampaignId;
+      params = maybeJobIdOrParams as { page?: number; pageSize?: number } | undefined;
+    }
+
+    const q = params ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}` : "";
+
+    if (campaignId != null) {
+      return await get<{ items: any[]; totalPages: number }>(
+        `${API_ENDPOINTS.RESUME.COMPANY_GET(campaignId, jobId)}${q}`
+      );
+    }
+
+    // Fallback to legacy route
+    return await get<{ items: any[]; totalPages: number }>(`/jobs/${jobId}/resumes${q}`);
   },
 
+  // Get resume detail by id
+  // Supports: getResumeDetail(jobId, resumeId) or getResumeDetail(campaignId, jobId, resumeId)
   getResumeDetail: async (
-    jobId: number,
-    resumeId: number
+    idOrCampaignId: number,
+    maybeJobIdOrResumeId: number,
+    maybeResumeId?: number
   ): Promise<ApiResponse<any>> => {
-    return await get<any>(
-      API_ENDPOINTS.RESUME.COMPANY_GET_BY_ID(jobId, resumeId)
-    );
+    if (typeof maybeResumeId === "number") {
+      const campaignId = idOrCampaignId;
+      const jobId = maybeJobIdOrResumeId;
+      const resumeId = maybeResumeId;
+      return await get<any>(API_ENDPOINTS.RESUME.COMPANY_GET_BY_ID(campaignId, jobId, resumeId));
+    }
+
+    const jobId = idOrCampaignId;
+    const resumeId = maybeJobIdOrResumeId;
+    return await get<any>(`/jobs/${jobId}/resumes/${resumeId}`);
   },
 
   // Get public list of companies (for joining)

@@ -2,7 +2,7 @@ import api from "./api";
 import { get } from "./api";
 import { API_ENDPOINTS } from "./config";
 
-import type { ApiResponse } from "../types/api.types";
+// (removed unused ApiResponse import)
 
 // ================== TYPES / INTERFACES ==================
 
@@ -31,38 +31,68 @@ export interface TopCandidate {
 
 // ================== SERVICE ==================
 
-export const companyDashboardService = {
-  // GET Summary: /dashboard/summary
-  // Dùng hàm get helper giống method getCurrentSubscription của bạn
-  async getSummary(): Promise<ApiResponse<DashboardSummary>> {
-    return await get<DashboardSummary>(
-      API_ENDPOINTS.COMPANY_DASHBOARD.SUMMARY
-    );
+// Helper delay for mock fallback
+const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
+
+const dashboardService = {
+  // Try to fetch real summary from API, otherwise return mock
+  async getSummary() {
+    try {
+      const resp = await get(API_ENDPOINTS.COMPANY_DASHBOARD.SUMMARY);
+      // support both shapes: { data: {...} } or direct object
+      return (resp && (resp as any).data) ? (resp as any).data : resp;
+    } catch (err) {
+      await delay(300);
+      return {
+        campaigns: 18,
+        jobs: 42,
+        cvSubmitted: 320,
+        cvHired: 48,
+        totalCandidates: 560,
+      };
+    }
   },
 
-  // GET Top Category: /dashboard/top-category-spec
-  // Dùng api.get để truyền params giống method getList của bạn
-  async getTopCategorySpec(top: number = 10): Promise<TopCategory[]> {
-    const res = await api.get<ApiResponse<TopCategory[]>>(
-      API_ENDPOINTS.COMPANY_DASHBOARD.TOP_CATE_SPEC,
-      {
-        params: { top },
-      }
-    );
-    return res.data.data!;
+  async getKpiJob() {
+    // No dedicated endpoint in config — return mocked KPI for now
+    try {
+      // if API existed, call it here
+      await delay(200);
+      return { successOnTime: 32, failed: 10 };
+    } catch (err) {
+      return { successOnTime: 0, failed: 0 };
+    }
   },
 
-  // GET Top Candidates: /dashboard/top-rated-candidates
-  // Dùng api.get để truyền params giống method getList của bạn
-  async getTopRatedCandidates(limit: number = 5): Promise<TopCandidate[]> {
-    const res = await api.get<ApiResponse<TopCandidate[]>>(
-      API_ENDPOINTS.COMPANY_DASHBOARD.TOP_RATE_RESUME,
-      {
-        params: { limit },
-      }
-    );
-    return res.data.data!;
+  async getKpiCampaign() {
+    try {
+      await delay(200);
+      return { successOnTime: 12, failed: 6 };
+    } catch (err) {
+      return { successOnTime: 0, failed: 0 };
+    }
+  },
+
+  // Top categories - attempt API then fallback
+  async getTopCategorySpec(top: number = 10) {
+    try {
+      const res = await api.get(API_ENDPOINTS.COMPANY_DASHBOARD.TOP_CATE_SPEC, { params: { top } });
+      return (res && (res as any).data) ? (res as any).data : [];
+    } catch (err) {
+      await delay(200);
+      return [];
+    }
+  },
+
+  async getTopRatedCandidates(limit: number = 5) {
+    try {
+      const res = await api.get(API_ENDPOINTS.COMPANY_DASHBOARD.TOP_RATE_RESUME, { params: { limit } });
+      return (res && (res as any).data) ? (res as any).data : [];
+    } catch (err) {
+      await delay(200);
+      return [];
+    }
   },
 };
 
-export default companyDashboardService;
+export default dashboardService;

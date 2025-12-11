@@ -189,15 +189,16 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ className, 
     : notifications;
 
   const content = (
-    <div className="w-[360px] flex flex-col bg-white rounded-lg shadow-sm font-sans h-full max-h-[80vh]">
+    <div className="w-[360px] flex flex-col bg-white rounded-lg shadow-sm font-sans h-full max-h-[80vh]" style={{ overflowX: 'hidden', boxSizing: 'border-box' }}>
       <NotificationHeader
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onMarkAllRead={handleMarkAllAsRead}
         isConnected={isConnected}
       />
-
-      <div className="flex-1 overflow-y-auto max-h-[60vh] custom-scrollbar flex flex-col p-2">
+      {/* Divider: full width, visible */}
+      <hr className="w-full border-t border-gray-100"  />
+      <div className="flex-1 overflow-y-auto max-h-[60vh] custom-scrollbar flex flex-col p-2" style={{ overflowX: 'hidden', boxSizing: 'border-box' }}>
         {loading && notifications.length === 0 ? ( // Chỉ hiện loading khi chưa có dữ liệu
           <div className="flex items-center justify-center py-10"><Spin /></div>
         ) : error ? (

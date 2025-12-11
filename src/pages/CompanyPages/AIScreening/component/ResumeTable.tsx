@@ -9,24 +9,25 @@ import {
 	TeamOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
+import type { Resume as ApiResume, ScoreDetail, AiScore } from "../../../../types/resume.types";
 
-interface Resume {
+type Resume = Partial<ApiResume> & {
+	// required locally
 	resumeId: number;
 	fullName: string;
 	status: string;
-	totalResumeScore: number | null;
-	email?: string;
-	phoneNumber?: string;
-	fileUrl?: string;
-	aiExplanation?: string;
-	scoreDetails?: Array<{
-		criteriaId: number;
-		criteriaName: string;
-		matched: number;
-		score: number;
-		aiNote: string;
-	}>;
-}
+	// optional/extensions
+	applicationId?: number;
+	applicationStatus?: string;
+	// compatibility fields
+	totalScore?: number | null;
+	adjustedScore?: number | null;
+	matchSkills?: string;
+	missingSkills?: string;
+	errorMessage?: string | null;
+	scoreDetails?: ScoreDetail[];
+	aiScores?: AiScore[] | undefined;
+};
 
 interface ResumeTableProps {
 	loading: boolean;
@@ -67,7 +68,7 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 
 	const isQualifiedCandidate = React.useCallback((index: number, record: Resume) => {
 		// Must have score >= 50
-		if (record.totalResumeScore == null || record.totalResumeScore < 50) {
+		if (record.totalScore == null || record.totalScore < 50) {
 			return false;
 		}
 		// Check if this candidate is within the top qualified range
@@ -142,7 +143,7 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 			width: 100,
 			align: "center" as const,
 			render: (_: unknown, record: Resume) => {
-				const score = record.totalResumeScore;
+				const score = record.totalScore;
 				if (score == null || score === 0)
 					return <span style={{ color: "#9ca3af" }}>—</span>;
 				const count = scoreCounts.get(score) || 0;
@@ -243,7 +244,7 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 					: undefined
 			}
 			columns={columns}
-			scroll={{ y: "67vh" }}
+			scroll={{ y: "60vh" }}
 			pagination={{
 				current: currentPage,
 				pageSize: pageSize,

@@ -36,7 +36,7 @@ const NotificationManager: React.FC = () => {
       } else {
         if (!isBackground) setError(response.message || "Không thể tải thông báo");
       }
-      } catch (err) {
+    } catch (err) {
       console.error(err);
       if (!isBackground) setError("Không thể tải thông báo. Vui lòng thử lại.");
     }
@@ -135,10 +135,17 @@ const NotificationManager: React.FC = () => {
   const filteredNotifications = useMemo(() => activeTab === 'unread' ? notifications.filter((n) => !n.isRead) : notifications, [activeTab, notifications]);
 
   return (
-    <Card title={<div className="font-semibold">Notifications</div>} style={{ maxWidth: 1200, margin: '12px auto' }}>
-      <NotificationHeader activeTab={activeTab} setActiveTab={setActiveTab} onMarkAllRead={handleMarkAllAsRead} isConnected={true} />
+    <Card title={
+      <div >
+        {/* <div style={{ flex: '0 0 auto' }}>
+          <span className="font-semibold">Notifications</span>
+        </div> */}
+        <NotificationHeader activeTab={activeTab} setActiveTab={setActiveTab} onMarkAllRead={handleMarkAllAsRead} isConnected={true} />
+      </div>}
+      style={{ maxWidth: 1200, margin: '12px auto', borderRadius: 12, height: 'calc(100% - 25px)', }}>
+      
 
-      <div style={{ minHeight: 240, maxHeight: '60vh', overflowY: 'auto', padding: 8 }}>
+      <div style={{ minHeight: 240, maxHeight: '80vh', overflowY: 'auto', overflowX: 'hidden', padding: 8, boxSizing: 'border-box' }}>
         {loading && notifications.length === 0 ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: 36 }}><Spin /></div>
         ) : error ? (

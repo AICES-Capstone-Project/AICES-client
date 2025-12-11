@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Table, Progress, Button, Spin, Modal, Select, Form, InputNumber, Drawer, Tag } from 'antd';
+import { Card, Table, Progress, Button, Spin, Modal, Tooltip, Space, Select, Form, InputNumber, Tag, message, Popconfirm } from 'antd';
+import { APP_ROUTES } from '../../../../services/config';
 import type { ColumnsType } from 'antd/es/table';
-import { ArrowLeftOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, MinusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
 import { campaignService } from '../../../../services/campaignService';
 import { jobService } from '../../../../services/jobService';
 import { EyeOutlined } from '@ant-design/icons';
@@ -18,9 +19,6 @@ const CampaignDetail: React.FC = () => {
     const [jobOptions, setJobOptions] = useState<Array<{ label: string; value: string }>>([]);
     const [addForm] = Form.useForm();
     const [jobLoading, setJobLoading] = useState(false);
-    const [resumeDrawerOpen, setResumeDrawerOpen] = useState(false);
-    const [resumeJobId, setResumeJobId] = useState<number | null>(null);
-    const [ResumeListComponent, setResumeListComponent] = useState<any>(null);
     const [jobViewOpen, setJobViewOpen] = useState(false);
     const [jobToView, setJobToView] = useState<any | null>(null);
 
@@ -122,15 +120,14 @@ const CampaignDetail: React.FC = () => {
         }
     };
 
-    const openResumes = async (job: any) => {
+    const openResumes = (job: any, campaignIdParam?: number) => {
         if (!job) return;
-        // Lazy load the ResumeList component to avoid bundling it twice
-        if (!ResumeListComponent) {
-            const mod = await import('../../AIScreening/ResumeList');
-            setResumeListComponent(() => mod.default || mod);
-        }
-        setResumeJobId(Number(job.jobId));
-        setResumeDrawerOpen(true);
+        const jid = Number(job.jobId ?? job.jobId);
+        const cid = campaignIdParam ?? id;
+        // Navigate to the resume list route for that job
+        const routeTemplate = APP_ROUTES.COMPANY_AI_SCREENING_RESUMES || '/company/ai-screening/:campaignId/:jobId/resumes';
+        const route = routeTemplate.replace(':campaignId', String(cid)).replace(':jobId', String(jid));
+        navigate(route);
     };
 
     const openJobView = (job: any) => {
@@ -167,20 +164,72 @@ const CampaignDetail: React.FC = () => {
         }
     };
 
+    // Remove a job from the current campaign
+    const onDelete = async (job: any) => {
+        if (!campaign) return;
+        try {
+            setLoading(true);
+            const jobId = Number(job?.jobId ?? job?.jobId);
+            if (!Number.isFinite(jobId)) {
+                message.error('Invalid job id');
+                return;
+            }
+
+            // call service to remove job(s) from campaign. API expects an array of jobIds (number[]).
+            const resp = await campaignService.removeJobsFromCampaign(campaign.campaignId, [jobId]);
+            const ok = resp?.status === 'Success' || resp?.statusCode === 200 || resp?.message;
+            if (ok) {
+                message.success('Job removed from campaign');
+                await loadCampaign();
+            } else {
+                console.error('Remove job failed', resp);
+                message.error('Delete failed');
+            }
+        } catch (err) {
+            console.error('Delete job error', err);
+            message.error('Delete failed');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const columns: ColumnsType<any> = [
-        { title: 'No', key: 'no', width: 60, render: (_: any, __: any, idx: number) => idx + 1 },
-        { title: 'Job Title', dataIndex: 'title', key: 'title' },
+        { title: 'No', key: 'no', align: 'center', width: 60, render: (_: any, __: any, idx: number) => idx + 1 },
+        { title: 'Job Title', align: 'center', dataIndex: 'title', key: 'title' },
         { title: 'Target', dataIndex: 'target', key: 'target', width: 100, align: 'center' },
         { title: 'Filled', dataIndex: 'filled', key: 'filled', width: 100, align: 'center' },
         { title: 'Remaining', key: 'remaining', width: 120, align: 'center', render: (_: any, r: any) => Math.max(0, (r.target || 0) - (r.filled || 0)) },
         {
-            title: 'CVs', key: 'cvs', width: 120, align: 'center', render: (_: any, r: any) => (
-                <Button size="small" onClick={() => openResumes(r)}>View CVs</Button>
+            title: 'Resumes', key: 'resumes', width: 120, align: 'center', render: (_: any, r: any) => (
+                    <Button type="text" className="company-btn" size="small" onClick={() => openResumes(r, id)}>List Resumes</Button>
+                )
+        },
+        {
+            title: 'Action', dataIndex: 'action', key: 'action', width: 140, align: 'center', render: (_: any, r: any) => (
+                <Space>
+                    <Tooltip title="View job details">
+                        <Button type="text" icon={<EyeOutlined />} size="small" onClick={() => openJobView(r)} />
+                    </Tooltip>
+                    <Tooltip title="Delete job in campaign">
+                        <Popconfirm
+                            title="Delete this job in campaign?"
+                            onConfirm={async () => {
+                                try {
+                                    await onDelete(r);
+                                } catch (err) {
+                                    message.error('Delete failed');
+                                }
+                            }}
+                            okText="Delete"
+                            cancelText="Cancel"
+                        >
+                            <Button type="text" icon={<DeleteOutlined />} size="small" danger />
+                        </Popconfirm>
+                    </Tooltip>
+                </Space>
+
             )
         },
-        { title: 'Action', dataIndex: 'action', key: 'action', width: 140, align: 'center', render: (_: any, r: any) => (
-            <Button size="small" icon={<EyeOutlined />} onClick={() => openJobView(r)} />
-        ) },
     ];
 
     if (loading) {
@@ -235,7 +284,7 @@ const CampaignDetail: React.FC = () => {
                         <Tag color="blue" style={{ padding: '4px' }}>
                             <strong style={{ marginRight: 6 }}>Target:</strong> {totalTarget}
                         </Tag>
-                        
+
                         <Tag color="green" style={{ padding: '4px' }}>
                             <strong style={{ marginRight: 6 }}>Hired:</strong> {totalHired}
                         </Tag>
@@ -328,19 +377,7 @@ const CampaignDetail: React.FC = () => {
                     </Form.List>
                 </Form>
             </Modal>
-            <Drawer
-                title={resumeJobId ? `Resumes for Job #${resumeJobId}` : 'Resumes'}
-                open={resumeDrawerOpen}
-                onClose={() => { setResumeDrawerOpen(false); setResumeJobId(null); }}
-                width={900}
-                destroyOnClose
-            >
-                {ResumeListComponent ? (
-                    <ResumeListComponent jobId={String(resumeJobId)} />
-                ) : (
-                    <div>Loading...</div>
-                )}
-            </Drawer>
+
         </Card>
     );
 };

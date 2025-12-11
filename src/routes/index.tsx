@@ -69,7 +69,7 @@ const Notification = lazy(
 // 	() => import("../pages/CompanyPages/Candidate/CandidateManagement")
 // );
 const CompareResumes = lazy(
-	() => import("../pages/CompanyPages/AIScreening/CompareResumes")
+	() => import("../pages/CompanyPages/AIScreening/component/CompareResumes")
 );
 const CompanySubscription = lazy(
 	() => import("../pages/CompanyPages/CompanySubsriptions/CompanySubscription")

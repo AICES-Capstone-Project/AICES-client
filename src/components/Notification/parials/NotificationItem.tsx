@@ -55,7 +55,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
       style={{ margin: '5px 5px 0 5px' }}
     >
-
       {/* --- LEFT COLUMN: Avatar --- */}
       <div className="flex-shrink-0 w-[60px] flex items-center justify-center mr-3">
         <Avatar

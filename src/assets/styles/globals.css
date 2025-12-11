@@ -246,6 +246,11 @@ button {
 		border-radius: 6px !important;
 		box-shadow: none !important;
 		padding: 4px 11px !important;
+		/* Force consistent control height and center vertical content */
+		min-height: 40px !important;
+		height: 40px !important;
+		display: flex !important;
+		align-items: center !important;
 	}
 	.company-select .ant-select-selector:hover,
 	.company-select.ant-select-focused .ant-select-selector {
@@ -270,6 +275,52 @@ button {
 		border-radius: 4px !important;
 		padding: 0 8px !important;
 		margin: 2px 4px 2px 0 !important;
+	}
+
+	/* Ensure multiple-select selection overflow stays vertically centered and clipped to control height */
+	.company-select.ant-select-multiple .ant-select-selection-overflow,
+	.company-select.ant-select-multiple .ant-select-selection-overflow-item {
+		display: flex !important;
+		align-items: center !important;
+		max-height: 40px !important;
+		overflow: hidden !important;
+	}
+
+	/* Prevent the placeholder / search input from receiving tag background
+	   (avoids a small block appearing before the placeholder text) */
+	.company-select .ant-select-selection-search,
+	.company-select .ant-select-selection-search-input,
+	.company-select .ant-select-selection-placeholder,
+	.company-select .ant-select-selection-item.ant-select-selection-placeholder {
+		background: transparent !important;
+		padding: 0 !important;
+		margin: 0 !important;
+		border: none !important;
+		max-height: none !important;
+	}
+
+	.company-select .ant-select-selection-placeholder {
+		color: rgba(0,0,0,0.35) !important;
+	}
+
+	/* Hide any leftover selection-overflow block and remove extra padding
+	   that may render a small boxed area before the placeholder text. */
+	.company-select .ant-select-selection-overflow,
+	.company-select .ant-select-selection-overflow-item,
+	.company-select .ant-select-selection-search-container {
+		background: transparent !important;
+		padding: 0 !important;
+		margin: 0 !important;
+		border: none !important;
+		box-shadow: none !important;
+	}
+
+	/* Ensure the inner search input (when visible) does not stretch or add its own box */
+	.company-select .ant-select-selection-search-input {
+		background: transparent !important;
+		padding: 0 !important;
+		margin: 0 !important;
+		border: none !important;
 	}
 	/* Fix dropdown item layering issue */
 	.company-select .ant-select-item-option-content {

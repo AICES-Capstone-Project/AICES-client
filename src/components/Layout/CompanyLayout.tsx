@@ -158,7 +158,7 @@ export default function CompanyLayout() {
             {
                 key: APP_ROUTES.COMPANY_CAMPAIN,
                 icon: <Rocket size={18}  style={iconStyle} />,
-                label: <Link to={APP_ROUTES.COMPANY_CAMPAIN}>Campain</Link>,
+                label: <Link to={APP_ROUTES.COMPANY_CAMPAIN}>Campaign</Link>,
             },
             {
                 key: APP_ROUTES.COMPANY_CANDIDATE,

@@ -255,6 +255,43 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
 
         <div style={{ display: "flex", gap: "16px" }}>
           <Form.Item
+            name="levelId"
+            label="Level"
+            style={{ width: "50%" }}
+            rules={[{ required: true, message: "Please select a level" }]}
+          >
+            <Select
+              className="company-select"
+              size="middle"
+              placeholder={loadingLevels ? "Loading levels..." : "Select level"}
+              loading={loadingLevels}
+              allowClear
+              options={levels.map((l: any) => ({
+                label: l.name,
+                value: l.id ?? l.levelId ?? l.name,
+              }))}
+              style={{ minHeight: 40 }}
+            />
+          </Form.Item>
+
+          <Form.Item name="languageIds" label="Languages" style={{ width: "50%" }} rules={[{ required: true, message: "Please select languages" }]}>
+            <Select
+              className="company-select"
+              mode="multiple"
+              size="middle"
+              maxTagCount={2}
+              maxTagTextLength={12}
+              placeholder={loadingLangs ? "Loading languages..." : "Select languages"}
+              loading={loadingLangs}
+              options={languages.map((l: any) => ({ label: l.name, value: l.id ?? l.languageId }))}
+              allowClear
+              style={{ minHeight: 40 }}
+            />
+          </Form.Item>
+        </div>
+
+        <div style={{ display: "flex", gap: "16px" }}>
+          <Form.Item
             name="categoryId"
             label="Category"
             style={{ width: "50%" }}
@@ -287,24 +324,6 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
               options={specializations.map((s: any) => ({
                 label: s.name,
                 value: s.specializationId,
-              }))}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="levelId"
-            label="Level"
-            style={{ width: "50%" }}
-            rules={[{ required: true, message: "Please select a level" }]}
-          >
-            <Select
-              className="company-select"
-              placeholder={loadingLevels ? "Loading levels..." : "Select level"}
-              loading={loadingLevels}
-              allowClear
-              options={levels.map((l: any) => ({
-                label: l.name,
-                value: l.id ?? l.levelId ?? l.name,
               }))}
             />
           </Form.Item>
@@ -437,10 +456,6 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
 
         <Form.Item name="skillIds" label="Skills" rules={[{ required: true, message: "Please select skills" }]}>
           <Select className="company-select" mode="multiple" placeholder={loadingSkills ? "Loading skills..." : "Select skills"} loading={loadingSkills} options={skills.map((s: any) => ({ label: s.name, value: s.skillId }))} allowClear />
-        </Form.Item>
-
-        <Form.Item name="languageIds" label="Languages" rules={[{ required: true, message: "Please select languages" }]}>
-          <Select className="company-select" mode="multiple" placeholder={loadingLangs ? "Loading languages..." : "Select languages"} loading={loadingLangs} options={languages.map((l: any) => ({ label: l.name, value: l.id ?? l.languageId }))} allowClear />
         </Form.Item>
 
         <Form.Item>

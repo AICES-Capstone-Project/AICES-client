@@ -8,7 +8,7 @@ export interface CompanyJob {
   description?: string;
   slug?: string;
   requirements?: string;
-  createdAt: string;
+  createdAt?: string | null;
   targetQuantity?: number;
   categoryName?: string | null;
   specializationName?: string | null;
@@ -16,6 +16,11 @@ export interface CompanyJob {
   criteria?: any[];
   skills?: any[];
   jobStatus?: string;
+  levelName?: string | null;
+  level?: any;
+  languages?: any[];
+  languageIds?: any[];
+  fullName?: string;
 }
 
 export interface JobsResponse {

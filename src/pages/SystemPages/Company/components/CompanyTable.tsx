@@ -1,4 +1,15 @@
-import { Button, Popconfirm, Space, Table, Tooltip } from "antd";
+import {
+  Button,
+  Space,
+  Table,
+  Tooltip,
+  Modal,
+  Input,
+  Typography,
+  Popconfirm,
+} from "antd";
+import { useState } from "react";
+
 import { useAppSelector } from "../../../../hooks/redux";
 
 import {
@@ -44,6 +55,23 @@ export default function CompanyTable({
     .replace(/_/g, " ")
     .toLowerCase();
   const isStaff = normalizedRole === "system staff";
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteCompany, setDeleteCompany] = useState<Company | null>(null);
+  const [deleteText, setDeleteText] = useState("");
+
+  const openDelete = (c: Company) => {
+    setDeleteCompany(c);
+    setDeleteText("");
+    setDeleteOpen(true);
+  };
+
+  const closeDelete = () => {
+    setDeleteOpen(false);
+    setDeleteCompany(null);
+    setDeleteText("");
+  };
+
+  const canDelete = deleteCompany ? deleteText === deleteCompany.name : false;
 
   const columns: ColumnsType<Company> = [
     {
@@ -163,18 +191,27 @@ export default function CompanyTable({
             </Tooltip>
 
             {/* Approve */}
-            <Tooltip title="Approve company">
-              <Button
-                size="small"
-                shape="circle"
-                disabled={disabledApprove}
-                className={
-                  disabledApprove ? "action-btn disabled" : "action-btn enabled"
-                }
-                icon={<CheckOutlined />}
-                onClick={() => onApprove(record.companyId)}
-              />
-            </Tooltip>
+            <Popconfirm
+              title={`Approve company "${record.name}"?`}
+              okText="Yes"
+              cancelText="No"
+              onConfirm={() => onApprove(record.companyId)}
+              disabled={disabledApprove}
+            >
+              <Tooltip title="Approve company">
+                <Button
+                  size="small"
+                  shape="circle"
+                  disabled={disabledApprove}
+                  className={
+                    disabledApprove
+                      ? "action-btn disabled"
+                      : "action-btn enabled"
+                  }
+                  icon={<CheckOutlined />}
+                />
+              </Tooltip>
+            </Popconfirm>
 
             {/* Reject */}
             <Tooltip title="Reject company">
@@ -204,20 +241,15 @@ export default function CompanyTable({
             </Tooltip>
 
             {/* Delete (giữ nguyên, dùng Popconfirm) */}
-            <Popconfirm
-              title="Delete company?"
-              okText="Delete"
-              okType="danger"
-              cancelText="Cancel"
-              onConfirm={() => onDelete(record.companyId)}
-            >
+            <Tooltip title="Delete company">
               <Button
                 size="small"
                 danger
                 shape="circle"
                 icon={<DeleteOutlined />}
+                onClick={() => openDelete(record)}
               />
-            </Popconfirm>
+            </Tooltip>
           </Space>
         );
       },
@@ -225,25 +257,77 @@ export default function CompanyTable({
   ];
 
   return (
-    <Table<Company>
-      className="accounts-table"
-      rowKey="companyId"
-      loading={loading}
-      dataSource={companies}
-      columns={columns}
-      pagination={{
-        current: pagination.current,
-        pageSize: pagination.pageSize,
-        total,
-        showSizeChanger: true,
-      }}
-      onChange={(p) =>
-        onChangePagination({
-          ...p,
-          current: p.current || 1,
-          pageSize: p.pageSize || defaultPageSize,
-        })
-      }
-    />
+    <>
+      <Table<Company>
+        className="accounts-table"
+        rowKey="companyId"
+        loading={loading}
+        dataSource={companies}
+        columns={columns}
+        pagination={{
+          current: pagination.current,
+          pageSize: pagination.pageSize,
+          total,
+          showSizeChanger: true,
+        }}
+        onChange={(p) =>
+          onChangePagination({
+            ...p,
+            current: p.current || 1,
+            pageSize: p.pageSize || defaultPageSize,
+          })
+        }
+      />
+
+      <Modal
+        open={deleteOpen}
+        title={<div className="system-modal-title">Delete Company</div>}
+        onCancel={closeDelete}
+        footer={null}
+        className="system-modal"
+        destroyOnClose
+      >
+        <Typography.Text type="danger" strong>
+          This action is irreversible.
+        </Typography.Text>
+
+        <div style={{ marginTop: 12 }}>
+          <Typography.Text>
+            To confirm deletion, type{" "}
+            <Typography.Text strong>{deleteCompany?.name}</Typography.Text>
+          </Typography.Text>
+
+          <Input
+            value={deleteText}
+            onChange={(e) => setDeleteText(e.target.value)}
+            placeholder="Type company name exactly..."
+            style={{ marginTop: 10 }}
+          />
+        </div>
+
+        <div className="system-modal-footer" style={{ marginTop: 24 }}>
+          <Button
+            className="system-modal-btn system-modal-btn-cancel"
+            onClick={closeDelete}
+          >
+            Cancel
+          </Button>
+
+          <Button
+            className="system-modal-btn system-modal-btn-danger"
+            danger
+            disabled={!canDelete}
+            loading={loading}
+            onClick={() => {
+              if (!deleteCompany) return;
+              onDelete(deleteCompany.companyId);
+              closeDelete();
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+      </Modal>
+    </>
   );
 }

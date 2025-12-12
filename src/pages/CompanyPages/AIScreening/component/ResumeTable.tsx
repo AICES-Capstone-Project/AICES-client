@@ -9,25 +9,9 @@ import {
 	TeamOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
-import type { Resume as ApiResume, ScoreDetail, AiScore } from "../../../../types/resume.types";
+import type { ResumeLocal } from "../../../../types/resume.types";
 
-type Resume = Partial<ApiResume> & {
-	// required locally
-	resumeId: number;
-	fullName: string;
-	status: string;
-	// optional/extensions
-	applicationId?: number;
-	applicationStatus?: string;
-	// compatibility fields
-	totalScore?: number | null;
-	adjustedScore?: number | null;
-	matchSkills?: string;
-	missingSkills?: string;
-	errorMessage?: string | null;
-	scoreDetails?: ScoreDetail[];
-	aiScores?: AiScore[] | undefined;
-};
+type Resume = ResumeLocal;
 
 interface ResumeTableProps {
 	loading: boolean;
@@ -200,7 +184,14 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 						type="text"
 						icon={<EyeOutlined />}
 						aria-label="View detail"
-						onClick={() => onViewDetail(record.resumeId)}
+						onClick={() => {
+							console.debug("View detail clicked", {
+								applicationId: record.applicationId,
+								resumeId: record.resumeId,
+								jobId,
+							});
+							onViewDetail(Number(record.applicationId ?? record.resumeId));
+						}}
 					/>
 					{/* Always show edit icon — clicking enters edit mode */}
 					<Tooltip title="Enter edit mode (select resumes)">

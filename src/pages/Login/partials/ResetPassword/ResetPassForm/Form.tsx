@@ -108,8 +108,8 @@ const ResetPasswordForm: React.FC = () => {
 	}
 
 	return (
-		<div className="flex flex-col gap-8">
-			<div className="flex flex-col gap-4">
+		<div className="flex flex-col gap-4 w-full max-w-md mx-auto">
+			<div className="flex flex-col gap-2 items-center text-center mb-6">
 				<div className="text-gray-900 font-inter text-[32px] font-medium">
 					Create new password
 				</div>
@@ -127,7 +127,9 @@ const ResetPasswordForm: React.FC = () => {
 						value={newPassword}
 						onChange={(e) => setNewPassword(e.target.value)}
 						status={newPasswordError ? "error" : undefined}
-						className="!px-3 !py-2 !w-[536px]"
+						className="!w-full !h-12 !px-3 !py-2 !rounded-lg 
+						!border-green-600 focus:!border-green-700 
+						hover:!border-green-700 transition-all duration-300"
 						onPressEnter={handleSubmit}
 					/>
 					{newPasswordError && (
@@ -141,7 +143,9 @@ const ResetPasswordForm: React.FC = () => {
 						value={confirmPassword}
 						onChange={(e) => setConfirmPassword(e.target.value)}
 						status={confirmPasswordError ? "error" : undefined}
-						className="!px-3 !py-2 !w-[536px]"
+						className="!w-full !h-12 !px-3 !py-2 !rounded-lg 
+						!border-green-600 focus:!border-green-700 
+						hover:!border-green-700 transition-all duration-300"
 						onPressEnter={handleSubmit}
 					/>
 					{confirmPasswordError && (

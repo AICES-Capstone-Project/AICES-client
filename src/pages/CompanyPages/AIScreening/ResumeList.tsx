@@ -26,31 +26,10 @@ import { toastError, toastSuccess } from "../../../components/UI/Toast";
 import { useResumeSignalR } from "../../../hooks/useResumeSignalR";
 import ScoreFilter from "./component/ScoreFilter";
 import ResumeTable from "./component/ResumeTable";
-import type { Resume as ApiResume, ScoreDetail, AiScore } from "../../../types/resume.types";
-
-type Resume = Partial<ApiResume> & {
-	// required locally
-	resumeId: number;
-	fullName: string;
-	status: string;
-	// optional/extensions
-	applicationId?: number;
-	applicationStatus?: string;
-	campaignId?: number;
-	matchSkills?: string;
-	missingSkills?: string;
-	// backend uses `totalScore` / `adjustedScore`; keep `totalResumeScore` for compatibility
-	totalScore?: number | null;
-	adjustedScore?: number | null;
-	totalResumeScore?: number | null;
-	aiExplanation?: string | null;
-	errorMessage?: string | null;
-	scoreDetails?: ScoreDetail[];
-	aiScores?: AiScore[] | undefined;
-};
+import type { ScoreDetail, ResumeLocal } from "../../../types/resume.types";
 import UploadDrawer from "./component/UploadDrawer";
 
-// (using shared `ApiResume` type with local extensions above)
+type UIResume = ResumeLocal;
 
 type ResumeListProps = {
 	jobId?: string | number;
@@ -67,9 +46,9 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 	const campaignId = campaignIdFromParams ?? campaignIdFromQuery;
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
-	const [resumes, setResumes] = useState<Resume[]>([]);
+	const [resumes, setResumes] = useState<UIResume[]>([]);
 	const [drawerOpen, setDrawerOpen] = useState(false);
-	const [selectedResume, setSelectedResume] = useState<Resume | null>(null);
+	const [selectedResume, setSelectedResume] = useState<UIResume | null>(null);
 	const [loadingDetail, setLoadingDetail] = useState(false);
 	const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
 	const [uploading, setUploading] = useState(false);
@@ -87,7 +66,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 		min: number | null;
 		max: number | null;
 	}>({ min: null, max: null });
-	const resumesRef = useRef<Resume[]>([]);
+	const resumesRef = useRef<UIResume[]>([]);
 
 	// Ensure displayed order is always by score desc (nulls last)
 	const sortedResumes = useMemo(() => {
@@ -194,9 +173,11 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					}>;
 				}>;
 
-				const mapped: Resume[] = resumeList.map((r) => ({
+				const mapped: UIResume[] = resumeList.map((r) => ({
 					// prefer explicit resumeId, otherwise fallback to applicationId
 					resumeId: (r.resumeId ?? r.applicationId) as number,
+					// preserve applicationId separately so campaign-aware endpoints can use it
+					applicationId: (r.applicationId ?? r.resumeId) as number,
 					fullName: r.fullName || r.candidateName || "Unknown",
 					// prefer applicationStatus (reviewer-friendly) then status/stage
 					status: r.applicationStatus || r.status || r.stage || "Processing",
@@ -450,6 +431,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 		try {
 			console.debug("[ResumeList] calling resumeService.getById", {
 				jobId,
+				campaignId,
 				resumeId,
 			});
 			const resp = campaignId
@@ -486,7 +468,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 						? data.aiScores[data.aiScores.length - 1] // Get the latest score
 						: null;
 
-				const mappedResume: Resume = {
+				const mappedResume: UIResume = {
 					resumeId: data.resumeId,
 					applicationId: (data as any).applicationId,
 					applicationStatus: (data as any).applicationStatus ?? data.status,
@@ -910,7 +892,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 										style={{ width: "100%" }}
 										size="middle"
 									>
-										{selectedResume.scoreDetails.map((detail) => (
+										{selectedResume.scoreDetails.map((detail: ScoreDetail) => (
 											<div
 												key={detail.criteriaId}
 												style={{

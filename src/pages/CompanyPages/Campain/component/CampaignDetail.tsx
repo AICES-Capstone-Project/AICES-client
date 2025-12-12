@@ -327,7 +327,7 @@ const CampaignDetail: React.FC = () => {
                 title="Add jobs to campaign"
                 onCancel={() => setAddJobModalOpen(false)}
                 onOk={handleAddJobs}
-                okText="Add"
+                okText="Add Jobs"
                 confirmLoading={jobLoading}
             >
                 <div style={{ marginBottom: 8 }}>Select jobs to add to this campaign and specify target quantity for each:</div>
@@ -370,7 +370,7 @@ const CampaignDetail: React.FC = () => {
                                 ))}
 
                                 <Button className="company-btn" onClick={() => add({ jobId: undefined, targetQuantity: undefined })} style={{ width: '100%' }}>
-                                    Add job
+                                    More jobs
                                 </Button>
                             </>
                         )}

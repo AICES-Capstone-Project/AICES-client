@@ -146,7 +146,7 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field) => (
-                  <div key={field.key} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                  <div key={`${field.key}-${field.name}`} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
                     <Form.Item
                       {...field}
                       name={[field.name, 'jobId']}
@@ -169,7 +169,13 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
                       rules={[{ required: true, message: 'Please input target quantity' }]}
                       style={{ width: 160, marginBottom: 0 }}
                     >
-                      <InputNumber placeholder="Target Quantity" min={1} step={1} style={{ width: '100%' }} />
+                        <InputNumber
+                          className="company-input"
+                          placeholder="Target Quantity"
+                          min={1}
+                          step={1}
+                          style={{ width: '100%', borderColor: 'var(--color-primary-light)' }}
+                        />
                     </Form.Item>
 
                     <MinusCircleOutlined
@@ -179,7 +185,7 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
                   </div>
                 ))}
 
-                <Button type="dashed" onClick={() => add({ jobId: undefined, targetQuantity: "" })} icon={<PlusCircleOutlined />}>
+                <Button className="company-btn" onClick={() => add({ jobId: undefined, targetQuantity: "" })} icon={<PlusCircleOutlined />} style={{width: '100%'}}>
                   Add job
                 </Button>
               </>
@@ -187,9 +193,9 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
           </Form.List>
         </Form.Item>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
           <Button onClick={() => { onClose(); form.resetFields(); }}>Cancel</Button>
-          <Button type="primary" loading={loading} onClick={() => form.submit()}>{campaignId ? 'Save' : 'Create'}</Button>
+          <Button className="company-btn--filled" loading={loading} onClick={() => form.submit()}>{campaignId ? 'Save' : 'Create'}</Button>
         </div>
       </Form>
     </Drawer>

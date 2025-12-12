@@ -6,10 +6,13 @@ import RightBanner from "../../../../components/RightBanner/RightBanner";
 const ResetPasswordPage: React.FC = () => {
     const { pathname: currentPath } = useLocation();
   return (
-    <div className="w-full h-screen m-0 p-0 flex flex-col justify-between">
+    <div className="w-full h-screen flex flex-col justify-between
+                 bg-gradient-to-r from-green-900 via-emerald-800 to-lime-700
+                 text-white"
+		>
       <div className="flex flex-row w-full flex-1">
         <div className="flex flex-1 items-center justify-center">
-          <div className="flex flex-col items-center justify-center">
+          <div className="bg-white text-gray-900 backdrop-blur-sm rounded-2xl shadow-2xl !p-10 w-[90%] max-w-md">
             <ResetPasswordForm />
           </div>
           <div className="flex items-center justify-center">

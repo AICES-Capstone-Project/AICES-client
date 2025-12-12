@@ -89,8 +89,8 @@ export const resumeService = {
       // Called as (campaignId, jobId, resumeId)
       const campaignId = idOrCampaignId;
       const jobId = maybeJobIdOrResumeId;
-      const resumeId = maybeResumeId;
-      return await get<Resume>(API_ENDPOINTS.RESUME.COMPANY_GET_BY_ID(campaignId, jobId, resumeId));
+      const applicationId = maybeResumeId;
+      return await get<Resume>(API_ENDPOINTS.RESUME.COMPANY_GET_BY_ID(campaignId, jobId, applicationId));
     }
 
     // Called as (jobId, resumeId) -> fallback to legacy route

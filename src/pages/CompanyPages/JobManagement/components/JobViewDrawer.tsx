@@ -39,7 +39,10 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
       bodyStyle={{ overflowX: 'hidden' }}
       footer={
         isPending && onApprove ? (
-          <div style={{ textAlign: "right" }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+            <Button className="company-btn" onClick={handleApproveClick}>
+              Reject
+            </Button>
             <Button className="company-btn--filled" onClick={handleApproveClick}>
               Approve
             </Button>

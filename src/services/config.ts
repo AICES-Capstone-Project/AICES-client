@@ -115,6 +115,18 @@ export const API_ENDPOINTS = {
     SYSTEM_UPDATE: (categoryId: number) => `/system/categories/${categoryId}`,
     SYSTEM_DELETE: (categoryId: number) => `/system/categories/${categoryId}`,
   },
+  
+  CANDIDATE: {
+    //------------------------------- SYSTEM -----------------------------------------
+    COMPANY_GET_ALL: "/candidates", 
+    COMPANY_GET_BY_ID:(candidateId: number) =>  `/candidates/${candidateId}/resumes`,
+    COMPANY_DELETE: (candidateId: number) => `/candidates/${candidateId}`,
+    SYSTEM_UPDATE: (blogId: number) => `/companies/blogs/${blogId}`,
+    SYSTEM_DELETE: (blogId: number) => `/companies/blogs/${blogId}`,
+
+    PUBLIC_GET_ALL: "/companies/blogs",
+    PUBLIC_GET_BY_ID: (id: number) => `/companies/blogs/${id}`,
+  },
 
   // Specialization endpoints
   SPECIALIZATION: {
@@ -321,8 +333,8 @@ export const API_ENDPOINTS = {
     // Get resumes for a job
     COMPANY_GET: (campaignId: number, jobId: number) =>
       `/campaigns/${campaignId}/jobs/${jobId}/resumes`,
-    COMPANY_GET_BY_ID: (campaignId: number, jobId: number, resumeId: number) =>
-      `/campaigns/${campaignId}/jobs/${jobId}/resumes/${resumeId}`,
+    COMPANY_GET_BY_ID: (campaignId: number, jobId: number, applicationId: number) =>
+      `/campaigns/${campaignId}/jobs/${jobId}/resumes/${applicationId}`,
 
     // Gửi lại resume để AI phân tích lại
     COMPANY_RETRY: (resumeId: number) => `/resumes/${resumeId}/retry`,

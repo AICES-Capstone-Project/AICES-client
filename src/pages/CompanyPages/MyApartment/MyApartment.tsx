@@ -227,10 +227,11 @@ export default function CompanyCreate() {
         </div>}
         style={{
           maxWidth: 1200,
-          margin: "12px auto",
+          marginTop: "12px",
           padding: "0 5px",
           borderRadius: 12,
           boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+          height: 'calc(100% - 25px)',
         }}
         bodyStyle={{
           paddingBottom: 0,

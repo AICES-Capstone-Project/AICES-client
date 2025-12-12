@@ -97,11 +97,27 @@ export const requestApi = async <T>(
   } catch (error) {
     const err = error as AxiosError<ApiResponse<T>>;
 
-    console.error("API call failed:", err);
+    const resp = err.response;
+
+    try {
+      console.error("API call failed:", {
+        url: (err.config as AxiosRequestConfig)?.url,
+        method: (err.config as AxiosRequestConfig)?.method,
+        status: resp?.status,
+        statusText: resp?.statusText,
+        responseData: resp?.data,
+        responseHeaders: resp?.headers,
+        message: err.message,
+      });
+    } catch (logErr) {
+      // Fallback if any of the above throws
+      console.error("API call failed (fallback):", err);
+    }
 
     return {
-      status: err.response?.status || "Error",
-      message: err.response?.data?.message || err.message || "Unknown error",
+      status: resp?.status || "Error",
+      message:
+        (resp as any)?.data?.message || err.message || JSON.stringify((resp as any)?.data) || "Unknown error",
       data: null,
     } as ApiResponse<T>;
   }

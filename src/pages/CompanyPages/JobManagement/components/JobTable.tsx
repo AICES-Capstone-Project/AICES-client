@@ -213,12 +213,10 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
         }
       >
         <div>
-          <p style={{ textAlign: "center", fontSize: 16 , marginTop: 8 }}>
-            Việc xoá tin tuyển dụng là hành động{" "}
-            <strong>không thể khôi phục</strong>.
+          <p style={{ textAlign: "center", fontSize: 16, marginTop: 8 }}>
+            Deleting this job posting is <strong>irreversible</strong>.
             <br />
-            Vui lòng nhập chính xác tiêu đề công việc{" "}
-            <strong>{jobTitle || "(job title)"}</strong> để xác nhận xoá.
+            Please type the exact job title <strong>{jobTitle || "(job title)"}</strong> to confirm deletion.
           </p>
 
           <Input

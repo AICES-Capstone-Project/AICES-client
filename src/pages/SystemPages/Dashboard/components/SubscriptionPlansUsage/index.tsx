@@ -162,7 +162,7 @@ const SubscriptionPlansUsage: React.FC<SubscriptionPlansUsageProps> = ({
             {/* ===== LEGEND (clean) ===== */}
             <div style={{ marginTop: 12 }}>
               <Space wrap size={[8, 8]}>
-                {plans.map((p, index) => (
+                {plans.map((p) => (
                   <Tag
                     key={p.planName}
                     color="green"

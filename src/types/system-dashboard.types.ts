@@ -65,8 +65,9 @@ export interface SystemTopCompanyItem {
   jobCount: number;
 }
 
-export type SystemTopCompaniesResponse =
-  SystemDashboardApiResponse<SystemTopCompanyItem[]>;
+export type SystemTopCompaniesResponse = SystemDashboardApiResponse<
+  SystemTopCompanyItem[]
+>;
 
 /* =========================
  * 5. /api/system/dashboard/revenue
@@ -98,8 +99,7 @@ export interface SystemUsersData {
   byRole: SystemUsersByRoleItem[];
 }
 
-export type SystemUsersResponse =
-  SystemDashboardApiResponse<SystemUsersData>;
+export type SystemUsersResponse = SystemDashboardApiResponse<SystemUsersData>;
 
 /* =========================
  * 7. /api/system/dashboard/jobs
@@ -113,8 +113,7 @@ export interface SystemJobsData {
   newJobsThisMonth: number;
 }
 
-export type SystemJobsResponse =
-  SystemDashboardApiResponse<SystemJobsData>;
+export type SystemJobsResponse = SystemDashboardApiResponse<SystemJobsData>;
 
 /* =========================
  * 8. /api/system/dashboard/resumes
@@ -139,5 +138,24 @@ export interface SystemSubscriptionPlanItem {
   monthlyRevenue: number;
 }
 
-export type SystemSubscriptionPlansResponse =
-  SystemDashboardApiResponse<SystemSubscriptionPlanItem[]>;
+export type SystemSubscriptionPlansResponse = SystemDashboardApiResponse<
+  SystemSubscriptionPlanItem[]
+>;
+/* =========================
+ * 10. /api/system/dashboard/resume-effectiveness
+ * ========================= */
+
+export interface SystemResumeEffectivenessProcessingData {
+  totalResumes: number;
+  processedResumes: number;
+  processingSuccessRate: number; // 0 - 100
+  failedResumes: number;
+  pendingResumes: number;
+}
+
+export interface SystemResumeEffectivenessData {
+  processing: SystemResumeEffectivenessProcessingData;
+}
+
+export type SystemResumeEffectivenessResponse =
+  SystemDashboardApiResponse<SystemResumeEffectivenessData>;

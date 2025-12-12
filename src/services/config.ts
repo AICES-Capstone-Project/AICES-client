@@ -183,7 +183,7 @@ export const API_ENDPOINTS = {
   // Blog endpoints
   BLOG: {
     //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET_ALL: "/system/blogs/me", 
+    SYSTEM_GET_ALL: "/system/blogs/me",
     SYSTEM_CREATE: "/system/blogs",
     SYSTEM_UPDATE: (blogId: number) => `/system/blogs/${blogId}`,
     SYSTEM_DELETE: (blogId: number) => `/system/blogs/${blogId}`,
@@ -319,7 +319,8 @@ export const API_ENDPOINTS = {
     COMPANY_UPLOAD: "/resumes/upload",
 
     // Get resumes for a job
-    COMPANY_GET: (campaignId: number, jobId: number) => `/campaigns/${campaignId}/jobs/${jobId}/resumes`,
+    COMPANY_GET: (campaignId: number, jobId: number) =>
+      `/campaigns/${campaignId}/jobs/${jobId}/resumes`,
     COMPANY_GET_BY_ID: (campaignId: number, jobId: number, resumeId: number) =>
       `/campaigns/${campaignId}/jobs/${jobId}/resumes/${resumeId}`,
 
@@ -337,8 +338,7 @@ export const API_ENDPOINTS = {
     //------------------------------- COMPANY -----------------------------------------
 
     COMPANY_GET: "/campaigns",
-    COMPANY_GET_BY_ID: (campaignId: number) =>
-      `/campaigns/${campaignId}`,
+    COMPANY_GET_BY_ID: (campaignId: number) => `/campaigns/${campaignId}`,
 
     COMPANY_POST: `/campaigns`,
 
@@ -348,13 +348,27 @@ export const API_ENDPOINTS = {
     COMPANY_DELETE: (campaignId: number) => `/campaigns/${campaignId}`,
 
     // Manage jobs in a campaign
-    COMPANY_ADD_JOBS: (campaignId: number) =>
-      `/campaigns/${campaignId}/jobs`,
+    COMPANY_ADD_JOBS: (campaignId: number) => `/campaigns/${campaignId}/jobs`,
 
     COMPANY_REMOVE_JOBS: (campaignId: number) =>
       `/campaigns/${campaignId}/jobs`,
   },
 
+  // =============================== SYSTEM DASHBOARD ===============================
+  SYSTEM_DASHBOARD: {
+    OVERVIEW: "/system/dashboard/overview",
+    COMPANIES: "/system/dashboard/companies",
+    COMPANY_SUBSCRIPTIONS: "/system/dashboard/company-subscriptions",
+    TOP_COMPANIES: "/system/dashboard/top-companies",
+    REVENUE: "/system/dashboard/revenue",
+    USERS: "/system/dashboard/users",
+    JOBS: "/system/dashboard/jobs",
+    RESUMES: "/system/dashboard/resumes",
+    SUBSCRIPTION_PLANS: "/system/dashboard/subscription-plans",
+    RESUME_EFFECTIVENESS: "/system/dashboard/resume-effectiveness",
+  },
+
+  // =============================== COMPANY DASHBOARD ===============================
 
   COMPANY_DASHBOARD: {
     TOP_CATE_SPEC: "/dashboard/top-category-spec",
@@ -497,7 +511,8 @@ export const APP_ROUTES = {
   COMPANY_CAMPAIN: "/company/campaign",
   COMPANY_NOTIFICATION: "/company/notification",
   COMPANY_AI_SCREENING: "/company/ai-screening",
-  COMPANY_AI_SCREENING_RESUMES: "/company/ai-screening/:campaignId/:jobId/resumes",
+  COMPANY_AI_SCREENING_RESUMES:
+    "/company/ai-screening/:campaignId/:jobId/resumes",
   COMPANY_AI_SCREENING_COMPARE: "/company/ai-screening/compare",
   COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
   COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",

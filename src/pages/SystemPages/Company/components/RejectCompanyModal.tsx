@@ -25,7 +25,7 @@ export default function RejectCompanyModal({
       open={open}
       title={
         <div className="system-modal-title">
-          Reject Company {company ? `#${company.companyId}` : ""}
+          Reject Company: {company?.name ?? `#${company?.companyId}`}
         </div>
       }
       onCancel={onCancel}

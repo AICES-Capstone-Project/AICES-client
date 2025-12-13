@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, Button, Badge, Form, Input, Select } from "antd";
-import { BellOutlined, PlusOutlined, HistoryOutlined, SearchOutlined } from "@ant-design/icons";
+import { BellOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
 
 // --- SERVICES ---
 import { jobService } from "../../../services/jobService";
@@ -18,7 +18,7 @@ import JobViewDrawer from "./components/JobViewDrawer";
 import PendingDrawer from "./components/PendingDrawer";
 import JobEditDrawer from "./components/JobEditDrawer";
 import JobCreateDrawer from "./components/JobCreateDrawer";
-import PostedJobsDrawer from "./components/JobPostedDrawer";
+// import PostedJobsDrawer from "./components/JobPostedDrawer";
 
 const JobManagement = () => {
   // --- STATE DỮ LIỆU ---
@@ -46,8 +46,8 @@ const JobManagement = () => {
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<CompanyJob | null>(null);
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
-  const [postedDrawerOpen, setPostedDrawerOpen] = useState(false);
-  const [postedJobs, setPostedJobs] = useState<CompanyJob[]>([]);
+  // const [postedDrawerOpen, setPostedDrawerOpen] = useState(false);
+  // const [postedJobs, setPostedJobs] = useState<CompanyJob[]>([]);
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
 
@@ -85,16 +85,16 @@ const JobManagement = () => {
     }
   };
 
-  const fetchPostedJobs = async () => {
-    try {
-      const resp = await jobService.getPostedJobs(1, 20);
-      if (resp?.status?.toLowerCase() === "success") {
-        setPostedJobs(resp.data?.jobs || []);
-      }
-    } catch {
-      setPostedJobs([]);
-    }
-  };
+  // const fetchPostedJobs = async () => {
+  //   try {
+  //     const resp = await jobService.getPostedJobs(1, 20);
+  //     if (resp?.status?.toLowerCase() === "success") {
+  //       setPostedJobs(resp.data?.jobs || []);
+  //     }
+  //   } catch {
+  //     setPostedJobs([]);
+  //   }
+  // };
 
   // Logic Fetch Categories
   const fetchCategories = async () => {
@@ -384,7 +384,7 @@ const JobManagement = () => {
             <div className="flex gap-2 items-center">
               {isHrManager && (
                 <Button
-                  className="company-btn--filled"
+                  className="company-btn"
                   icon={<BellOutlined style={{ fontSize: 16 }} />}
                   onClick={() => {
                     fetchPendingJobs();
@@ -395,7 +395,7 @@ const JobManagement = () => {
                   <span>Pending</span>
                 </Button>
               )}
-              <Button
+              {/* <Button
                 className="company-btn"
                 icon={<HistoryOutlined />}
                 onClick={async () => {
@@ -404,7 +404,7 @@ const JobManagement = () => {
                 }}
               >
                 My posted
-              </Button>
+              </Button> */}
               <Button
                 className="company-btn--filled"
                 icon={<PlusOutlined />}
@@ -471,11 +471,11 @@ const JobManagement = () => {
         saving={saving}
       />
 
-      <PostedJobsDrawer
+      {/* <PostedJobsDrawer
         open={postedDrawerOpen}
         onClose={() => setPostedDrawerOpen(false)}
         postedJobs={postedJobs}
-      />
+      /> */}
     </Card>
   );
 };

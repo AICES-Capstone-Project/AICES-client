@@ -343,7 +343,7 @@ export const API_ENDPOINTS = {
       `/jobs/${jobId}/resumes/${resumeId}/resend`,
 
     // Delete a resume
-    COMPANY_DELETE: (resumeId: number) => `/resumes/${resumeId}`,
+    COMPANY_DELETE: (applicationId: number) => `/resumes/${applicationId}`,
   },
 
   CAMPAIGN: {
@@ -353,6 +353,8 @@ export const API_ENDPOINTS = {
     COMPANY_GET_BY_ID: (campaignId: number) => `/campaigns/${campaignId}`,
 
     COMPANY_POST: `/campaigns`,
+
+    COMPANY_UPDATE: (campaignId: number) => `/campaigns/${campaignId}`,
 
     COMPANY_UPDATE_STATUS: (campaignId: number) =>
       `/campaigns/${campaignId}/status`,
@@ -364,6 +366,9 @@ export const API_ENDPOINTS = {
 
     COMPANY_REMOVE_JOBS: (campaignId: number) =>
       `/campaigns/${campaignId}/jobs`,
+
+    COMPANY_PENDING: "/campaigns/pending",
+    COMPANY_PENDING_BY_ID: (campaignId: number) => `/campaigns/${campaignId}/pending`,
   },
 
   // =============================== SYSTEM DASHBOARD ===============================
@@ -389,8 +394,8 @@ export const API_ENDPOINTS = {
   },
 
   COMPANY_REPORT: {
-    JOBS_EXCEL: (jobId: number) => `/reports/job/${jobId}/excel`,
-    JOBS_PDF: (jobId: number) => `/reports/job/${jobId}/pdf`,
+    JOBS_EXCEL: (campaignId: number, jobId: number) => `/reports/campaigns/${campaignId}/job/${jobId}/excel`,
+    JOBS_PDF: (campaignId: number, jobId: number) => `/reports/campaigns/${campaignId}/job/${jobId}/pdf`,
   },
 
   ROLE: {

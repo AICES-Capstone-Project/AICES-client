@@ -87,7 +87,7 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       title: "Category",
       dataIndex: "categoryName",
       key: "categoryName",
-      width: "20%",
+      width: "15%",
       align: "center",
       render: (cat) => <Tag color={tagColorFor(cat)}>{cat || "-"}</Tag>,
     },
@@ -95,7 +95,7 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       title: "Specialization",
       dataIndex: "specializationName",
       key: "specializationName",
-      width: "20%",
+      width: "15%",
       align: "center",
       render: (spec, record) => {
         const category = (record as CompanyJob).categoryName;
@@ -104,9 +104,27 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       },
     },
     {
+      title: "Posted by",
+      dataIndex: "fullName",
+      key: "fullName",
+      width: "15%",
+      align: "center",
+      render: (fullName) => (
+        <div
+          style={{
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {fullName || "-"}
+        </div>
+      ),
+    },
+    {
       title: "Actions",
       key: "actions",
-      width: "15%",
+      width: "10%",
       fixed: "right",
       align: "center",
       render: (_, record) => (

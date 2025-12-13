@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Table, Progress, Button, Spin, Modal, Tooltip, Space, Select, Form, InputNumber, Tag, message, Popconfirm } from 'antd';
-import { APP_ROUTES } from '../../../../services/config';
+import { Card, Table, Progress, Button, Spin, Modal, Tooltip, Space, Select, Form, InputNumber, Tag, message, Popconfirm, Dropdown } from 'antd';
+import { APP_ROUTES} from '../../../../services/config';
 import type { ColumnsType } from 'antd/es/table';
-import { ArrowLeftOutlined, MinusCircleOutlined, DeleteOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, MinusCircleOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
+import reportService from '../../../../services/reportService';
 import { campaignService } from '../../../../services/campaignService';
 import { jobService } from '../../../../services/jobService';
 import { EyeOutlined } from '@ant-design/icons';
@@ -210,6 +211,55 @@ const CampaignDetail: React.FC = () => {
                     <Tooltip title="View job details">
                         <Button type="text" icon={<EyeOutlined />} size="small" onClick={() => openJobView(r)} />
                     </Tooltip>
+                    <Dropdown
+                        menu={{
+                            items: [
+                                { key: 'excel', label: 'Export Excel' },
+                                { key: 'pdf', label: 'Export PDF' },
+                            ],
+                            onClick: async ({ key }) => {
+                                try {
+                                    const jid = Number(r?.jobId ?? r?.jobId);
+                                    if (!Number.isFinite(jid)) {
+                                        message.error('Invalid job id for export');
+                                        return;
+                                    }
+                                    const cid = id; // campaign id from component scope
+                                    let blob: Blob;
+                                    if (key === 'excel') {
+                                        blob = await reportService.exportJobExcel(cid, jid);
+                                    } else {
+                                        blob = await reportService.exportJobPdf(cid, jid);
+                                    }
+
+                                    const ext = key === 'excel' ? 'xlsx' : 'pdf';
+                                    const sanitize = (s?: string) =>
+                                        (s || '')
+                                            .replace(/[\\/:*?"<>|]/g, '')
+                                            .replace(/\s+/g, ' ')
+                                            .trim()
+                                            .slice(0, 100);
+                                    const jobName = sanitize(r?.title ?? r?.jobTitle ?? `Job ${jid}`);
+                                    const campaignName = sanitize(campaign?.title ?? `Campaign ${id}`);
+                                    const filename = `Job report ${campaignName} - ${jobName}.${ext}`;
+                                    const url = window.URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = url;
+                                    a.download = filename;
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    a.remove();
+                                    window.URL.revokeObjectURL(url);
+                                } catch (err) {
+                                    console.error('Export failed', err);
+                                    message.error('Export failed');
+                                }
+                            },
+                        }}
+                        placement="bottom"
+                    >
+                        <Button type="text" icon={<MoreOutlined />} size="small" />
+                    </Dropdown>
                     <Tooltip title="Delete job in campaign">
                         <Popconfirm
                             title="Delete this job in campaign?"

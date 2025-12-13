@@ -114,8 +114,8 @@ export const resumeService = {
   },
 
   // Delete a resume
-  delete: async (resumeId: number): Promise<ApiResponse<null>> => {
-    return await remove<null>(API_ENDPOINTS.RESUME.COMPANY_DELETE(resumeId));
+  delete: async (applicationId: number): Promise<ApiResponse<null>> => {
+    return await remove<null>(API_ENDPOINTS.RESUME.COMPANY_DELETE(applicationId));
   },
   // 🔹 System Admin: xem resumes theo job
   getSystemResumes: async (

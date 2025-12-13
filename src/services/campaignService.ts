@@ -70,6 +70,46 @@ export const campaignService = {
     }
   },
 
+  // Get pending campaigns (for HR_Manager)
+  getPendingCampaigns: async () => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_ENDPOINTS.CAMPAIGN.COMPANY_PENDING}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
+      return await response.json();
+    } catch (error) {
+      console.error("Failed to fetch pending campaigns:", error);
+      throw error;
+    }
+  },
+
+  // Get a single pending campaign by ID
+  getPendingCampaignById: async (campaignId: number) => {
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_ENDPOINTS.CAMPAIGN.COMPANY_PENDING_BY_ID(campaignId)}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+          },
+        }
+      );
+      return await response.json();
+    } catch (error) {
+      console.error("Failed to fetch pending campaign:", error);
+      throw error;
+    }
+  },
+
   // Update campaign status
   updateCampaignStatus: async (
     campaignId: number,
@@ -98,7 +138,7 @@ export const campaignService = {
   updateCampaign: async (campaignId: number, data: any) => {
     try {
       const response = await fetch(
-        `${API_CONFIG.BASE_URL}/campaigns/${campaignId}`,
+        `${API_CONFIG.BASE_URL}${API_ENDPOINTS.CAMPAIGN.COMPANY_UPDATE(campaignId)}`,
         {
           method: "PATCH",
           headers: {

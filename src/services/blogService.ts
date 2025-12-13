@@ -15,9 +15,9 @@ import type {
 const BLOG = API_ENDPOINTS.BLOG;
 
 export const blogService = {
-  // GET /system/blogs?page=&pageSize=
-  getAllBlogs(params?: { page?: number; pageSize?: number }) {
-    return api.get<GetMyBlogsResponse>(BLOG.PUBLIC_GET_ALL, { params });
+  // GET /system/blogs/me?page=&pageSize=
+  getAllBlogs(params?: { page?: number; pageSize?: number; search?: string }) {
+    return api.get<GetMyBlogsResponse>(BLOG.SYSTEM_GET_ALL, { params });
   },
   // GET /public/blogs?page=&pageSize=
   getPublicBlogs(params?: { page?: number; pageSize?: number }) {

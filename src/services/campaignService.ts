@@ -195,7 +195,20 @@ export const campaignService = {
           body: JSON.stringify(body),
         }
       );
-      return await response.json();
+      const text = await response.text();
+      let data: any = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch (e) {
+        data = text;
+      }
+      const message = (data && (data.message || data.error)) || null;
+      return {
+        ok: response.ok,
+        statusCode: response.status,
+        data,
+        message,
+      };
     } catch (error) {
       console.error("Failed to add jobs to campaign:", error);
       throw error;

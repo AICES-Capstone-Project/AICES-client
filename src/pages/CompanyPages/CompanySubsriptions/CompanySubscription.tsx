@@ -134,21 +134,26 @@ const CompanySubscription: React.FC = () => {
 			{loading ? (
 				<div style={{ textAlign: "center", padding: "60px 0" }}>Loading...</div>
 			) : currentSubscription ? (
-				<div>
-					<SubscriptionStatsCard
-						subscriptionName={currentSubscription.subscriptionName}
-						resumeLimit={currentSubscription.resumeLimit}
-						hoursLimit={currentSubscription.hoursLimit}
-            description={currentSubscription.description}
-					/>
-					{currentSubscription.subscriptionName?.toLowerCase() !== "free" && (
-						<SubscriptionDetailsSection
-							startDate={currentSubscription.startDate}
-							endDate={currentSubscription.endDate}
-							price={currentSubscription.price}
-							onCancel={handleCancelSubscription}
-							cancelling={cancelling}
+				<div style={{ display: "flex", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
+					<div style={{ flex: "0 0 420px", minWidth: 300 }}>
+						<SubscriptionStatsCard
+							subscriptionName={currentSubscription.subscriptionName}
+							resumeLimit={currentSubscription.resumeLimit}
+							hoursLimit={currentSubscription.hoursLimit}
+							description={currentSubscription.description}
 						/>
+					</div>
+
+					{currentSubscription.subscriptionName?.toLowerCase() !== "free" && (
+						<div style={{ flex: "1 1 560px", minWidth: 320 }}>
+							<SubscriptionDetailsSection
+								startDate={currentSubscription.startDate}
+								endDate={currentSubscription.endDate}
+								price={currentSubscription.price}
+								onCancel={handleCancelSubscription}
+								cancelling={cancelling}
+							/>
+						</div>
 					)}
 				</div>
 			) : (

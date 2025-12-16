@@ -751,6 +751,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					scoreCounts={scoreCounts}
 					jobId={jobId ? String(jobId) : undefined}
 					targetQuantity={targetQuantity}
+					className={editMode ? "edit-mode-table" : undefined}
 				/>
 			</Card>			{/* Delete selected confirmation modal requiring exact job title */}
 			<Modal

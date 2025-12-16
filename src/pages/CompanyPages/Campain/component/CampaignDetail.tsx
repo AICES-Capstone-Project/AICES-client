@@ -1,7 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Table, Progress, Button, Spin, Modal, Tooltip, Space, Select, Form, InputNumber, Tag, message, Popconfirm, Dropdown } from 'antd';
-import { APP_ROUTES} from '../../../../services/config';
+import { Card, Button, Spin, Modal, Tooltip, Space, Select, Form, InputNumber, message, Popconfirm, Dropdown } from 'antd';
+import CampaignInfoCard from './CampaignInfoCard';
+import CampaignJobsTable from './CampaignJobsTable';
+import { APP_ROUTES } from '../../../../services/config';
 import type { ColumnsType } from 'antd/es/table';
 import { ArrowLeftOutlined, MinusCircleOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
 import reportService from '../../../../services/reportService';
@@ -22,11 +24,17 @@ const CampaignDetail: React.FC = () => {
     const [jobLoading, setJobLoading] = useState(false);
     const [jobViewOpen, setJobViewOpen] = useState(false);
     const [jobToView, setJobToView] = useState<any | null>(null);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const PAGE_SIZE = 5;
+    const [apiError, setApiError] = useState<string | null>(null);
+    const fieldKeyMap = useRef<Map<any, string>>(new Map());
+    const fieldKeyCounter = useRef<number>(0);
 
     // Load campaign detail from API
     const loadCampaign = async () => {
         setLoading(true);
         try {
+            setApiError(null);
             const response = await campaignService.getCampaignById(id);
             console.log("Campaign response:", response);
 
@@ -92,10 +100,13 @@ const CampaignDetail: React.FC = () => {
 
                 setCampaign(campaignData);
             } else {
-                console.error("Failed to fetch campaign - invalid data structure");
+                const msg = response?.message || response?.data?.message || 'Failed to fetch campaign - invalid data structure';
+                console.error(msg);
+                setApiError(msg);
             }
         } catch (error) {
             console.error("Error loading campaign:", error);
+            setApiError((error as any)?.message || 'Error loading campaign');
         } finally {
             setLoading(false);
         }
@@ -104,6 +115,30 @@ const CampaignDetail: React.FC = () => {
     useEffect(() => {
         loadCampaign();
     }, [id]);
+
+    const formatDateTime = (s?: string) => {
+        if (!s) return "";
+        try {
+            // support strings like "2025-12-09 17:00:00" by converting to ISO
+            const iso = s.includes('T') ? s : s.replace(' ', 'T');
+            const d = new Date(iso);
+            if (isNaN(d.getTime())) return s;
+            const datePart = d.toLocaleDateString('vi-VN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+            });
+            const timePart = d.toLocaleTimeString('vi-VN', {
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+            });
+            return `${datePart} ${timePart}`;
+        } catch (err) {
+            return s;
+        }
+    };
 
     // Load jobs for add modal
     const loadAllJobs = async () => {
@@ -146,6 +181,7 @@ const CampaignDetail: React.FC = () => {
     const handleAddJobs = async () => {
         if (!campaign) return;
         try {
+            setApiError(null);
             const values = await addForm.validateFields();
             const entries = Array.isArray(values.jobs) ? values.jobs : [];
             const jobsPayload = entries
@@ -153,15 +189,22 @@ const CampaignDetail: React.FC = () => {
                 .filter((it: any) => Number.isFinite(it.jobId) && Number.isFinite(it.targetQuantity) && Number(it.targetQuantity) >= 1);
             if (!jobsPayload.length) return;
             const resp = await campaignService.addJobsToCampaign(campaign.campaignId, jobsPayload);
-            const ok = resp?.status === 'Success' || resp?.statusCode === 200 || resp?.message;
+            const ok = resp?.ok === true || resp?.statusCode === 200;
             if (ok) {
+                setApiError(null);
                 await loadCampaign();
                 setAddJobModalOpen(false);
             } else {
+                const msg = resp?.message || (resp?.data && resp.data.message) || 'Add jobs failed';
                 console.error('Add jobs failed', resp);
+                setApiError(msg);
+                message.error(msg);
             }
         } catch (err) {
+            const msg = (err as any)?.message || 'Add jobs error';
             console.error('Add jobs error', err);
+            setApiError(msg);
+            message.error(msg);
         }
     };
 
@@ -195,21 +238,45 @@ const CampaignDetail: React.FC = () => {
     };
 
     const columns: ColumnsType<any> = [
-        { title: 'No', key: 'no', align: 'center', width: 60, render: (_: any, __: any, idx: number) => idx + 1 },
+        {
+            title: 'No',
+            align: 'center',
+            width: 60,
+            render: (_: any, __: any, index: number) =>
+                (currentPage - 1) * PAGE_SIZE + index + 1,
+        }
+        ,
         { title: 'Job Title', align: 'center', dataIndex: 'title', key: 'title' },
         { title: 'Target', dataIndex: 'target', key: 'target', width: 100, align: 'center' },
         { title: 'Filled', dataIndex: 'filled', key: 'filled', width: 100, align: 'center' },
         { title: 'Remaining', key: 'remaining', width: 120, align: 'center', render: (_: any, r: any) => Math.max(0, (r.target || 0) - (r.filled || 0)) },
         {
             title: 'Resumes', key: 'resumes', width: 120, align: 'center', render: (_: any, r: any) => (
-                    <Button type="text" className="company-btn" size="small" onClick={() => openResumes(r, id)}>List Resumes</Button>
-                )
+                <Button type="text" className="company-btn" size="small" onClick={() => openResumes(r, id)}>List Resumes</Button>
+            )
         },
         {
             title: 'Action', dataIndex: 'action', key: 'action', width: 140, align: 'center', render: (_: any, r: any) => (
                 <Space>
                     <Tooltip title="View job details">
                         <Button type="text" icon={<EyeOutlined />} size="small" onClick={() => openJobView(r)} />
+                    </Tooltip>
+                    
+                    <Tooltip title="Delete job in campaign">
+                        <Popconfirm
+                            title="Delete this job in campaign?"
+                            onConfirm={async () => {
+                                try {
+                                    await onDelete(r);
+                                } catch (err) {
+                                    message.error('Delete failed');
+                                }
+                            }}
+                            okText="Delete"
+                            cancelText="Cancel"
+                        >
+                            <Button type="text" icon={<DeleteOutlined />} size="small" danger />
+                        </Popconfirm>
                     </Tooltip>
                     <Dropdown
                         menu={{
@@ -225,13 +292,20 @@ const CampaignDetail: React.FC = () => {
                                         return;
                                     }
                                     const cid = id; // campaign id from component scope
-                                    let blob: Blob;
+                                    let resp: any;
                                     if (key === 'excel') {
-                                        blob = await reportService.exportJobExcel(cid, jid);
+                                        resp = await reportService.exportJobExcel(cid, jid);
                                     } else {
-                                        blob = await reportService.exportJobPdf(cid, jid);
+                                        resp = await reportService.exportJobPdf(cid, jid);
+                                    }
+                                    if (!resp || resp.ok !== true) {
+                                        const msg = resp?.message || 'Export failed';
+                                        message.error(msg);
+                                        console.error('Export failed', resp);
+                                        return;
                                     }
 
+                                    const blob: Blob = resp.blob;
                                     const ext = key === 'excel' ? 'xlsx' : 'pdf';
                                     const sanitize = (s?: string) =>
                                         (s || '')
@@ -260,22 +334,6 @@ const CampaignDetail: React.FC = () => {
                     >
                         <Button type="text" icon={<MoreOutlined />} size="small" />
                     </Dropdown>
-                    <Tooltip title="Delete job in campaign">
-                        <Popconfirm
-                            title="Delete this job in campaign?"
-                            onConfirm={async () => {
-                                try {
-                                    await onDelete(r);
-                                } catch (err) {
-                                    message.error('Delete failed');
-                                }
-                            }}
-                            okText="Delete"
-                            cancelText="Cancel"
-                        >
-                            <Button type="text" icon={<DeleteOutlined />} size="small" danger />
-                        </Popconfirm>
-                    </Tooltip>
                 </Space>
 
             )
@@ -301,6 +359,8 @@ const CampaignDetail: React.FC = () => {
     }
 
     const jobs = campaign?.jobs || [];
+    const totalJobs = jobs.length;
+    const pagedJobs = jobs.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
     const totalTarget = (jobs || []).reduce((s: number, j: any) => s + (Number(j?.target) || 0), 0);
     const totalHired = (jobs || []).reduce((s: number, j: any) => s + (Number(j?.filled) || 0), 0);
     const percent = totalTarget ? Math.round((totalHired / totalTarget) * 100) : 0;
@@ -324,48 +384,16 @@ const CampaignDetail: React.FC = () => {
             }
             style={{ maxWidth: 1200, margin: '12px auto', borderRadius: 12, height: 'calc(100% - 25px)' }}
         >
-            <div style={{ marginBottom: 16 }}>
-                <div style={{ marginBottom: 12, textAlign: 'center' }}>
-                    <p style={{ margin: 0 }}>{campaign.description}</p>
-                </div>
+            <CampaignInfoCard campaign={campaign} percent={percent} totalTarget={totalTarget} totalHired={totalHired} formatDateTime={formatDateTime} apiError={apiError} />
 
-                <div style={{ display: 'flex', gap: 16, alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ display: 'flex', gap: 10, alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <Tag color="blue" style={{ padding: '4px' }}>
-                            <strong style={{ marginRight: 6 }}>Target:</strong> {totalTarget}
-                        </Tag>
-
-                        <Tag color="green" style={{ padding: '4px' }}>
-                            <strong style={{ marginRight: 6 }}>Hired:</strong> {totalHired}
-                        </Tag>
-
-                        <Tag color={campaign?.status === 'Published' ? 'success' : campaign?.status === 'Expired' ? 'error' : 'default'} style={{ padding: '4px' }}>
-                            {campaign.status}
-                        </Tag>
-
-                        <Tag style={{ padding: '6px 10px', display: 'flex', alignItems: 'center' }}>
-                            <div style={{ minWidth: 220, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-                                <strong style={{ whiteSpace: 'nowrap' }}>Progress</strong>
-                                <div style={{ flex: 1 }}>
-                                    <Progress
-                                        percent={percent}
-                                        size="small"
-                                        strokeColor={percent === 100 ? '#52c41a' : '#ff4d4f'}
-                                        trailColor={percent === 0 ? '#b9b9b9ff' : undefined}
-                                    />
-                                </div>
-                            </div>
-                        </Tag>
-                    </div>
-                </div>
-            </div>
-
-            <Table
-                dataSource={jobs}
+            <CampaignJobsTable
+                dataSource={pagedJobs}
                 columns={columns}
                 rowKey="jobId"
-                pagination={false}
-                size="middle"
+                current={currentPage}
+                pageSize={PAGE_SIZE}
+                total={totalJobs}
+                onChange={(page: number) => setCurrentPage(page)}
             />
             <JobViewDrawer
                 open={jobViewOpen}
@@ -376,54 +404,66 @@ const CampaignDetail: React.FC = () => {
                 open={addJobModalOpen}
                 title="Add jobs to campaign"
                 onCancel={() => setAddJobModalOpen(false)}
-                onOk={handleAddJobs}
-                okText="Add Jobs"
-                confirmLoading={jobLoading}
+                footer={
+                    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
+                        <Button className="company-btn" onClick={() => setAddJobModalOpen(false)}>Cancel</Button>
+                        <Button className="company-btn--filled" onClick={handleAddJobs} loading={jobLoading}>Add Jobs</Button>
+                    </div>
+                }
             >
                 <div style={{ marginBottom: 8 }}>Select jobs to add to this campaign and specify target quantity for each:</div>
                 <Form form={addForm} layout="vertical">
                     <Form.List name="jobs" initialValue={[]}>
-                        {(fields, { add, remove }) => (
-                            <>
-                                {fields.map((field) => (
-                                    <div key={field.key} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
-                                        <Form.Item
-                                            {...field}
-                                            name={[field.name, 'jobId']}
-                                            rules={[{ required: true, message: 'Please select a job' }]}
-                                            style={{ flex: 1, marginBottom: 0 }}
-                                        >
-                                            <Select
-                                                placeholder={jobLoading ? 'Loading jobs...' : 'Select job'}
-                                                options={jobOptions}
-                                                loading={jobLoading}
-                                                showSearch
-                                                optionFilterProp="label"
-                                                className="company-select"
-                                            />
-                                        </Form.Item>
+                        {(fields, { add, remove }) => {
+                            return (
+                                <div>
+                                    {fields.map((field) => {
+                                        let uniqueKey = fieldKeyMap.current.get(field.key);
+                                        if (!uniqueKey) {
+                                            uniqueKey = `${field.key}-${field.name}-${fieldKeyCounter.current++}`;
+                                            fieldKeyMap.current.set(field.key, uniqueKey);
+                                        }
+                                        return (
+                                            <div key={uniqueKey} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                                                <Form.Item
+                                                    {...field}
+                                                    name={[field.name, 'jobId']}
+                                                    rules={[{ required: true, message: 'Please select a job' }]}
+                                                    style={{ flex: 1, marginBottom: 0 }}
+                                                >
+                                                    <Select
+                                                        placeholder={jobLoading ? 'Loading jobs...' : 'Select job'}
+                                                        options={jobOptions}
+                                                        loading={jobLoading}
+                                                        showSearch
+                                                        optionFilterProp="label"
+                                                        className="company-select"
+                                                    />
+                                                </Form.Item>
 
-                                        <Form.Item
-                                            {...field}
-                                            name={[field.name, 'targetQuantity']}
-                                            rules={[{ required: true, message: 'Please input target quantity' }]}
-                                            style={{ width: 140, marginBottom: 0 }}
-                                        >
-                                            <InputNumber
-                                                min={1}
-                                                style={{ width: '100%' }}
-                                                placeholder="Target quantity"
-                                            />
-                                        </Form.Item>
-                                        <MinusCircleOutlined onClick={() => remove(field.name)} style={{ color: 'red', cursor: 'pointer', fontSize: 18 }} />
-                                    </div>
-                                ))}
+                                                <Form.Item
+                                                    name={[field.name, 'targetQuantity']}
+                                                    rules={[{ required: true, message: 'Please input target quantity' }]}
+                                                    style={{ width: 140, marginBottom: 0 }}
+                                                >
+                                                    <InputNumber
+                                                        className="company-input-number"
+                                                        min={1}
+                                                        style={{ width: '100%' }}
+                                                        placeholder="Target quantity"
+                                                    />
+                                                </Form.Item>
+                                                <MinusCircleOutlined onClick={() => remove(field.name)} style={{ color: 'red', cursor: 'pointer', fontSize: 18 }} />
+                                            </div>
+                                        );
+                                    })}
 
-                                <Button className="company-btn" onClick={() => add({ jobId: undefined, targetQuantity: undefined })} style={{ width: '100%' }}>
-                                    More jobs
-                                </Button>
-                            </>
-                        )}
+                                    <Button className="company-btn" onClick={() => add({ jobId: undefined, targetQuantity: undefined })} style={{ width: '100%' }}>
+                                        More jobs
+                                    </Button>
+                                </div>
+                            );
+                        }}
                     </Form.List>
                 </Form>
             </Modal>

@@ -1,12 +1,11 @@
 import React from "react";
-import { Table, Tag, Button, Space, Tooltip, Popover } from "antd";
-import { useNavigate } from "react-router-dom";
+import { Table, Tag, Button, Space, Tooltip } from "antd";
+// import { useNavigate } from "react-router-dom";
 import { Flame } from "lucide-react";
 import {
 	EyeOutlined,
 	EditOutlined,
 	ReloadOutlined,
-	TeamOutlined,
 } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { ResumeLocal } from "../../../../types/resume.types";
@@ -16,6 +15,7 @@ type Resume = ResumeLocal;
 interface ResumeTableProps {
 	loading: boolean;
 	dataSource: Resume[];
+	className?: string;
 	editMode: boolean;
 	selectedRowKeys: React.Key[];
 	onSelectedRowKeysChange: (keys: React.Key[]) => void;
@@ -35,6 +35,7 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 	loading,
 	dataSource,
 	editMode,
+	className,
 	selectedRowKeys,
 	onSelectedRowKeysChange,
 	currentPage,
@@ -44,11 +45,11 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 	onEnterEditMode,
 	onRetry,
 	retryingIds,
-	scoreCounts,
+	// scoreCounts,
 	jobId,
 	targetQuantity,
 }) => {
-	const navigate = useNavigate();
+	// const navigate = useNavigate();
 
 	const isQualifiedCandidate = React.useCallback((index: number, record: Resume) => {
 		// Must have score >= 50
@@ -122,61 +123,61 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 					<span>—</span>
 				),
 		},
-		{
-			title: "Ties",
-			width: 100,
-			align: "center" as const,
-			render: (_: unknown, record: Resume) => {
-				const score = record.totalScore;
-				if (score == null || score === 0)
-					return <span style={{ color: "#9ca3af" }}>—</span>;
-				const count = scoreCounts.get(score) || 0;
-				if (count <= 1) return <span style={{ color: "#9ca3af" }}>—</span>;
-				const content = (
-					<div style={{ maxWidth: 290 }}>
-						<div>There are {count} candidates with the same score.</div>
-					</div>
-				);
+		// {
+		// 	title: "Ties",
+		// 	width: 100,
+		// 	align: "center" as const,
+		// 	render: (_: unknown, record: Resume) => {
+		// 		const score = record.totalScore;
+		// 		if (score == null || score === 0)
+		// 			return <span style={{ color: "#9ca3af" }}>—</span>;
+		// 		const count = scoreCounts.get(score) || 0;
+		// 		if (count <= 1) return <span style={{ color: "#9ca3af" }}>—</span>;
+		// 		const content = (
+		// 			<div style={{ maxWidth: 290 }}>
+		// 				<div>There are {count} candidates with the same score.</div>
+		// 			</div>
+		// 		);
 
-				// choose tag color based on number of ties
-				let bgColor = "var(--color-primary-light)";
-				let textColor = "#fff";
-				if (count < 5) {
-					bgColor = "#f472b6"; // pink
-					textColor = "#fff";
-				} else if (count < 10) {
-					bgColor = "#f59e0b"; // amber/yellow
-					textColor = "#000";
-				} else {
-					bgColor = "#ef4444"; // red
-					textColor = "#fff";
-				}
+		// 		// choose tag color based on number of ties
+		// 		let bgColor = "var(--color-primary-light)";
+		// 		let textColor = "#fff";
+		// 		if (count < 5) {
+		// 			bgColor = "#f472b6"; // pink
+		// 			textColor = "#fff";
+		// 		} else if (count < 10) {
+		// 			bgColor = "#f59e0b"; // amber/yellow
+		// 			textColor = "#000";
+		// 		} else {
+		// 			bgColor = "#ef4444"; // red
+		// 			textColor = "#fff";
+		// 		}
 
-				return (
-					<Popover content={content} trigger={["hover"]}>
-						<Tag
-							style={{
-								cursor: "pointer",
-								backgroundColor: bgColor,
-								color: textColor,
-							}}
-							onClick={() =>
-								navigate(
-									`/company/ai-screening/compare?jobId=${jobId}&score=${score}`
-								)
-							}
-						>
-							{count}{" "}
-							<TeamOutlined style={{ marginLeft: 6, color: textColor }} />
-						</Tag>
-					</Popover>
-				);
-			},
-		},
+		// 		return (
+		// 			<Popover content={content} trigger={["hover"]}>
+		// 				<Tag
+		// 					style={{
+		// 						cursor: "pointer",
+		// 						backgroundColor: bgColor,
+		// 						color: textColor,
+		// 					}}
+		// 					onClick={() =>
+		// 						navigate(
+		// 							`/company/ai-screening/compare?jobId=${jobId}&score=${score}`
+		// 						)
+		// 					}
+		// 				>
+		// 					{count}{" "}
+		// 					<TeamOutlined style={{ marginLeft: 6, color: textColor }} />
+		// 				</Tag>
+		// 			</Popover>
+		// 		);
+		// 	},
+		// },
 		{
 			title: "Actions",
 			key: "actions",
-			width: 120,
+			width: 150,
 			align: "center" as const,
 			render: (_, record) => (
 				<Space size="middle">
@@ -198,7 +199,6 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 						<Button
 							type="text"
 							icon={<EditOutlined />}
-							style={{ color: "#096dd9" }}
 							onClick={onEnterEditMode}
 						/>
 					</Tooltip>
@@ -209,7 +209,6 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 							<Button
 								type="text"
 								icon={<ReloadOutlined />}
-								style={{ color: "#096dd9" }}
 								loading={retryingIds.includes(record.resumeId)}
 								onClick={() => onRetry(record.resumeId)}
 							/>
@@ -222,6 +221,7 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 
 	return (
 		<Table
+			 className={`edit-mode-table ${className ?? ""}`}
 			rowKey="resumeId"
 			loading={loading}
 			dataSource={dataSource}

@@ -106,6 +106,23 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
     // Only proceed when the drawer is open. Parent will reset the form when closing.
     if (!open) return;
 
+    const normalizeLanguageValue = (val: any) => {
+      if (val === null || val === undefined) return val;
+      if (typeof val === 'number') return val;
+      const s = String(val).trim();
+      if (s === '') return val;
+      const found = languages.find((l: any) => String((l as any).id) === s || String((l as any).languageId) === s || String((l as any).name).toLowerCase() === s.toLowerCase());
+      if (found) return (found as any).id ?? (found as any).languageId;
+      // fuzzy match
+      const fuzzy = languages.find((l: any) => {
+        const name = String((l as any).name).toLowerCase();
+        const q = s.toLowerCase();
+        return name.includes(q) || q.includes(name);
+      });
+      if (fuzzy) return (fuzzy as any).id ?? (fuzzy as any).languageId;
+      return val;
+    };
+
     if (job) {
         const base: any = {
         title: job.title,
@@ -120,9 +137,9 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
           ? job.skills.map((s: any) => (typeof s === "object" ? (s.skillId ?? s.name) : s))
           : [],
         languageIds: Array.isArray((job as any).languageIds)
-          ? (job as any).languageIds
+          ? (job as any).languageIds.map((v: any) => normalizeLanguageValue(v))
           : Array.isArray((job as any).languages)
-          ? (job as any).languages.map((l: any) => (typeof l === 'object' ? (l.id ?? l.languageId ?? l.name) : l))
+          ? (job as any).languages.map((l: any) => normalizeLanguageValue(typeof l === 'object' ? (l.id ?? l.languageId ?? l.name) : l))
           : [],
         // Ensure we extract an actual id if `job.level` is an object
         levelId:
@@ -254,7 +271,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
     } else {
       Promise.resolve().then(() => form.resetFields());
     }
-  }, [job, form, open, categories, skills, employmentTypes]);
+  }, [job, form, open, categories, skills, employmentTypes, languages, levels]);
 
   return (
     <Drawer title="Edit Job" width={640} open={open} onClose={onClose}>
@@ -276,7 +293,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
             return;
           }
 
-          // Convert importance (1-10) to normalized weights summing to 1
+          // Convert importance (1-10) to normalized decimal weights summing to 1
           const totalImportance = crit.reduce((acc: number, c: any) => acc + Number(c?.importance || 0), 0);
           if (totalImportance === 0) {
             form.setFields([
@@ -288,17 +305,24 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
             return;
           }
 
-          let runningWeight = 0;
-          const processedCriteria = crit.map((c: any, index: number) => {
-            let weight = 0;
-            if (index === crit.length - 1) {
-              weight = Number((1 - runningWeight).toFixed(2));
+          // Compute precise normalized weights and ensure they sum to exactly 1 after rounding
+          const unrounded = crit.map((c: any) => Number(c.importance || 0) / totalImportance);
+          const rounded: number[] = [];
+          let sumRounded = 0;
+          for (let i = 0; i < unrounded.length; i++) {
+            if (i === unrounded.length - 1) {
+              // last = 1 - sum(previous rounded) to guarantee sum equals 1
+              const last = Number((1 - sumRounded).toFixed(4));
+              rounded.push(last);
+              sumRounded = Number((sumRounded + last).toFixed(4));
             } else {
-              weight = Number(((c.importance || 0) / totalImportance).toFixed(2));
-              runningWeight += weight;
+              const r = Number(unrounded[i].toFixed(4));
+              rounded.push(r);
+              sumRounded = Number((sumRounded + r).toFixed(4));
             }
-            return { name: c.name, weight };
-          });
+          }
+
+          const processedCriteria = crit.map((c: any, index: number) => ({ name: c.name, weight: rounded[index] }));
 
           // normalize other fields similarly to create flow
           const payload = {
@@ -309,6 +333,77 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
             levelId: values.levelId,
             criteria: processedCriteria,
           };
+
+          // Ensure employmentTypeIds and skillIds are numeric IDs expected by API.
+          const normalizeToId = (val: any, list: any[], idKey: string) => {
+            if (val === null || val === undefined) return val;
+            const n = Number(val);
+            if (!isNaN(n)) return n;
+            const found = list.find((it: any) => String(it[idKey]) === String(val) || String(it.name).toLowerCase() === String(val).toLowerCase());
+            return found ? found[idKey] : val;
+          };
+
+          if (Array.isArray(payload.employmentTypeIds)) {
+            payload.employmentTypeIds = payload.employmentTypeIds.map((v: any) => normalizeToId(v, employmentTypes, 'employTypeId'));
+          }
+
+          if (Array.isArray(payload.skillIds)) {
+            payload.skillIds = payload.skillIds.map((v: any) => normalizeToId(v, skills, 'skillId'));
+          }
+
+          // If any ids remain non-numeric, abort and show error to user
+          const nonNumericEmp = Array.isArray(payload.employmentTypeIds) && payload.employmentTypeIds.some((v: any) => v !== null && v !== undefined && isNaN(Number(v)));
+          const nonNumericSkill = Array.isArray(payload.skillIds) && payload.skillIds.some((v: any) => v !== null && v !== undefined && isNaN(Number(v)));
+          if (nonNumericEmp || nonNumericSkill) {
+            form.setFields([
+              {
+                name: ['employmentTypeIds'],
+                errors: nonNumericEmp ? ['Some employment types could not be resolved to IDs'] : [],
+              },
+              {
+                name: ['skillIds'],
+                errors: nonNumericSkill ? ['Some skills could not be resolved to IDs'] : [],
+              },
+            ]);
+            return;
+          }
+
+          // Debug: log processed criteria and payload to inspect what's sent to API
+          try {
+            console.log("Processed criteria:", processedCriteria);
+          } catch (e) {
+            console.log("Processed criteria (unserializable)");
+          }
+
+          // Validate criteria: unique names and valid weights
+          const names = processedCriteria.map((c: any) => String(c.name).trim().toLowerCase());
+          const dup = names.filter((v: any, i: number) => names.indexOf(v) !== i);
+          if (dup.length > 0) {
+            form.setFields([
+              {
+                name: ["criteria"],
+                errors: ["Criteria names must be unique"],
+              },
+            ]);
+            return;
+          }
+
+          const totalWeight = processedCriteria.reduce((s: number, c: any) => s + Number(c.weight || 0), 0);
+          try {
+            console.log("Total criteria weight:", totalWeight);
+            console.log("Submitting payload:", { ...payload });
+          } catch (e) {
+            console.log("Payload (unserializable)");
+          }
+          if (!Number.isFinite(totalWeight) || Math.abs(totalWeight - 1) > 0.0001) {
+            form.setFields([
+              {
+                name: ["criteria"],
+                errors: ["Invalid criteria weights (must sum to 1)"],
+              },
+            ]);
+            return;
+          }
 
           onSubmit(payload);
         }}
@@ -437,7 +532,7 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
                           max={10}
                           step={0.1}
                           marks={{ 0.1: '0.1', 5: '5', 10: '10' }}
-                          tipFormatter={(v) => `${(v as number).toFixed(1)}`}
+                          tooltip={{ formatter: (v) => `${(v as number).toFixed(1)}` }}
                           style={{ width: "100%" }}
                         />
                       </Form.Item>

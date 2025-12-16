@@ -159,13 +159,14 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
                         loading={jobLoading}
                         showSearch
                         optionFilterProp="label"
+                        className="company-select"
                       />
                     </Form.Item>
 
                     <Form.Item
                       {...field}
                       name={[field.name, 'targetQuantity']}
-                      initialValue={1}
+                      // initialValue={1}
                       rules={[{ required: true, message: 'Please input target quantity' }]}
                       style={{ width: 160, marginBottom: 0 }}
                     >

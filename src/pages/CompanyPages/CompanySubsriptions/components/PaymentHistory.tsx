@@ -62,7 +62,7 @@ const PaymentHistory: React.FC = () => {
     },
     {
       title: <div style={{ textAlign: "center" }}>Amount</div>,
-      width: 120,
+      width: 80,
       align: "center" as const,
       render: (_: any, record: Payment) => (
         <strong>
@@ -86,24 +86,24 @@ const PaymentHistory: React.FC = () => {
         </Tag>
       ),
     },
-    {
-      title: <div style={{ textAlign: "center" }}>Subscription Status</div>,
-      dataIndex: "subscriptionStatus",
-      width: 150,
-      align: "center" as const,
-      render: (status: string | null) => {
-        if (!status) return <Tag>—</Tag>;
-        return (
-          <Tag color={status === "Active" ? "green" : status === "Canceled" ? "red" : "default"}>
-            {status}
-          </Tag>
-        );
-      },
-    },
+    // {
+    //   title: <div style={{ textAlign: "center" }}>Subscription Status</div>,
+    //   dataIndex: "subscriptionStatus",
+    //   width: 150,
+    //   align: "center" as const,
+    //   render: (status: string | null) => {
+    //     if (!status) return <Tag>—</Tag>;
+    //     return (
+    //       <Tag color={status === "Active" ? "green" : status === "Canceled" ? "red" : "default"}>
+    //         {status}
+    //       </Tag>
+    //     );
+    //   },
+    // },
     {
       title: <div style={{ textAlign: "center" }}>Transaction Time</div>,
       dataIndex: "transactionTime",
-      width: 180,
+      width: 160,
       align: "center" as const,
       render: (time: string | null) =>
         time ? new Date(time).toLocaleString() : "—",
@@ -115,16 +115,15 @@ const PaymentHistory: React.FC = () => {
       render: (_: any, record: Payment) => {
         if (!record.startDate || !record.endDate) return "—";
         return (
-          <div style={{ fontSize: 12 }}>
-            {new Date(record.startDate).toLocaleDateString()}
-            <br />→ {new Date(record.endDate).toLocaleDateString()}
+          <div>
+            {new Date(record.startDate).toLocaleDateString()} → {new Date(record.endDate).toLocaleDateString()}
           </div>
         );
       },
     },
     {
       title: <div style={{ textAlign: "center" }}>Invoice</div>,
-      width: 100,
+      width: 80,
       align: "center" as const,
       render: (_: any, record: Payment) => {
         if (record.paymentStatus !== "Paid") return "—";
@@ -146,7 +145,6 @@ const PaymentHistory: React.FC = () => {
               }
             }}
           >
-            Invoice
           </Button>
         );
       },

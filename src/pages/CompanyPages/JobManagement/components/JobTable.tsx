@@ -179,7 +179,7 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
         rowKey="jobId"
         pagination={{
           pageSize: 10,
-          showSizeChanger: true,
+          showSizeChanger: false,
           total: jobs.length,
           showTotal: (total) => `Total ${total} jobs`,
         }}

@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { Card, Button, Input, Badge } from "antd";
-import { PlusOutlined, SearchOutlined, BellOutlined } from "@ant-design/icons";
+import { SearchOutlined, BellOutlined } from "@ant-design/icons";
 import { companyService } from "../../../services/companyService";
 import { invitationService } from "../../../services/invitationService";
 import type { CompanyMember } from "../../../types/company.types";
 import StaffTable from "./components/StaffTable";
-import InviteDrawer from "./components/InviteDrawer";
 import PendingMembersDrawer from "./components/PendingMembersDrawer";
 import { useAppSelector } from "../../../hooks/redux";
 import { ROLES } from "../../../services/config";
@@ -18,10 +17,10 @@ const StaffManagement = () => {
 	const [members, setMembers] = useState<CompanyMember[]>([]);
 	const [filteredMembers, setFilteredMembers] = useState<CompanyMember[]>([]);
 	const [loading, setLoading] = useState(false);
-	const [drawerOpen, setDrawerOpen] = useState(false);
 	const [sending, setSending] = useState(false);
 	const [pendingDrawerOpen, setPendingDrawerOpen] = useState(false);
 	const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+	const [inviteEmail, setInviteEmail] = useState("");
 
 	const auth = useAppSelector((state) => state.auth);
 	const user = auth?.user;
@@ -138,14 +137,23 @@ const StaffManagement = () => {
 		}
 	};
 
-	// Drawer form submission
-	const handleInviteSubmit = async (values: { email: string }) => {
+	// Inline invite submission (used by the input + button)
+	const handleInviteSubmit = async () => {
+		if (!inviteEmail || inviteEmail.trim() === "") {
+			toastError("Please enter an email");
+			return;
+		}
+
 		setSending(true);
 		try {
-			const resp = await invitationService.sendInvitation({ email: values.email });
+			const payload: any = { email: inviteEmail };
+			const resp = await invitationService.sendInvitation(payload);
+
 			if (resp?.status === "Success" || resp?.status === "success") {
-				toastSuccess(`Invitation sent to ${values.email}`);
-				setDrawerOpen(false);
+				toastSuccess(`Invitation sent to ${inviteEmail}`);
+				setInviteEmail("");
+				// refresh members list
+				await fetchMembers();
 			} else {
 				toastError("Failed to send invitation", resp?.message);
 			}
@@ -194,101 +202,108 @@ const StaffManagement = () => {
 	};
 
 	return (
-		<Card
-			title={
-				<div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 16 }}>
-					<div style={{ flex: '0 0 auto' }}>
-						<span style={{ fontWeight: 600 }}>Staff Management</span>
-					</div>
+		<>
+			<Card
+				title={
+					<div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 16 }}>
+						<div style={{ flex: '0 0 auto' }}>
+							<span style={{ fontWeight: 600 }}>Staff Management</span>
+						</div>
 
-					<div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-						<Input
-							placeholder="Search by name, email, or role..."
-							prefix={<SearchOutlined />}
-							allowClear
-							style={{ width: 360 }}
-							onChange={(e) => handleSearch(e.target.value)}
-						/>
-					</div>
+						<div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+							<Input
+								placeholder="Search by name, email, or role..."
+								prefix={<SearchOutlined />}
+								allowClear
+								style={{ width: 360 }}
+								onChange={(e) => handleSearch(e.target.value)}
+							/>
+						</div>
 
-					<div style={{ flex: '0 0 auto' }}>
-						<div>
-							<Button
+						<div style={{ flex: '0 0 auto' }}>
+							<div>
+								{/* <Button
 								className="company-btn--filled"
 								icon={<PlusOutlined />}
 								onClick={() => setDrawerOpen(true)}
 							>
 								Invite New Staff
-							</Button>
-							{isHrManager && (
-								<Button
-									className="company-btn"
-									style={{ marginLeft: 8 }}
-									onClick={handleOpenPending}
-								>
-									<Badge
-										className="company-badge"
-										count={pendingRequests.length}
-										size="small"
-										offset={[-2, 1]}
+							</Button> */}
+								{isHrManager && (
+									<Button
+										className="company-btn"
+										style={{ marginLeft: 8 }}
+										onClick={handleOpenPending}
 									>
-										<BellOutlined
-											style={{
-												fontSize: 16,
-												color: "var(--color-primary-medium) !important",
-											}}
-										/>
-									</Badge>
-									<span className="ml-2">Pending Members</span>
-								</Button>
-							)}
+										<Badge
+											className="company-badge"
+											count={pendingRequests.length}
+											size="small"
+											offset={[-2, 1]}
+										>
+											<BellOutlined
+												style={{
+													fontSize: 16,
+													color: "var(--color-primary-medium) !important",
+												}}
+											/>
+										</Badge>
+										<span className="ml-2">Pending Members</span>
+									</Button>
+								)}
+							</div>
 						</div>
 					</div>
-				</div>
-			}
-			style={{
-				maxWidth: 1200,
-				margin: "12px auto",
-				padding: "0 5px",
-				borderRadius: 12,
-				boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-				// Constrain card height to viewport and make inner content scroll when needed
-				height: 'calc(100% - 25px)',
-				display: 'flex',
-				flexDirection: 'column',
-			}}
-		>
-			<div className="w-full" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-				{/* Header Section (search moved into Card title) */}
-				<div style={{ padding: '8px 0' }} />
-
-				{/* Staff Table - make body scrollable so whole card fits on one screen */}
-				<div style={{ flex: 1, overflow: 'auto' }}>
-					<StaffTable
-						members={filteredMembers}
-						loading={loading}
-						onDelete={handleDelete}
-						onChangeStatus={handleChangeStatus}
-					/>
-				</div>
-			</div>
-
-			{/* Invite Drawer */}
-			<InviteDrawer
-				open={drawerOpen}
-				onClose={() => setDrawerOpen(false)}
-				onSubmit={handleInviteSubmit}
-				submitting={sending}
-			/>
-			<PendingMembersDrawer
-				open={pendingDrawerOpen}
-				onClose={() => setPendingDrawerOpen(false)}
-				requests={pendingRequests}
-				onApprove={async (r) => {
-					await handleApproveRequest(r);
+				}
+				style={{
+					maxWidth: 1200,
+					margin: "12px auto",
+					padding: "0 5px",
+					borderRadius: 12,
+					boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+					// Constrain card height to viewport and make inner content scroll when needed
+					height: 'calc(100% - 25px)',
+					display: 'flex',
+					flexDirection: 'column',
 				}}
-			/>
-		</Card>
+			>
+				<div className="w-full" style={{ flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+					{/* Full-width invite row */}
+					<div style={{ width: '100%', boxSizing: 'border-box', padding: '12px 16px', background: 'transparent' }}>
+						<div style={{ maxWidth: "80%", margin: '0 auto', display: 'flex', gap: 8, alignItems: 'center' }}>
+							<Input
+								placeholder="Nhập email"
+								value={inviteEmail}
+								onChange={(e) => setInviteEmail(e.target.value)}
+								style={{ flex: 1 }}
+							/>
+
+							<Button className="company-btn--filled" loading={sending} onClick={handleInviteSubmit}>
+								Gửi lời mời
+							</Button>
+						</div>
+					</div>
+
+					<div style={{ flex: 1, overflow: 'auto' }}>
+						<StaffTable
+							members={filteredMembers}
+							loading={loading}
+							onDelete={handleDelete}
+							onChangeStatus={handleChangeStatus}
+						/>
+					</div>
+				</div>
+
+				<PendingMembersDrawer
+					open={pendingDrawerOpen}
+					onClose={() => setPendingDrawerOpen(false)}
+					requests={pendingRequests}
+					onApprove={async (r) => {
+						await handleApproveRequest(r);
+					}}
+				/>
+			</Card>
+		</>
 	);
 };
 

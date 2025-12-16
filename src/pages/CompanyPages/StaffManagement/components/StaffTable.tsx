@@ -172,7 +172,12 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
         dataSource={sortedMembers}
         loading={loading}
         rowKey="userId"
-        pagination={{ pageSize: 10, showSizeChanger: true, showQuickJumper: true }}
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: false,
+          total: sortedMembers.length,
+          showTotal: (total) => `Total ${total} members`,
+        }}
         scroll={{ x: 1000, y: bodyScroll }}
         style={{ flex: 1 }}
         locale={{

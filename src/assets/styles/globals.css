@@ -109,11 +109,11 @@ button {
 		color: var(--color-primary) !important;
 	}
 
-	/* 👇👇👇 PHẦN THÊM MỚI: Style cho InputNumber ở Dashboard 👇👇👇 */
+	/* 👇👇👇 PHẦN THÊM MỚI: Style cho InputNumber ở Dashboard 👇👇👇
     /* Chỉ đổi màu khi không có lỗi (status != error) */
-    .company-input-number.ant-input-number:not(.ant-input-number-status-error) {
+    /* .company-input-number.ant-input-number:not(.ant-input-number-status-error) {
         border-color: var(--color-primary-light) !important;
-    }
+    }  */
 
     /* Hover & Focus state */
     .company-input-number.ant-input-number:not(.ant-input-number-status-error):hover,
@@ -246,9 +246,9 @@ button {
 		border-radius: 6px !important;
 		box-shadow: none !important;
 		padding: 4px 11px !important;
-		/* Force consistent control height and center vertical content */
-		min-height: 40px !important;
-		height: 40px !important;
+		/* Force consistent control height and center vertical content (match normal inputs) */
+		min-height: 32px !important;
+		height: 32px !important;
 		display: flex !important;
 		align-items: center !important;
 	}
@@ -282,7 +282,7 @@ button {
 	.company-select.ant-select-multiple .ant-select-selection-overflow-item {
 		display: flex !important;
 		align-items: center !important;
-		max-height: 40px !important;
+		max-height: 36px !important;
 		overflow: hidden !important;
 	}
 
@@ -749,4 +749,97 @@ button {
 
 .icon {
 	color: white !important;
+}
+
+/* Edit-mode checkbox: when table has edit-mode-table, use brand light color */
+.edit-mode-table .ant-checkbox .ant-checkbox-inner {
+	border-color: var(--color-primary-light) !important;
+}
+.edit-mode-table .ant-checkbox:hover .ant-checkbox-inner {
+	border-color: var(--color-primary-light) !important;
+}
+.edit-mode-table .ant-checkbox-checked .ant-checkbox-inner {
+	background: var(--color-primary-light) !important;
+	border-color: var(--color-primary-light) !important;
+}
+.edit-mode-table .ant-checkbox-checked .ant-checkbox-inner::after {
+	border-color: #fff !important;
+}
+.edit-mode-table .ant-checkbox-input:focus + .ant-checkbox-inner,
+.edit-mode-table .ant-checkbox-input:checked + .ant-checkbox-inner {
+	box-shadow: none !important;
+}
+
+/* Header (select-all) checkbox in table header */
+.edit-mode-table .ant-table-thead .ant-checkbox .ant-checkbox-inner {
+	border-color: var(--color-primary-light) !important;
+}
+.edit-mode-table .ant-table-thead .ant-checkbox:hover .ant-checkbox-inner {
+	border-color: var(--color-primary-light) !important;
+}
+.edit-mode-table .ant-table-thead .ant-checkbox-checked .ant-checkbox-inner {
+	background: var(--color-primary-light) !important;
+	border-color: var(--color-primary-light) !important;
+}
+.edit-mode-table .ant-table-thead .ant-checkbox-inner::after {
+	border-color: #fff !important;
+}
+.edit-mode-table .ant-table-thead input.ant-checkbox-input:focus + .ant-checkbox-inner {
+	box-shadow: none !important;
+}
+
+/* Row (tbody) checkboxes — ensure individual item checkboxes also use brand light color */
+.edit-mode-table .ant-table-tbody .ant-checkbox .ant-checkbox-inner,
+.edit-mode-table .ant-table-row .ant-checkbox .ant-checkbox-inner,
+.edit-mode-table .ant-checkbox-wrapper .ant-checkbox .ant-checkbox-inner {
+	border-color: var(--color-primary-light) !important;
+}
+.edit-mode-table .ant-table-tbody .ant-checkbox:hover .ant-checkbox-inner,
+.edit-mode-table .ant-table-row .ant-checkbox:hover .ant-checkbox-inner,
+.edit-mode-table .ant-checkbox-wrapper:hover .ant-checkbox .ant-checkbox-inner {
+	border-color: var(--color-primary-light) !important;
+}
+.edit-mode-table .ant-table-tbody .ant-checkbox-checked .ant-checkbox-inner,
+.edit-mode-table .ant-table-row .ant-checkbox-checked .ant-checkbox-inner,
+.edit-mode-table .ant-checkbox-wrapper .ant-checkbox-checked .ant-checkbox-inner {
+	background: var(--color-primary-light) !important;
+	border-color: var(--color-primary-light) !important;
+}
+.edit-mode-table .ant-table-tbody .ant-checkbox-checked .ant-checkbox-inner::after,
+.edit-mode-table .ant-table-row .ant-checkbox-checked .ant-checkbox-inner::after,
+.edit-mode-table .ant-checkbox-wrapper .ant-checkbox-checked .ant-checkbox-inner::after {
+	border-color: #fff !important;
+}
+.edit-mode-table .ant-table-tbody input.ant-checkbox-input:focus + .ant-checkbox-inner,
+.edit-mode-table .ant-table-row input.ant-checkbox-input:focus + .ant-checkbox-inner,
+.edit-mode-table .ant-checkbox-wrapper input.ant-checkbox-input:focus + .ant-checkbox-inner {
+	box-shadow: none !important;
+}
+/* FIX: select-all checkbox khi chọn một phần (indeterminate) */
+.edit-mode-table
+.ant-table-thead
+.ant-checkbox-indeterminate
+.ant-checkbox-inner {
+  background: var(--color-primary-light) !important;
+  border-color: var(--color-primary-light) !important;
+}
+
+.edit-mode-table
+.ant-table-thead
+.ant-checkbox-indeterminate
+.ant-checkbox-inner::after {
+  background-color: #fff !important;
+}
+/* === Highlight row when selected (Ant Design Table) === */
+.edit-mode-table
+.ant-table-tbody
+.ant-table-row.ant-table-row-selected > td {
+  background-color: color-mix(in srgb, var(--color-primary-light) 10%, white) !important;
+}
+
+/* Hover row đã chọn */
+.edit-mode-table
+.ant-table-tbody
+.ant-table-row.ant-table-row-selected:hover > td {
+  background-color: color-mix(in srgb, var(--color-primary-light) 10%, white) !important;
 }

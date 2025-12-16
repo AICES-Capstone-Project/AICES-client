@@ -14,11 +14,14 @@ import {
 import {
   PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend
 } from "recharts";
-
+import { useAppSelector } from "../../../hooks/redux";
 import dashboardService from "../../../services/dashboardService";
 
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
+  const user = useAppSelector((state) => state.auth.user);
+  const displayName = user?.fullName ?? "Người dùng";
+
 
   const [stats, setStats] = useState({
     campaigns: 0,
@@ -75,8 +78,21 @@ const Dashboard: React.FC = () => {
 
   return (
     <Card
-      title={<span style={{ fontWeight: 600 }}>Dashboard Overview</span>}
-      style={{ maxWidth: 1300, margin: "20px auto", borderRadius: 12 }}
+      title={
+        <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+          <div style={{ fontSize: 13, color: "#8c8c8c" }}>Xin chào {displayName},</div>
+          <div style={{ fontSize: 20, fontWeight: 700 }}>Chào buổi tối</div>
+          <div style={{ fontWeight: 600 }}>Dashboard Overview</div>
+        </div>
+      }
+      style={{ maxWidth: 1200,
+				margin: "12px auto",
+				padding: "0 5px",
+				borderRadius: 12,
+				boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+				height: 'calc(100% - 25px)',
+				display: 'flex',
+				flexDirection: 'column', }}
     >
       {loading ? (
         <div style={{ textAlign: "center", padding: 40 }}>

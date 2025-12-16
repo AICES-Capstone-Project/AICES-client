@@ -5,32 +5,67 @@ import ResumeDetailDrawer from "./components/ResumeDetailDrawer";
 import type { ColumnsType } from "antd/es/table";
 import candidateService from "../../../services/candidateService";
 
-// (data comes from API)
-
 const CandidateManagement = () => {
-    // Khởi tạo state và gọi API để lấy dữ liệu
     const [candidates, setCandidates] = useState<any[]>([]);
-    const [filtered, setFiltered] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
-    // UI Layout States
     const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(12);
+    const [pageSize, setPageSize] = useState<number>(10);
     const [searchText, setSearchText] = useState("");
 
-    // Drawer States
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedCandidateId, setSelectedCandidateId] = useState<number | null>(null);
-    // PDF preview state (kept for detail drawer)
+
     const [pdfOpen, setPdfOpen] = useState(false);
     const [pdfUrl] = useState<string | null>(null);
 
-    // Delete modal state
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [candidateToDelete, setCandidateToDelete] = useState<any | null>(null);
 
-    // Delete candidate via API (updates UI on success)
+    const [apiTotal, setApiTotal] = useState<number>(0);
+
+    const loadCandidates = async (page = 1, size = pageSize, searchKey = "") => {
+        setLoading(true);
+        try {
+            const resp = await candidateService.getCandidates({
+                page,
+                pageSize: size,
+                search: searchKey,
+            });
+
+            if (resp?.status?.toLowerCase() === "success") {
+                const payload = resp.data ?? {};
+                const list = payload.items ?? payload.candidates ?? [];
+
+                setCandidates(
+                    list.map((c: any) => ({
+                        candidateId: c.candidateId ?? c.id,
+                        candidateName: c.fullName ?? c.name,
+                        email: c.email,
+                        phone: c.phoneNumber,
+                    }))
+                );
+
+                setCurrentPage(payload.currentPage ?? page);
+                setPageSize(payload.pageSize ?? size);
+                setApiTotal(payload.totalCount ?? list.length);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        loadCandidates(currentPage, pageSize, searchText);
+    }, []);
+
+    const handleSearch = () => {
+        setCurrentPage(1);
+        loadCandidates(1, pageSize, searchText);
+    };
+
     const handleDelete = async (record: any) => {
         const id = record?.candidateId ?? record?.resumeId ?? record?.id ?? null;
         if (!id) {
@@ -44,15 +79,13 @@ const CandidateManagement = () => {
             if (String(resp?.status || "").toLowerCase() === "success") {
                 const newData = candidates.filter((item) => (item.candidateId ?? item.resumeId ?? item.id) !== id);
                 setCandidates(newData);
-                // decrement total shown in pagination
                 setApiTotal((prev) => Math.max(0, prev - 1));
                 message.success(resp?.message || "Candidate deleted");
 
-                // if current page is now empty and we are beyond page 1, load previous page
                 if (newData.length === 0 && currentPage > 1) {
                     const prevPage = currentPage - 1;
                     setCurrentPage(prevPage);
-                    await loadCandidates(prevPage, pageSize);
+                    await loadCandidates(prevPage, pageSize, searchText);
                 }
             } else {
                 message.error(resp?.message || "Unable to delete candidate");
@@ -65,7 +98,6 @@ const CandidateManagement = () => {
         }
     };
 
-    // Tính toán chiều cao bảng (UI Logic)
     useEffect(() => {
         const calculate = () => {
             const reserved = 220; // px
@@ -78,78 +110,11 @@ const CandidateManagement = () => {
         return () => window.removeEventListener("resize", calculate);
     }, []);
 
-    // Load candidates from API (paged)
-    const [apiTotal, setApiTotal] = useState<number>(0);
-
-    const loadCandidates = async (page = 1, size = 10) => {
-        setLoading(true);
-        try {
-            const resp = await candidateService.getCandidates({ page, pageSize: size });
-            if (String(resp?.status || "").toLowerCase() === "success") {
-                const payload = resp.data ?? {};
-                const raw = Array.isArray(payload)
-                    ? payload
-                    : payload.candidates ?? payload.data ?? payload.items ?? [];
-
-                const mapped = (Array.isArray(raw) ? raw : []).map((c: any) => ({
-                    resumeId: c.candidateId ?? c.id,
-                    candidateId: c.candidateId ?? c.id,
-                    candidateName: c.fullName ?? c.candidateName ?? c.name,
-                    email: c.email,
-                    phone: c.phoneNumber ?? c.phone,
-                    createdAt: c.createdAt,
-                }));
-
-                setCandidates(mapped);
-
-                // compute total from API pagination if available
-                const totalPages = Number(payload.totalPages) || 0;
-                const pageSizeFromApi = Number(payload.pageSize) || size;
-                const total = totalPages > 0 ? totalPages * pageSizeFromApi : mapped.length;
-                setApiTotal(total);
-
-                const current = Number(payload.currentPage) || page;
-                setCurrentPage(current);
-                setPageSize(pageSizeFromApi);
-            } else {
-                message.error(resp?.message || "Unable to load candidates");
-            }
-        } catch (e) {
-            console.error("Failed to load candidates:", e);
-            message.error("Unable to load candidates");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        loadCandidates(currentPage, pageSize);
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Logic tìm kiếm (Client-side filtering)
-    useEffect(() => {
-        let result = [...candidates];
-        if (searchText) {
-            const v = searchText.trim().toLowerCase();
-            result = result.filter(
-                (c) =>
-                    c.candidateName?.toLowerCase().includes(v) ||
-                    c.email?.toLowerCase().includes(v) ||
-                    c.jobTitle?.toLowerCase().includes(v)
-            );
-        }
-        setFiltered(result);
-    }, [candidates, searchText]);
-
-    // Mở drawer xem chi tiết của một resume (nếu cần, có thể fetch thêm)
     const openResume = (record: any) => {
         const id = record?.candidateId ?? record?.resumeId ?? record?.id ?? null;
         setSelectedCandidateId(id);
         setDrawerOpen(true);
     };
-
-    // (resume list drawer removed)
 
     const columns: ColumnsType<any> = [
         {
@@ -157,7 +122,8 @@ const CandidateManagement = () => {
             key: "no",
             width: 72,
             align: "center",
-            render: (_: any, __: any, index: number) => (currentPage - 1) * pageSize + index + 1,
+            render: (_: any, __: any, index: number) =>
+                (currentPage - 1) * pageSize + index + 1,
         },
         {
             title: "Name",
@@ -214,6 +180,8 @@ const CandidateManagement = () => {
                             style={{ width: 320 }}
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
+                            // [THÊM]: Bấm Enter thì gọi API search
+                            onPressEnter={handleSearch}
                         />
                     </div>
                 </div>
@@ -226,19 +194,24 @@ const CandidateManagement = () => {
             }}
         >
             <Table
-                dataSource={filtered}
+                dataSource={candidates}
                 columns={columns}
                 rowKey="candidateId"
                 loading={loading}
                 pagination={{
                     current: currentPage,
-                    pageSize,
-                    showSizeChanger: true,
-                    pageSizeOptions: [6, 12, 24, 48],
+                    pageSize: pageSize,
+                    showSizeChanger: false,
                     total: apiTotal,
                     showTotal: (total) => `Total ${total} candidates`,
+                    showQuickJumper: true,
+                    showPrevNextJumpers: true,
+                    showLessItems: false,
                     onChange: (page, size) => {
-                        loadCandidates(page, size || pageSize);
+                        // update local state then load
+                        setCurrentPage(page);
+                        if (size && size !== pageSize) setPageSize(size);
+                        loadCandidates(page, size || pageSize, searchText);
                     },
                 }}
                 size="middle"

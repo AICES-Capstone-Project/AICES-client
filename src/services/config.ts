@@ -115,11 +115,12 @@ export const API_ENDPOINTS = {
     SYSTEM_UPDATE: (categoryId: number) => `/system/categories/${categoryId}`,
     SYSTEM_DELETE: (categoryId: number) => `/system/categories/${categoryId}`,
   },
-  
+
   CANDIDATE: {
     //------------------------------- SYSTEM -----------------------------------------
-    COMPANY_GET_ALL: "/candidates", 
-    COMPANY_GET_BY_ID:(candidateId: number) =>  `/candidates/${candidateId}/resumes`,
+    COMPANY_GET_ALL: "/candidates",
+    COMPANY_GET_BY_ID: (candidateId: number) =>
+      `/candidates/${candidateId}/resumes`,
     COMPANY_DELETE: (candidateId: number) => `/candidates/${candidateId}`,
     SYSTEM_UPDATE: (blogId: number) => `/companies/blogs/${blogId}`,
     SYSTEM_DELETE: (blogId: number) => `/companies/blogs/${blogId}`,
@@ -172,6 +173,13 @@ export const API_ENDPOINTS = {
     //------------------------------- PUBLIC -----------------------------------------
     PUBLIC_GET: "/public/levels",
     PUBLIC_GET_BY_ID: (levelId: number) => `/public/levels/${levelId}`,
+
+    //------------------------------- SYSTEM -----------------------------------------
+    SYSTEM_GET: "/public/levels",
+    SYSTEM_GET_BY_ID: (levelId: number) => `/public/levels/${levelId}`,
+    SYSTEM_CREATE: "/system/levels",
+    SYSTEM_UPDATE: (levelId: number) => `/system/levels/${levelId}`,
+    SYSTEM_DELETE: (levelId: number) => `/system/levels/${levelId}`,
   },
 
   // Banner Config endpoints
@@ -333,8 +341,11 @@ export const API_ENDPOINTS = {
     // Get resumes for a job
     COMPANY_GET: (campaignId: number, jobId: number) =>
       `/campaigns/${campaignId}/jobs/${jobId}/resumes`,
-    COMPANY_GET_BY_ID: (campaignId: number, jobId: number, applicationId: number) =>
-      `/campaigns/${campaignId}/jobs/${jobId}/resumes/${applicationId}`,
+    COMPANY_GET_BY_ID: (
+      campaignId: number,
+      jobId: number,
+      applicationId: number
+    ) => `/campaigns/${campaignId}/jobs/${jobId}/resumes/${applicationId}`,
 
     // Gửi lại resume để AI phân tích lại
     COMPANY_RETRY: (resumeId: number) => `/resumes/${resumeId}/retry`,
@@ -368,7 +379,8 @@ export const API_ENDPOINTS = {
       `/campaigns/${campaignId}/jobs`,
 
     COMPANY_PENDING: "/campaigns/pending",
-    COMPANY_PENDING_BY_ID: (campaignId: number) => `/campaigns/${campaignId}/pending`,
+    COMPANY_PENDING_BY_ID: (campaignId: number) =>
+      `/campaigns/${campaignId}/pending`,
   },
 
   // =============================== SYSTEM DASHBOARD ===============================
@@ -394,8 +406,10 @@ export const API_ENDPOINTS = {
   },
 
   COMPANY_REPORT: {
-    JOBS_EXCEL: (campaignId: number, jobId: number) => `/reports/campaigns/${campaignId}/job/${jobId}/excel`,
-    JOBS_PDF: (campaignId: number, jobId: number) => `/reports/campaigns/${campaignId}/job/${jobId}/pdf`,
+    JOBS_EXCEL: (campaignId: number, jobId: number) =>
+      `/reports/campaigns/${campaignId}/job/${jobId}/excel`,
+    JOBS_PDF: (campaignId: number, jobId: number) =>
+      `/reports/campaigns/${campaignId}/job/${jobId}/pdf`,
   },
 
   ROLE: {
@@ -499,10 +513,12 @@ export const APP_ROUTES = {
   SYSTEM_PAYMENT_DETAIL: "/system/payments/:paymentId",
 
   // Taxonomy
+  SYSTEM_TAXONOMY_LEVEL: "/system/taxonomy/levels",
   SYSTEM_TAXONOMY_CATEGORY: "/system/taxonomy/categories",
   SYSTEM_TAXONOMY_SKILL: "/system/taxonomy/skills",
   SYSTEM_TAXONOMY_SPECIALIZATION: "/system/taxonomy/specializations",
   SYSTEM_TAXONOMY_RECRUITMENT_TYPE: "/system/taxonomy/recruitment-types",
+  
 
   // Content
   SYSTEM_CONTENT_BANNERS: "/system/content/banners",

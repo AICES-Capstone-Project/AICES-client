@@ -5,16 +5,18 @@ import {
   DashboardOutlined,
   TeamOutlined,
   // FileDoneOutlined,
+  BranchesOutlined,
   AppstoreOutlined,
   BarChartOutlined,
   // BellOutlined,
   // SettingOutlined,
   ApartmentOutlined,
-  // TagsOutlined,
   PartitionOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  RiseOutlined,
   PoweroffOutlined,
+  TagsOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logoLong from "../../assets/logo/logo_long.png";
@@ -89,17 +91,25 @@ export default function SystemAdminLayout() {
       label: "Taxonomy Management",
       children: [
         {
+          key: APP_ROUTES.SYSTEM_TAXONOMY_LEVEL,
+          icon: <RiseOutlined />,
+          label: <Link to={APP_ROUTES.SYSTEM_TAXONOMY_LEVEL}>Levels</Link>,
+        },
+        {
           key: APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY,
+          icon: <AppstoreOutlined />,
           label: (
             <Link to={APP_ROUTES.SYSTEM_TAXONOMY_CATEGORY}>Categories</Link>
           ),
         },
         {
           key: APP_ROUTES.SYSTEM_TAXONOMY_SKILL,
+          icon: <TagsOutlined />,
           label: <Link to={APP_ROUTES.SYSTEM_TAXONOMY_SKILL}>Skills</Link>,
         },
         {
           key: APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION,
+          icon: <ApartmentOutlined />,
           label: (
             <Link to={APP_ROUTES.SYSTEM_TAXONOMY_SPECIALIZATION}>
               Specializations
@@ -108,6 +118,7 @@ export default function SystemAdminLayout() {
         },
         {
           key: APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE,
+          icon: <BranchesOutlined />,
           label: (
             <Link to={APP_ROUTES.SYSTEM_TAXONOMY_RECRUITMENT_TYPE}>
               Recruitment Types
@@ -116,6 +127,7 @@ export default function SystemAdminLayout() {
         },
       ],
     },
+
     // Content
     {
       key: "content",

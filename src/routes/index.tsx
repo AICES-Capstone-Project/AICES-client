@@ -10,6 +10,7 @@ import CompanyList from "../pages/SystemPages/Company";
 import CompanyDetail from "../pages/SystemPages/Company/components/CompanyDetail";
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
 import ResumeDetail from "../pages/SystemPages/Company/ResumeDetail";
+import LevelList from "../pages/SystemPages/Taxonomy/LevelList";
 
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
@@ -141,6 +142,7 @@ const systemChildren = [
   },
 
   // Taxonomy
+  { path: "taxonomy/levels", element: <LevelList /> },
   { path: "taxonomy/categories", element: <CategoryList /> },
   { path: "taxonomy/skills", element: <SkillList /> },
   {

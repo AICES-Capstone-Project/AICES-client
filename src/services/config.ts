@@ -166,6 +166,12 @@ export const API_ENDPOINTS = {
     //------------------------------- PUBLIC -----------------------------------------
     PUBLIC_GET: "/public/languages",
     PUBLIC_GET_BY_ID: (languageId: number) => `/public/languages/${languageId}`,
+  //------------------------------- SYSTEM -----------------------------------------
+    SYSTEM_GET: "/public/languages",
+    SYSTEM_GET_BY_ID: (languageId: number) => `/public/languages/${languageId}`,
+    SYSTEM_CREATE: "/system/languages",
+    SYSTEM_UPDATE: (languageId: number) => `/system/languages/${languageId}`,
+    SYSTEM_DELETE: (languageId: number) => `/system/languages/${languageId}`,
   },
 
   // Level endpoints
@@ -513,6 +519,7 @@ export const APP_ROUTES = {
   SYSTEM_PAYMENT_DETAIL: "/system/payments/:paymentId",
 
   // Taxonomy
+  SYSTEM_TAXONOMY_LANGUAGE: "/system/taxonomy/languages",
   SYSTEM_TAXONOMY_LEVEL: "/system/taxonomy/levels",
   SYSTEM_TAXONOMY_CATEGORY: "/system/taxonomy/categories",
   SYSTEM_TAXONOMY_SKILL: "/system/taxonomy/skills",

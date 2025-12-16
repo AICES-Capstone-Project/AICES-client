@@ -4,6 +4,7 @@ import "../../assets/styles/system.css";
 import {
   DashboardOutlined,
   TeamOutlined,
+  GlobalOutlined,
   // FileDoneOutlined,
   BranchesOutlined,
   AppstoreOutlined,
@@ -90,6 +91,13 @@ export default function SystemAdminLayout() {
       icon: <PartitionOutlined />,
       label: "Taxonomy Management",
       children: [
+        {
+          key: APP_ROUTES.SYSTEM_TAXONOMY_LANGUAGE,
+          icon: <GlobalOutlined />,
+          label: (
+            <Link to={APP_ROUTES.SYSTEM_TAXONOMY_LANGUAGE}>Languages</Link>
+          ),
+        },
         {
           key: APP_ROUTES.SYSTEM_TAXONOMY_LEVEL,
           icon: <RiseOutlined />,

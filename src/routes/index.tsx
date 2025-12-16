@@ -10,7 +10,7 @@ import CompanyList from "../pages/SystemPages/Company";
 import CompanyDetail from "../pages/SystemPages/Company/components/CompanyDetail";
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
 import ResumeDetail from "../pages/SystemPages/Company/ResumeDetail";
-import LevelList from "../pages/SystemPages/Taxonomy/LevelList";
+
 
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
@@ -108,6 +108,11 @@ const SpecializationList = lazy(
 const RecruitmentTypeList = lazy(
   () => import("../pages/SystemPages/Taxonomy/RecruitmentTypeList")
 );
+const LanguageList = lazy(
+  () => import("../pages/SystemPages/Taxonomy/LanguageList")
+);
+
+const LevelList = lazy(() => import("../pages/SystemPages/Taxonomy/LevelList"));
 
 //Content
 const BannerList = lazy(
@@ -142,6 +147,7 @@ const systemChildren = [
   },
 
   // Taxonomy
+  { path: "taxonomy/languages", element: <LanguageList /> },
   { path: "taxonomy/levels", element: <LevelList /> },
   { path: "taxonomy/categories", element: <CategoryList /> },
   { path: "taxonomy/skills", element: <SkillList /> },

@@ -122,6 +122,10 @@ const BlogList = lazy(
   () => import("../pages/SystemPages/Content/Blogs/BlogList")
 );
 
+//Feedback
+const FeedbackList = lazy(() => import("../pages/SystemPages/Feedback/FeedbackList"));
+
+
 const PaymentSuccess = lazy(
   () =>
     import(
@@ -178,6 +182,8 @@ const systemChildren = [
     path: "company/:companyId/jobs/:jobId/resumes/:resumeId",
     element: <ResumeDetail />,
   },
+  { path: "feedbacks", element: <FeedbackList /> },
+
 ];
 
 export const router = createBrowserRouter([

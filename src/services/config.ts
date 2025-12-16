@@ -166,7 +166,7 @@ export const API_ENDPOINTS = {
     //------------------------------- PUBLIC -----------------------------------------
     PUBLIC_GET: "/public/languages",
     PUBLIC_GET_BY_ID: (languageId: number) => `/public/languages/${languageId}`,
-  //------------------------------- SYSTEM -----------------------------------------
+    //------------------------------- SYSTEM -----------------------------------------
     SYSTEM_GET: "/public/languages",
     SYSTEM_GET_BY_ID: (languageId: number) => `/public/languages/${languageId}`,
     SYSTEM_CREATE: "/system/languages",
@@ -216,6 +216,12 @@ export const API_ENDPOINTS = {
 
     PUBLIC_GET_ALL: "/public/blogs",
     PUBLIC_GET_BY_ID: (id: number) => `/public/blogs/${id}`,
+  },
+
+  // Feedback endpoints
+  FEEDBACK: {
+    SYSTEM_GET_ALL: "/system/feedbacks",
+    SYSTEM_GET_BY_ID: (feedbackId: number) => `/system/feedbacks/${feedbackId}`,
   },
 
   // Job endpoints
@@ -525,7 +531,6 @@ export const APP_ROUTES = {
   SYSTEM_TAXONOMY_SKILL: "/system/taxonomy/skills",
   SYSTEM_TAXONOMY_SPECIALIZATION: "/system/taxonomy/specializations",
   SYSTEM_TAXONOMY_RECRUITMENT_TYPE: "/system/taxonomy/recruitment-types",
-  
 
   // Content
   SYSTEM_CONTENT_BANNERS: "/system/content/banners",
@@ -533,6 +538,10 @@ export const APP_ROUTES = {
   SYSTEM_BLOGS: "/system/content/blogs",
   SYSTEM_BLOG_DETAIL: "/system/content/blogs/:blogId",
   SYSTEM_TAGS: "/system/tags",
+
+  //Feedbacks
+  SYSTEM_FEEDBACKS: "/system/feedbacks",
+  SYSTEM_FEEDBACK_DETAIL: "/system/feedbacks/:feedbackId",
 
   // Optional detail routes (for future expansion)
   SYSTEM_COMPANY_DETAIL: "/system/company/:companyId",

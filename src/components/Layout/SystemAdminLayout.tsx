@@ -18,6 +18,7 @@ import {
   RiseOutlined,
   PoweroffOutlined,
   TagsOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logoLong from "../../assets/logo/logo_long.png";
@@ -152,6 +153,13 @@ export default function SystemAdminLayout() {
         },
       ],
     },
+    // Feedbacks
+    {
+      key: APP_ROUTES.SYSTEM_FEEDBACKS,
+      icon: <MessageOutlined />,
+      label: <Link to={APP_ROUTES.SYSTEM_FEEDBACKS}>Feedbacks</Link>,
+    },
+
     // // Notifications
     // {
     //   key: "notifications",

@@ -10,13 +10,22 @@ export interface SkillListParams {
   keyword?: string;
 }
 
+type SkillListData = {
+  skills: Skill[];
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  totalCount: number;
+};
+
 const PUBLIC_SKILL_BASE_URL = "/public/skills";
 const SYSTEM_SKILL_BASE_URL = "/system/skills";
 
 export const skillService = {
-  // ---------- PUBLIC (GIỮ CHO FE KHÁC XÀI) ----------
+  // ---------- PUBLIC ----------
+  // ✅ list trả về paging object
   getSkills(params?: SkillListParams) {
-    return api.get<ApiResponse<Skill[]>>(PUBLIC_SKILL_BASE_URL, {
+    return api.get<ApiResponse<SkillListData>>(PUBLIC_SKILL_BASE_URL, {
       params,
     });
   },
@@ -40,9 +49,10 @@ export const skillService = {
     return api.delete<ApiResponse<null>>(`${PUBLIC_SKILL_BASE_URL}/${id}`);
   },
 
-  // ---------- SYSTEM (CHO SYSTEM ADMIN / TAXONOMY) ----------
+  // ---------- SYSTEM ----------
+  // ✅ nếu BE nói GET dùng public thì giữ public
   getSkillsSystem(params?: SkillListParams) {
-    return api.get<ApiResponse<Skill[]>>(PUBLIC_SKILL_BASE_URL, {
+    return api.get<ApiResponse<SkillListData>>(PUBLIC_SKILL_BASE_URL, {
       params,
     });
   },

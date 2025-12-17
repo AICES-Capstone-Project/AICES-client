@@ -23,7 +23,7 @@ export default function RecruitmentTypeTable({
   const columns: ColumnsType<RecruitmentType> = [
     {
       title: "ID",
-      dataIndex: "recruitmentTypeId",
+      dataIndex: "employTypeId", // ✅ FIX
       width: 80,
       align: "center",
     },
@@ -57,7 +57,7 @@ export default function RecruitmentTypeTable({
             title="Delete recruitment type?"
             okText="Yes"
             cancelText="No"
-            onConfirm={() => onDelete(record.recruitmentTypeId)}
+            onConfirm={() => onDelete(record.employTypeId)} // ✅ FIX
           >
             <Button
               size="small"
@@ -73,7 +73,7 @@ export default function RecruitmentTypeTable({
 
   return (
     <Table
-      rowKey="recruitmentTypeId"
+      rowKey="employTypeId" // ✅ FIX
       loading={loading}
       dataSource={data}
       columns={columns}

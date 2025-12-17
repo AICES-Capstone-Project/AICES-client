@@ -11,77 +11,50 @@ export interface RecruitmentTypeQuery {
   keyword?: string;
 }
 
-export interface RecruitmentTypeListResult {
-  items: RecruitmentType[];
-  total: number;
+// ✅ Shape đúng theo BE response bạn gửi
+export interface EmploymentTypeListData {
+  employmentTypes: RecruitmentType[];
+  totalPages: number;
+  currentPage: number;
+  pageSize: number;
+  totalCount: number;
 }
 
-// Map từ BE schema -> FE schema
-function mapEmploymentType(item: any): RecruitmentType {
-  return {
-    recruitmentTypeId: item.employTypeId,
-    name: item.name,
-    isActive: item.isActive,
-    createdAt: item.createdAt,
-  };
-}
-
-// Base URL theo API_ENDPOINTS mới
-const PUBLIC_BASE = API_ENDPOINTS.EMPLOYMENT_TYPE.PUBLIC_GET;        // /public/employment-types
-const SYSTEM_BASE = API_ENDPOINTS.EMPLOYMENT_TYPE.SYSTEM_CREATE;     // /system/employment-types
+// Base URL theo API_ENDPOINTS
+const PUBLIC_BASE = API_ENDPOINTS.EMPLOYMENT_TYPE.PUBLIC_GET; // /public/employment-types
+const SYSTEM_BASE = API_ENDPOINTS.EMPLOYMENT_TYPE.SYSTEM_CREATE; // /system/employment-types
 
 export const recruitmentTypeService = {
   // ================== GET (PUBLIC) ==================
-  // BE chỉ có PUBLIC_GET, nên list & detail vẫn dùng public
-  async getAll(
-    params: RecruitmentTypeQuery = {}
-  ): Promise<RecruitmentTypeListResult> {
-    const res = await api.get<ApiResponse<any>>(PUBLIC_BASE, { params });
-
-    const payload = res.data?.data;
-
-    // BE có thể trả:
-    // - data: [ ... ]
-    // - hoặc data: { items: [...], total: number }
-    const list = Array.isArray(payload)
-      ? payload
-      : Array.isArray(payload?.items)
-      ? payload.items
-      : [];
-
-    const mapped = list.map(mapEmploymentType);
-
-    const total =
-      typeof payload?.total === "number" ? payload.total : mapped.length;
-
-    return {
-      items: mapped,
-      total,
-    };
+  // List & detail dùng public
+  getAll(params: RecruitmentTypeQuery = {}) {
+    // ✅ đồng bộ pattern với Skill/Level/Language: return AxiosResponse<ApiResponse<...>>
+    return api.get<ApiResponse<EmploymentTypeListData>>(PUBLIC_BASE, {
+      params,
+    });
   },
 
-  async getById(id: number): Promise<RecruitmentType> {
-    const res = await api.get<ApiResponse<any>>(
+  getById(id: number) {
+    return api.get<ApiResponse<RecruitmentType>>(
       API_ENDPOINTS.EMPLOYMENT_TYPE.PUBLIC_GET_BY_ID(id)
     );
-    const item = res.data?.data;
-    return mapEmploymentType(item);
   },
 
   // ================== CRUD (SYSTEM) ==================
-
-  async create(data: { name: string }): Promise<void> {
-    // POST /system/employment-types
-    await api.post(SYSTEM_BASE, data);
+  create(data: { name: string }) {
+    return api.post<ApiResponse<RecruitmentType>>(SYSTEM_BASE, data);
   },
 
-  async update(id: number, data: { name: string }): Promise<void> {
-    // PATCH /system/employment-types/{id}
-    await api.patch(API_ENDPOINTS.EMPLOYMENT_TYPE.SYSTEM_UPDATE(id), data);
+  update(id: number, data: { name: string }) {
+    return api.patch<ApiResponse<RecruitmentType>>(
+      API_ENDPOINTS.EMPLOYMENT_TYPE.SYSTEM_UPDATE(id),
+      data
+    );
   },
 
-  async remove(id: number): Promise<void> {
-    // DELETE /system/employment-types/{id}
-    await api.delete(API_ENDPOINTS.EMPLOYMENT_TYPE.SYSTEM_DELETE(id));
+  remove(id: number) {
+    return api.delete<ApiResponse<null>>(
+      API_ENDPOINTS.EMPLOYMENT_TYPE.SYSTEM_DELETE(id)
+    );
   },
 };

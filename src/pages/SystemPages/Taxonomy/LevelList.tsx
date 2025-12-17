@@ -1,3 +1,5 @@
+// src/pages/SystemPages/Taxonomy/LevelList.tsx
+
 import { useEffect, useState } from "react";
 import { Card, Form, message } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
@@ -17,13 +19,14 @@ export interface LevelFormValues {
 }
 
 export default function LevelList() {
-  const [loading, setLoading] = useState(false);
   const [levels, setLevels] = useState<LevelEntity[]>([]);
+  const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState("");
 
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: DEFAULT_PAGE_SIZE,
+    total: 0,
     showSizeChanger: true,
   });
 
@@ -33,63 +36,53 @@ export default function LevelList() {
 
   const [form] = Form.useForm<LevelFormValues>();
 
-  const filteredLevels = levels.filter((item) =>
-    item.name.toLowerCase().includes(keyword.toLowerCase())
-  );
-
-  const fetchLevels = async (page = 1, pageSize = DEFAULT_PAGE_SIZE) => {
-    setLoading(true);
+  const fetchData = async (page = 1, pageSize = DEFAULT_PAGE_SIZE) => {
     try {
-      const response = await levelSystemService.getLevels({
-        page,
-        pageSize,
-      });
+      setLoading(true);
 
+      const response = await levelSystemService.getLevels({ page, pageSize });
       const apiRes = response.data;
 
       if (apiRes.status !== "Success" || !apiRes.data) {
-        message.error(apiRes.message || "Failed to load levels. Please try again.");
+        message.error(apiRes.message || "Failed to load levels");
         setLevels([]);
-        setPagination((prev) => ({ ...prev, current: page, pageSize }));
+        setPagination((prev) => ({
+          ...prev,
+          current: page,
+          pageSize,
+          total: 0,
+        }));
         return;
       }
 
-      // Backend trả: data.levels
-      const list: LevelEntity[] = apiRes.data.levels;
+      const payload = apiRes.data; // { levels, totalPages, currentPage, pageSize, totalCount }
 
-      setLevels(list);
-      setPagination((prev) => ({
-        ...prev,
-        current: page,
-        pageSize,
-      }));
-    } catch (error) {
-      console.error(error);
-      message.error("Failed to load levels. Please try again.");
+      setLevels(payload.levels || []);
+      setPagination({
+        current: payload.currentPage ?? page,
+        pageSize: payload.pageSize ?? pageSize,
+        total: payload.totalCount ?? 0, // ✅ quan trọng để có page 2/3
+        showSizeChanger: true,
+      });
+    } catch (err: any) {
+      console.error(err);
+      message.error("Failed to load levels");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchLevels(
-      pagination.current || 1,
-      pagination.pageSize || DEFAULT_PAGE_SIZE
-    );
+    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTableChange = (pag: TablePaginationConfig) => {
-    fetchLevels(pag.current || 1, pag.pageSize || DEFAULT_PAGE_SIZE);
-  };
+    const current = pag.current || 1;
+    const size = pag.pageSize || DEFAULT_PAGE_SIZE;
 
-  const handleSearch = () => {
-    fetchLevels(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
-  };
-
-  const handleResetSearch = () => {
-    setKeyword("");
-    fetchLevels(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+    setPagination((prev) => ({ ...prev, current, pageSize: size }));
+    fetchData(current, size);
   };
 
   const openCreateModal = () => {
@@ -110,10 +103,16 @@ export default function LevelList() {
     form.resetFields();
   };
 
-  const handleSubmit = async (values: LevelFormValues) => {
+  const handleSubmit = async () => {
     setSubmitting(true);
     try {
-      const name = values.name.trim();
+      const values = await form.validateFields();
+      const name = (values.name || "").trim();
+
+      if (!name) {
+        message.error("Level name is required.");
+        return;
+      }
 
       if (editingLevel) {
         await levelSystemService.updateLevel(editingLevel.levelId, { name });
@@ -127,7 +126,7 @@ export default function LevelList() {
       setEditingLevel(null);
       form.resetFields();
 
-      fetchLevels(
+      fetchData(
         pagination.current || 1,
         pagination.pageSize || DEFAULT_PAGE_SIZE
       );
@@ -144,7 +143,8 @@ export default function LevelList() {
     try {
       await levelSystemService.deleteLevel(id);
       message.success("Level deleted successfully.");
-      fetchLevels(
+
+      fetchData(
         pagination.current || 1,
         pagination.pageSize || DEFAULT_PAGE_SIZE
       );
@@ -156,6 +156,10 @@ export default function LevelList() {
     }
   };
 
+  const filteredData = levels.filter((item) =>
+    (item.name ?? "").toLowerCase().includes(keyword.toLowerCase())
+  );
+
   return (
     <div>
       <Card className="aices-card">
@@ -164,8 +168,13 @@ export default function LevelList() {
             <LevelToolbar
               keyword={keyword}
               onKeywordChange={setKeyword}
-              onSearch={handleSearch}
-              onReset={handleResetSearch}
+              onSearch={() =>
+                fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE)
+              }
+              onReset={() => {
+                setKeyword("");
+                fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+              }}
               onCreate={openCreateModal}
             />
           </div>
@@ -174,11 +183,8 @@ export default function LevelList() {
         <div className="accounts-table-wrapper">
           <LevelTable
             loading={loading}
-            data={filteredLevels}
-            pagination={{
-              ...pagination,
-              total: filteredLevels.length,
-            }}
+            data={filteredData}
+            pagination={pagination}
             onChangePage={handleTableChange}
             onEdit={openEditModal}
             onDelete={handleDelete}

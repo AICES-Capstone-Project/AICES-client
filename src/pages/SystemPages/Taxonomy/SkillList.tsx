@@ -19,13 +19,14 @@ export interface SkillFormValues {
 }
 
 export default function SkillList() {
-  const [loading, setLoading] = useState(false);
   const [skills, setSkills] = useState<Skill[]>([]);
+  const [loading, setLoading] = useState(false);
   const [keyword, setKeyword] = useState("");
 
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: DEFAULT_PAGE_SIZE,
+    total: 0,
     showSizeChanger: true,
   });
 
@@ -35,69 +36,53 @@ export default function SkillList() {
 
   const [form] = Form.useForm<SkillFormValues>();
 
-  const filteredSkills = skills.filter((item) =>
-    item.name.toLowerCase().includes(keyword.toLowerCase())
-  );
-
-  const fetchSkills = async (page = 1, pageSize = DEFAULT_PAGE_SIZE) => {
-    setLoading(true);
+  const fetchData = async (page = 1, pageSize = DEFAULT_PAGE_SIZE) => {
     try {
-      const response = await skillService.getSkillsSystem({
-        page,
-        pageSize,
-      });
+      setLoading(true);
 
+      const response = await skillService.getSkillsSystem({ page, pageSize });
       const apiRes = response.data;
 
       if (apiRes.status !== "Success" || !apiRes.data) {
-        message.error(
-          apiRes.message || "Failed to load skills. Please try again."
-        );
+        message.error(apiRes.message || "Failed to load skills");
         setSkills([]);
         setPagination((prev) => ({
           ...prev,
           current: page,
           pageSize,
+          total: 0,
         }));
         return;
       }
 
-      const list: Skill[] = apiRes.data;
+      const payload = apiRes.data; // { skills, totalPages, currentPage, pageSize, totalCount }
 
-      setSkills(list);
-      setPagination((prev) => ({
-        ...prev,
-        current: page,
-        pageSize,
-      }));
-    } catch (error) {
-      console.error(error);
-      message.error("Failed to load skills. Please try again.");
+      setSkills(payload.skills || []);
+      setPagination({
+        current: payload.currentPage ?? page,
+        pageSize: payload.pageSize ?? pageSize,
+        total: payload.totalCount ?? 0, // ✅ quan trọng để hiện page 2
+        showSizeChanger: true,
+      });
+    } catch (err: any) {
+      console.error(err);
+      message.error("Failed to load skills");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSkills(
-      pagination.current || 1,
-      pagination.pageSize || DEFAULT_PAGE_SIZE
-    );
+    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleTableChange = (pag: TablePaginationConfig) => {
-    fetchSkills(pag.current || 1, pag.pageSize || DEFAULT_PAGE_SIZE);
-  };
+    const current = pag.current || 1;
+    const size = pag.pageSize || DEFAULT_PAGE_SIZE;
 
-  const handleSearch = () => {
-    // search đang filter ở FE nên chỉ cần refetch nếu bạn muốn làm mới list
-    fetchSkills(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
-  };
-
-  const handleResetSearch = () => {
-    setKeyword("");
-    fetchSkills(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+    setPagination((prev) => ({ ...prev, current, pageSize: size }));
+    fetchData(current, size);
   };
 
   const openCreateModal = () => {
@@ -108,9 +93,7 @@ export default function SkillList() {
 
   const openEditModal = (record: Skill) => {
     setEditingSkill(record);
-    form.setFieldsValue({
-      name: record.name,
-    });
+    form.setFieldsValue({ name: record.name });
     setIsModalOpen(true);
   };
 
@@ -120,18 +103,22 @@ export default function SkillList() {
     form.resetFields();
   };
 
-  const handleSubmit = async (values: SkillFormValues) => {
+  const handleSubmit = async () => {
     setSubmitting(true);
     try {
+      const values = await form.validateFields();
+      const name = (values.name || "").trim();
+
+      if (!name) {
+        message.error("Skill name is required.");
+        return;
+      }
+
       if (editingSkill) {
-        await skillService.updateSkillSystem(editingSkill.skillId, {
-          name: values.name.trim(),
-        });
+        await skillService.updateSkillSystem(editingSkill.skillId, { name });
         message.success("Skill updated successfully.");
       } else {
-        await skillService.createSkillSystem({
-          name: values.name.trim(),
-        });
+        await skillService.createSkillSystem({ name });
         message.success("Skill created successfully.");
       }
 
@@ -139,10 +126,7 @@ export default function SkillList() {
       setEditingSkill(null);
       form.resetFields();
 
-      fetchSkills(
-        pagination.current || 1,
-        pagination.pageSize || DEFAULT_PAGE_SIZE
-      );
+      fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE);
     } catch (error) {
       console.error(error);
       message.error("Something went wrong. Please try again.");
@@ -156,10 +140,8 @@ export default function SkillList() {
     try {
       await skillService.deleteSkillSystem(id);
       message.success("Skill deleted successfully.");
-      fetchSkills(
-        pagination.current || 1,
-        pagination.pageSize || DEFAULT_PAGE_SIZE
-      );
+
+      fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE);
     } catch (error) {
       console.error(error);
       message.error("Failed to delete skill. Please try again.");
@@ -168,31 +150,33 @@ export default function SkillList() {
     }
   };
 
+  const filteredData = skills.filter((item) =>
+    (item.name ?? "").toLowerCase().includes(keyword.toLowerCase())
+  );
+
   return (
     <div>
       <Card className="aices-card">
-        {/* TOP BAR CHUẨN AICES trong Card */}
         <div className="company-header-row">
           <div className="company-left">
             <SkillToolbar
               keyword={keyword}
               onKeywordChange={setKeyword}
-              onSearch={handleSearch}
-              onReset={handleResetSearch}
+              onSearch={() => fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE)}
+              onReset={() => {
+                setKeyword("");
+                fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+              }}
               onCreate={openCreateModal}
             />
           </div>
         </div>
 
-        {/* BẢNG */}
         <div className="accounts-table-wrapper">
           <SkillTable
             loading={loading}
-            data={filteredSkills}
-            pagination={{
-              ...pagination,
-              total: filteredSkills.length,
-            }}
+            data={filteredData}
+            pagination={pagination}
             onChangePage={handleTableChange}
             onEdit={openEditModal}
             onDelete={handleDelete}

@@ -19,6 +19,7 @@ export default function CategoryList() {
     current: 1,
     pageSize: DEFAULT_PAGE_SIZE,
     total: 0,
+    showSizeChanger: true,
   });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -50,6 +51,7 @@ export default function CategoryList() {
         current: payload.currentPage,
         pageSize: payload.pageSize,
         total: payload.totalPages * payload.pageSize,
+        showSizeChanger: true,
       });
     } catch (err: any) {
       console.error(err);

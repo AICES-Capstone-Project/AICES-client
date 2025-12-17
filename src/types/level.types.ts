@@ -9,6 +9,7 @@ export interface LevelListData {
   totalPages: number;
   currentPage: number;
   pageSize: number;
+  totalCount: number;
 }
 
 export interface CreateLevelPayload {

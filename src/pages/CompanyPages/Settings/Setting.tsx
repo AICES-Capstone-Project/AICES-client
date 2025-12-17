@@ -27,7 +27,7 @@ export default function Setting() {
     if (!user) return;
 
     formProfile.setFieldsValue({
-      username: user.fullName || "",
+      fullName: user.fullName || "",
       email: user.email || "",
       birthday: user.dateOfBirth ? dayjs(user.dateOfBirth) : null,
       address: user.address || "",
@@ -41,8 +41,10 @@ export default function Setting() {
       setSaving(true);
       const values = await formProfile.validateFields();
 
+      console.log("Profile form values:", values);
+
       const form = new FormData();
-      if (values.username?.trim()) form.append("FullName", values.username.trim());
+      if (values.fullName?.trim()) form.append("FullName", values.fullName.trim());
       if (values.address?.trim()) form.append("Address", values.address.trim());
       if (values.phoneNumber?.trim()) form.append("PhoneNumber", values.phoneNumber.trim());
       if (values.birthday) form.append("DateOfBirth", values.birthday.format("YYYY-MM-DD"));

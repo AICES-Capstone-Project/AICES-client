@@ -66,11 +66,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
       setLoadingLangs(true);
       setLoadingLevels(true);
       try {
-        console.log("🔄 Starting to fetch categories...");
         const catsResp = await categoryService.getAll({ page: 1, pageSize: 100 });
-        console.log("📦 Full Categories API response:", JSON.stringify(catsResp, null, 2));
-        console.log("📊 Categories data field:", catsResp?.data);
-        console.log("📋 Type of data:", typeof catsResp?.data, Array.isArray(catsResp?.data));
 
         const [skillsResp, empResp, langsResp, levelsResp] = await Promise.all([
           systemService.getSkills(),
@@ -90,22 +86,31 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
             categoriesData = catsResp.data.categories;
           }
         }
-        console.log("✅ Final extracted categories:", categoriesData);
-        console.log("📝 Categories count:", categoriesData.length);
 
         const normalizeList = (d: any) => {
           if (!d) return [];
           if (Array.isArray(d)) return d;
           if (Array.isArray(d.items)) return d.items;
           if (Array.isArray(d.data)) return d.data;
+          if (Array.isArray(d.skills)) return d.skills;
+          if (Array.isArray(d.employmentTypes)) return d.employmentTypes;
+          if (Array.isArray(d.employments)) return d.employments;
           if (Array.isArray(d.levels)) return d.levels;
           if (Array.isArray(d.languages)) return d.languages;
+          if (Array.isArray(d.categories)) return d.categories;
+          if (Array.isArray(d.specializations)) return d.specializations;
+          // fallback: find first array value in object
+          for (const k in d) {
+            if (Array.isArray(d[k])) return d[k];
+          }
           return [];
         };
 
         setCategories(categoriesData);
-        setSkills(normalizeList(skillsResp?.data));
-        setEmploymentTypes(normalizeList(empResp?.data));
+        const normalizedSkills = normalizeList(skillsResp?.data);
+        const normalizedEmployment = normalizeList(empResp?.data);
+        setSkills(normalizedSkills);
+        setEmploymentTypes(normalizedEmployment);
         setLanguages(normalizeList(langsResp?.data));
         setLevels(normalizeList(levelsResp?.data));
       } catch (error) {
@@ -450,12 +455,25 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
             placeholder={loadingEmployment ? "Loading employment types..." : "Select employment types"}
             loading={loadingEmployment}
             allowClear
-            options={employmentTypes.map((e: any) => ({ label: e.name, value: e.employTypeId }))}
+            options={employmentTypes.map((e: any) => ({
+              label: e?.name ?? e?.title ?? String(e),
+              value: e?.employTypeId ?? e?.id ?? e?.value ?? e?.name ?? String(e),
+            }))}
           />
         </Form.Item>
 
         <Form.Item name="skillIds" label="Skills" rules={[{ required: true, message: "Please select skills" }]}>
-          <Select className="company-select" mode="multiple" placeholder={loadingSkills ? "Loading skills..." : "Select skills"} loading={loadingSkills} options={skills.map((s: any) => ({ label: s.name, value: s.skillId }))} allowClear />
+          <Select
+            className="company-select"
+            mode="multiple"
+            placeholder={loadingSkills ? "Loading skills..." : "Select skills"}
+            loading={loadingSkills}
+            options={skills.map((s: any) => ({
+              label: s?.name ?? s?.title ?? String(s),
+              value: s?.skillId ?? s?.id ?? s?.value ?? s?.name ?? String(s),
+            }))}
+            allowClear
+          />
         </Form.Item>
 
         <Form.Item>

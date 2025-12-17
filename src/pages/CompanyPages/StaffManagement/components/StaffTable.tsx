@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Table, Tag, Space, Button, Empty, Avatar, Modal } from "antd";
+import { Table, Tag, Space, Button, Empty, Avatar, Modal, Tooltip } from "antd";
 import { UserOutlined, UserDeleteOutlined } from "@ant-design/icons";
 import { companyService } from "../../../../services/companyService";
 import type { ColumnsType } from "antd/es/table";
 import type { CompanyMember } from "../../../../types/company.types";
 import {toastError } from "../../../../components/UI/Toast";
+import { LockKeyhole } from "lucide-react";
 
 type Props = {
   members: CompanyMember[];
@@ -15,6 +16,7 @@ type Props = {
 
 const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
   const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
+  const iconStyle = { color: "var(--color-primary-medium)", fontWeight: "bold" };
 
   useEffect(() => {
     const calculate = () => {
@@ -46,14 +48,14 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
       title: "No",
       key: "no",
       align: "center",
-      width: 60,
+      width: "5%",
       render: (_, __, index) => index + 1,
     },
     {
       title: "Member",
       key: "member",
       align: "center",
-      width: 200,
+      width: "30%",
       render: (_, record) => (
         <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
           <div style={{ width: 56, display: "flex", justifyContent: "center" }}>
@@ -69,33 +71,48 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
       title: "Email",
       dataIndex: "email",
       key: "email",
-      width: 260,
+      width: "17%",
       align: "center",
       render: (email: string) => <div style={{ textAlign: "center", fontSize: 13, color: "#333" }}>{email}</div>,
+    },
+    {
+      title: "Phone Number",
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      width: "12%",
+      align: "center",
+      render: (phoneNumber: string) => <div style={{ textAlign: "center", fontSize: 13, color: "#333" }}>{phoneNumber}</div>,
+    },
+    {
+      title: "Address",
+      dataIndex: "address",
+      key: "address",
+      width: "20%",
+      align: "center",
+      render: (address: string) => <div style={{ textAlign: "center", fontSize: 13, color: "#333" }}>{address}</div>,
     },
     {
       title: "Role",
       dataIndex: "roleName",
       key: "roleName",
-      width: 275,
+      width: "9%",
       align: "center",
       render: (roleName) => (
         <Tag color={getRoleColor(roleName)}>{formatRoleName(roleName)}</Tag>
       ),
     },
     {
-      title: "Status",
-      key: "status",
-      width: 180,
+      title: "Action",
+      key: "action",
+      width: "7%",
       fixed: "right",
       align: "center",
       render: (_, record) => (
         <Space size="small">
           {record.roleName?.toLowerCase() === "hr_manager" ? (
-            <Tag color={record.joinStatus === "Approved" ? "green" : record.joinStatus === "Rejected" ? "red" : "gold"}>
-              {record.joinStatus || "Approved"}
-            </Tag>
+            <Tooltip title="This function is locked."><LockKeyhole size={18} style={iconStyle}/></Tooltip>
           ) : (
+            <Tooltip title="Delete member.">
             <Button
               type="text"
               icon={<UserDeleteOutlined  style={{ color: '#ff4d4f', fontSize: 16 }} />}
@@ -146,6 +163,7 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
                 });
               }}
             />
+            </Tooltip>
           )}
         </Space>
       ),

@@ -32,7 +32,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
       {
         key: "markRead",
         icon: <CheckOutlined />,
-        label: t("notification.markAsRead", "Đánh dấu là đã đọc"),
+        label: t("notification.markAsRead", "Mark as read"),
         onClick: (info) => {
           info.domEvent.stopPropagation();
           onMarkRead(notif.notifId, info.domEvent as unknown as React.MouseEvent);
@@ -96,21 +96,21 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
                   onClick={(e) => onAccept(notif, e)}
                   className="company-btn--filled"
                 >
-                  {t("notification.accept", "Chấp nhận")}
+                  {t("notification.accept", "Accept")}
                 </Button>
                 <Button
                   loading={isResponding}
                   onClick={(e) => onDecline(notif, e)}
                   className="company-btn"
                 >
-                  {t("notification.decline", "Xóa")}
+                  {t("notification.decline", "Decline")}
                 </Button>
               </div>
             ) : (
               <span className={`text-[13px] font-medium ${notif.invitation.status?.toLowerCase() === "accepted" ? "text-green-600" : "text-gray-500"}`}>
                 {notif.invitation.status?.toLowerCase() === "accepted"
-                  ? t("notification.accepted", "Đã chấp nhận")
-                  : t("notification.declined", "Đã từ chối")}
+                  ? t("notification.accepted", "Accepted")
+                  : t("notification.declined", "Declined")}
               </span>
             )}
           </div>

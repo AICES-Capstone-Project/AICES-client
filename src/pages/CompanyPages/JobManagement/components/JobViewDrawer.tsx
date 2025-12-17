@@ -31,7 +31,20 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
 
   return (
     <Drawer
-      title="Job Details"
+      title={
+        job ? (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.title}</div>
+            {job.jobStatus ? (
+              <Tag color={tagColorFor(String(job.jobStatus))} style={{ margin: 0 }}>
+                {job.jobStatus}
+              </Tag>
+            ) : null}
+          </div>
+        ) : (
+          "Job Details"
+        )
+      }
       // use a fixed width to encourage vertical expansion instead of horizontal
       width={720}
       onClose={onClose}
@@ -51,16 +64,10 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
       }
     >
       {job ? (
-        <Descriptions column={1} bordered style={{ tableLayout: 'fixed', width: '100%' }}>
-          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Title</div>}>
-            <div style={{ whiteSpace: 'normal', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.title}</div>
-          </Descriptions.Item>
-          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Status</div>}>
-            <div>{job.jobStatus ?? '-'}</div>
-          </Descriptions.Item>
-          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Created At</div>}>
-            <div>{job.createdAt ? new Date(job.createdAt).toLocaleString() : '-'}</div>
-          </Descriptions.Item>
+        <Descriptions column={1} bordered style={{ tableLayout: 'fixed', width: '100%' }}>   
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Description</div>}>
+            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.description || '-'}</div>
+          </Descriptions.Item>     
           <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Category - Specialization</div>}>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
               {job.categoryName ? (
@@ -84,31 +91,6 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
                 "-"
               )}
             </div>
-          </Descriptions.Item>
-          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Level</div>}>
-            <div>{(job as any).levelName ?? (job as any).level ?? '-'}</div>
-          </Descriptions.Item>
-          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Languages</div>}>
-            {Array.isArray((job as any).languages) && (job as any).languages.length > 0 ? (
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                {(job as any).languages.map((l: any, i: number) => {
-                  const label = l && (typeof l === 'object' ? (l.name ?? l.languageId ?? String(l)) : String(l));
-                  return (
-                    <Tag key={`${label}-${i}`} color={tagColorFor(String(label))} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
-                      {label}
-                    </Tag>
-                  );
-                })}
-              </div>
-            ) : (
-              <span>-</span>
-            )}
-          </Descriptions.Item>
-          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Posted By</div>}>
-            <div>{(job as any).fullName ?? '-'}</div>
-          </Descriptions.Item>
-          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Description</div>}>
-            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.description || '-'}</div>
           </Descriptions.Item>
           <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Requirements</div>}>
             <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', overflowWrap: 'anywhere' }}>{job.requirements || '-'}</div>
@@ -157,6 +139,31 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
             ) : (
               <span>-</span>
             )}
+          </Descriptions.Item>
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Level</div>}>
+            <div>{(job as any).levelName ?? (job as any).level ?? '-'}</div>
+          </Descriptions.Item>
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Languages</div>}>
+            {Array.isArray((job as any).languages) && (job as any).languages.length > 0 ? (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {(job as any).languages.map((l: any, i: number) => {
+                  const label = l && (typeof l === 'object' ? (l.name ?? l.languageId ?? String(l)) : String(l));
+                  return (
+                    <Tag key={`${label}-${i}`} color={tagColorFor(String(label))} style={{ margin: 0, whiteSpace: 'normal', display: 'inline-block', overflowWrap: 'anywhere', wordBreak: 'break-word' }}>
+                      {label}
+                    </Tag>
+                  );
+                })}
+              </div>
+            ) : (
+              <span>-</span>
+            )}
+          </Descriptions.Item>
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Posted By</div>}>
+            <div>{(job as any).fullName ?? '-'}</div>
+          </Descriptions.Item>         
+          <Descriptions.Item label={<div style={{ minWidth: 160, whiteSpace: 'nowrap' }}>Created At</div>}>
+            <div>{job.createdAt ? new Date(job.createdAt).toLocaleString() : '-'}</div>
           </Descriptions.Item>
         </Descriptions>
       ) : (

@@ -1,12 +1,8 @@
 import React from "react";
-import { Table, Tag, Button, Space, Tooltip } from "antd";
+import { Table, Tag, Button, Space, Tooltip, Modal, Input } from "antd";
 // import { useNavigate } from "react-router-dom";
 import { Flame } from "lucide-react";
-import {
-	EyeOutlined,
-	EditOutlined,
-	ReloadOutlined,
-} from "@ant-design/icons";
+import { EyeOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { ResumeLocal } from "../../../../types/resume.types";
 
@@ -16,16 +12,14 @@ interface ResumeTableProps {
 	loading: boolean;
 	dataSource: Resume[];
 	className?: string;
-	editMode: boolean;
-	selectedRowKeys: React.Key[];
-	onSelectedRowKeysChange: (keys: React.Key[]) => void;
+	editMode?: boolean;
+	selectedRowKeys?: React.Key[];
+	onSelectedRowKeysChange?: (keys: React.Key[]) => void;
 	currentPage: number;
 	pageSize: number;
 	onPageChange: (page: number, size: number) => void;
 	onViewDetail: (resumeId: number) => void;
-	onEnterEditMode: () => void;
-	onRetry: (resumeId: number) => void;
-	retryingIds: number[];
+	onDelete: (resumeId: number) => void;
 	scoreCounts: Map<number, number>;
 	jobId?: string;
 	targetQuantity?: number;
@@ -34,22 +28,24 @@ interface ResumeTableProps {
 const ResumeTable: React.FC<ResumeTableProps> = ({
 	loading,
 	dataSource,
-	editMode,
+	editMode = false,
 	className,
-	selectedRowKeys,
-	onSelectedRowKeysChange,
+	selectedRowKeys = [],
+	onSelectedRowKeysChange = () => {},
 	currentPage,
 	pageSize,
-	onPageChange,
 	onViewDetail,
-	onEnterEditMode,
-	onRetry,
-	retryingIds,
+	onDelete,
 	// scoreCounts,
 	jobId,
 	targetQuantity,
 }) => {
 	// const navigate = useNavigate();
+
+	const [confirmModalOpen, setConfirmModalOpen] = React.useState(false);
+	const [pendingDelete, setPendingDelete] = React.useState<{ resumeId: number; name: string } | null>(null);
+	const [confirmInput, setConfirmInput] = React.useState("");
+	const [confirmLoading, setConfirmLoading] = React.useState(false);
 
 	const isQualifiedCandidate = React.useCallback((index: number, record: Resume) => {
 		// Must have score >= 50
@@ -63,7 +59,7 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 	const columns: ColumnsType<Resume> = [
 		{
 			title: "No",
-			width: 80,
+			width: "10%",
 			align: "center" as const,
 			render: (_: unknown, __: unknown, index: number) =>
 				(currentPage - 1) * pageSize + index + 1,
@@ -74,7 +70,6 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 			align: "center" as const,
 			render: (text: string, record: Resume, index: number) => {
 				const isTopCandidate = isQualifiedCandidate(index, record);
-				
 				return (
 					<Space>
 						{isTopCandidate && (
@@ -101,8 +96,8 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 						status === "Completed"
 							? "green"
 							: status === "Pending"
-							? "blue"
-							: "default"
+								? "blue"
+								: "default"
 					}
 				>
 					{status || "Processing"}
@@ -177,7 +172,7 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 		{
 			title: "Actions",
 			key: "actions",
-			width: 150,
+			width: "15%",
 			align: "center" as const,
 			render: (_, record) => (
 				<Space size="middle">
@@ -194,58 +189,102 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 							onViewDetail(Number(record.applicationId ?? record.resumeId));
 						}}
 					/>
-					{/* Always show edit icon — clicking enters edit mode */}
-					<Tooltip title="Enter edit mode (select resumes)">
+					<Tooltip title="Delete resume">
 						<Button
 							type="text"
-							icon={<EditOutlined />}
-							onClick={onEnterEditMode}
+							icon={<DeleteOutlined style={{ color: "#f5222d" }} />}
+							onClick={() => {
+								setPendingDelete({ resumeId: Number(record.resumeId), name: String(record.fullName ?? "") });
+								setConfirmInput("");
+								setConfirmModalOpen(true);
+							}}
 						/>
 					</Tooltip>
-
-					{/* Per-row retry button (optional) - show only for Failed */}
-					{String(record.status) === "Failed" && (
-						<Tooltip title="Retry processing">
-							<Button
-								type="text"
-								icon={<ReloadOutlined />}
-								loading={retryingIds.includes(record.resumeId)}
-								onClick={() => onRetry(record.resumeId)}
-							/>
-						</Tooltip>
-					)}
 				</Space>
 			),
 		},
 	];
 
 	return (
-		<Table
-			 className={`edit-mode-table ${className ?? ""}`}
-			rowKey="resumeId"
-			loading={loading}
-			dataSource={dataSource}
-			rowSelection={
-				editMode
-					? {
-							selectedRowKeys,
-							onChange: onSelectedRowKeysChange,
-							type: "checkbox",
-					  }
-					: undefined
-			}
-			columns={columns}
-			scroll={{ y: "60vh" }}
-			pagination={{
-				current: currentPage,
-				pageSize: pageSize,
-				total: dataSource.length,
-				showSizeChanger: true,
-				showTotal: (total) => `Total ${total} resumes`,
-				pageSizeOptions: ["10", "20", "50", "100"],
-				onChange: onPageChange,
-			}}
-		/>
+		<>
+			<Table
+				className={`edit-mode-table ${className ?? ""}`}
+				rowKey="resumeId"
+				loading={loading}
+				dataSource={dataSource}
+				rowSelection={
+					editMode
+						? {
+							selectedRowKeys: selectedRowKeys ?? [],
+							onChange: (keys) => onSelectedRowKeysChange && onSelectedRowKeysChange(keys as React.Key[]),
+							type: "radio",
+						}
+						: undefined
+				}
+				columns={columns}
+				scroll={{ y: "60vh" }}
+				pagination={{
+					current: currentPage,
+					pageSize: 10,
+					total: dataSource.length,
+					showSizeChanger: false,
+					showTotal: (total) => `Total ${total} resumes`,
+					
+				}}
+			/>
+
+			<Modal
+				title={<div style={{ textAlign: 'center', width: '100%' }}>Confirm delete</div>}
+				open={confirmModalOpen}
+				onCancel={() => {
+					setConfirmModalOpen(false);
+					setPendingDelete(null);
+					setConfirmInput("");
+				}}
+				footer={
+					<div style={{ display: 'flex', justifyContent: 'center', gap: 12, width: '100%' }}>
+						<div>
+							<Button
+								className="company-btn"
+								style={{ marginRight: 12 }}
+								onClick={() => {
+									setConfirmModalOpen(false);
+									setPendingDelete(null);
+									setConfirmInput("");
+								}}>Cancel</Button>
+						</div>
+						<div>
+							<Button
+								danger
+								loading={confirmLoading}
+								disabled={confirmInput.trim() !== (pendingDelete?.name ?? "")}
+								onClick={async () => {
+									if (!pendingDelete) return;
+									setConfirmLoading(true);
+									try {
+										await Promise.resolve(onDelete(pendingDelete.resumeId));
+									} finally {
+										setConfirmLoading(false);
+										setConfirmModalOpen(false);
+										setPendingDelete(null);
+										setConfirmInput("");
+									}
+								}}
+							>
+								Delete
+							</Button>
+						</div>
+					</div>
+				}
+			>
+				<div style={{ textAlign: 'center' }}>
+					<p style={{ marginBottom: 12 }}>
+						Type <strong>{pendingDelete?.name}</strong> to confirm deletion.
+					</p>
+					<Input style={{ margin: '0 auto', display: 'block', maxWidth: "100%" }} value={confirmInput} onChange={(e) => setConfirmInput(e.target.value)} placeholder="Enter full name to confirm" />
+				</div>
+			</Modal>
+		</>
 	);
 };
 

@@ -190,6 +190,26 @@ const StaffManagement = () => {
 		}
 	};
 
+	const handleRejectRequest = async (req: any) => {
+		if (!req?.comUserId) return;
+		try {
+			const resp = await companyService.updateJoinRequestStatus(
+				req.comUserId,
+				"NotApplied"
+			);
+			if (resp?.status === "Success" || resp?.status === "success") {
+				toastSuccess("Member rejected");
+				fetchJoinRequests();
+				fetchMembers();
+			} else {
+				toastError("Failed to reject member");
+			}
+		} catch (err) {
+			console.error("Reject error:", err);
+			toastError("Error rejecting member");
+		}
+	};
+
 	// Search handler
 	const handleSearch = (value: string) => {
 		const filtered = members.filter(
@@ -279,7 +299,7 @@ const StaffManagement = () => {
 							/>
 
 							<Button className="company-btn--filled" loading={sending} onClick={handleInviteSubmit}>
-								Gửi lời mời
+								Send request
 							</Button>
 						</div>
 					</div>
@@ -300,6 +320,9 @@ const StaffManagement = () => {
 					requests={pendingRequests}
 					onApprove={async (r) => {
 						await handleApproveRequest(r);
+					}}
+					onReject={async (r) => {
+						await handleRejectRequest(r);
 					}}
 				/>
 			</Card>

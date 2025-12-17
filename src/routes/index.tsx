@@ -71,6 +71,7 @@ const Notification = lazy(
 const CandidateManagement = lazy(
   () => import("../pages/CompanyPages/Candidate/CandidateManagement")
 );
+const CandidateDetail = lazy(() => import("../pages/CompanyPages/Candidate/components/CandidateDetail"));
 const CompareResumes = lazy(
   () => import("../pages/CompanyPages/AIScreening/component/CompareResumes")
 );
@@ -245,6 +246,7 @@ export const router = createBrowserRouter([
       { path: APP_ROUTES.COMPANY_JOBS, element: <JobManagement /> },
       { path: APP_ROUTES.COMPANY_NOTIFICATION, element: <Notification /> },
       { path: APP_ROUTES.COMPANY_CANDIDATE, element: <CandidateManagement /> },
+      { path: "/company/candidate/:candidateId", element: <CandidateDetail /> },
       { path: APP_ROUTES.COMPANY_SETTINGS, element: <Setting /> },
       {
         path: APP_ROUTES.COMPANY_MY_APARTMENTS,
@@ -264,7 +266,7 @@ export const router = createBrowserRouter([
         element: <CampaignDetail />,
       },
       {
-        path: APP_ROUTES.COMPANY_AI_SCREENING_COMPARE,
+        path: APP_ROUTES.COMPANY_CANDIDATE_COMPARE,
         element: <CompareResumes />,
       },
       {

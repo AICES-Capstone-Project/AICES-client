@@ -52,8 +52,17 @@ const JobEditDrawer = ({ open, onClose, job, form, onSubmit, saving }: Props) =>
           if (Array.isArray(d)) return d;
           if (Array.isArray(d.items)) return d.items;
           if (Array.isArray(d.data)) return d.data;
+          if (Array.isArray(d.skills)) return d.skills;
+          if (Array.isArray(d.employmentTypes)) return d.employmentTypes;
+          if (Array.isArray(d.employments)) return d.employments;
           if (Array.isArray(d.languages)) return d.languages;
           if (Array.isArray(d.levels)) return d.levels;
+          if (Array.isArray(d.categories)) return d.categories;
+          if (Array.isArray(d.specializations)) return d.specializations;
+          // fallback: return first array found on the object
+          for (const k in d) {
+            if (Array.isArray(d[k])) return d[k];
+          }
           return [];
         };
 

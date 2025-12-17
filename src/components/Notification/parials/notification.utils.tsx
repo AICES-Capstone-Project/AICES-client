@@ -16,12 +16,12 @@ export const formatTimeAgo = (dateStr: string) => {
   const diffDay = Math.floor(diffHour / 24);
   const diffWeek = Math.floor(diffDay / 7);
 
-  if (diffSec < 60) return "Vừa xong";
-  if (diffMin < 60) return `${diffMin} phút`;
-  if (diffHour < 24) return `${diffHour} giờ`;
-  if (diffDay < 7) return `${diffDay} ngày`;
-  if (diffWeek < 4) return `${diffWeek} tuần`;
-  return date.toLocaleDateString("vi-VN");
+  if (diffSec < 60) return "Just now";
+  if (diffMin < 60) return `${diffMin} minutes`;
+  if (diffHour < 24) return `${diffHour} hours`;
+  if (diffDay < 7) return `${diffDay} days`;
+  if (diffWeek < 4) return `${diffWeek} weeks`;
+  return date.toLocaleDateString("en-US");
 };
 
 export const getNotificationIcon = (type: string) => {

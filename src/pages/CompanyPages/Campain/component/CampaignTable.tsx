@@ -15,7 +15,7 @@ type Props = {
   onDelete: (record: any) => Promise<void> | void;
 };
 
-const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPage, pageSize, onPageChange, onView, onEdit, onDelete }) => {
+const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPage, pageSize, onView, onEdit, onDelete }) => {
   const columns: ColumnsType<any> = [
     {
       title: 'No',
@@ -132,12 +132,11 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
       loading={loading}
       pagination={{
         current: currentPage,
-        pageSize,
-        showSizeChanger: true,
-        pageSizeOptions: [6, 12, 24, 48],
+        pageSize:10,
+        showSizeChanger: false,
         total: data.length,
         showTotal: (total) => `Total ${total} campaigns`,
-        onChange: onPageChange,
+
       }}
       size="middle"
       tableLayout="fixed"

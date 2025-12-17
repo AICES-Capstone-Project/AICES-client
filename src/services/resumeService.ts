@@ -4,20 +4,12 @@ import type { ApiResponse } from "../types/api.types";
 import type { Resume, Paginated } from "../types/company.types";
 
 export const resumeService = {
-  // Upload a resume file to a job (multipart/form-data)
-  // Supports three calling styles for backward compatibility:
-  //  - uploadToJob(formData: FormData)
-  //  - uploadToJob(jobId: number | string, file: File)
-  //  - uploadToJob(campaignId: number, jobId: number, file: File)
   uploadToJob: async (...args: any[]): Promise<ApiResponse<null>> => {
     let formData: FormData;
 
-    // If first arg is FormData, use it directly
     if (args[0] instanceof FormData) {
       formData = args[0] as FormData;
     } else {
-      // Determine which signature was used
-      // Case: (jobId, file)
       if (
         (typeof args[0] === "number" || typeof args[0] === "string") &&
         args[1] instanceof File
@@ -44,10 +36,6 @@ export const resumeService = {
     return await postForm<null>(API_ENDPOINTS.RESUME.COMPANY_UPLOAD, formData);
   },
 
-  // Get resumes for a job (paged)
-  // Supports two signatures for backward compatibility:
-  //  - getByJob(jobId, params?)
-  //  - getByJob(campaignId, jobId, params?)
   getByJob: async (
     idOrCampaignId: number,
     maybeJobIdOrParams?: number | { page?: number; pageSize?: number },
@@ -78,8 +66,6 @@ export const resumeService = {
     return await get<Paginated<Resume>>(`/jobs/${jobId}/resumes${q}`);
   },
 
-  // Get resume detail by id (for a job)
-  // Supports: getById(jobId, resumeId) or getById(campaignId, jobId, resumeId)
   getById: async (
     idOrCampaignId: number,
     maybeJobIdOrResumeId: number,
@@ -116,6 +102,13 @@ export const resumeService = {
   // Delete a resume
   delete: async (applicationId: number): Promise<ApiResponse<null>> => {
     return await remove<null>(API_ENDPOINTS.RESUME.COMPANY_DELETE(applicationId));
+  },
+
+  getApplicationsByResume: async (resumeId: number): Promise<ApiResponse<any>> => {
+    return await get<any>(API_ENDPOINTS.RESUME.APPLICATIONS_BY_RESUME(resumeId));
+  },
+  getApplicationById: async (resumeId: number, applicationId: number): Promise<ApiResponse<any>> => {
+    return await get<any>(API_ENDPOINTS.RESUME.APPLICATION_BY_ID(resumeId, applicationId));
   },
   // 🔹 System Admin: xem resumes theo job
   getSystemResumes: async (

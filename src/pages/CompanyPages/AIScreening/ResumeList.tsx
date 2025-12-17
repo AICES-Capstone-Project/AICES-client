@@ -5,17 +5,7 @@ import React, {
 	useCallback,
 	useRef,
 } from "react";
-import {
-	Card,
-	Tag,
-	Button,
-	Drawer,
-	Space,
-	message,
-	Modal,
-	Input,
-	Tooltip,
-} from "antd";
+import { Card, Tag, Button, message, Input, Tooltip } from "antd";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
 	ArrowLeftOutlined,
@@ -26,7 +16,8 @@ import { toastError, toastSuccess } from "../../../components/UI/Toast";
 import { useResumeSignalR } from "../../../hooks/useResumeSignalR";
 import ScoreFilter from "./component/ScoreFilter";
 import ResumeTable from "./component/ResumeTable";
-import type { ScoreDetail, ResumeLocal } from "../../../types/resume.types";
+import ResumeDetailDrawer from "./component/ResumeDetailDrawer";
+import type { ResumeLocal } from "../../../types/resume.types";
 import UploadDrawer from "./component/UploadDrawer";
 
 type UIResume = ResumeLocal;
@@ -52,11 +43,8 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 	const [loadingDetail, setLoadingDetail] = useState(false);
 	const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
 	const [uploading, setUploading] = useState(false);
-	const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
-	const [editMode, setEditMode] = useState(false);
-	const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-	const [confirmInput, setConfirmInput] = useState("");
-	const [deletingMultiple, setDeletingMultiple] = useState(false);
+	// removed batch-delete state
+	// removed selectedRowKeys/editMode/multi-delete related state
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
 	const [jobTitle, setJobTitle] = useState<string>("");
@@ -122,96 +110,67 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				// data may itself be the object or an object with `data` inside
 				jobData = (resp as any).data.data ?? (resp as any).data;
 			} else {
-				jobData = resp;
-			}
+						jobData = resp;
+					}
+					setJobTitle(jobData?.title ?? "");
+					setTargetQuantity(jobData?.targetQuantity ?? jobData?.target ?? undefined);
+				} catch (e) {
+					console.error("Failed to load job info:", e);
+				}
+			}, [jobId]);
 
-			if (jobData) {
-				const title = jobData.title ?? jobData.jobTitle ?? jobData.name ?? "";
-				const target = jobData.targetQuantity ?? jobData.target ?? jobData.targetQty ?? undefined;
-				setJobTitle(title || "");
-				if (typeof target !== "undefined") setTargetQuantity(target);
-			}
-		} catch (e) {
-			console.error("Failed to load job info:", e);
-		}
-	}, [jobId, campaignId]);
+			const loadResumes = useCallback(async () => {
+				if (!jobId) return;
+				setLoading(true);
+				try {
+					const resp = campaignId
+						? await resumeService.getByJob(Number(campaignId), Number(jobId))
+						: await resumeService.getByJob(Number(jobId));
 
-	const loadResumes = useCallback(async () => {
-		setLoading(true);
-		try {
-			console.debug("[ResumeList] calling resumeService.getByJob", { jobId, campaignId });
-			const resp = campaignId
-				? await resumeService.getByJob(Number(campaignId), Number(jobId))
-				: await resumeService.getByJob(Number(jobId));
-			console.debug("[ResumeList] resumeService.getByJob response", resp);
+					if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
+						const raw = resp.data as any;
+						let resumeList: any[] = [];
+						if (Array.isArray(raw)) resumeList = raw;
+						else if (Array.isArray(raw.data)) resumeList = raw.data;
+						else if (Array.isArray(raw.resumes)) resumeList = raw.resumes;
+						else if (Array.isArray(raw.items)) resumeList = raw.items;
+						else resumeList = [];
 
-			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
-				const raw = Array.isArray(resp.data)
-					? resp.data
-					: resp.data.items || [];
-				const resumeList = (Array.isArray(raw) ? raw : []) as Array<{
-					resumeId?: number;
-					applicationId?: number;
-					fullName?: string;
-					candidateName?: string;
-					status?: string;
-					stage?: string;
-					applicationStatus?: string;
-					totalScore?: number | null;
-					adjustedScore?: number | null;
-					email?: string;
-					phone?: string;
-					phoneNumber?: string;
-					fileUrl?: string;
-					aiExplanation?: string;
-					scoreDetails?: Array<{
-						criteriaId: number;
-						criteriaName: string;
-						matched: number;
-						score: number;
-						aiNote: string;
-					}>;
-				}>;
+						const mapped: UIResume[] = resumeList.map((r: any) => ({
+							resumeId: (r.resumeId ?? r.applicationId) as number,
+							applicationId: (r.applicationId ?? r.resumeId) as number,
+							fullName: r.fullName || r.candidateName || "Unknown",
+							status: r.applicationStatus || r.status || r.stage || "Processing",
+							totalResumeScore: (r.adjustedScore ?? r.totalScore ?? null) ?? null,
+							email: r.email,
+							phoneNumber: r.phone || r.phoneNumber,
+							fileUrl: r.fileUrl,
+							aiExplanation: r.aiExplanation,
+							scoreDetails: r.scoreDetails,
+						}));
 
-				const mapped: UIResume[] = resumeList.map((r) => ({
-					// prefer explicit resumeId, otherwise fallback to applicationId
-					resumeId: (r.resumeId ?? r.applicationId) as number,
-					// preserve applicationId separately so campaign-aware endpoints can use it
-					applicationId: (r.applicationId ?? r.resumeId) as number,
-					fullName: r.fullName || r.candidateName || "Unknown",
-					// prefer applicationStatus (reviewer-friendly) then status/stage
-					status: r.applicationStatus || r.status || r.stage || "Processing",
-					// map backend score fields to UI field
-					totalResumeScore: (r.adjustedScore ?? r.totalScore ?? r.totalScore) ?? null,
-					email: r.email,
-					phoneNumber: r.phone || r.phoneNumber,
-					fileUrl: r.fileUrl,
-					aiExplanation: r.aiExplanation,
-					scoreDetails: r.scoreDetails,
-				}));
-				// Sort by totalResumeScore descending (highest first). Place null/undefined scores last.
-				// For equal scores, fallback to resumeId ascending for stable order.
-				const sortedList = mapped.slice().sort((a, b) => {
-					const aS = a.totalResumeScore;
-					const bS = b.totalResumeScore;
-					if (aS == null && bS == null) return a.resumeId - b.resumeId;
-					if (aS == null) return 1; // a should come after b
-					if (bS == null) return -1; // b should come after a
-					if (bS !== aS) return bS - aS; // descending numeric
-					return a.resumeId - b.resumeId;
-				});
-				setResumes(sortedList);
-				resumesRef.current = sortedList; // Update ref
-			} else {
-				message.error(resp?.message || "Unable to load resumes");
-			}
-		} catch (e) {
-			console.error("Failed to load resumes:", e);
-			toastError("Unable to load resumes");
-		} finally {
-			setLoading(false);
-		}
-	}, [jobId]);
+						const sortedList = mapped.slice().sort((a, b) => {
+							const aS = a.totalResumeScore;
+							const bS = b.totalResumeScore;
+							if (aS == null && bS == null) return a.resumeId - b.resumeId;
+							if (aS == null) return 1;
+							if (bS == null) return -1;
+							if (bS !== aS) return bS - aS;
+							return a.resumeId - b.resumeId;
+						});
+
+						setResumes(sortedList);
+						resumesRef.current = sortedList; // Update ref
+					} else {
+						message.error(resp?.message || "Unable to load resumes");
+					}
+				} catch (e) {
+					console.error("Failed to load resumes:", e);
+					toastError("Unable to load resumes");
+				} finally {
+					setLoading(false);
+				}
+			}, [jobId, campaignId]);
 
 	useEffect(() => {
 		if (jobId) {
@@ -405,16 +364,6 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 		jobId: jobId ? Number(jobId) : null,
 	});
 
-	// canRetrySelected: true only when at least one selected and ALL selected have status === "Failed"
-	const canRetrySelected = useMemo(() => {
-		if (!selectedRowKeys || selectedRowKeys.length === 0) return false;
-		// map to numbers and find the resume objects
-		const ids = selectedRowKeys.map((k) => Number(k));
-		const selected = resumes.filter((r) => ids.includes(r.resumeId));
-		if (selected.length === 0) return false;
-		return selected.every((r) => String(r.status) === "Failed");
-	}, [selectedRowKeys, resumes]);
-
 	// compute score counts to detect duplicates (based on displayed/sorted list)
 	const scoreCounts = useMemo(() => {
 		const m = new Map<number, number>();
@@ -515,85 +464,24 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 		}
 	};
 
-	// retry analysis for a failed resume
-	const [retryingIds, setRetryingIds] = useState<number[]>([]);
-	const handleRetry = async (resumeId: number) => {
+	const handleDeleteOne = async (resumeId: number) => {
 		if (!resumeId) return;
-		setRetryingIds((s) => [...s, resumeId]);
 		try {
-			const resp = await resumeService.retryAnalysis(resumeId);
+			// Resolve applicationId when available; backend delete expects applicationId
+			const found = resumes.find((r) => r.resumeId === resumeId);
+			const idToDelete = (found && (found.applicationId ?? found.resumeId)) || resumeId;
+			const resp = await resumeService.delete(idToDelete as number);
 			if (String(resp?.status || "").toLowerCase() === "success") {
-				toastSuccess("Retry requested", "Resume reprocessing has been queued.");
-				// reload list to reflect status changes (if backend updates quickly)
+				toastSuccess("Delete completed", `Resume deleted`);
 				await loadResumes();
+				setSelectedResume(null);
 			} else {
-				toastError("Retry failed", resp?.message);
+				toastError("Delete failed", resp?.message);
 			}
 		} catch (e) {
-			console.error("Retry analysis failed:", e);
-			const errorMessage = e instanceof Error ? e.message : "Unknown error";
-			toastError("Retry failed", errorMessage);
-		} finally {
-			setRetryingIds((s) => s.filter((id) => id !== resumeId));
+			console.error("Delete resume failed:", e);
+			toastError("Delete failed", (e as Error)?.message ?? String(e));
 		}
-	};
-
-	const handleRetrySelected = async () => {
-		if (!selectedRowKeys || selectedRowKeys.length === 0) return;
-		setDeletingMultiple(true);
-		const ids = selectedRowKeys.map((k) => Number(k));
-		let success = 0;
-		for (const id of ids) {
-			try {
-				const resp = await resumeService.retryAnalysis(id);
-				if (String(resp?.status || "").toLowerCase() === "success") {
-					success++;
-				}
-			} catch (e) {
-				console.error("Retry selected resume failed:", e);
-			}
-		}
-		setDeletingMultiple(false);
-		setSelectedRowKeys([]);
-		// keep edit mode on — user can continue editing; if you want to auto-exit, uncomment next line
-		// setEditMode(false);
-		await loadResumes();
-		setCurrentPage(1);
-		toastSuccess(
-			"Retry completed",
-			`${success} of ${ids.length} resumes queued for reprocessing`
-		);
-	};
-
-	const handleDeleteSelected = async () => {
-		if (!selectedRowKeys || selectedRowKeys.length === 0) return;
-		setDeletingMultiple(true);
-		const ids = selectedRowKeys.map((k) => Number(k));
-		let success = 0;
-		for (const id of ids) {
-			try {
-				const resp = await resumeService.delete(id);
-				if (String(resp?.status || "").toLowerCase() === "success") {
-					success++;
-				}
-			} catch (e) {
-				console.error("Delete selected resume failed:", e);
-			}
-		}
-		setDeletingMultiple(false);
-		setDeleteModalOpen(false);
-		setSelectedRowKeys([]);
-		// reload and reset page
-		await loadResumes();
-		setCurrentPage(1);
-		setSelectedResume(null);
-		setConfirmInput("");
-		// Optionally exit edit mode after delete:
-		setEditMode(false);
-		toastSuccess(
-			"Delete completed",
-			`${success} of ${ids.length} resumes deleted`
-		);
 	};
 
 	const handleUpload = async (file: File) => {
@@ -647,53 +535,12 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 							</span>
 						</div>
 						<div className="flex gap-2 items-center">
-							{/* Buttons visible only in edit mode */}
-							{editMode && (
-								<>
-									{canRetrySelected && (
-										<Button
-											type="primary"
-											onClick={() => handleRetrySelected()}
-											disabled={!canRetrySelected || deletingMultiple}
-											style={{ marginRight: 8 }}
-										>
-											Retry screening ({selectedRowKeys.length})
-										</Button>
-									)}
-
-									{selectedRowKeys.length > 0 && (
-										<Button
-											type="primary"
-											danger
-											onClick={() => setDeleteModalOpen(true)}
-											style={{ marginRight: 8 }}
-										>
-											Delete resumes ({selectedRowKeys.length})
-										</Button>
-									)}
-
-									{/* Done / Exit edit mode */}
-									<Button
-										className="company-btn"
-										onClick={() => {
-											setEditMode(false);
-											setSelectedRowKeys([]);
-										}}
-										style={{ marginRight: 8 }}
-									>
-										Done
-									</Button>
-								</>
-							)}
-
-							{!editMode && (
-								<Button
-									className="company-btn--filled"
-									onClick={() => setUploadDrawerOpen(true)}
-								>
-									Upload CV
-								</Button>
-							)}
+							<Button
+								className="company-btn--filled"
+								onClick={() => setUploadDrawerOpen(true)}
+							>
+								Upload CV
+							</Button>
 						</div>
 					</div>
 				}
@@ -732,9 +579,6 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				<ResumeTable
 					loading={loading}
 					dataSource={sortedResumes}
-					editMode={editMode}
-					selectedRowKeys={selectedRowKeys}
-					onSelectedRowKeysChange={setSelectedRowKeys}
 					currentPage={currentPage}
 					pageSize={pageSize}
 					onPageChange={(page, size) => {
@@ -745,195 +589,22 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 						setDrawerOpen(true);
 						await loadResumeDetail(resumeId);
 					}}
-					onEnterEditMode={() => setEditMode(true)}
-					onRetry={handleRetry}
-					retryingIds={retryingIds}
+					onDelete={handleDeleteOne}
 					scoreCounts={scoreCounts}
 					jobId={jobId ? String(jobId) : undefined}
 					targetQuantity={targetQuantity}
-					className={editMode ? "edit-mode-table" : undefined}
 				/>
-			</Card>			{/* Delete selected confirmation modal requiring exact job title */}
-			<Modal
-				title={`Confirm delete ${selectedRowKeys.length} resumes`}
-				open={deleteModalOpen}
-				onCancel={() => {
-					setDeleteModalOpen(false);
-					setConfirmInput("");
-				}}
-				onOk={handleDeleteSelected}
-				okButtonProps={{
-					disabled: confirmInput !== (jobTitle || "") || deletingMultiple,
-					loading: deletingMultiple,
-				}}
-				cancelButtonProps={{ disabled: deletingMultiple }}
-			>
-				<div>
-					<p>
-						Việc xóa CV là hành động <strong>không thể khôi phục</strong> và có
-						thể gây ra những bất tiện cho bạn trong quá trình sử dụng hệ thống.
-						Vui lòng nhập chính xác tiêu đề công việc{" "}
-						<strong>{jobTitle || "(job title)"}</strong> để xác nhận xoá.
-					</p>
+			</Card>
 
-					<Input
-						value={confirmInput}
-						onChange={(e) => setConfirmInput(e.target.value)}
-						placeholder="Type job title here"
-					/>
-				</div>
-			</Modal>
-
-			<Drawer
-				title={
-					selectedResume
-						? `Resume Detail - ${selectedResume.fullName}`
-						: "Resume Detail"
-				}
-				width={720}
+			<ResumeDetailDrawer
+				open={drawerOpen}
+				loading={loadingDetail}
+				selectedResume={selectedResume}
 				onClose={() => {
 					setDrawerOpen(false);
 					setSelectedResume(null);
 				}}
-				open={drawerOpen}
-				destroyOnClose
-				loading={loadingDetail}
-			>
-				{selectedResume && (
-					<Space direction="vertical" style={{ width: "100%" }} size="large">
-						<Card size="small" title="Basic Information">
-							<Space direction="vertical" style={{ width: "100%" }}>
-								<div>
-									<strong>Full Name:</strong>{" "}
-									{selectedResume.fullName || "Unknown"}
-								</div>
-								{selectedResume.email && (
-									<div>
-										<strong>Email:</strong> {selectedResume.email}
-									</div>
-								)}
-								{selectedResume.phoneNumber && (
-									<div>
-										<strong>Phone:</strong> {selectedResume.phoneNumber}
-									</div>
-								)}
-								<div>
-									<strong>Status:</strong>{" "}
-									<Tag
-										color={
-											selectedResume.status === "Completed"
-												? "green"
-												: selectedResume.status === "Pending"
-													? "blue"
-													: "default"
-										}
-									>
-										{selectedResume.status || "Processing"}
-									</Tag>
-								</div>
-								{selectedResume.fileUrl && (
-									<div>
-										<strong>Resume File:</strong>{" "}
-										<Button
-											type="link"
-											href={selectedResume.fileUrl}
-											target="_blank"
-										>
-											View PDF
-										</Button>
-									</div>
-								)}
-							</Space>
-						</Card>
-
-						<Card size="small" title="AI Evaluation">
-							<Space direction="vertical" style={{ width: "100%" }}>
-								<div>
-									<strong>Total Score:</strong>{" "}
-									{selectedResume.totalScore != null ? (
-										<Tag
-											color={
-												selectedResume.totalScore >= 70
-													? "green"
-													: selectedResume.totalScore >= 40
-														? "orange"
-														: "red"
-											}
-											style={{ fontSize: 16, padding: "4px 12px" }}
-										>
-											{selectedResume.totalScore}
-										</Tag>
-									) : (
-										<span>—</span>
-									)}
-								</div>
-								{selectedResume.aiExplanation && (
-									<div>
-										<strong>AI Explanation:</strong>
-										<p
-											style={{
-												marginTop: 8,
-												padding: 12,
-												background: "#f5f5f5",
-												borderRadius: 4,
-											}}
-										>
-											{selectedResume.aiExplanation.replace(/\\u0027/g, "'")}
-										</p>
-									</div>
-								)}
-							</Space>
-						</Card>
-
-						{selectedResume.scoreDetails &&
-							selectedResume.scoreDetails.length > 0 && (
-								<Card size="small" title="Criteria Scores">
-									<Space
-										direction="vertical"
-										style={{ width: "100%" }}
-										size="middle"
-									>
-										{selectedResume.scoreDetails.map((detail: ScoreDetail) => (
-											<div
-												key={detail.criteriaId}
-												style={{
-													padding: 12,
-													border: "1px solid #d9d9d9",
-													borderRadius: 4,
-												}}
-											>
-												<div style={{ marginBottom: 8 }}>
-													<strong>{detail.criteriaName}</strong>
-													<Tag
-														color={
-															detail.score >= 70
-																? "green"
-																: detail.score >= 40
-																	? "orange"
-																	: "red"
-														}
-														style={{ marginLeft: 8 }}
-													>
-														Score: {detail.score}
-													</Tag>
-													<Tag
-														color={detail.matched ? "success" : "default"}
-														style={{ marginLeft: 4 }}
-													>
-														{detail.matched ? "Matched" : "Not Matched"}
-													</Tag>
-												</div>
-												<div style={{ color: "#666" }}>
-													<em>{detail.aiNote}</em>
-												</div>
-											</div>
-										))}
-									</Space>
-								</Card>
-							)}
-					</Space>
-				)}
-			</Drawer>
+			/>
 
 			<UploadDrawer
 				open={uploadDrawerOpen}

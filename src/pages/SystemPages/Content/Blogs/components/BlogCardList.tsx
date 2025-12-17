@@ -66,26 +66,30 @@ export default function BlogCardList({
                     </div>
                   }
                   actions={[
-                    <Button
-                      key="edit"
-                      type="text"
-                      icon={<EditOutlined />}
-                      onClick={() => onEdit(blog)}
-                    >
-                      Edit
-                    </Button>,
-                    <Popconfirm
-                      key="del"
-                      title="Delete blog"
-                      description="Are you sure you want to delete this blog?"
-                      okText="Yes"
-                      cancelText="No"
-                      onConfirm={() => onDelete(blog.blogId)}
-                    >
-                      <Button type="text" danger icon={<DeleteOutlined />}>
-                        Delete
-                      </Button>
-                    </Popconfirm>,
+                    <Space key="actions" size="small">
+                      <Button
+                        type="default"
+                        shape="circle"
+                        size="small"
+                        icon={<EditOutlined />}
+                        
+                        onClick={() => onEdit(blog)}
+                      />
+                      <Popconfirm
+                        title="Delete this blog?"
+                        okText="Delete"
+                        cancelText="Cancel"
+                        okButtonProps={{ danger: true }}
+                        onConfirm={() => onDelete(blog.blogId)}
+                      >
+                        <Button
+                          danger
+                          shape="circle"
+                          size="small"
+                          icon={<DeleteOutlined />}
+                        />
+                      </Popconfirm>
+                    </Space>,
                   ]}
                 >
                   <div
@@ -133,18 +137,10 @@ export default function BlogCardList({
                 showSizeChanger={pagination.showSizeChanger}
                 pageSizeOptions={pagination.pageSizeOptions}
                 onChange={(page, pageSize) =>
-                  onChangePage({
-                    ...pagination,
-                    current: page,
-                    pageSize,
-                  })
+                  onChangePage({ ...pagination, current: page, pageSize })
                 }
                 onShowSizeChange={(page, pageSize) =>
-                  onChangePage({
-                    ...pagination,
-                    current: page,
-                    pageSize,
-                  })
+                  onChangePage({ ...pagination, current: page, pageSize })
                 }
               />
             </div>

@@ -33,6 +33,21 @@ export const candidateService = {
   deleteCandidate: async (candidateId: number): Promise<ApiResponse<any>> => {
     return await remove<any>(API_ENDPOINTS.CANDIDATE.COMPANY_DELETE(candidateId));
   },
+
+  // Get applications for a resume
+  getApplicationsByResume: async (resumeId: number): Promise<ApiResponse<any>> => {
+    return await get<any>(API_ENDPOINTS.RESUME.APPLICATIONS_BY_RESUME(resumeId));
+  },
+
+  // Get a single application by resumeId and applicationId
+  getApplicationById: async (
+    resumeId: number,
+    applicationId: number
+  ): Promise<ApiResponse<any>> => {
+    return await get<any>(
+      API_ENDPOINTS.RESUME.APPLICATION_BY_ID(resumeId, applicationId)
+    );
+  },
 };
 
 export default candidateService;

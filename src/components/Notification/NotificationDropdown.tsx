@@ -52,8 +52,8 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ className, 
     });
 
     const { icon, color } = getNotificationIcon(newNotif.type);
-    antNotification.open({
-      message: <span className="font-semibold text-gray-900">Thông báo mới</span>,
+        antNotification.open({
+      message: <span className="font-semibold text-gray-900">New notification</span>,
       description: (
         <div>
           <p className="text-gray-700 mb-1" dangerouslySetInnerHTML={{ __html: newNotif.message }} />
@@ -87,12 +87,12 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ className, 
         );
         setNotifications(sorted);
       } else {
-        // Chỉ set error nếu không phải loading ngầm, tránh trải nghiệm xấu
-        if (!isBackground) setError(response.message || "Không thể tải thông báo");
+        // Only set error when not background loading
+        if (!isBackground) setError(response.message || "Unable to load notifications");
       }
     } catch (err) {
       console.error(err);
-      if (!isBackground) setError("Không thể tải thông báo. Vui lòng thử lại.");
+      if (!isBackground) setError("Unable to load notifications. Please try again.");
     }
     if (!isBackground) setLoading(false);
   }, []);
@@ -206,13 +206,13 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ className, 
             <ExclamationCircleOutlined className="text-2xl text-gray-400 mb-2" />
             <p className="text-[#65676B] mb-2">{error}</p>
             <Button type="primary" size="small" icon={<ReloadOutlined />} onClick={() => loadNotifications()}>
-              {t("notification.retry", "Thử lại")}
+              {t("notification.retry", "Retry")}
             </Button>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
-            description={<span className="text-[#65676B]">{t("notification.empty", "Không có thông báo")}</span>}
+            description={<span className="text-[#65676B]">{t("notification.empty", "No notifications")}</span>}
             className="py-10"
           />
         ) : (
@@ -246,7 +246,7 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({ className, 
             }
           }}
         >
-          {t("notification.viewAll", "Xem tất cả thông báo")}
+          {t("notification.viewAll", "View all notifications")}
         </Button>
       </div>
     </div>

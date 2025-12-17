@@ -18,18 +18,18 @@ export default function PersonalFields() {
     <>
       {/* Username */}
       <Form.Item
-        name="username"
-        label="Username:"
+        name="fullName"
+        label="Full Name:"
         labelCol={{ span: 24 }}
         wrapperCol={{ span: 24 }}
         hasFeedback
         rules={[
-          { required: true, message: "Please enter your username" },
-          { min: 3, message: "Username must be at least 3 characters" },
-          { max: 20, message: "Username must be at most 20 characters" },
+          { required: true, message: "Please enter your full name" },
+          { min: 3, message: "Full name must be at least 3 characters" },
+          { max: 50, message: "Full name must be at most 50 characters" },
         ]}
       >
-        <Input size="large" placeholder="Enter username" />
+        <Input size="large" placeholder="Enter full name" />
       </Form.Item>
 
       {/* Email */}

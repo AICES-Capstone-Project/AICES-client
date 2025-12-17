@@ -24,13 +24,13 @@ const NotificationHeader: React.FC<NotificationHeaderProps> = ({
     {
       key: "markAllRead",
       icon: <CheckOutlined />,
-      label: t("notification.markAllAsRead", "Đánh dấu tất cả đã đọc"),
+      label: t("notification.markAllAsRead", "Mark all as read"),
       onClick: onMarkAllRead,
     },
     {
       key: "settings",
       icon: <SettingOutlined />,
-      label: t("notification.settings", "Cài đặt thông báo"),
+      label: t("notification.settings", "Notification settings"),
     },
   ];
 
@@ -42,12 +42,12 @@ const NotificationHeader: React.FC<NotificationHeaderProps> = ({
           <TabButton
             active={activeTab === "all"}
             onClick={() => setActiveTab("all")}
-            label={t("notification.all", "Tất cả")}
+            label={t("notification.all", "All")}
           />
           <TabButton
             active={activeTab === "unread"}
             onClick={() => setActiveTab("unread")}
-            label={t("notification.unread", "Chưa đọc")}
+            label={t("notification.unread", "Unread")}
           />
           <Dropdown menu={{ items: moreMenuItems }} trigger={["click"]} placement="bottomRight">
           <div className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F0F2F5] cursor-pointer transition-colors">

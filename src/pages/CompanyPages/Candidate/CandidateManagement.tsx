@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Card, Input, Table, Button, Tooltip, Space, Modal, message } from "antd";
 import { EyeOutlined, SearchOutlined, DeleteOutlined } from "@ant-design/icons";
-import ResumeDetailDrawer from "./components/ResumeDetailDrawer";
+import { Swords } from "lucide-react";
+import { APP_ROUTES } from "../../../services/config";
+import { useNavigate } from "react-router-dom";
 import type { ColumnsType } from "antd/es/table";
 import candidateService from "../../../services/candidateService";
 
@@ -14,8 +16,7 @@ const CandidateManagement = () => {
     const [pageSize, setPageSize] = useState<number>(10);
     const [searchText, setSearchText] = useState("");
 
-    const [drawerOpen, setDrawerOpen] = useState(false);
-    const [selectedCandidateId, setSelectedCandidateId] = useState<number | null>(null);
+    const navigate = useNavigate();
 
     const [pdfOpen, setPdfOpen] = useState(false);
     const [pdfUrl] = useState<string | null>(null);
@@ -112,34 +113,34 @@ const CandidateManagement = () => {
 
     const openResume = (record: any) => {
         const id = record?.candidateId ?? record?.resumeId ?? record?.id ?? null;
-        setSelectedCandidateId(id);
-        setDrawerOpen(true);
+        if (!id) return;
+        navigate(`/company/candidate/${id}`);
     };
 
     const columns: ColumnsType<any> = [
         {
             title: "No",
             key: "no",
-            width: 72,
+            width: "10%",
             align: "center",
             render: (_: any, __: any, index: number) =>
                 (currentPage - 1) * pageSize + index + 1,
         },
         {
-            title: "Name",
+            title: "Candidate name",
             dataIndex: "candidateName",
             key: "candidateName",
             align: "center",
-            width: "30%",
+            width: "40%",
             ellipsis: true,
             render: (v: string) => v || "-",
         },
         { title: "Email", dataIndex: "email", key: "email", align: "center", width: "25%", ellipsis: true, render: (v: string) => v || "-" },
-        { title: "Phone", dataIndex: "phone", key: "phone", align: "center", width: "15%", render: (v: string) => v || "-" },
+        { title: "Phone", dataIndex: "phone", key: "phone", align: "center", width: "20%", render: (v: string) => v || "-" },
         {
             title: "Actions",
             key: "actions",
-            width: "10%",
+            width: "15%",
             align: "center",
             render: (_: any, record: any) => (
                 <Space size="small">
@@ -184,6 +185,13 @@ const CandidateManagement = () => {
                             onPressEnter={handleSearch}
                         />
                     </div>
+                    <Button
+                        className="company-btn"
+                        icon={<Swords size={16} />}
+                        onClick={() => navigate(APP_ROUTES.COMPANY_CANDIDATE_COMPARE)}
+                    >
+                        <span>Compare Candidate</span>
+                    </Button>
                 </div>
             }
             style={{
@@ -200,7 +208,7 @@ const CandidateManagement = () => {
                 loading={loading}
                 pagination={{
                     current: currentPage,
-                    pageSize: pageSize,
+                    pageSize: 10,
                     showSizeChanger: false,
                     total: apiTotal,
                     showTotal: (total) => `Total ${total} candidates`,
@@ -220,7 +228,7 @@ const CandidateManagement = () => {
                 scroll={{ y: tableHeight }}
                 rowClassName={(_, index) => (index % 2 === 0 ? "table-row-light" : "table-row-dark")}
             />
-            <ResumeDetailDrawer open={drawerOpen} candidateId={selectedCandidateId} onClose={() => { setDrawerOpen(false); setSelectedCandidateId(null); }} />
+            {/* navigates to candidate detail page instead of drawer */}
 
             {/* PDF preview modal (UI-only, sample PDF) */}
             <Modal open={pdfOpen} onCancel={() => setPdfOpen(false)} footer={null} width="80%" style={{ top: 20 }} bodyStyle={{ height: '80vh', padding: 0 }}>

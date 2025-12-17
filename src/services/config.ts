@@ -122,6 +122,8 @@ export const API_ENDPOINTS = {
     COMPANY_GET_BY_ID: (candidateId: number) =>
       `/candidates/${candidateId}/resumes`,
     COMPANY_DELETE: (candidateId: number) => `/candidates/${candidateId}`,
+
+    
     SYSTEM_UPDATE: (blogId: number) => `/companies/blogs/${blogId}`,
     SYSTEM_DELETE: (blogId: number) => `/companies/blogs/${blogId}`,
 
@@ -355,6 +357,9 @@ export const API_ENDPOINTS = {
 
     // Delete a resume
     COMPANY_DELETE: (applicationId: number) => `/resumes/${applicationId}`,
+    // Applications associated with a candidate's resume
+    APPLICATIONS_BY_RESUME: (resumeId: number) => `/candidates/resumes/${resumeId}/applications`,
+    APPLICATION_BY_ID: (resumeId: number, applicationId: number) => `/candidates/resumes/${resumeId}/applications/${applicationId}`,
   },
 
   CAMPAIGN: {
@@ -546,7 +551,7 @@ export const APP_ROUTES = {
   COMPANY_AI_SCREENING: "/company/ai-screening",
   COMPANY_AI_SCREENING_RESUMES:
     "/company/ai-screening/:campaignId/:jobId/resumes",
-  COMPANY_AI_SCREENING_COMPARE: "/company/ai-screening/compare",
+  COMPANY_CANDIDATE_COMPARE: "/company/candidate/compare",
   COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
   COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
   COMPANY_PAYMENT_HISTORY: "/company/payment-history",

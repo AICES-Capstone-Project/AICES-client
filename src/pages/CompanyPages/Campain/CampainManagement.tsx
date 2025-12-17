@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { Card, Input, Button, message, Drawer, Badge, List, Tag, Spin, Divider } from "antd";
-import { SearchOutlined, PlusOutlined, BellOutlined, ArrowRightOutlined, CheckOutlined, CloseOutlined, EyeOutlined } from "@ant-design/icons";
+import { Card, Input, Button, message, Badge} from "antd";
+import { SearchOutlined, PlusOutlined, BellOutlined } from "@ant-design/icons";
 import CampaignCreateDrawer from './component/CampaignCreateDrawer';
 import CampaignEditDrawer from './component/CampaignEditDrawer';
 import CampaignTable from './component/CampaignTable';
+import PendingCampaignsDrawer from './component/PendingCampaignsDrawer';
 import { campaignService } from "../../../services/campaignService";
 import { useNotificationSignalR } from '../../../hooks/useNotificationSignalR';
 import { useAppSelector } from "../../../hooks/redux";
@@ -138,7 +139,7 @@ const CampaignManagement = () => {
         setPendingActionLoading(true);
         try {
             const resp = await campaignService.updateCampaignStatus(pendingDetail.campaignId, 'Published');
-            const ok = resp?.status === 'Success' || resp?.statusCode === 200 || resp?.message;
+            const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
                 if (ok) {
                 message.success('Campaign approved');
                 await loadPendingCampaigns();
@@ -160,7 +161,7 @@ const CampaignManagement = () => {
         setPendingActionLoading(true);
         try {
             const resp = await campaignService.updateCampaignStatus(pendingDetail.campaignId, 'Rejected');
-            const ok = resp?.status === 'Success' || resp?.statusCode === 200 || resp?.message;
+            const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
                 if (ok) {
                 message.success('Campaign rejected');
                 await loadPendingCampaigns();
@@ -261,119 +262,18 @@ const CampaignManagement = () => {
                 }}
             />
 
-            <Drawer
-                title={
-                    pendingDetail ? (
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <span style={{ fontWeight: 600 }}>{pendingDetail.title || 'Campaign details'}</span>
-                                <Tag color={pendingDetail.status === 'Pending' ? 'orange' : pendingDetail.status === 'Published' ? 'green' : 'default'}>{pendingDetail.status || '-'}</Tag>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Button type="text" icon={<ArrowRightOutlined />} onClick={() => setPendingDetail(null)} />
-                            </div>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <span>Pending Campaigns ({pendingCampaigns.length})</span>
-                        </div>
-                    )
-                }
+            <PendingCampaignsDrawer
                 open={pendingDrawerOpen}
                 onClose={() => { setPendingDrawerOpen(false); setPendingDetail(null); loadPendingCampaigns(); }}
-                width={760}
-                bodyStyle={{ padding: 24 }}
-            >
-                {pendingDetail ? (
-                    pendingDetailLoading ? (
-                        <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}><Spin /></div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 8 }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                <div>
-                                    <div style={{ color: '#666', fontSize: 12 }}>Creator</div>
-                                    <div style={{ fontWeight: 600 }}>{pendingDetail.creatorName || pendingDetail.creator || '-'}</div>
-                                </div>
-                                <div>
-                                    <div style={{ color: '#666', fontSize: 12 }}>Created at</div>
-                                    <div>{pendingDetail.createdAt ? new Date(pendingDetail.createdAt).toLocaleString() : '-'}</div>
-                                </div>
-                                <div>
-                                    <div style={{ color: '#666', fontSize: 12 }}>Start date</div>
-                                    <div>{pendingDetail.startDate ? new Date(pendingDetail.startDate).toLocaleDateString() : '-'}</div>
-                                </div>
-                                <div>
-                                    <div style={{ color: '#666', fontSize: 12 }}>End date</div>
-                                    <div>{pendingDetail.endDate ? new Date(pendingDetail.endDate).toLocaleDateString() : '-'}</div>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div style={{ color: '#666', fontSize: 12 }}>Description</div>
-                                <div style={{ marginTop: 8, whiteSpace: 'pre-wrap' }}>{pendingDetail.description || '-'}</div>
-                            </div>
-
-                            <Divider />
-
-                            <div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <strong>Jobs</strong>
-                                    <span style={{ color: '#666', fontSize: 12 }}>{Array.isArray(pendingDetail.jobs) ? `${pendingDetail.jobs.length} job(s)` : ''}</span>
-                                </div>
-                                {Array.isArray(pendingDetail.jobs) && pendingDetail.jobs.length ? (
-                                    <div style={{ marginTop: 12, display: 'grid', gap: 8 }}>
-                                        {pendingDetail.jobs.map((j: any) => (
-                                            <div key={j.jobId} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '12px', border: '1px solid #f0f0f0', borderRadius: 8, background: '#fff' }}>
-                                                <div style={{ minWidth: 0 }}>
-                                                    <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{j.jobTitle || j.title || `#${j.jobId}`}</div>
-                                                </div>
-                                                <div style={{ textAlign: 'right', minWidth: 140, display: 'flex', gap: 12, alignItems: 'center', justifyContent: 'flex-end' }}>
-                                                    <div style={{ color: '#666', fontSize: 13 }}><strong style={{ color: '#333', fontWeight: 600 }}>Target:</strong>&nbsp;{Number(j.targetQuantity ?? j.target ?? 0)}</div>
-                                                    <div style={{ color: '#666', fontSize: 13 }}><strong style={{ color: '#333', fontWeight: 600 }}>Hired:</strong>&nbsp;{Number(j.currentHired ?? j.filled ?? 0)}</div>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div style={{ marginTop: 8, color: '#666' }}>{Array.isArray(pendingDetail.jobIds) ? `${pendingDetail.jobIds.length} job(s)` : '0 job(s)'}</div>
-                                )}
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 12 }}>
-                                <Button danger icon={<CloseOutlined />} onClick={handleReject} loading={pendingActionLoading}>Reject</Button>
-                                <Button className="company-btn" icon={<CheckOutlined />} onClick={handleApprove} loading={pendingActionLoading}>Approve</Button>                               
-                            </div>
-                        </div>
-                    )
-                ) : (
-                    <List
-                        dataSource={pendingCampaigns}
-                        loading={pendingLoading}
-                        renderItem={(item: any, idx) => (
-                            <List.Item
-                                key={item.campaignId}
-                                style={{ padding: 12, borderRadius: 8 }}
-                            >
-                                <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 12 }}>
-                                    {/* Column 1: No. */}
-                                    <div style={{ width: 40, textAlign: 'center', color: '#666', flexShrink: 0 }}>{idx + 1}</div>
-
-                                    {/* Column 2: Campaign title + created by */}
-                                    <div style={{ flex: 1, minWidth: 0 }}>
-                                        <div style={{ fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item.title || '-'}</div>
-                                        <div style={{ fontSize: 12, color: '#666' }}>{`Created by ${item.creatorName || item.creator || '-'} on ${item.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-'}`}</div>
-                                    </div>
-
-                                    {/* Column 3: Status + Eye icon */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginLeft: 8, flexShrink: 0 }}>
-                                        <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewPending(item.campaignId)} />
-                                        <Tag color={item.status === 'Pending' ? 'orange' : item.status === 'Published' ? 'green' : 'default'}>{item.status || '-'}</Tag>
-                                    </div>
-                                </div>
-                            </List.Item>
-                        )}
-                    />
-                )}
-            </Drawer>
+                pendingCampaigns={pendingCampaigns}
+                loading={pendingLoading}
+                pendingDetail={pendingDetail}
+                pendingDetailLoading={pendingDetailLoading}
+                pendingActionLoading={pendingActionLoading}
+                onView={handleViewPending}
+                onApprove={handleApprove}
+                onReject={handleReject}
+            />
 
             <CampaignTable
                 data={filtered}
@@ -392,7 +292,7 @@ const CampaignManagement = () => {
                 onDelete={async (record) => {
                     try {
                         const resp = await campaignService.deleteCampaign(record.campaignId);
-                        const ok = resp?.status === 'Success' || resp?.statusCode === 200 || resp?.message;
+                        const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
                         if (ok) {
                             message.success('Campaign deleted');
                             await loadCampaigns();

@@ -38,12 +38,11 @@ const CampaignDetail: React.FC = () => {
             const response = await campaignService.getCampaignById(id);
             console.log("Campaign response:", response);
 
-            // Handle both direct campaign object and wrapped response
-            let campaignData = null;
-            if (response?.data?.campaignId) {
-                campaignData = response.data;
-            } else if (response?.campaignId) {
-                campaignData = response;
+            // Support ApiResponse<T> (wrapper) or legacy raw campaign object
+            let campaignData: any = null;
+            const payload = response && (response as any).data ? (response as any).data : response;
+            if (payload && (payload as any).campaignId) {
+                campaignData = payload;
             }
 
             if (campaignData) {
@@ -189,7 +188,7 @@ const CampaignDetail: React.FC = () => {
                 .filter((it: any) => Number.isFinite(it.jobId) && Number.isFinite(it.targetQuantity) && Number(it.targetQuantity) >= 1);
             if (!jobsPayload.length) return;
             const resp = await campaignService.addJobsToCampaign(campaign.campaignId, jobsPayload);
-            const ok = resp?.ok === true || resp?.statusCode === 200;
+            const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
             if (ok) {
                 setApiError(null);
                 await loadCampaign();
@@ -221,7 +220,7 @@ const CampaignDetail: React.FC = () => {
 
             // call service to remove job(s) from campaign. API expects an array of jobIds (number[]).
             const resp = await campaignService.removeJobsFromCampaign(campaign.campaignId, [jobId]);
-            const ok = resp?.status === 'Success' || resp?.statusCode === 200 || resp?.message;
+            const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
             if (ok) {
                 message.success('Job removed from campaign');
                 await loadCampaign();

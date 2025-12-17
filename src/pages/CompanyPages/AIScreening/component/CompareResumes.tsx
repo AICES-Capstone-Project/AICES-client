@@ -178,10 +178,10 @@ const CompareResumes: React.FC = () => {
                         <Button
                             className="company-btn"
                             icon={<ArrowLeftOutlined />}
-                            onClick={() => navigate(`/company/ai-screening/${jobId}/resumes`)}
+                            onClick={() => navigate(`/company/candidate`)}
                         />
                         <div style={{ fontWeight: 600 }}>
-                            {`Compare Resumes — Main criteria score: ${score ?? "-"}`}
+                            {`Compare Candidate`}
                         </div>
                     </div>
                 }

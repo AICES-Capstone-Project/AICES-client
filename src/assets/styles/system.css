@@ -1400,3 +1400,46 @@
   opacity: 0.35; /* mờ icon */
   cursor: not-allowed !important;
 }
+.blog-card-pagination{
+  margin-top: 14px;      /* cách xuống khỏi cards */
+  padding-top: 10px;
+  border-top: 1px solid #eef2f7; /* optional: ngăn cách nhẹ */
+  display: flex;
+  justify-content: flex-start;   /* hoặc center nếu bạn thích */
+}
+/* ===== BLOG CARD ACTION ICONS — copy style from accounts-table ===== */
+.aices-blog-card .ant-card-actions {
+  background: #fff;
+}
+
+.aices-blog-card .ant-card-actions > li {
+  margin: 0 !important;
+  padding: 10px 0 !important;
+}
+
+.aices-blog-card .ant-card-actions > li > span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.aices-blog-card .ant-card-actions .ant-btn {
+  border-radius: 50% !important;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+/* neutral gray like banner table */
+.aices-blog-card .ant-card-actions .ant-btn.ant-btn-default {
+  border: none !important;
+  background: transparent !important;
+  color: #9ca3af !important;
+  box-shadow: none !important;
+}
+
+.aices-blog-card .ant-card-actions .ant-btn.ant-btn-default:hover {
+  background-color: #f3f4f6 !important;
+  color: #111827 !important;
+}
+

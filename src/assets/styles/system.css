@@ -1,4 +1,6 @@
-/* ===== TOKENS CHUNG CHO SYSTEM ===== */
+/* =========================
+   TOKENS CHUNG CHO SYSTEM
+   ========================= */
 
 :root {
   --aices-green: #28623a;
@@ -6,15 +8,17 @@
   --aices-green-soft: #e5f3ea;
 }
 
-/* ===== System - Accounts Toolbar ===== */
+/* =========================
+   ACCOUNTS TOOLBAR
+   ========================= */
 
 .accounts-toolbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap; /* xuống hàng đẹp khi màn nhỏ */
+  margin-bottom: 14px; /* ✅ giữ 1 giá trị */
+  flex-wrap: wrap;
 }
 
 .accounts-toolbar-left {
@@ -23,8 +27,7 @@
   gap: 8px;
 }
 
-/* ===== Ghost button for Search ===== */
-
+/* ===== Ghost button for Search (GIỮ UI cũ) ===== */
 .btn-search {
   border-radius: 999px !important;
   border-color: #d1d5db !important;
@@ -34,13 +37,13 @@
   padding-inline: 14px !important;
   font-size: 13px;
   font-weight: 500;
+  transition: all 0.2s;
 }
 
 .btn-search .anticon {
   margin-right: 4px;
 }
 
-/* Hover: viền xanh, nền rất nhạt */
 .btn-search:hover,
 .btn-search:focus {
   border-color: var(--aices-green) !important;
@@ -48,39 +51,30 @@
   color: var(--aices-green) !important;
 }
 
-
-/* Nút Reset kiểu text nhẹ */
 /* ===== RESET BUTTON — Ghost Icon + Strong Text ===== */
-
 .accounts-reset-btn {
   display: flex;
   align-items: center;
   gap: 6px;
-
   height: 36px;
   padding: 0 14px;
   border-radius: 999px;
-
-  background-color: rgba(0, 0, 0, 0.03); /* icon ghost */
+  background-color: rgba(0, 0, 0, 0.03);
   border: 1px solid transparent;
-
-  color: #374151 !important;  /* text đậm */
+  color: #374151 !important;
   font-weight: 500;
   font-size: 13px;
-
   transition: all 0.18s ease;
 }
 
-/* Icon reset màu xám */
 .accounts-reset-btn .anticon {
   color: #6b7280;
   transition: color 0.18s ease;
 }
 
-/* Hover: unify vào tone AICES */
 .accounts-reset-btn:hover,
 .accounts-reset-btn:focus {
-  background-color: #f3f7f5 !important; /* xanh lá nhạt */
+  background-color: #f3f7f5 !important;
   border-color: var(--aices-green) !important;
   color: var(--aices-green) !important;
 }
@@ -89,19 +83,16 @@
   color: var(--aices-green) !important;
 }
 
-/* ===== Fix yellow loading spinner on Reset button (v2) ===== */
-
-/* Khi nút Reset đang loading: */
+/* Fix yellow loading spinner on Reset button */
 .accounts-reset-btn.ant-btn-loading .ant-btn-loading-icon,
 .accounts-reset-btn.ant-btn-loading .ant-btn-loading-icon .anticon,
 .accounts-reset-btn.ant-btn-loading .ant-btn-loading-icon .anticon-loading,
 .accounts-reset-btn.ant-btn-loading .ant-btn-loading-icon .anticon svg {
-  color: #6b7280 !important;   /* xám trung tính */
+  color: #6b7280 !important;
   fill: #6b7280 !important;
   stroke: #6b7280 !important;
 }
 
-/* Hover trong lúc loading: dùng tone xanh AICES */
 .accounts-reset-btn.ant-btn-loading:hover .ant-btn-loading-icon,
 .accounts-reset-btn.ant-btn-loading:hover .ant-btn-loading-icon .anticon,
 .accounts-reset-btn.ant-btn-loading:hover .ant-btn-loading-icon .anticon-loading,
@@ -110,9 +101,6 @@
   fill: var(--aices-green) !important;
   stroke: var(--aices-green) !important;
 }
-
-
-
 
 /* CTA xanh lá AICES */
 .accounts-new-btn {
@@ -135,7 +123,37 @@
   box-shadow: none !important;
 }
 
-/* ===== System - Accounts Table Wrapper ===== */
+/* Accounts search bar */
+.accounts-toolbar-left .ant-input-affix-wrapper {
+  border-radius: 999px !important;
+  background-color: #f5f7f6 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  padding-inline: 12px !important;
+  height: 36px !important;
+}
+
+.accounts-toolbar-left .ant-input-affix-wrapper .anticon {
+  color: #9ca3af;
+}
+
+.accounts-toolbar-left .ant-input {
+  background-color: transparent !important;
+}
+
+.accounts-toolbar-left .ant-input::placeholder {
+  color: #9ca3af;
+}
+
+.accounts-toolbar-left .ant-input-affix-wrapper:hover,
+.accounts-toolbar-left .ant-input-affix-wrapper-focused {
+  background-color: #ffffff !important;
+  border-color: var(--aices-green) !important;
+}
+
+/* =========================
+   ACCOUNTS TABLE
+   ========================= */
 
 .accounts-table-wrapper {
   border-radius: 16px;
@@ -145,8 +163,6 @@
   margin-top: 12px;
 }
 
-/* Header table */
-
 .accounts-table .ant-table-thead > tr > th {
   background-color: #fafafa !important;
   font-weight: 600 !important;
@@ -155,18 +171,14 @@
   border-bottom: 1px solid #e5e7eb !important;
 }
 
-/* Body table */
-
 .accounts-table .ant-table-tbody > tr > td {
   padding: 10px 16px !important;
   border-bottom: 1px solid #f3f4f6;
 }
 
 .accounts-table .ant-table-tbody > tr:hover > td {
-  background-color: #f3f7f5 !important; /* xanh lá rất nhạt */
+  background-color: #f3f7f5 !important;
 }
-
-/* ID column căn giữa */
 
 .accounts-table .ant-table-tbody td:first-child,
 .accounts-table .ant-table-thead th:first-child {
@@ -174,158 +186,7 @@
   width: 60px !important;
 }
 
-/* ===== Role tags (System > HR hierarchy) ===== */
-
-.role-tag {
-  border-radius: 999px;
-  padding: 3px 12px;
-  font-size: 12px;
-  font-weight: 600;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 🔥 SYSTEM ROLES — nổi bật hơn */
-.role-tag-system {
-  background: #e5f3ea;                   /* xanh lá soft */
-  color: #1f4f31;                         /* chữ xanh đậm */
-  border: 1px solid #28623a;              /* viền xanh primary */
-  box-shadow: 0 0 4px rgba(40, 98, 58, 0.1); /* hiệu ứng nhẹ */
-}
-
-/* 💙 HR ROLES — phụ, nhẹ hơn */
-.role-tag-hr {
-  background: #f5f9ff;                    /* xanh dương pastel */
-  color: #3b82f6;                          /* xanh dương rõ */
-  border: 1px solid #bfdbfe;               /* viền nhạt */
-}
-/* Icon trong role tag (cho System_Admin) */
-.role-tag-icon {
-  font-size: 12px;
-  margin-right: 4px;
-}
-
-/* Super admin đặc biệt hơn chút */
-.role-tag-super-admin {
-  background: #ddeee3; /* đậm hơn system thường xíu */
-  border-color: #1f4f31;
-}
-
-/* Hover nhẹ cho role tags */
-.role-tag-system:hover {
-  background: #d7ecdf;
-  border-color: var(--aices-green);
-  box-shadow: 0 0 0 1px rgba(40, 98, 58, 0.1);
-  cursor: default;
-}
-
-.role-tag-hr:hover {
-  background: #e7efff;
-  border-color: #93c5fd;
-  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.08);
-  cursor: default;
-}
-
-/* Role tag tự nhỏ lại trên màn nhỏ */
-@media (max-width: 992px) {
-  .role-tag {
-    padding: 2px 8px;
-    font-size: 11px;
-  }
-}
-
-/* ===== Status tags (dot + text, nhìn “status” hơn) ===== */
-
-.status-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border-radius: 999px;
-  padding: 2px 10px;
-  font-size: 12px;
-  font-weight: 500;
-  border: none;
-  line-height: 1;
-}
-
-/* Chấm trạng thái */
-.status-tag::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background-color: #d1d5db; /* default grey, sẽ bị override bên dưới */
-}
-
-/* Verified – xanh lá AICES */
-.status-tag-verified {
-  background-color: var(--aices-green-soft);
-  color: var(--aices-green-dark);
-}
-
-.status-tag-verified::before {
-  background-color: #22c55e; /* dot xanh tươi cho rõ */
-}
-
-/* Unverified – vàng */
-.status-tag-unverified {
-  background-color: #fff8c5;
-  color: #684f17;
-}
-
-.status-tag-unverified::before {
-  background-color: #eab308;
-}
-
-/* Locked – đỏ */
-.status-tag-locked {
-  background-color: #fee2e2;
-  color: #b91c1c;
-}
-
-.status-tag-locked::before {
-  background-color: #ef4444;
-}
-
-
-/* ===== User cell (avatar + name + email) ===== */
-/* Avatar ring AICES */
-.accounts-user-avatar {
-  flex-shrink: 0;
-  border: 2px solid #e5f3ea;          /* viền xanh nhạt */
-  background-color: #f3f4f6;          /* nền xám nhạt khi không có ảnh */
-  color: #111827;
-  font-size: 13px;
-}
-
-
-.accounts-user-cell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  min-width: 240px;
-}
-
-.accounts-user-avatar {
-  flex-shrink: 0;
-}
-
-.accounts-user-text .name {
-  font-weight: 500;
-  color: #111827;
-  font-size: 14px;
-}
-
-.accounts-user-text .email {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-
-/* ===== ACTION ICON BUTTONS — toned down ===== */
-
+/* Action icon buttons */
 .accounts-table .ant-btn {
   border-radius: 50% !important;
   width: 28px;
@@ -333,7 +194,6 @@
   padding: 0;
 }
 
-/* Icon button mặc định: xám nhẹ, trong suốt */
 .accounts-table .ant-btn.ant-btn-default {
   border: none !important;
   background: transparent !important;
@@ -341,25 +201,33 @@
   box-shadow: none !important;
 }
 
-/* Hover: highlight nhẹ, không quá gắt */
 .accounts-table .ant-btn.ant-btn-default:hover {
   background-color: #f3f4f6 !important;
   color: #111827 !important;
 }
 
-/* Delete: lúc bình thường KHÔNG đỏ */
 .accounts-table .ant-btn-dangerous.ant-btn-default {
   color: #9ca3af !important;
 }
 
-/* Delete hover: mới chuyển đỏ cảnh báo */
 .accounts-table .ant-btn-dangerous.ant-btn-default:hover {
   background-color: #fef2f2 !important;
   color: #b91c1c !important;
 }
 
-/* ===== Pagination ===== */
+/* Center align for Actions column */
+.accounts-table .ant-table-thead th:last-child,
+.accounts-table .ant-table-tbody td:last-child {
+  text-align: center !important;
+}
 
+.accounts-table .ant-table-tbody td:last-child .ant-space {
+  gap: 6px !important;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Pagination */
 .accounts-table-wrapper .ant-pagination-item-active {
   border-color: var(--aices-green) !important;
 }
@@ -375,75 +243,167 @@
 .accounts-table-wrapper .ant-pagination-item:hover a {
   color: var(--aices-green) !important;
 }
-/* ===== Center align for Actions column ===== */
 
-.accounts-table .ant-table-thead th:last-child,
-.accounts-table .ant-table-tbody td:last-child {
-  text-align: center !important;
-}
-
-
-/* Make action icons tighter & visually aligned */
-.accounts-table .ant-table-tbody td:last-child .ant-space {
-  gap: 6px !important;     /* icon gần nhau nhưng không dính */
-  justify-content: center; /* bảo đảm nằm giữa theo chiều ngang */
-  align-items: center;     /* icon cùng baseline */
-}
-/* ===== Accounts search bar ===== */
-
-/* Ô search: pill, nền xám rất nhẹ */
-.accounts-toolbar-left .ant-input-affix-wrapper {
-  border-radius: 999px !important;
-  background-color: #f5f7f6 !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-  padding-inline: 12px !important;
-  height: 36px !important;
-}
-
-/* Icon kính lúp xám nhẹ */
-.accounts-toolbar-left .ant-input-affix-wrapper .anticon {
-  color: #9ca3af;
-}
-
-/* Text + placeholder */
-.accounts-toolbar-left .ant-input {
-  background-color: transparent !important;
-}
-
-.accounts-toolbar-left .ant-input::placeholder {
-  color: #9ca3af;
-}
-
-/* Hover + focus: border xanh, nền trắng */
-.accounts-toolbar-left .ant-input-affix-wrapper:hover,
-.accounts-toolbar-left .ant-input-affix-wrapper-focused {
-  background-color: #ffffff !important;
-  border-color: var(--aices-green) !important;
-}
-
-/* ===== Force row hover/selected to use AICES green (no yellow) ===== */
-
+/* Force row hover/selected to use AICES green (no yellow) */
 .accounts-table .ant-table-tbody > tr.ant-table-row:hover > td,
 .accounts-table .ant-table-tbody > tr.ant-table-row-selected > td,
 .accounts-table .ant-table-tbody > tr.ant-table-row-selected:hover > td {
-  background-color: #f3f7f5 !important; /* xanh lá rất nhạt */
+  background-color: #f3f7f5 !important;
 }
-/* ===== System Modal (Create / Edit user) ===== */
-/* ===== User Detail modal – enhanced ===== */
+
+/* =========================
+   ROLE TAGS
+   ========================= */
+
+.role-tag {
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.role-tag-system {
+  background: #e5f3ea;
+  color: #1f4f31;
+  border: 1px solid #28623a;
+  box-shadow: 0 0 4px rgba(40, 98, 58, 0.1);
+}
+
+.role-tag-hr {
+  background: #f5f9ff;
+  color: #3b82f6;
+  border: 1px solid #bfdbfe;
+}
+
+.role-tag-icon {
+  font-size: 12px;
+  margin-right: 4px;
+}
+
+.role-tag-super-admin {
+  background: #ddeee3;
+  border-color: #1f4f31;
+}
+
+.role-tag-system:hover {
+  background: #d7ecdf;
+  border-color: var(--aices-green);
+  box-shadow: 0 0 0 1px rgba(40, 98, 58, 0.1);
+  cursor: default;
+}
+
+.role-tag-hr:hover {
+  background: #e7efff;
+  border-color: #93c5fd;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.08);
+  cursor: default;
+}
+
+@media (max-width: 992px) {
+  .role-tag {
+    padding: 2px 8px;
+    font-size: 11px;
+  }
+}
+
+/* =========================
+   STATUS TAGS
+   ========================= */
+
+.status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 500;
+  border: none;
+  line-height: 1;
+}
+
+.status-tag::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background-color: #d1d5db;
+}
+
+.status-tag-verified {
+  background-color: var(--aices-green-soft);
+  color: var(--aices-green-dark);
+}
+
+.status-tag-verified::before {
+  background-color: #22c55e;
+}
+
+.status-tag-unverified {
+  background-color: #fff8c5;
+  color: #684f17;
+}
+
+.status-tag-unverified::before {
+  background-color: #eab308;
+}
+
+.status-tag-locked {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.status-tag-locked::before {
+  background-color: #ef4444;
+}
+
+/* =========================
+   USER CELL
+   ========================= */
+
+.accounts-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 240px;
+}
+
+.accounts-user-avatar {
+  flex-shrink: 0;
+  border: 2px solid #e5f3ea;
+  background-color: #f3f4f6;
+  color: #111827;
+  font-size: 13px;
+}
+
+.accounts-user-text .name {
+  font-weight: 500;
+  color: #111827;
+  font-size: 14px;
+}
+
+.accounts-user-text .email {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* =========================
+   SYSTEM MODAL + USER DETAIL
+   ========================= */
 
 .user-detail-modal .ant-modal-content {
   border-radius: 20px;
 }
 
-/* wrapper chung */
 .user-detail-wrapper {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
-
-/* ---------- HEADER ---------- */
 
 .user-detail-header {
   display: flex;
@@ -504,8 +464,6 @@
   margin-top: 4px;
 }
 
-/* ---------- SECTION & CARDS ---------- */
-
 .user-detail-section {
   margin-top: 4px;
 }
@@ -518,7 +476,6 @@
   border: 1px solid #e5e7eb;
 }
 
-/* Grid 2 cột */
 .user-detail-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -550,7 +507,6 @@
   color: #111827;
 }
 
-/* Provider pill */
 .user-detail-provider-tag {
   border-radius: 999px;
   background-color: #e5f3ea;
@@ -560,29 +516,26 @@
   padding-inline: 10px;
 }
 
-/* Responsive: mobile 1 cột */
 @media (max-width: 768px) {
   .user-detail-header {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .user-detail-grid {
     grid-template-columns: 1fr;
   }
 }
 
-
-
+/* System modal (GIỮ style cuối cùng) */
 .system-modal .ant-modal-content {
-  border-radius: 18px;
+  border-radius: 16px;
   padding: 20px 24px 18px;
   box-shadow: 0 18px 45px rgba(15, 32, 24, 0.28);
 }
 
 .system-modal .ant-modal-header {
   border-bottom: none;
-  padding-bottom: 8px;
+  padding-bottom: 4px;
 }
 
 .system-modal .ant-modal-title {
@@ -595,13 +548,11 @@
   padding-top: 8px;
 }
 
-/* Label form */
 .system-modal .ant-form-item-label > label {
   font-weight: 500;
   color: #374151;
 }
 
-/* Input / Select style */
 .system-modal .ant-input,
 .system-modal .ant-input-password,
 .system-modal .ant-select-selector {
@@ -624,7 +575,6 @@
   box-shadow: 0 0 0 1px rgba(40, 98, 58, 0.08);
 }
 
-/* Footer buttons */
 .system-modal-footer {
   margin-top: 8px;
   display: flex;
@@ -640,7 +590,6 @@
   font-weight: 500;
 }
 
-/* Cancel: grey ghost */
 .system-modal-btn-cancel {
   background-color: #f3f4f6 !important;
   color: #374151 !important;
@@ -653,7 +602,6 @@
   color: #111827 !important;
 }
 
-/* Create: AICES green */
 .system-modal-btn-primary {
   background-color: var(--aices-green) !important;
   border-color: var(--aices-green) !important;
@@ -667,165 +615,200 @@
   color: #ffffff !important;
   box-shadow: none !important;
 }
-/* ===== System modal layout grid ===== */
 
-.system-modal-section-title {
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: #6b7280;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.system-modal-grid {
-  display: grid;
-  grid-template-columns: 1fr;   /* mobile: 1 cột */
-  gap: 12px 16px;
-}
-
-/* mỗi Form.Item trong grid */
-.system-modal-grid-item {
-  margin-bottom: 12px;
-}
-
-/* Item full chiều ngang (password, role) */
-.system-modal-grid-item.full-row {
-  grid-column: 1 / -1;
-}
-
-/* từ tablet trở lên: 2 cột */
-@media (min-width: 768px) {
-  .system-modal-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-/* ===== System modal – dùng chung cho Create / Edit user ===== */
-
-.system-modal .ant-modal-content {
-  border-radius: 16px;
-}
-
-.system-modal .ant-modal-header {
-  border-bottom: none;
-  padding-bottom: 4px;
-}
-
-.system-modal .ant-modal-title {
-  font-weight: 600;
-  font-size: 16px;
-}
-
-/* Sub title: ACCOUNT INFORMATION */
+/* modal grid */
 .system-modal-section-title {
   margin-bottom: 12px;
   font-size: 11px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: #6b7280;
+  font-weight: 600;
 }
 
-/* 2 cột: Full name – Role */
-.system-modal-grid-2 {
+.system-modal-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  grid-template-columns: 1fr;
+  gap: 12px 16px;
 }
 
-@media (max-width: 768px) {
-  .system-modal-grid-2 {
-    grid-template-columns: 1fr; /* mobile về 1 cột */
+.system-modal-grid-item {
+  margin-bottom: 12px;
+}
+
+.system-modal-grid-item.full-row {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 768px) {
+  .system-modal-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-/* Footer buttons: giống New User (xanh AICES) */
-.system-modal .ant-modal-footer {
-  border-top: none;
-  padding-top: 8px;
-}
+/* =========================
+   SELECT DROPDOWN OVERRIDES
+   ========================= */
 
-.system-modal .ant-btn-default {
-  border-radius: 999px;
-}
-
-.system-modal .ant-btn-primary {
-  border-radius: 999px;
-  background-color: var(--aices-green) !important;
-  border-color: var(--aices-green) !important;
-}
-
-.system-modal .ant-btn-primary:hover,
-.system-modal .ant-btn-primary:focus {
-  background-color: var(--aices-green-dark) !important;
-  border-color: var(--aices-green-dark) !important;
-}
-
-
-/* ========================================
-   System role dropdown – AICES style only
-   (dùng với dropdownClassName="system-role-dropdown")
-   ======================================== */
-
-/* Bo nhẹ item trong dropdown */
+/* Scoped dropdown (nếu bạn set dropdownClassName="system-role-dropdown") */
 .system-role-dropdown .ant-select-item-option {
   border-radius: 6px;
 }
 
 .system-role-dropdown
   .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-  background-color: #ffffff !important;   /* ⬅ trắng, không còn nền xanh */
-  color: #111827 !important;              /* chữ xám đậm nhẹ */
-  font-weight: 500 !important;            /* đừng bold quá */
-}
-
-
-
-
-/* Hover lên option (kể cả option selected) */
-.system-role-dropdown
-  .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
-  background-color: #f3f7f5 !important;                 /* xanh siêu nhạt */
-  color: var(--aices-green-dark) !important;
-}
-
-/* Icon check (dấu tick) của option selected */
-.system-role-dropdown
-  .ant-select-item-option-selected
-  .ant-select-item-option-state {
-  color: var(--aices-green-dark) !important;
-}
-/* Option đang được chọn trong mọi Select của AntD */
-.ant-select-dropdown
-  .ant-select-item-option-selected:not(.ant-select-item-option-disabled),
-.ant-select-dropdown
-  .ant-select-item-option-selected.ant-select-item-option-active {
-  background-color: #ffffff !important;   /* ⬅ trắng sạch */
+  background-color: #ffffff !important;
   color: #111827 !important;
   font-weight: 500 !important;
 }
 
-
-/* Khi hover lên option (kể cả option đang selected) */
-.ant-select-dropdown
+.system-role-dropdown
   .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
-  background-color: #f3f7f5 !important; /* xanh siêu nhạt */
+  background-color: #f3f7f5 !important;
   color: var(--aices-green-dark) !important;
 }
 
-/* Icon check bên phải option selected */
+.system-role-dropdown
+  .ant-select-item-option-selected
+  .ant-select-item-option-state {
+  color: var(--aices-green-dark) !important;
+}
+
+/* Global: tắt nền xanh selected trong mọi Select */
+.ant-select-dropdown
+  .ant-select-item-option-selected:not(.ant-select-item-option-disabled),
+.ant-select-dropdown
+  .ant-select-item-option-selected.ant-select-item-option-active {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  font-weight: 500 !important;
+}
+
+.ant-select-dropdown
+  .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
+  background-color: #f3f7f5 !important;
+  color: var(--aices-green-dark) !important;
+}
+
 .ant-select-dropdown
   .ant-select-item-option-selected
   .ant-select-item-option-state {
   color: var(--aices-green-dark) !important;
 }
-.company-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
-  object-fit: cover;
-  background: #f3f4f6;
+
+/* =========================
+   SEARCH INPUT WRAPPER (GENERIC)
+   ========================= */
+
+.search-input-wrapper {
+  position: relative;
 }
-/* Company logo style */
+
+.search-input {
+  width: 260px;
+  height: 36px !important;
+  border-radius: 999px !important;
+  padding-left: 32px !important;
+  padding-right: 12px !important;
+  text-align: left !important;
+  box-sizing: border-box;
+}
+
+.search-input-icon {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  color: #9ca3af;
+  font-size: 14px;
+  pointer-events: none;
+}
+
+/* ✅ Chỉ button đặt trong search-input-wrapper mới dùng style “nền trắng” (không đè .btn-search ghost) */
+.search-input-wrapper .btn-search {
+  border-radius: 30px !important;
+  padding: 0 16px !important;
+  height: 36px !important;
+  border: 1px solid #e8e8e8 !important;
+  background: #fff !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.search-input-wrapper .btn-search:hover {
+  border-color: #0a5c36 !important;
+  color: #0a5c36 !important;
+}
+
+/* =========================
+   COMPANY: COMMON UI
+   ========================= */
+
+.aices-card {
+  padding: 18px 24px;
+}
+
+.company-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px; /* ✅ giữ 1 giá trị */
+  flex-wrap: wrap;
+}
+
+.company-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.company-toolbar-left .ant-input-affix-wrapper {
+  border-radius: 999px !important;
+  background-color: #f5f7f6 !important;
+  border-color: transparent !important;
+  height: 36px !important;
+  padding-inline: 12px !important;
+}
+
+.company-add-btn {
+  border-radius: 999px !important;
+  padding: 0 18px !important;
+  height: 36px !important;
+  background-color: var(--aices-green) !important;
+  border-color: var(--aices-green) !important;
+  color: white !important;
+}
+
+.company-add-btn:hover {
+  background-color: var(--aices-green-dark) !important;
+  border-color: var(--aices-green-dark) !important;
+  color: white !important;
+}
+
+.company-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 14px;
+  flex-wrap: nowrap;
+}
+
+.company-left {
+  flex: 1;
+}
+
+.company-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+/* Company logo */
 .company-logo {
   width: 32px;
   height: 32px;
@@ -834,19 +817,10 @@
   background: #f3f4f6;
 }
 
-/* Fix small icon buttons */
-.accounts-table .ant-btn {
-  width: 28px;
-  height: 28px;
-  border-radius: 50% !important;
-  padding: 0;
-}
-/* apply same pill style as accounts search bar */
-.toolbar-search-input,
-.toolbar-search-input .ant-input-affix-wrapper {
-  border-radius: 999px !important;
-}
-/* GRID WRAPPER */
+/* =========================
+   COMPANY MODAL (GRID + DOCS)
+   ========================= */
+
 .company-modal-grid {
   display: grid;
   grid-template-columns: 200px 1fr;
@@ -859,7 +833,6 @@
   }
 }
 
-/* LOGO */
 .company-logo-item {
   display: flex;
   flex-direction: column;
@@ -889,7 +862,6 @@
   font-size: 12px;
 }
 
-/* COMPANY INFO GRID */
 .company-info-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -902,7 +874,6 @@
   }
 }
 
-/* DOCUMENTS WRAPPER */
 .company-documents-wrapper {
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -924,7 +895,6 @@
   margin-bottom: 10px;
 }
 
-/* icons */
 .company-doc-icon {
   font-size: 18px;
   cursor: pointer;
@@ -943,13 +913,11 @@
   cursor: not-allowed;
 }
 
-/* document type */
 .company-doc-type {
   flex: 1;
   margin-bottom: 0 !important;
 }
 
-/* file input */
 .company-file-input {
   width: 100%;
   height: 40px;
@@ -960,7 +928,6 @@
   cursor: pointer;
 }
 
-/* note */
 .company-doc-note {
   font-size: 12px;
   color: #6b7280;
@@ -974,8 +941,8 @@
   padding-left: 16px;
   margin: 4px 0 0 0;
 }
-/* Modal container (tái sử dụng system-modal đã có) */
 
+/* Reject modal */
 .system-modal .reject-modal-body {
   margin-top: 8px;
   display: flex;
@@ -1000,50 +967,10 @@
   border-color: var(--aices-green) !important;
   box-shadow: 0 0 0 2px rgba(40, 98, 58, 0.15) !important;
 }
-/* ============================
-   COMPANY TOOLBAR (System)
-   ============================ */
 
-.company-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap; /* responsive */
-}
-
-.company-toolbar-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-/* Search input */
-.company-toolbar-left .ant-input-affix-wrapper {
-  border-radius: 999px !important;
-  background-color: #f5f7f6 !important;
-  border-color: transparent !important;
-  height: 36px !important;
-  padding-inline: 12px !important;
-}
-
-/* Add company button */
-.company-add-btn {
-  border-radius: 999px !important;
-  padding: 0 18px !important;
-  height: 36px !important;
-  background-color: var(--aices-green) !important;
-  border-color: var(--aices-green) !important;
-  color: white !important;
-}
-
-.company-add-btn:hover {
-  background-color: var(--aices-green-dark) !important;
-  border-color: var(--aices-green-dark) !important;
-  color: white !important;
-}
-/* ===== Company Overview – AICES CRM style ===== */
+/* =========================
+   COMPANY OVERVIEW (CRM)
+   ========================= */
 
 .company-overview-layout {
   display: flex;
@@ -1051,7 +978,6 @@
   gap: 16px;
 }
 
-/* Header strip: logo + name + meta (gradient giống CRM) */
 .company-overview-header {
   display: flex;
   justify-content: space-between;
@@ -1097,7 +1023,6 @@
   gap: 6px;
 }
 
-/* meta on the right */
 .company-overview-header-meta {
   display: flex;
   flex-wrap: wrap;
@@ -1123,7 +1048,6 @@
   color: #111827;
 }
 
-/* Grid body: 2 cards */
 .company-overview-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
@@ -1146,7 +1070,6 @@
   margin-bottom: 10px;
 }
 
-/* fields (giống form CRM) */
 .company-overview-fields {
   display: grid;
   grid-template-columns: 1fr;
@@ -1184,7 +1107,6 @@
   padding: 8px 4px;
 }
 
-/* documents list */
 .company-doc-list {
   list-style: none;
   padding-left: 0;
@@ -1206,118 +1128,23 @@
   font-size: 12px;
 }
 
-/* small text */
 .text-muted {
   color: #9ca3af;
 }
 
-/* responsive: 1 cột trên mobile */
 @media (max-width: 992px) {
   .company-overview-header {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .company-overview-grid {
     grid-template-columns: 1fr;
   }
 }
-.search-input-wrapper {
-  position: relative;
-}
 
-.search-input {
-  padding-left: 32px !important;
-  height: 36px;
-  border-radius: 30px !important;
-}
-
-.search-input-icon {
-  position: absolute;
-  top: 50%;
-  left: 10px;
-  transform: translateY(-50%);
-  color: #888;
-  font-size: 14px;
-}
-
-.btn-search {
-  border-radius: 30px !important;
-  padding: 0 16px !important;
-  height: 36px !important;
-  border: 1px solid #e8e8e8 !important;
-  background: #fff !important;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  transition: all 0.2s;
-}
-
-.btn-search:hover {
-  border-color: #0a5c36 !important;
-  color: #0a5c36 !important;
-}
-/* Wrapper giữ nguyên */
-.search-input-wrapper {
-  position: relative;
-}
-
-/* Input bên trong */
-.search-input {
-  width: 260px;                    /* giống ô search company */
-  height: 36px !important;
-  border-radius: 999px !important;
-  padding-left: 32px !important;   /* chừa chỗ cho icon */
-  padding-right: 12px !important;
-  text-align: left !important;     /* ép căn trái */
-  box-sizing: border-box;
-}
-
-/* Icon kính lúp bên trái */
-.search-input-icon {
-  position: absolute;
-  top: 50%;
-  left: 10px;
-  transform: translateY(-50%);
-  color: #9ca3af;
-  font-size: 14px;
-  pointer-events: none;
-}
- .accounts-toolbar {
-  margin-bottom: 14px;
-}
-.aices-card {
-  padding: 18px 24px;
-}
-.company-toolbar {
-  margin-bottom: 14px;
-}
-.company-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 14px;
-  flex-wrap: nowrap;           /* 🔥 quan trọng */
-}
-
-.company-left {
-  flex: 1;                     /* search auto chiếm phần rộng */
-}
-
-.company-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;         /* giữ nút không bị xuống dòng */
-}
-.company-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  white-space: nowrap;
-}
-/* ===== COMPANY STATUS TAG ===== */
+/* =========================
+   COMPANY STATUS TAG
+   ========================= */
 
 .company-status {
   display: inline-flex;
@@ -1329,7 +1156,6 @@
   font-weight: 500;
 }
 
-/* Dot */
 .company-status::before {
   content: "";
   width: 8px;
@@ -1337,109 +1163,129 @@
   border-radius: 50%;
 }
 
-/* Approved → Xanh lá giống Users */
 .company-status-approved {
   background: var(--aices-green-soft);
   color: var(--aices-green-dark);
 }
 .company-status-approved::before {
-  background:#22c55e;
+  background: #22c55e;
 }
 
-/* Pending → Vàng giống Unverified */
 .company-status-pending {
-  background:#fff8c5;
-  color:#805b12;
+  background: #fff8c5;
+  color: #805b12;
 }
 .company-status-pending::before {
-  background:#eab308;
+  background: #eab308;
 }
 
-/* Rejected → Đỏ */
 .company-status-rejected {
-  background:#fee2e2;
-  color:#b91c1c;
+  background: #fee2e2;
+  color: #b91c1c;
 }
 .company-status-rejected::before {
-  background:#ef4444;
+  background: #ef4444;
 }
 
-/* Suspended / Canceled → Xám */
 .company-status-suspended,
 .company-status-canceled {
-  background:#e5e7eb;
-  color:#374151;
+  background: #e5e7eb;
+  color: #374151;
 }
 .company-status-suspended::before,
 .company-status-canceled::before {
-  background:#6b7280;
-}
-/* ==== HARD OVERRIDE: tắt nền xanh selected trong mọi Select ==== */
-
-/* Item đang được chọn (kể cả đang active) */
-.ant-select-dropdown
-  .ant-select-item-option-selected:not(.ant-select-item-option-disabled),
-.ant-select-dropdown
-  .ant-select-item-option-selected.ant-select-item-option-active {
-  background-color: #ffffff !important;   /* nền trắng sạch */
-  color: #111827 !important;              /* chữ xám đậm nhẹ */
-  font-weight: 500 !important;            /* không in đậm quá */
+  background: #6b7280;
 }
 
-/* Hover lên option (kể cả option đang selected) */
-.ant-select-dropdown
-  .ant-select-item-option-active:not(.ant-select-item-option-disabled) {
-  background-color: #f3f7f5 !important;   /* xanh siêu nhạt */
-  color: var(--aices-green-dark) !important;
-}
+/* =========================
+   MISC
+   ========================= */
+
 .action-btn.enabled {
   opacity: 1;
 }
 
 .action-btn.disabled {
-  opacity: 0.35; /* mờ icon */
+  opacity: 0.35;
   cursor: not-allowed !important;
 }
-.blog-card-pagination{
-  margin-top: 14px;      /* cách xuống khỏi cards */
+
+.blog-card-pagination {
+  margin-top: 14px;
   padding-top: 10px;
-  border-top: 1px solid #eef2f7; /* optional: ngăn cách nhẹ */
+  border-top: 1px solid #eef2f7;
   display: flex;
-  justify-content: flex-start;   /* hoặc center nếu bạn thích */
+  justify-content: flex-start;
 }
-/* ===== BLOG CARD ACTION ICONS — copy style from accounts-table ===== */
+
+/* Blog card action icons */
 .aices-blog-card .ant-card-actions {
   background: #fff;
 }
-
 .aices-blog-card .ant-card-actions > li {
   margin: 0 !important;
   padding: 10px 0 !important;
 }
-
 .aices-blog-card .ant-card-actions > li > span {
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .aices-blog-card .ant-card-actions .ant-btn {
   border-radius: 50% !important;
   width: 28px;
   height: 28px;
   padding: 0;
 }
-
-/* neutral gray like banner table */
 .aices-blog-card .ant-card-actions .ant-btn.ant-btn-default {
   border: none !important;
   background: transparent !important;
   color: #9ca3af !important;
   box-shadow: none !important;
 }
-
 .aices-blog-card .ant-card-actions .ant-btn.ant-btn-default:hover {
   background-color: #f3f4f6 !important;
   color: #111827 !important;
 }
 
+/* Sidebar scroll (System Admin) */
+.aices-sider .aices-sider-scroll {
+  scrollbar-gutter: stable;
+}
+
+/* Webkit */
+.aices-sider .aices-sider-scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.aices-sider .aices-sider-scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.06);
+}
+.aices-sider .aices-sider-scroll::-webkit-scrollbar-thumb {
+  background: rgba(156, 197, 161, 0.35);
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+}
+.aices-sider .aices-sider-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(156, 197, 161, 0.55);
+}
+
+/* Firefox */
+.aices-sider .aices-sider-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(156, 197, 161, 0.45) rgba(255, 255, 255, 0.06);
+}
+
+/* Make Sider children a flex column & full height */
+.aices-sider .ant-layout-sider-children {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.aices-sider .ant-layout-sider-children .aices-sider-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}

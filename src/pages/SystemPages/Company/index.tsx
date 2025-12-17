@@ -1,15 +1,14 @@
 // src/pages/SystemPages/Companies/CompanyList.tsx
 
 import { useEffect, useState } from "react";
-import { Card, Form, Button, Select } from "antd"; // ⭐ thêm Button
-import { PlusOutlined } from "@ant-design/icons"; // ⭐ thêm icon
+import { Card, Select } from "antd";
 
 import type { TablePaginationConfig } from "antd/es/table";
 import { useNavigate } from "react-router-dom";
 
 import { companyService } from "../../../services/companyService";
 import type { Company } from "../../../types/company.types";
-import type { UploadFile } from "antd/es/upload/interface";
+
 import {
   toastError,
   toastSuccess,
@@ -20,7 +19,7 @@ import { useAppSelector } from "../../../hooks/redux";
 import CompanySearchBar from "./components/CompanySearchBar";
 import CompanyTable from "./components/CompanyTable";
 import RejectCompanyModal from "./components/RejectCompanyModal";
-import CreateCompanyModal from "./components/CreateCompanyModal";
+
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -44,8 +43,6 @@ export default function CompanyList() {
   );
   const [rejectionReason, setRejectionReason] = useState("");
 
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [form] = Form.useForm();
 
   const nav = useNavigate();
 
@@ -179,98 +176,9 @@ export default function CompanyList() {
     setRejectionReason("");
   };
 
-  // ================== CREATE ==================
-  const handleCreate = async () => {
-    try {
-      const values = await form.validateFields();
-      setLoading(true);
+  
 
-      const formData = new FormData();
-
-      formData.append("name", values.name || "");
-      formData.append("description", values.description || "");
-      formData.append("address", values.address || "");
-      formData.append("website", values.websiteUrl || "");
-      formData.append("taxCode", values.taxCode || "");
-
-      const logoList = values.logoFile as UploadFile[] | undefined;
-      if (logoList?.length) {
-        const logoFile = logoList[0].originFileObj as File;
-        if (logoFile) {
-          formData.append("logoFile", logoFile, logoFile.name);
-        }
-      }
-
-      const documents = (values.documents || []) as {
-        type?: string;
-        file?: File;
-      }[];
-
-      const validDocs = documents.filter(
-        (d) => d?.type && d?.file instanceof File
-      );
-
-      if (validDocs.length === 0) {
-        toastWarning("Please add at least one document with type and file");
-        setLoading(false);
-        return;
-      }
-
-      validDocs.forEach((doc, idx) => {
-        formData.append(`documentTypes[${idx}]`, doc.type!);
-        formData.append("documentFiles", doc.file!);
-      });
-
-      const res = await companyService.createAdminForm(formData);
-
-      if (res.status === "Success") {
-        toastSuccess("Company created successfully");
-        setIsCreateOpen(false);
-        form.resetFields();
-        await fetchData();
-      } else {
-        toastError("Failed to create company", res?.message);
-      }
-    } catch (err: any) {
-      if (err?.errorFields) return;
-      toastError("Failed to create company");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // ================== DELETE ==================
-  const handleDeleteCompany = async (companyId: number) => {
-    setLoading(true);
-    try {
-      const res = await companyService.deleteCompany(companyId);
-
-      if (res.status === "Success") {
-        toastSuccess("Company deleted successfully");
-
-        setAllCompanies((prev) => {
-          const updated = prev.filter((c) => c.companyId !== companyId);
-
-          const page = pagination.current || 1;
-          const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
-
-          const source = statusFilter
-            ? updated.filter((c) => (c.companyStatus || "") === statusFilter)
-            : updated;
-
-          applyFilterAndPaging(source, keyword, page, pageSize);
-
-          return updated;
-        });
-      } else {
-        toastError("Failed to delete company", res?.message);
-      }
-    } catch {
-      toastError("Failed to delete company");
-    } finally {
-      setLoading(false);
-    }
-  };
+  
 
   const handleApprove = (companyId: number) =>
     updateCompanyStatus(companyId, "Approved");
@@ -296,10 +204,6 @@ export default function CompanyList() {
 
     applyFilterAndPaging(source, keyword, page, pageSize);
   };
-  const handleOpenCreate = () => {
-    setIsCreateOpen(true);
-    form.resetFields(); // nếu không cần reset thì có thể bỏ dòng này
-  };
 
   // ==================================================
   const { user } = useAppSelector((state) => state.auth);
@@ -317,7 +221,6 @@ export default function CompanyList() {
     baseSystemPath = "/system_staff";
   }
 
-  const isStaff = normalizedRole === "system staff";
 
   return (
     <div className="page-layout">
@@ -352,16 +255,6 @@ export default function CompanyList() {
               <Select.Option value="Suspended">Suspended</Select.Option>
               <Select.Option value="Canceled">Canceled</Select.Option>
             </Select>
-            {/* Add Company chỉ cho Manager/Admin */}
-            {!isStaff && (
-              <Button
-                icon={<PlusOutlined />}
-                className="accounts-new-btn"
-                onClick={handleOpenCreate}
-              >
-                Add Company
-              </Button>
-            )}
           </div>
         </div>
 
@@ -380,7 +273,6 @@ export default function CompanyList() {
               setRejectingCompany(c);
               setRejectionReason("");
             }}
-            onDelete={handleDeleteCompany}
             onSuspend={handleSuspend} // ⭐ thêm dòng này
           />
         </div>
@@ -400,15 +292,7 @@ export default function CompanyList() {
         onConfirm={handleConfirmReject}
       />
 
-      {!isStaff && (
-        <CreateCompanyModal
-          open={isCreateOpen}
-          loading={loading}
-          form={form}
-          onCancel={() => setIsCreateOpen(false)}
-          onCreate={handleCreate}
-        />
-      )}
+
     </div>
   );
 }

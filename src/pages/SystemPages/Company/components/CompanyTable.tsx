@@ -3,12 +3,8 @@ import {
   Space,
   Table,
   Tooltip,
-  Modal,
-  Input,
-  Typography,
   Popconfirm,
 } from "antd";
-import { useState } from "react";
 
 import { useAppSelector } from "../../../../hooks/redux";
 
@@ -16,7 +12,6 @@ import {
   EyeOutlined,
   CheckOutlined,
   CloseOutlined,
-  DeleteOutlined,
   PauseCircleOutlined,
 } from "@ant-design/icons";
 
@@ -33,7 +28,6 @@ interface CompanyTableProps {
   onOpenDetail: (companyId: number) => void;
   onApprove: (companyId: number) => void;
   onOpenReject: (c: Company) => void;
-  onDelete: (companyId: number) => void;
   onSuspend: (companyId: number) => void; // ⭐ NEW
 }
 
@@ -47,7 +41,6 @@ export default function CompanyTable({
   onOpenDetail,
   onApprove,
   onOpenReject,
-  onDelete,
   onSuspend,
 }: CompanyTableProps) {
   const { user } = useAppSelector((state) => state.auth);
@@ -55,23 +48,6 @@ export default function CompanyTable({
     .replace(/_/g, " ")
     .toLowerCase();
   const isStaff = normalizedRole === "system staff";
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleteCompany, setDeleteCompany] = useState<Company | null>(null);
-  const [deleteText, setDeleteText] = useState("");
-
-  const openDelete = (c: Company) => {
-    setDeleteCompany(c);
-    setDeleteText("");
-    setDeleteOpen(true);
-  };
-
-  const closeDelete = () => {
-    setDeleteOpen(false);
-    setDeleteCompany(null);
-    setDeleteText("");
-  };
-
-  const canDelete = deleteCompany ? deleteText === deleteCompany.name : false;
 
   const columns: ColumnsType<Company> = [
     {
@@ -240,16 +216,7 @@ export default function CompanyTable({
               />
             </Tooltip>
 
-            {/* Delete (giữ nguyên, dùng Popconfirm) */}
-            <Tooltip title="Delete company">
-              <Button
-                size="small"
-                danger
-                shape="circle"
-                icon={<DeleteOutlined />}
-                onClick={() => openDelete(record)}
-              />
-            </Tooltip>
+          
           </Space>
         );
       },
@@ -279,55 +246,7 @@ export default function CompanyTable({
         }
       />
 
-      <Modal
-        open={deleteOpen}
-        title={<div className="system-modal-title">Delete Company</div>}
-        onCancel={closeDelete}
-        footer={null}
-        className="system-modal"
-        destroyOnClose
-      >
-        <Typography.Text type="danger" strong>
-          This action is irreversible.
-        </Typography.Text>
-
-        <div style={{ marginTop: 12 }}>
-          <Typography.Text>
-            To confirm deletion, type{" "}
-            <Typography.Text strong>{deleteCompany?.name}</Typography.Text>
-          </Typography.Text>
-
-          <Input
-            value={deleteText}
-            onChange={(e) => setDeleteText(e.target.value)}
-            placeholder="Type company name exactly..."
-            style={{ marginTop: 10 }}
-          />
-        </div>
-
-        <div className="system-modal-footer" style={{ marginTop: 24 }}>
-          <Button
-            className="system-modal-btn system-modal-btn-cancel"
-            onClick={closeDelete}
-          >
-            Cancel
-          </Button>
-
-          <Button
-            className="system-modal-btn system-modal-btn-danger"
-            danger
-            disabled={!canDelete}
-            loading={loading}
-            onClick={() => {
-              if (!deleteCompany) return;
-              onDelete(deleteCompany.companyId);
-              closeDelete();
-            }}
-          >
-            Delete
-          </Button>
-        </div>
-      </Modal>
+      
     </>
   );
 }

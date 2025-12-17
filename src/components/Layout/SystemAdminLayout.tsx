@@ -13,8 +13,6 @@ import {
   // SettingOutlined,
   ApartmentOutlined,
   PartitionOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
   RiseOutlined,
   PoweroffOutlined,
   TagsOutlined,
@@ -22,6 +20,7 @@ import {
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logoLong from "../../assets/logo/logo_long.png";
+import { PanelLeft } from "lucide-react";
 
 import { APP_ROUTES } from "../../services/config";
 
@@ -379,19 +378,24 @@ export default function SystemAdminLayout() {
         .ant-table-tbody > tr.ant-table-row:hover > td {
           background: ${GOLD.cream2} !important;
         }
-        *::-webkit-scrollbar { width: 10px; height: 10px; }
-        *::-webkit-scrollbar-track { background: #ffffff; }
-        *::-webkit-scrollbar-thumb {
-          background: ${GOLD.border};
-          border-radius: 10px;
-          border: 2px solid #ffffff;
-        }
-        *::-webkit-scrollbar-thumb:hover { background: ${GOLD.hover}; }
-        .ant-input:focus, .ant-input-focused,
-        .ant-select-focused .ant-select-selector,
-        .ant-picker-focused, .ant-btn:focus-visible {
-          box-shadow: 0 0 0 2px rgba(245,196,0,0.25) !important;
-        }
+        /* ===== GLOBAL SCROLLBAR — AICES GREEN ===== */
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-track { background: #f6fbf8; }
+*::-webkit-scrollbar-thumb {
+  background: rgba(40, 98, 58, 0.35);
+  border-radius: 999px;
+  border: 2px solid #f6fbf8;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: rgba(40, 98, 58, 0.55);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(40, 98, 58, 0.45) #f6fbf8;
+}
+
             .aices-sider .logout-section {
     border-top: 1px solid rgba(255, 255, 255, 0.08);
   }
@@ -413,11 +417,11 @@ export default function SystemAdminLayout() {
 
       <Layout style={{ minHeight: "100vh" }}>
         <Sider
-          collapsible
           collapsed={collapsed}
           onCollapse={setCollapsed}
           breakpoint="lg"
           width={240}
+          trigger={null}
           className="aices-sider"
           style={{
             display: "flex",
@@ -430,35 +434,108 @@ export default function SystemAdminLayout() {
           }}
         >
           <div
+            className="sys-sidebar-header"
             style={{
               height: 64,
+              minHeight: 64,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               paddingInline: 12,
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
+              position: "relative",
               cursor: "pointer",
             }}
-            onClick={() => navigate("/")} // điều hướng về trang chủ admin
+            onClick={() => navigate("/")}
           >
-            {collapsed ? (
+            {/* Logo */}
+            <div
+              className="sys-sidebar-logo"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                width: "100%",
+                transition: "opacity 0.2s",
+                opacity: 1,
+              }}
+            >
               <img
                 src={logoLong}
-                style={{ height: 28, objectFit: "contain" }}
+                style={{
+                  height: collapsed ? 28 : 36,
+                  maxWidth: collapsed ? 44 : "80%",
+                  objectFit: "contain",
+                  display: "block",
+                  margin: "0 auto",
+                }}
               />
-            ) : (
-              <img
-                src={logoLong}
-                style={{ height: 36, objectFit: "contain" }}
-              />
+            </div>
+
+            {/* Hover trigger (chỉ hiện khi collapsed) */}
+            <div
+              className="sys-collapse-trigger"
+              onClick={(e) => {
+                e.stopPropagation();
+                setCollapsed(!collapsed); // ✅ bấm là toggle luôn (đóng/mở)
+              }}
+              style={{
+                cursor: "pointer",
+                padding: 8,
+                borderRadius: 10,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                position: "absolute",
+                top: "50%",
+                right: collapsed ? "50%" : 10,
+                transform: collapsed
+                  ? "translate(50%, -50%)"
+                  : "translateY(-50%)",
+                color: "#9CC5A1",
+                opacity: collapsed ? 0 : 1, // ✅ expanded hiện sẵn, collapsed ẩn
+                transition: "opacity 0.2s, background 0.15s, transform 0.15s",
+              }}
+            >
+              <PanelLeft size={18} />
+            </div>
+
+            {collapsed && (
+              <style>{`
+    .sys-sidebar-header:hover .sys-sidebar-logo { opacity: 0 !important; }
+    .sys-sidebar-header:hover .sys-collapse-trigger { opacity: 1 !important; }
+  `}</style>
+            )}
+
+            {collapsed && (
+              <style>{`
+      .sys-sidebar-header:hover .sys-sidebar-logo { opacity: 0 !important; }
+      .sys-sidebar-header:hover .sys-collapse-trigger { opacity: 1 !important; }
+      .sys-collapse-trigger { opacity: 0; right: 50% !important; transform: translate(50%, -50%) !important; }
+    `}</style>
             )}
           </div>
 
-          <Menu
-            mode="inline"
-            selectedKeys={[selectedKey]}
-            items={items}
-            style={{ flex: 1 }}
-          />
+          <div
+            className="aices-sider-scroll"
+            style={{
+              flex: 1,
+              minHeight: 0, // ⭐ bắt buộc để scroll hoạt động trong flex column
+              overflowY: "auto",
+              overflowX: "hidden",
+              paddingBottom: 8,
+            }}
+          >
+            <Menu
+              mode="inline"
+              selectedKeys={[selectedKey]}
+              items={items}
+              style={{
+                borderRight: 0,
+                background: "transparent",
+              }}
+            />
+          </div>
 
           <div className="logout-section" style={{ padding: 16 }}>
             <Button
@@ -494,12 +571,6 @@ export default function SystemAdminLayout() {
               zIndex: 90,
             }}
           >
-            <Button
-              type="text"
-              aria-label="Toggle sidebar"
-              onClick={() => setCollapsed(!collapsed)}
-              icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            />
             <Title level={4} style={{ margin: 0 }}>
               System Admin
             </Title>

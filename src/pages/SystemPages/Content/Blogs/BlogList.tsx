@@ -8,7 +8,8 @@ import { blogService } from "../../../../services/blogService";
 import type { Blog } from "../../../../types/blog.types";
 
 import BlogToolbar from "./components/BlogToolbar";
-import BlogTable from "./components/BlogTable";
+import BlogCardList from "./components/BlogCardList";
+
 import BlogModal from "./components/BlogModal";
 import type { BlogFormValues } from "./components/BlogModal";
 
@@ -154,7 +155,7 @@ export default function BlogList() {
 
         {/* TABLE */}
         <div className="accounts-table-wrapper">
-          <BlogTable
+          <BlogCardList
             loading={loading}
             data={blogs}
             pagination={pagination}

@@ -9,6 +9,32 @@ type Props = {
   onClose: () => void;
 };
 
+const STATUS_MAP: Record<string, { label: string; color: string }> = {
+  completed: { label: "Completed", color: "green" },
+  pending: { label: "Pending", color: "blue" },
+  failed: { label: "Failed", color: "red" },
+  timeout: { label: "Timeout", color: "orange" },
+  invalidjobdata: { label: "Invalid Job Data", color: "magenta" },
+  invalidresumedata: { label: "Invalid Resume Data", color: "magenta" },
+  jobtitlenotmatched: { label: "Job Title Not Matched", color: "gold" },
+  canceled: { label: "Canceled", color: "default" },
+  corruptedfile: { label: "Corrupted File", color: "red" },
+  duplicateresume: { label: "Duplicate Resume", color: "purple" },
+  servererror: { label: "Server Error", color: "red" },
+};
+
+function formatStatusLabel(status: string | undefined) {
+  if (!status) return "Processing";
+  const key = String(status).trim();
+  // split camelCase/PascalCase and underscores/hyphens into words and capitalize
+  const withSpaces = key
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  return withSpaces.replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 const ResumeDetailDrawer: React.FC<Props> = ({ open, loading, selectedResume, onClose }) => {
   const isJobTitleMismatch = Boolean(
     selectedResume && String(selectedResume.status || "").toLowerCase() === "jobtitlenotmatched"
@@ -41,19 +67,19 @@ const ResumeDetailDrawer: React.FC<Props> = ({ open, loading, selectedResume, on
                   <strong>Phone:</strong> {selectedResume.phoneNumber}
                 </div>
               )}
-              <div>
-                <strong>Status:</strong>{" "}
-                <Tag
-                  color={
-                    String(selectedResume.status || "").toLowerCase() === "completed"
-                      ? "green"
-                      : String(selectedResume.status || "").toLowerCase() === "pending"
-                      ? "blue"
-                      : "default"
-                  }
-                >
-                  {selectedResume.status || "Processing"}
-                </Tag>
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <strong style={{ marginRight: 8 }}>Status:</strong>
+                {(() => {
+                  const key = String(selectedResume.status || "").toLowerCase();
+                  const mapped = STATUS_MAP[key];
+                  const label = mapped ? mapped.label : formatStatusLabel(selectedResume.status || undefined);
+                  const color = mapped ? mapped.color : "default";
+                  return (
+                    <Tag color={color} style={{ textTransform: "none" }}>
+                      {label}
+                    </Tag>
+                  );
+                })()}
               </div>
               {selectedResume.fileUrl && (
                 <div>

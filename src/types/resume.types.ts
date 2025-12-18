@@ -40,7 +40,7 @@ export type ResumeLocal = Partial<Resume> & {
   campaignId?: number;
   matchSkills?: string;
   missingSkills?: string;
-  totalScore?: number | null;
+  score?: number | null;
   adjustedScore?: number | null;
   totalResumeScore?: number | null;
   aiExplanation?: string | null;

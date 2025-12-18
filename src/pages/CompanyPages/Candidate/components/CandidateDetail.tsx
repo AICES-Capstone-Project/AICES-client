@@ -1,7 +1,7 @@
 import { Card, Spin, Descriptions, Typography, Table, Button, message, Space, Divider } from "antd";
-import { MailOutlined, PhoneOutlined, FileTextOutlined } from "@ant-design/icons";
+import { MailOutlined, PhoneOutlined, FileTextOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import candidateService from "../../../../services/candidateService";
 import CandidateApplicationsDrawer from './CandidateApplicationsDrawer';
 
@@ -10,6 +10,7 @@ const { Text } = Typography;
 
 export default function CandidateDetail() {
   const { candidateId } = useParams<{ candidateId: string }>();
+  const navigate = useNavigate();
 
   const [resume, setResume] = useState<Resume | null>(null);
   const [loading, setLoading] = useState(false);
@@ -137,7 +138,17 @@ export default function CandidateDetail() {
 
   return (
     <Card
-      title={resume?.candidateName || "Candidate Detail"}
+      title={
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate(-1)}
+            aria-label="Back"
+          />
+          <span>{resume?.candidateName || "Candidate Detail"}</span>
+        </div>
+      }
       style={{
         maxWidth: 1200,
         margin: "12px auto",

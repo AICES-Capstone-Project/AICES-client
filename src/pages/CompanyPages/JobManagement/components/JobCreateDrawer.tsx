@@ -221,7 +221,6 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
             setSavedAndPending(true);
             return;
           }
-          // otherwise close and reset
           onClose();
         }}
       >
@@ -230,24 +229,24 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
           label="Title"
           rules={[
             { required: true, message: "Please input title" },
-            { max: 70, message: "Title must not exceed 70 characters" }
+            { max: 150, message: "Title must not exceed 150 characters" }
           ]}
         >
-          <Input maxLength={70} showCount />
+          <Input maxLength={150} showCount />
         </Form.Item>
 
         <Form.Item name="description" label="Description" rules={[
           { required: true, message: "Please input description" },
-          { max: 300, message: "Description must not exceed 300 characters" }
+          { max: 3000, message: "Description must not exceed 3000 characters" }
         ]}>
           <Input.TextArea rows={2} maxLength={300} showCount />
         </Form.Item>
 
         <Form.Item name="requirements" label="Requirements" rules={[
           { required: true, message: "Please input requirements" },
-          { max: 2000, message: "Requirements must not exceed 2000 characters" }
+          { max: 5000, message: "Requirements must not exceed 5000 characters" }
         ]}>
-          <Input.TextArea rows={3} maxLength={2000} showCount />
+          <Input.TextArea rows={3} maxLength={5000} showCount />
         </Form.Item>
 
         {/* <Form.Item name="targetQuantity" label="Target Quantity" rules={[

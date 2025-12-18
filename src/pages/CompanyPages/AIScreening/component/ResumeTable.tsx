@@ -1,10 +1,12 @@
 import React from "react";
-import { Table, Tag, Button, Space, Tooltip, Modal, Input } from "antd";
+import { Table, Tag, Button, Space, Tooltip, Modal, Input, message } from "antd";
 // import { useNavigate } from "react-router-dom";
-import { Flame } from "lucide-react";
+import { Flame, Pencil } from "lucide-react";
 import { EyeOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { ResumeLocal } from "../../../../types/resume.types";
+import resumeService from "../../../../services/resumeService";
+import compareResumeService from "../../../../services/compareResumeService";
 
 type Resume = ResumeLocal;
 
@@ -22,30 +24,54 @@ interface ResumeTableProps {
 	onDelete: (resumeId: number) => void;
 	scoreCounts: Map<number, number>;
 	jobId?: string;
+	campaignId?: number;
 	targetQuantity?: number;
 }
 
-const ResumeTable: React.FC<ResumeTableProps> = ({
-	loading,
-	dataSource,
-	editMode = false,
-	className,
-	selectedRowKeys = [],
-	onSelectedRowKeysChange = () => {},
-	currentPage,
-	pageSize,
-	onViewDetail,
-	onDelete,
-	// scoreCounts,
-	jobId,
-	targetQuantity,
-}) => {
+type ResumeTableHandle = {
+	openCompare: () => void;
+};
+
+const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props, ref) => {
+	const {
+		loading,
+		dataSource,
+		editMode = false,
+		className,
+		selectedRowKeys = [],
+		onSelectedRowKeysChange = () => {},
+		currentPage,
+		pageSize,
+		onViewDetail,
+		onDelete,
+		// scoreCounts,
+		jobId,
+		campaignId,
+		targetQuantity,
+	} = props;
 	// const navigate = useNavigate();
 
 	const [confirmModalOpen, setConfirmModalOpen] = React.useState(false);
 	const [pendingDelete, setPendingDelete] = React.useState<{ resumeId: number; name: string } | null>(null);
 	const [confirmInput, setConfirmInput] = React.useState("");
 	const [confirmLoading, setConfirmLoading] = React.useState(false);
+
+	// Inline edit state for adjusted score
+	const [editingAppId, setEditingAppId] = React.useState<number | null>(null);
+	const [editValue, setEditValue] = React.useState<string>("");
+	const [savingAppId, setSavingAppId] = React.useState<number | null>(null);
+	const [adjustedOverrides, setAdjustedOverrides] = React.useState<Map<number, number | null>>(() => new Map());
+	const [hoveredAppId, setHoveredAppId] = React.useState<number | null>(null);
+	// compare state
+	const [compareSelectedKeys, setCompareSelectedKeys] = React.useState<React.Key[]>([]);
+	const [compareLoading, setCompareLoading] = React.useState(false);
+	const [compareMode, setCompareMode] = React.useState(false);
+
+	// Only resumes with normalized status 'completed' can be selected for compare
+	const isSelectable = React.useCallback((record: Resume) => {
+		const key = String(record.status || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
+		return key === "completed";
+	}, []);
 
 	const isQualifiedCandidate = React.useCallback((index: number, record: Resume) => {
 		// Must have score >= 50
@@ -65,8 +91,9 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 				(currentPage - 1) * pageSize + index + 1,
 		},
 		{
-			title: "Full Name",
+			title: "Full name",
 			dataIndex: "fullName",
+			width: "15%",
 			align: "center" as const,
 			render: (text: string, record: Resume, index: number) => {
 				const isTopCandidate = isQualifiedCandidate(index, record);
@@ -86,97 +113,232 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 			},
 		},
 		{
-			title: "Screening Status",
+			title: "Screening status",
 			dataIndex: "status",
 			align: "center" as const,
-			width: 150,
-			render: (status: string) => (
-				<Tag
-					color={
-						status === "Completed"
-							? "green"
-							: status === "Pending"
-								? "blue"
-								: "default"
-					}
-				>
-					{status || "Processing"}
-				</Tag>
-			),
+			width: "18%",
+			render: (status: string) => {
+				const STATUS_COLORS: Record<string, string> = {
+					// pipeline/application statuses
+					pending: "blue",
+					reviewed: "green",
+					shortlisted: "cyan",
+					interview: "gold",
+					rejected: "red",
+					hired: "purple",
+					failed: "red",
+					// screening/error statuses
+					completed: "green",
+					timeout: "orange",
+					invalidjobdata: "orange",
+					invalidresumedata: "orange",
+					jobtitlenotmatched: "orange",
+					canceled: "default",
+					corruptedfile: "red",
+					duplicateresume: "purple",
+					servererror: "red",
+				};
+				const key = String(status || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
+				const color = STATUS_COLORS[key] ?? "default";
+
+				const STATUS_LABELS: Record<string, string> = {
+					pending: "Pending",
+					completed: "Completed",
+					failed: "Failed",
+					timeout: "Timeout",
+					invalidjobdata: "Invalid Job Data",
+					invalidresumedata: "Invalid Resume Data",
+					jobtitlenotmatched: "Job Title Not Matched",
+					canceled: "Canceled",
+					corruptedfile: "Corrupted File",
+					duplicateresume: "Duplicate Resume",
+					servererror: "Server Error",
+					reviewed: "Reviewed",
+					shortlisted: "Shortlisted",
+					interview: "Interview",
+					rejected: "Rejected",
+					hired: "Hired",
+				};
+
+				const humanize = (s: string) => {
+					if (!s) return "Processing";
+					if (STATUS_LABELS[key]) return STATUS_LABELS[key];
+					const spaced = String(s)
+						.replace(/[_-]+/g, " ")
+						.replace(/([a-z])([A-Z])/g, "$1 $2")
+						.replace(/\s+/g, " ")
+						.trim();
+					return spaced
+						.split(" ")
+						.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+						.join(" ");
+				};
+
+				return (
+					<Tag
+						color={color}
+						style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", padding: "0 8px", whiteSpace: "nowrap" }}
+					>
+						{humanize(status)}
+					</Tag>
+				);
+			},
 		},
 		{
-			title: "Score",
+			title: "Screening score",
 			dataIndex: "totalResumeScore",
-			width: 120,
+			width: "15%",
 			align: "center" as const,
-			render: (score: number | null) =>
-				score != null ? (
+			render: (_: number | null, record) => {
+				const score = record.totalScore ?? record.totalResumeScore ?? null;
+				return score != null ? (
 					<Tag color={score >= 70 ? "green" : score >= 40 ? "orange" : "red"}>
 						{score}
 					</Tag>
 				) : (
 					<span>—</span>
-				),
+				);
+			},
 		},
-		// {
-		// 	title: "Ties",
-		// 	width: 100,
-		// 	align: "center" as const,
-		// 	render: (_: unknown, record: Resume) => {
-		// 		const score = record.totalScore;
-		// 		if (score == null || score === 0)
-		// 			return <span style={{ color: "#9ca3af" }}>—</span>;
-		// 		const count = scoreCounts.get(score) || 0;
-		// 		if (count <= 1) return <span style={{ color: "#9ca3af" }}>—</span>;
-		// 		const content = (
-		// 			<div style={{ maxWidth: 290 }}>
-		// 				<div>There are {count} candidates with the same score.</div>
-		// 			</div>
-		// 		);
+		{
+			title: "Adjusted Score",
+			dataIndex: "adjustedScore",
+			width: "15%",
+			align: "center" as const,
+			render: (adjustedScore: number | null, record: Resume) => {
+				const applicationId = Number(record.applicationId ?? record.resumeId);
+				const key = String(record.status || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
+				const editable = key === "reviewed";
 
-		// 		// choose tag color based on number of ties
-		// 		let bgColor = "var(--color-primary-light)";
-		// 		let textColor = "#fff";
-		// 		if (count < 5) {
-		// 			bgColor = "#f472b6"; // pink
-		// 			textColor = "#fff";
-		// 		} else if (count < 10) {
-		// 			bgColor = "#f59e0b"; // amber/yellow
-		// 			textColor = "#000";
-		// 		} else {
-		// 			bgColor = "#ef4444"; // red
-		// 			textColor = "#fff";
-		// 		}
+				const display = adjustedOverrides.has(applicationId)
+					? adjustedOverrides.get(applicationId)
+					: adjustedScore;
 
-		// 		return (
-		// 			<Popover content={content} trigger={["hover"]}>
-		// 				<Tag
-		// 					style={{
-		// 						cursor: "pointer",
-		// 						backgroundColor: bgColor,
-		// 						color: textColor,
-		// 					}}
-		// 					onClick={() =>
-		// 						navigate(
-		// 							`/company/ai-screening/compare?jobId=${jobId}&score=${score}`
-		// 						)
-		// 					}
-		// 				>
-		// 					{count}{" "}
-		// 					<TeamOutlined style={{ marginLeft: 6, color: textColor }} />
-		// 				</Tag>
-		// 			</Popover>
-		// 		);
-		// 	},
-		// },
+				const startEdit = (val: number | null) => {
+					if (!editable) return;
+					setEditingAppId(applicationId);
+					setEditValue(val != null ? String(val) : "");
+				};
+
+				const cancelEdit = () => {
+					setEditingAppId(null);
+					setEditValue("");
+				};
+
+				const saveEdit = async () => {
+					const v = editValue.trim();
+					if (v === "") {
+						message.error("Please enter a score between 0 and 100.");
+						return;
+					}
+					const n = Number(v);
+					if (!Number.isFinite(n) || n < 0 || n > 100) {
+						message.error("Score must be a number between 0 and 100.");
+						return;
+					}
+
+					setSavingAppId(applicationId);
+					try {
+						await resumeService.updateAdjustedScore(applicationId, Math.round(n));
+						setAdjustedOverrides(prev => {
+							const next = new Map(prev);
+							next.set(applicationId, Math.round(n));
+							return next;
+						});
+						message.success("Adjusted score updated");
+						cancelEdit();
+					} catch (err) {
+						console.error(err);
+						message.error("Failed to update adjusted score");
+					} finally {
+						setSavingAppId(null);
+					}
+				};
+
+				const hovered = hoveredAppId === applicationId;
+
+				if (editingAppId === applicationId) {
+					return (
+						<Input
+							size="small"
+							autoFocus
+							value={editValue}
+							onChange={(e) => setEditValue(e.target.value)}
+							onBlur={() => saveEdit()}
+							onKeyDown={(e) => {
+								if (e.key === "Enter") saveEdit();
+								if (e.key === "Escape") cancelEdit();
+							}}
+							style={{ width: 80, textAlign: "center" }}
+							disabled={savingAppId === applicationId}
+						/>
+					);
+				}
+				// wrapper provides hover background & cursor changes
+				const cellStyle: React.CSSProperties = {
+					display: "inline-flex",
+					alignItems: "center",
+					justifyContent: "center",
+					padding: "2px 8px",
+					borderRadius: 6,
+					transition: "background-color 120ms",
+					backgroundColor: hovered && editable ? "#f3f4f6" : "transparent",
+					cursor: editable ? "pointer" : "default",
+				};
+
+				const hidePencil = key === "failed";
+
+				const content = display != null ? (
+					<>
+						<Tag color={display >= 70 ? "green" : display >= 40 ? "orange" : "red"} style={{ margin: 0 }}>
+							{display}
+						</Tag>
+						{!hidePencil && (
+							<Pencil size={12} style={{ marginLeft: 6, color: hovered && editable ? "#6b7280" : "#9ca3af" }} />
+						)}
+					</>
+				) : (
+					// empty state: encourage adding score
+					<>
+						<span style={{ color: editable ? "#6b7280" : "#9ca3af", marginRight: 6 }}>{editable ? "Add score" : "—"}</span>
+						{!hidePencil && (
+							<Pencil size={14} style={{ color: editable ? (hovered ? "#6b7280" : "#9ca3af") : "#e5e7eb" }} />
+						)}
+					</>
+				);
+
+				const wrapper = (
+					<div
+						style={cellStyle}
+						onMouseEnter={() => setHoveredAppId(applicationId)}
+						onMouseLeave={() => setHoveredAppId(null)}
+						onClick={() => startEdit(display != null ? Number(display) : null)}
+						role={editable ? "button" : undefined}
+						tabIndex={editable ? 0 : undefined}
+						onKeyDown={(e) => {
+							if (!editable) return;
+							if (e.key === "Enter" || e.key === " ") startEdit(display != null ? Number(display) : null);
+						}}
+					>
+						{content}
+					</div>
+				);
+
+				return editable ? (
+					<Tooltip title="Click to edit score">{wrapper}</Tooltip>
+				) : (
+					wrapper
+				);
+			},
+		},
 		{
 			title: "Actions",
 			key: "actions",
-			width: "15%",
+			width: "10%",
 			align: "center" as const,
 			render: (_, record) => (
 				<Space size="middle">
-					<Button
+					<Tooltip title="View detail result resume"><Button
 						type="text"
 						icon={<EyeOutlined />}
 						aria-label="View detail"
@@ -188,7 +350,8 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 							});
 							onViewDetail(Number(record.applicationId ?? record.resumeId));
 						}}
-					/>
+					/></Tooltip>
+					
 					<Tooltip title="Delete resume">
 						<Button
 							type="text"
@@ -205,33 +368,164 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 		},
 	];
 
+	const openCompare = React.useCallback(() => {
+		// Toggle compare mode; clear any existing selections when toggling
+		setCompareSelectedKeys([]);
+		setCompareMode((prev) => !prev);
+		// keep modal closed; we'll use table selection UI instead
+	}, []);
+
+	React.useImperativeHandle(ref, () => ({
+		openCompare,
+	}), [openCompare]);
+
+	const handleCompare = async () => {
+		if (!jobId) {
+			message.error("Missing jobId for compare");
+			return;
+		}
+		if (!compareSelectedKeys || compareSelectedKeys.length === 0) {
+			message.error("Select at least one resume to compare (max 5)");
+			return;
+		}
+
+		const applicationIds = compareSelectedKeys.map((k) => Number(k));
+		console.debug("Compare triggered", { jobId, campaignId, selectedKeys: compareSelectedKeys });
+
+		// Log selected records from current dataSource for debugging
+		try {
+			const selectedRecords = compareSelectedKeys.map((k) => {
+				const id = Number(k);
+				return dataSource.find((r) => Number(r.applicationId ?? r.resumeId) === id) || null;
+			});
+			console.debug("Selected records (from table dataSource):", selectedRecords);
+			const missing = selectedRecords.map((r, i) => (r ? null : compareSelectedKeys[i])).filter(Boolean);
+			if (missing.length) console.warn("Some selected applicationIds not found in current table data:", missing);
+			// Check for possible job/campaign mismatch if records contain those fields
+			const mismatches: any[] = [];
+			selectedRecords.forEach((rec, idx) => {
+				if (!rec) return;
+				// check campaignId and jobId if present on the record
+				if (typeof (rec as any).campaignId !== 'undefined' && campaignId != null && Number((rec as any).campaignId) !== Number(campaignId)) {
+					mismatches.push({ applicationId: compareSelectedKeys[idx], field: 'campaignId', record: (rec as any).campaignId });
+				}
+				if (typeof (rec as any).jobId !== 'undefined' && jobId != null && Number((rec as any).jobId) !== Number(jobId)) {
+					mismatches.push({ applicationId: compareSelectedKeys[idx], field: 'jobId', record: (rec as any).jobId });
+				}
+			});
+			if (mismatches.length) console.warn('Detected possible job/campaign mismatches for selected records:', mismatches);
+		} catch (dbgErr) {
+			console.error('Error while preparing compare debug info', dbgErr);
+		}
+		setCompareLoading(true);
+		try {
+			const body: any = { applicationIds };
+			const jid = Number(jobId);
+			if (!Number.isNaN(jid)) body.jobId = jid;
+			if (typeof campaignId === "number") body.campaignId = campaignId;
+
+			const resp = await compareResumeService.compare(body);
+			console.debug("compare response:", resp);
+			// Normalize response handling: prefer explicit message or data
+			if (resp) {
+				const statusStr = String(resp.status || "");
+				if (statusStr.toLowerCase() === "success" || resp.data) {
+					message.success("Compare request sent");
+					setCompareMode(false);
+					setCompareSelectedKeys([]);
+				} else {
+					// Try to show useful error detail
+					let errMsg = resp.message || "Compare request failed";
+					try {
+						if (!errMsg && resp.data) errMsg = JSON.stringify(resp.data);
+						// If API returned structured errors
+						if (resp.data && (resp.data as any).errors) {
+							errMsg = (resp.data as any).errors.join ? (resp.data as any).errors.join("; ") : JSON.stringify((resp.data as any).errors);
+						}
+					} catch (ee) {
+						console.error("Error formatting compare response", ee);
+					}
+					message.error(errMsg);
+				}
+			} else {
+				message.error("Compare request failed");
+			}
+		} catch (err) {
+			console.error(err);
+			message.error("Compare request failed");
+		} finally {
+			setCompareLoading(false);
+		}
+	};
+
 	return (
 		<>
+			{compareMode && (
+				<div style={{ display: "flex", justifyContent: "flex-end", gap: 8, marginBottom: 8 }}>
+					<Button onClick={() => { setCompareMode(false); setCompareSelectedKeys([]); }}>Cancel</Button>
+					<Button type="primary" loading={compareLoading} onClick={handleCompare} disabled={compareSelectedKeys.length === 0}>
+						Compare ({compareSelectedKeys.length})
+					</Button>
+				</div>
+			)}
 			<Table
 				className={`edit-mode-table ${className ?? ""}`}
-				rowKey="resumeId"
+				rowKey={(r: Resume) => r.applicationId ?? r.resumeId}
 				loading={loading}
 				dataSource={dataSource}
 				rowSelection={
-					editMode
+					compareMode
 						? {
-							selectedRowKeys: selectedRowKeys ?? [],
-							onChange: (keys) => onSelectedRowKeysChange && onSelectedRowKeysChange(keys as React.Key[]),
-							type: "radio",
+							selectedRowKeys: compareSelectedKeys,
+							columnWidth: '2%',
+							onChange: (keys) => {
+								// Filter out any keys that are for non-selectable rows (e.g., not 'completed')
+								const attempted = (keys as React.Key[]) || [];
+								const allowed = attempted.filter((k) => {
+									const id = Number(k);
+									const rec = dataSource.find((r) => Number(r.applicationId ?? r.resumeId) === id);
+									return !!rec && isSelectable(rec);
+								});
+								if (allowed.length > 5) {
+									message.error("You may select up to 5 resumes only");
+									return;
+								}
+								setCompareSelectedKeys(allowed);
+							},
+							// Hide/disable checkbox for rows that are not selectable
+							getCheckboxProps: (record: Resume) => {
+								const selectable = isSelectable(record);
+								return {
+									disabled: !selectable,
+									style: !selectable ? { display: "none" } : undefined,
+								} as any;
+							},
+							type: "checkbox",
 						}
-						: undefined
+						: editMode
+							? {
+								selectedRowKeys: selectedRowKeys ?? [],
+								onChange: (keys) => onSelectedRowKeysChange && onSelectedRowKeysChange(keys as React.Key[]),
+								type: "radio",
+							}
+							: undefined
 				}
 				columns={columns}
 				scroll={{ y: "60vh" }}
 				pagination={{
 					current: currentPage,
-					pageSize: 10,
+					pageSize: pageSize,
 					total: dataSource.length,
 					showSizeChanger: false,
 					showTotal: (total) => `Total ${total} resumes`,
-					
+					onChange: (page: number, size?: number) => {
+						// notify parent to update current page / page size
+						props.onPageChange(page, size || pageSize);
+					},
 				}}
 			/>
+
+			{/* Compare modal removed: selection now done inline on main table via compareMode */}
 
 			<Modal
 				title={<div style={{ textAlign: 'center', width: '100%' }}>Confirm delete</div>}
@@ -242,7 +536,7 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 					setConfirmInput("");
 				}}
 				footer={
-					<div style={{ display: 'flex', justifyContent: 'center', gap: 12, width: '100%' }}>
+					<div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, width: '100%' }}>
 						<div>
 							<Button
 								className="company-btn"
@@ -286,6 +580,6 @@ const ResumeTable: React.FC<ResumeTableProps> = ({
 			</Modal>
 		</>
 	);
-};
+});
 
 export default ResumeTable;

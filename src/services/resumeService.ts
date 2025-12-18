@@ -1,4 +1,4 @@
-import { postForm, post, get, remove } from "./api";
+import { postForm, post, get, remove, patch } from "./api";
 import { API_ENDPOINTS } from "./config";
 import type { ApiResponse } from "../types/api.types";
 import type { Resume, Paginated } from "../types/company.types";
@@ -97,6 +97,11 @@ export const resumeService = {
       API_ENDPOINTS.RESUME.COMPANY_RESEND(jobId, resumeId),
       {} // Body rỗng vì data đã có sẵn theo resumeId, method POST yêu cầu phải có body
     );
+  },
+
+  // Update adjusted score for an application
+  updateAdjustedScore: async (applicationId: number, adjustedScore: number): Promise<ApiResponse<null>> => {
+    return await patch<null>(API_ENDPOINTS.RESUME.ADJUSTED_SCORE(applicationId), { adjustedScore });
   },
 
   // Delete a resume

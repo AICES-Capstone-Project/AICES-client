@@ -1,6 +1,10 @@
 import React from "react";
 import { Layout, Menu, Button, Typography, ConfigProvider } from "antd";
 import "../../assets/styles/system.css";
+import { Modal, message } from "antd";
+import { authService } from "../../services/authService";
+import { STORAGE_KEYS } from "../../services/config";
+
 import {
   DashboardOutlined,
   TeamOutlined,
@@ -223,11 +227,40 @@ export default function SystemAdminLayout() {
     // },
   ];
 
+  const [logoutLoading, setLogoutLoading] = React.useState(false);
+
   const handleLogout = () => {
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    localStorage.removeItem("user");
-    navigate("/login");
+    Modal.confirm({
+      title: "Logout",
+      content: "Are you sure you want to log out?",
+      okText: "Logout",
+      cancelText: "Cancel",
+      centered: true,
+      okButtonProps: {
+        loading: logoutLoading,
+        className: "btn-aices-logout",
+      },
+      onOk: async () => {
+        setLogoutLoading(true);
+        try {
+          // ✅ GỌI API (đủ điều kiện pass issue)
+          await authService.logout();
+          message.success("Logged out successfully");
+        } catch (error) {
+          // ❗ Không chặn user – vẫn logout local
+          message.warning("Logout API failed. Logged out locally.");
+        } finally {
+          setLogoutLoading(false);
+
+          // ✅ LOCAL LOGOUT
+          localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+
+          navigate("/login", { replace: true });
+        }
+      },
+    });
   };
 
   return (

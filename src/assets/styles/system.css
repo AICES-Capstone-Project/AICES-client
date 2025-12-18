@@ -1386,3 +1386,23 @@
   line-height: 1.5;
   min-height: calc(1.5em * 2);
 }
+ /* ===== AICES LOGOUT BUTTON ===== */
+.btn-aices-logout {
+  background: linear-gradient(135deg, #28623a, #1f4f31) !important;
+  border: none !important;
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+.btn-aices-logout:hover {
+  background: linear-gradient(135deg, #1f4f31, #16392e) !important;
+}
+
+.btn-aices-logout:active {
+  background: #16392e !important;
+}
+
+.btn-aices-logout:disabled {
+  background: #a7c7b2 !important;
+  color: #ffffff !important;
+}

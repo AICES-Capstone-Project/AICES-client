@@ -22,12 +22,17 @@ export default function BannerTable({
 }: BannerTableProps) {
   const columns: ColumnsType<BannerConfig> = [
     {
-      title: "ID",
-      dataIndex: "bannerId",
+      title: "No.",
+      key: "no",
       width: 80,
       align: "center",
-      render: (id: number) => <span style={{ fontWeight: 500 }}>{id}</span>,
+      render: (_: any, __: any, index: number) => {
+        const current = pagination.current ?? 1;
+        const pageSize = pagination.pageSize ?? 10;
+        return (current - 1) * pageSize + index + 1;
+      },
     },
+
     {
       title: "Image",
       dataIndex: "source",
@@ -43,11 +48,27 @@ export default function BannerTable({
             background: "#fafafa",
           }}
         >
-          <img
-            src={src}
-            alt="banner"
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
+          {src ? (
+            <img
+              src={src}
+              alt="banner"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: 12,
+                color: "#9ca3af",
+              }}
+            >
+              No image
+            </div>
+          )}
         </div>
       ),
     },

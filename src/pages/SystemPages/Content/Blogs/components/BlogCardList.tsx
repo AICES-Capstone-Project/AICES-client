@@ -72,7 +72,6 @@ export default function BlogCardList({
                         shape="circle"
                         size="small"
                         icon={<EditOutlined />}
-                        
                         onClick={() => onEdit(blog)}
                       />
                       <Popconfirm
@@ -98,6 +97,7 @@ export default function BlogCardList({
                     <Title
                       level={5}
                       className="aices-blog-card-title"
+                      ellipsis={{ rows: 2 }}
                       title={blog.title}
                     >
                       {blog.title}

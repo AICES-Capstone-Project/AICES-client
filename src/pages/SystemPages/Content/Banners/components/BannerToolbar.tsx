@@ -1,14 +1,9 @@
 import { Button, Input } from "antd";
-import {
-  PlusOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 
 interface BannerToolbarProps {
   keyword: string;
   onKeywordChange: (value: string) => void;
-  onSearch: () => void;
   onReload: () => void;
   onCreate: () => void;
 }
@@ -16,7 +11,6 @@ interface BannerToolbarProps {
 export default function BannerToolbar({
   keyword,
   onKeywordChange,
-  onSearch,
   onReload,
   onCreate,
 }: BannerToolbarProps) {
@@ -29,24 +23,15 @@ export default function BannerToolbar({
           placeholder="Search by title..."
           value={keyword}
           onChange={(e) => onKeywordChange(e.target.value)}
-          onPressEnter={onSearch}
           style={{ width: 320 }}
         />
-
-        <Button
-          icon={<SearchOutlined />}
-          className="btn-search"
-          onClick={onSearch}
-        >
-          Search
-        </Button>
 
         <Button
           icon={<ReloadOutlined />}
           className="accounts-reset-btn"
           onClick={onReload}
         >
-          Reload
+          Reset
         </Button>
       </div>
 

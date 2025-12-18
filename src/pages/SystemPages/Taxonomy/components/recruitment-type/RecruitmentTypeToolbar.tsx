@@ -1,14 +1,9 @@
 import { Button, Input } from "antd";
-import {
-  PlusOutlined,
-  ReloadOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 
 interface RecruitmentTypeToolbarProps {
   keyword: string;
   onKeywordChange: (value: string) => void;
-  onSearch: (value: string) => void;
   onReset: () => void;
   onCreate: () => void;
 }
@@ -16,7 +11,6 @@ interface RecruitmentTypeToolbarProps {
 export default function RecruitmentTypeToolbar({
   keyword,
   onKeywordChange,
-  onSearch,
   onReset,
   onCreate,
 }: RecruitmentTypeToolbarProps) {
@@ -29,13 +23,8 @@ export default function RecruitmentTypeToolbar({
           prefix={<SearchOutlined />}
           value={keyword}
           onChange={(e) => onKeywordChange(e.target.value)}
-          onPressEnter={(e: any) => onSearch(e.target.value)}
           style={{ width: 320 }}
         />
-
-        <Button className="btn-search" icon={<SearchOutlined />} onClick={() => onSearch(keyword)}>
-          Search
-        </Button>
 
         <Button
           className="accounts-reset-btn"

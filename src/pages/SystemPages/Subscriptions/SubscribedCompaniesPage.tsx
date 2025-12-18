@@ -1,8 +1,5 @@
-// src/pages/SystemPages/Subscriptions/SubscribedCompaniesPage.tsx
-
 import { useEffect, useMemo, useState } from "react";
-import { Card, Input, Button, Select, Space } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Card } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
 
 import {
@@ -13,12 +10,14 @@ import type { CompanySubscription } from "../../../types/companySubscription.typ
 import { toastError } from "../../../components/UI/Toast";
 
 import SubscribedCompaniesTable from "./components/subscribed-companies/SubscribedCompaniesTable";
+import SubscribedCompaniesToolbar from "./components/subscribed-companies/SubscribedCompaniesToolbar";
 
 const DEFAULT_PAGE_SIZE = 10;
 
 // normalize string for search
 const normalize = (str: string) =>
-  str?.normalize("NFD")
+  str
+    ?.normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
     .trim() || "";
@@ -85,7 +84,7 @@ export default function SubscribedCompaniesPage() {
         });
       }
 
-      // 🔥 Filter theo Subscription plan (Test 1, Pro, ...)
+      // Filter theo Subscription plan
       const planToUse = selectedPlan ?? planFilter;
       if (planToUse) {
         const normalizedPlan = normalize(planToUse);
@@ -112,61 +111,48 @@ export default function SubscribedCompaniesPage() {
     const current = pag.current ?? 1;
     const size = pag.pageSize ?? DEFAULT_PAGE_SIZE;
 
-    setPagination({ ...pagination, current, pageSize: size });
+    setPagination((prev) => ({ ...prev, current, pageSize: size }));
     fetchData({ page: current, pageSize: size, search }, planFilter);
   };
 
+  // realtime search
   const handleSearchChange = (value: string) => {
     setSearch(value);
-    setPagination({ ...pagination, current: 1 });
-    fetchData({ page: 1, pageSize: pagination.pageSize, search: value }, planFilter);
+    setPagination((prev) => ({ ...prev, current: 1 }));
+    fetchData(
+      { page: 1, pageSize: pagination.pageSize, search: value },
+      planFilter
+    );
   };
 
   const handlePlanChange = (value?: string) => {
     setPlanFilter(value);
-    setPagination({ ...pagination, current: 1 });
+    setPagination((prev) => ({ ...prev, current: 1 }));
+    fetchData({ page: 1, pageSize: pagination.pageSize, search }, value);
+  };
+
+  const handleReset = () => {
+    setSearch("");
+    setPlanFilter(undefined);
+    setPagination((prev) => ({ ...prev, current: 1 }));
     fetchData(
-      { page: 1, pageSize: pagination.pageSize, search },
-      value // truyền plan mới vào fetchData
+      { page: 1, pageSize: pagination.pageSize, search: "" },
+      undefined
     );
   };
 
   return (
     <div className="page-layout">
       <Card className="aices-card">
-        {/* 🔥 Search + Filter nằm trong card */}
-        <div className="company-header-row">
-          <div className="company-left">
-            <Input
-              placeholder="Search companies or plans..."
-              value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="toolbar-search-input"
-              prefix={<SearchOutlined />}
-              style={{ height: 36 }}
-            />
-          </div>
+        <SubscribedCompaniesToolbar
+          search={search}
+          onSearchChange={handleSearchChange}
+          planFilter={planFilter}
+          planOptions={planOptions}
+          onPlanChange={handlePlanChange}
+          onReset={handleReset}
+        />
 
-          <div className="company-right">
-            <Space size="middle">
-              {/* Select filter Subscription plan */}
-              <Select
-                allowClear
-                placeholder="Subscription plan"
-                value={planFilter}
-                options={planOptions}
-                onChange={(value) => handlePlanChange(value)}
-                style={{ minWidth: 160 }}
-              />
-
-              <Button className="btn-search" onClick={() => fetchData()}>
-                <SearchOutlined /> Search
-              </Button>
-            </Space>
-          </div>
-        </div>
-
-        {/* TABLE */}
         <div className="accounts-table-wrapper">
           <SubscribedCompaniesTable
             loading={loading}

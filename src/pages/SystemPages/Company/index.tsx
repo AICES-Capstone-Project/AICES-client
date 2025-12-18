@@ -20,7 +20,6 @@ import CompanySearchBar from "./components/CompanySearchBar";
 import CompanyTable from "./components/CompanyTable";
 import RejectCompanyModal from "./components/RejectCompanyModal";
 
-
 const DEFAULT_PAGE_SIZE = 10;
 
 export default function CompanyList() {
@@ -42,7 +41,6 @@ export default function CompanyList() {
     null
   );
   const [rejectionReason, setRejectionReason] = useState("");
-
 
   const nav = useNavigate();
 
@@ -123,6 +121,20 @@ export default function CompanyList() {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  useEffect(() => {
+    const t = setTimeout(() => {
+      const page = 1;
+      const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
+
+      const source = statusFilter
+        ? allCompanies.filter((c) => (c.companyStatus || "") === statusFilter)
+        : allCompanies;
+
+      applyFilterAndPaging(source, keyword, page, pageSize);
+    }, 250);
+
+    return () => clearTimeout(t);
+  }, [keyword, statusFilter, allCompanies, pagination.pageSize]);
 
   // ================== STATUS HANDLERS ==================
   const updateCompanyStatus = async (
@@ -176,10 +188,6 @@ export default function CompanyList() {
     setRejectionReason("");
   };
 
-  
-
-  
-
   const handleApprove = (companyId: number) =>
     updateCompanyStatus(companyId, "Approved");
 
@@ -220,7 +228,6 @@ export default function CompanyList() {
   } else if (normalizedRole === "system staff") {
     baseSystemPath = "/system_staff";
   }
-
 
   return (
     <div className="page-layout">
@@ -291,8 +298,6 @@ export default function CompanyList() {
         }}
         onConfirm={handleConfirmReject}
       />
-
-
     </div>
   );
 }

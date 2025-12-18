@@ -8,7 +8,6 @@ import {
 interface AccountsToolbarProps {
   keyword: string;
   onKeywordChange: (value: string) => void;
-  onSearch: () => void;
   onReset: () => void;
   onOpenCreate: () => void;
 }
@@ -16,7 +15,6 @@ interface AccountsToolbarProps {
 export default function AccountsToolbar({
   keyword,
   onKeywordChange,
-  onSearch,
   onReset,
   onOpenCreate,
 }: AccountsToolbarProps) {
@@ -26,25 +24,14 @@ export default function AccountsToolbar({
         className="accounts-toolbar-left"
         style={{ display: "flex", gap: 8 }}
       >
-        {/* Search */}
         <Input
           placeholder="Search by email or name"
           allowClear
           value={keyword}
           onChange={(e) => onKeywordChange(e.target.value)}
-          onPressEnter={onSearch}
           style={{ width: 260 }}
           prefix={<SearchOutlined />}
         />
-
-        {/* Buttons */}
-        <Button
-          icon={<SearchOutlined />}
-          onClick={onSearch}
-          className="btn-search"
-        >
-          Search
-        </Button>
 
         <Button
           className="accounts-reset-btn"

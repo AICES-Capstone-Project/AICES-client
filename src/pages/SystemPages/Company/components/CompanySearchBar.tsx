@@ -30,9 +30,6 @@ export default function CompanySearchBar({
 }: CompanySearchBarProps) {
   const pageSize = pagination.pageSize || defaultPageSize;
 
-  const doSearch = () =>
-    applyFilterAndPaging(allCompanies, keyword, 1, pageSize);
-
   const doReset = () => {
     setKeyword("");
     applyFilterAndPaging(allCompanies, "", 1, pageSize);
@@ -48,20 +45,11 @@ export default function CompanySearchBar({
           onChange={(e) => {
             const v = e.target.value;
             setKeyword(v);
-            applyFilterAndPaging(allCompanies, v, 1, pageSize);
+            applyFilterAndPaging(allCompanies, v, 1, pageSize); // ✅ realtime
           }}
-          onPressEnter={doSearch}
           style={{ width: 360 }}
           prefix={<SearchOutlined />}
         />
-
-        <Button
-          icon={<SearchOutlined />}
-          className="btn-search"
-          onClick={doSearch}
-        >
-          Search
-        </Button>
 
         <Button
           className="accounts-reset-btn"

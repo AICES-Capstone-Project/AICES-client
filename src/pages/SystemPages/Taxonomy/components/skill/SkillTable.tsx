@@ -25,11 +25,17 @@ export default function SkillTable({
 }: SkillTableProps) {
   const columns: ColumnsType<Skill> = [
     {
-      title: "ID",
-      dataIndex: "skillId",
+      title: "No.",
+      key: "no",
       width: 80,
       align: "center",
+      render: (_: any, __: any, index: number) => {
+        const current = pagination.current ?? 1;
+        const pageSize = pagination.pageSize ?? 10;
+        return (current - 1) * pageSize + index + 1;
+      },
     },
+
     {
       title: "Name",
       dataIndex: "name",

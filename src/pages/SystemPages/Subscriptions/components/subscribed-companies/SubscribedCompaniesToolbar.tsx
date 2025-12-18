@@ -1,49 +1,61 @@
-import { Input, Space, Button } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { Button, Input, Select, Space } from "antd";
+import { ReloadOutlined, SearchOutlined } from "@ant-design/icons";
 
 interface SubscribedCompaniesToolbarProps {
-  onSearch: (value: string) => void;
+  search: string;
+  onSearchChange: (value: string) => void;
+
+  planFilter?: string;
+  planOptions: { label: string; value: string }[];
+  onPlanChange: (value?: string) => void;
+
+  onReset: () => void;
 }
 
 export default function SubscribedCompaniesToolbar({
-  onSearch,
+  search,
+  onSearchChange,
+  planFilter,
+  planOptions,
+  onPlanChange,
+  onReset,
 }: SubscribedCompaniesToolbarProps) {
-  const [value, setValue] = useState("");
-
-  // Realtime search
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setValue(val);
-    onSearch(val);
-  };
-
   return (
-    <Space
-      style={{
-        width: "100%",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      {/* Input + Button giống Company */}
-      <Space>
-        <div className="search-input-wrapper">
-          <SearchOutlined className="search-input-icon" />
-          <Input
-            placeholder="Search companies or plans..."
-            value={value}
-            onChange={handleChange}
-            className="search-input"
-          />
-        </div>
+    <div className="company-header-row">
+      {/* LEFT - realtime search */}
+      <div className="company-left">
+        <Input
+          placeholder="Search companies or plans..."
+          value={search}
+          onChange={(e) => onSearchChange(e.target.value)}
+          allowClear
+          className="toolbar-search-input"
+          prefix={<SearchOutlined />}
+          style={{ height: 36 }}
+        />
+      </div>
 
-        <Button className="btn-search">
-          <SearchOutlined />
-          Search
-        </Button>
-      </Space>
-    </Space>
+      {/* RIGHT - plan filter + reset */}
+      <div className="company-right">
+        <Space size="middle">
+          <Select
+            allowClear
+            placeholder="Subscription plan"
+            value={planFilter}
+            options={planOptions}
+            onChange={(value) => onPlanChange(value)}
+            style={{ minWidth: 160 }}
+          />
+
+          <Button
+            className="accounts-reset-btn"
+            icon={<ReloadOutlined />}
+            onClick={onReset}
+          >
+            Reset
+          </Button>
+        </Space>
+      </div>
+    </div>
   );
 }

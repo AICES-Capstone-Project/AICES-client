@@ -29,8 +29,9 @@ export default function LanguageList() {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [editingLanguage, setEditingLanguage] =
-    useState<LanguageEntity | null>(null);
+  const [editingLanguage, setEditingLanguage] = useState<LanguageEntity | null>(
+    null
+  );
 
   const [form] = Form.useForm<LanguageFormValues>();
 
@@ -118,10 +119,9 @@ export default function LanguageList() {
       }
 
       if (editingLanguage) {
-        await languageSystemService.updateLanguage(
-          editingLanguage.languageId,
-          { name }
-        );
+        await languageSystemService.updateLanguage(editingLanguage.languageId, {
+          name,
+        });
         message.success("Language updated successfully.");
       } else {
         await languageSystemService.createLanguage({ name });
@@ -168,22 +168,12 @@ export default function LanguageList() {
   return (
     <div>
       <Card className="aices-card">
-        <div className="company-header-row">
-          <div className="company-left">
-            <LanguageToolbar
-              keyword={keyword}
-              onKeywordChange={setKeyword}
-              onSearch={() =>
-                fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE)
-              }
-              onReset={() => {
-                setKeyword("");
-                fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
-              }}
-              onCreate={openCreateModal}
-            />
-          </div>
-        </div>
+        <LanguageToolbar
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onReset={() => setKeyword("")}
+          onCreate={openCreateModal}
+        />
 
         <div className="accounts-table-wrapper">
           <LanguageTable

@@ -29,11 +29,13 @@ export default function PlansTable({
 
   const columns: ColumnsType<SubscriptionPlan> = [
     {
-      title: "ID",
-      dataIndex: "subscriptionId",
+      title: "No.",
+      key: "no",
       width: 70,
       align: "center",
+      render: (_: any, __: any, index: number) => index + 1,
     },
+
     {
       title: "Plan",
       dataIndex: "name",

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, Form, message } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
 
@@ -13,12 +13,18 @@ const DEFAULT_PAGE_SIZE = 10;
 
 export default function SpecializationList() {
   const [loading, setLoading] = useState(false);
-  const [specializations, setSpecializations] = useState<Specialization[]>([]);
+
+  // ✅ raw list
+  const [allSpecializations, setAllSpecializations] = useState<Specialization[]>(
+    []
+  );
+
   const [keyword, setKeyword] = useState("");
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: DEFAULT_PAGE_SIZE,
     showSizeChanger: true,
+    total: 0,
   });
 
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -26,12 +32,12 @@ export default function SpecializationList() {
     useState<Specialization | null>(null);
   const [form] = Form.useForm();
 
-  const fetchData = async (page = 1, pageSize = DEFAULT_PAGE_SIZE) => {
+  const fetchData = async () => {
     setLoading(true);
     try {
       const response = await specializationService.getSpecializationsSystem({
-      page: 1,
-      pageSize: 1000,
+        page: 1,
+        pageSize: 1000,
       });
 
       const apiRes = response.data;
@@ -40,55 +46,73 @@ export default function SpecializationList() {
         message.error(
           apiRes.message || "Failed to load specializations. Please try again."
         );
-        setSpecializations([]);
-        setPagination((prev) => ({
-          ...prev,
-          current: page,
-          pageSize,
-        }));
+        setAllSpecializations([]);
+        setPagination((prev) => ({ ...prev, total: 0 }));
         return;
       }
 
-      // apiRes.data có thể là mảng hoặc object { specializations: [] }
       const payload = apiRes.data as any;
       const list: Specialization[] = Array.isArray(payload)
         ? payload
         : payload.specializations ?? [];
 
-      setSpecializations(list);
-      setPagination((prev) => ({
-        ...prev,
-        current: page,
-        pageSize,
-      }));
+      setAllSpecializations(list);
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error(error);
       message.error("Failed to load specializations. Please try again.");
+      setAllSpecializations([]);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData(
-      pagination.current || 1,
-      pagination.pageSize || DEFAULT_PAGE_SIZE
-    );
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleTableChange = (pag: TablePaginationConfig) => {
-    fetchData(pag.current, pag.pageSize);
-  };
+  // ✅ Realtime filter (FE)
+  const filteredSpecializations = useMemo(() => {
+    const kw = keyword.trim().toLowerCase();
+    if (!kw) return allSpecializations;
 
-  const handleSearch = () => {
-    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+    return allSpecializations.filter((item) =>
+      `${item.name ?? ""} ${item.categoryName ?? ""}`
+        .toLowerCase()
+        .includes(kw)
+    );
+  }, [allSpecializations, keyword]);
+
+  // ✅ update total + reset về page 1 khi keyword đổi
+  useEffect(() => {
+    setPagination((prev) => ({
+      ...prev,
+      current: 1,
+      total: filteredSpecializations.length,
+    }));
+  }, [filteredSpecializations.length]);
+
+  // ✅ FE paging (slice)
+  const pagedSpecializations = useMemo(() => {
+    const current = pagination.current || 1;
+    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
+    const start = (current - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredSpecializations.slice(start, end);
+  }, [filteredSpecializations, pagination.current, pagination.pageSize]);
+
+  const handleTableChange = (pag: TablePaginationConfig) => {
+    setPagination((prev) => ({
+      ...prev,
+      current: pag.current || 1,
+      pageSize: pag.pageSize || DEFAULT_PAGE_SIZE,
+    }));
   };
 
   const handleReset = () => {
     setKeyword("");
-    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+    setPagination((prev) => ({ ...prev, current: 1 }));
+    // ✅ không cần fetch lại vì đã FE filter, trừ khi bạn muốn reload data mới
   };
 
   const openCreateModal = () => {
@@ -111,16 +135,12 @@ export default function SpecializationList() {
       setLoading(true);
       await specializationService.delete(record.specializationId);
       message.success("Specialization deleted successfully.");
-      fetchData(
-        pagination.current || 1,
-        pagination.pageSize || DEFAULT_PAGE_SIZE
-      );
+      await fetchData();
     } catch (error: any) {
-      // eslint-disable-next-line no-console
       console.error("Failed to delete specialization", error);
-      const msg =
-        error?.response?.data?.message || "Failed to delete specialization.";
-      message.error(msg);
+      message.error(
+        error?.response?.data?.message || "Failed to delete specialization."
+      );
     } finally {
       setLoading(false);
     }
@@ -131,7 +151,7 @@ export default function SpecializationList() {
       const values = await form.validateFields();
 
       const payload = {
-        name: values.name as string,
+        name: (values.name as string).trim(),
         categoryId: Number(values.categoryId),
       };
 
@@ -151,18 +171,13 @@ export default function SpecializationList() {
       setIsModalVisible(false);
       setEditingSpecialization(null);
       form.resetFields();
-      fetchData(
-        pagination.current || 1,
-        pagination.pageSize || DEFAULT_PAGE_SIZE
-      );
+      await fetchData();
     } catch (error: any) {
       if (error?.errorFields) return;
-
-      // eslint-disable-next-line no-console
       console.error("Failed to save specialization", error);
-      const msg =
-        error?.response?.data?.message || "Failed to save specialization.";
-      message.error(msg);
+      message.error(
+        error?.response?.data?.message || "Failed to save specialization."
+      );
     } finally {
       setLoading(false);
     }
@@ -174,33 +189,20 @@ export default function SpecializationList() {
     form.resetFields();
   };
 
-  const filteredSpecializations = specializations.filter((item) =>
-    `${item.name} ${item.categoryName || ""}`
-      .toLowerCase()
-      .includes(keyword.toLowerCase())
-  );
-
   return (
     <div>
       <Card className="aices-card">
-        {/* 🔥 TOP BAR CHUẨN SYSTEM */}
-        <div className="company-header-row">
-          <div className="company-left">
-            <SpecializationToolbar
-              keyword={keyword}
-              onKeywordChange={setKeyword}
-              onSearch={handleSearch}
-              onReset={handleReset}
-              onCreate={openCreateModal}
-            />
-          </div>
-        </div>
+        <SpecializationToolbar
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onReset={handleReset}
+          onCreate={openCreateModal}
+        />
 
-        {/* TABLE */}
         <div className="accounts-table-wrapper">
           <SpecializationTable
             loading={loading}
-            data={filteredSpecializations}
+            data={pagedSpecializations}
             pagination={{
               ...pagination,
               total: filteredSpecializations.length,

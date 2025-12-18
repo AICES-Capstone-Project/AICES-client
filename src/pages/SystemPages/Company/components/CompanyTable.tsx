@@ -1,10 +1,4 @@
-import {
-  Button,
-  Space,
-  Table,
-  Tooltip,
-  Popconfirm,
-} from "antd";
+import { Button, Space, Table, Tooltip, Popconfirm, Avatar } from "antd";
 
 import { useAppSelector } from "../../../../hooks/redux";
 
@@ -51,25 +45,43 @@ export default function CompanyTable({
 
   const columns: ColumnsType<Company> = [
     {
-      title: "ID",
-      dataIndex: "companyId",
+      title: "No.",
+      key: "no",
       width: 60,
       align: "center",
+      render: (_: any, __: any, index: number) => {
+        const current = pagination.current ?? 1;
+        const pageSize = pagination.pageSize ?? defaultPageSize;
+        return (current - 1) * pageSize + index + 1;
+      },
     },
 
     {
       title: "Company",
       dataIndex: "name",
-      render: (_, r) => (
-        <div className="accounts-user-cell">
-          <img src={r.logoUrl || ""} alt="logo" className="company-logo" />
+      render: (_: any, r) => {
+        const hasLogo = !!r.logoUrl && r.logoUrl.trim() !== "";
 
-          <div className="accounts-user-text">
-            <div className="name">{r.name}</div>
-            <div className="email">{r.address || "—"}</div>
+        return (
+          <div className="accounts-user-cell">
+            <Avatar
+              shape="square"
+              size={32}
+              src={hasLogo ? r.logoUrl : undefined}
+              className={`company-logo-fixed ${
+                hasLogo ? "" : "company-logo-default"
+              }`}
+            >
+              {(r.name || "C").charAt(0).toUpperCase()}
+            </Avatar>
+
+            <div className="accounts-user-text">
+              <div className="name">{r.name}</div>
+              <div className="email">{r.address || "—"}</div>
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
 
     {
@@ -215,8 +227,6 @@ export default function CompanyTable({
                 onClick={() => onSuspend(record.companyId)}
               />
             </Tooltip>
-
-          
           </Space>
         );
       },
@@ -245,8 +255,6 @@ export default function CompanyTable({
           })
         }
       />
-
-      
     </>
   );
 }

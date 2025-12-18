@@ -126,7 +126,10 @@ export default function SkillList() {
       setEditingSkill(null);
       form.resetFields();
 
-      fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+      fetchData(
+        pagination.current || 1,
+        pagination.pageSize || DEFAULT_PAGE_SIZE
+      );
     } catch (error) {
       console.error(error);
       message.error("Something went wrong. Please try again.");
@@ -141,7 +144,10 @@ export default function SkillList() {
       await skillService.deleteSkillSystem(id);
       message.success("Skill deleted successfully.");
 
-      fetchData(pagination.current || 1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+      fetchData(
+        pagination.current || 1,
+        pagination.pageSize || DEFAULT_PAGE_SIZE
+      );
     } catch (error) {
       console.error(error);
       message.error("Failed to delete skill. Please try again.");
@@ -157,20 +163,15 @@ export default function SkillList() {
   return (
     <div>
       <Card className="aices-card">
-        <div className="company-header-row">
-          <div className="company-left">
-            <SkillToolbar
-              keyword={keyword}
-              onKeywordChange={setKeyword}
-              onSearch={() => fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE)}
-              onReset={() => {
-                setKeyword("");
-                fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
-              }}
-              onCreate={openCreateModal}
-            />
-          </div>
-        </div>
+        <SkillToolbar
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onReset={() => {
+            setKeyword("");
+            fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
+          }}
+          onCreate={openCreateModal}
+        />
 
         <div className="accounts-table-wrapper">
           <SkillTable

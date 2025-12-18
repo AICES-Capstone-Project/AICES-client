@@ -4,14 +4,14 @@ import { SearchOutlined, ReloadOutlined, PlusOutlined } from "@ant-design/icons"
 interface CategoryToolbarProps {
   keyword: string;
   onKeywordChange: (value: string) => void;
-  onReload: () => void;
+  onReset: () => void;
   onCreate: () => void;
 }
 
 export default function CategoryToolbar({
   keyword,
   onKeywordChange,
-  onReload,
+  onReset,
   onCreate,
 }: CategoryToolbarProps) {
   return (
@@ -22,17 +22,16 @@ export default function CategoryToolbar({
           allowClear
           value={keyword}
           onChange={(e) => onKeywordChange(e.target.value)}
-          onPressEnter={onReload}
           prefix={<SearchOutlined />}
           className="toolbar-search-input"
           style={{ width: 300 }}
         />
 
-        <Button icon={<SearchOutlined />} className="btn-search" onClick={onReload}>
-          Search
-        </Button>
-
-        <Button icon={<ReloadOutlined />} className="accounts-reset-btn" onClick={onReload}>
+        <Button
+          icon={<ReloadOutlined />}
+          className="accounts-reset-btn"
+          onClick={onReset}
+        >
           Reset
         </Button>
       </div>

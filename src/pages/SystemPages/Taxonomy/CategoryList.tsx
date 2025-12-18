@@ -162,24 +162,13 @@ export default function CategoryList() {
   return (
     <div>
       <Card className="aices-card">
-        {/* HÀNG TOP — Search + Reset + New Category */}
-        <div className="company-header-row">
-          <div className="company-left">
-            <CategoryToolbar
-              keyword={keyword}
-              onKeywordChange={setKeyword}
-              onReload={() =>
-                fetchData(
-                  pagination.current || 1,
-                  pagination.pageSize || DEFAULT_PAGE_SIZE
-                )
-              }
-              onCreate={openCreateModal}
-            />
-          </div>
-        </div>
+        <CategoryToolbar
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onReset={() => setKeyword("")}
+          onCreate={openCreateModal}
+        />
 
-        {/* TABLE WRAPPER */}
         <div className="accounts-table-wrapper">
           <CategoryTable
             loading={loading}

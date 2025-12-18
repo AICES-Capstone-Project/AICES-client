@@ -22,7 +22,18 @@ export default function FeedbackTable({
   formatDate,
 }: FeedbackTableProps) {
   const columns: ColumnsType<FeedbackEntity> = [
-    { title: "ID", dataIndex: "feedbackId", width: 90, align: "center" },
+    {
+      title: "No.",
+      key: "no",
+      width: 90,
+      align: "center",
+      render: (_: any, __: any, index: number) => {
+        const current = pagination.current ?? 1;
+        const pageSize = pagination.pageSize ?? 10;
+        return (current - 1) * pageSize + index + 1;
+      },
+    },
+
     {
       title: "User Name",
       dataIndex: "userName",

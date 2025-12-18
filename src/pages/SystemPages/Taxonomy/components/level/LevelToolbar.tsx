@@ -1,10 +1,13 @@
 import { Button, Input } from "antd";
-import { PlusOutlined, ReloadOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  PlusOutlined,
+  ReloadOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 
 interface LevelToolbarProps {
   keyword: string;
   onKeywordChange: (value: string) => void;
-  onSearch: () => void;
   onReset: () => void;
   onCreate: () => void;
 }
@@ -12,7 +15,6 @@ interface LevelToolbarProps {
 export default function LevelToolbar({
   keyword,
   onKeywordChange,
-  onSearch,
   onReset,
   onCreate,
 }: LevelToolbarProps) {
@@ -25,13 +27,8 @@ export default function LevelToolbar({
           value={keyword}
           prefix={<SearchOutlined />}
           onChange={(e) => onKeywordChange(e.target.value)}
-          onPressEnter={onSearch}
           style={{ width: 260 }}
         />
-
-        <Button className="btn-search" icon={<SearchOutlined />} onClick={onSearch}>
-          Search
-        </Button>
 
         <Button
           className="accounts-reset-btn"

@@ -163,22 +163,12 @@ export default function LevelList() {
   return (
     <div>
       <Card className="aices-card">
-        <div className="company-header-row">
-          <div className="company-left">
-            <LevelToolbar
-              keyword={keyword}
-              onKeywordChange={setKeyword}
-              onSearch={() =>
-                fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE)
-              }
-              onReset={() => {
-                setKeyword("");
-                fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE);
-              }}
-              onCreate={openCreateModal}
-            />
-          </div>
-        </div>
+        <LevelToolbar
+          keyword={keyword}
+          onKeywordChange={setKeyword}
+          onReset={() => setKeyword("")}
+          onCreate={openCreateModal}
+        />
 
         <div className="accounts-table-wrapper">
           <LevelTable

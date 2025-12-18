@@ -126,14 +126,15 @@ export default function Accounts() {
     fetchData();
   }, [fetchData]);
 
-  const onSearch = () => {
-    setPagination({ ...pagination, current: 1 });
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, current: 1 }));
     fetchData(1, pageSize, keyword);
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyword]);
 
   const onReset = () => {
     setKeyword("");
-    setPagination({ ...pagination, current: 1 });
+    setPagination((prev) => ({ ...prev, current: 1 }));
     fetchData(1, pageSize, "");
   };
 
@@ -284,7 +285,6 @@ export default function Accounts() {
           <AccountsToolbar
             keyword={keyword}
             onKeywordChange={setKeyword}
-            onSearch={onSearch}
             onReset={onReset}
             onOpenCreate={() => setIsCreateOpen(true)}
           />

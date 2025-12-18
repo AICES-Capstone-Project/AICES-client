@@ -1,4 +1,4 @@
-import { Button, Space, Table, Tag, Tooltip, Popconfirm, Avatar  } from "antd";
+import { Button, Space, Table, Tag, Tooltip, Popconfirm, Avatar } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import {
   EyeOutlined,
@@ -9,8 +9,6 @@ import {
 } from "@ant-design/icons";
 import type { User } from "../../../../types/user.types";
 import { CrownOutlined } from "@ant-design/icons";
-
-
 
 interface AccountsTableProps {
   loading: boolean;
@@ -37,57 +35,71 @@ export default function AccountsTable({
   onDelete,
 }: AccountsTableProps) {
   const columns: ColumnsType<User> = [
-    { title: "ID", dataIndex: "userId", width: 80 },
+    {
+      title: "No.",
+      key: "no",
+      width: 80,
+      align: "center",
+      render: (_: any, __: any, index: number) => {
+        const current = pagination.current ?? 1;
+        const pageSize = pagination.pageSize ?? 10;
+        return (current - 1) * pageSize + index + 1;
+      },
+    },
+
     {
       title: "User",
       dataIndex: "email",
-      render: (_: any, record) => (
-        <div className="accounts-user-cell">
-          <Avatar
-            src={record.avatarUrl}
-            alt={record.fullName || record.email}
-            size="large"
-            className="accounts-user-avatar"
-          >
-            {(record.fullName || record.email)?.charAt(0).toUpperCase()}
-          </Avatar>
+      render: (_: any, record) => {
+        const hasAvatar = !!record.avatarUrl && record.avatarUrl.trim() !== "";
 
-          <div className="accounts-user-text">
-            <div className="name">{record.fullName || "—"}</div>
-            <div className="email">{record.email}</div>
+        return (
+          <div className="accounts-user-cell">
+            <Avatar
+              src={hasAvatar ? record.avatarUrl : undefined}
+              alt={record.fullName || record.email}
+              size="large"
+              className={`accounts-user-avatar ${
+                hasAvatar ? "" : "accounts-avatar-default"
+              }`}
+            >
+              {(record.fullName || record.email)?.charAt(0).toUpperCase()}
+            </Avatar>
+
+            <div className="accounts-user-text">
+              <div className="name">{record.fullName || "—"}</div>
+              <div className="email">{record.email}</div>
+            </div>
           </div>
-        </div>
-      ),
+        );
+      },
     },
+
     {
-  title: "Role",
-  dataIndex: "roleName",
-  width: 160,
-  render: (role: string) => {
-    const isSystem = role.startsWith("System");
-    const isSuperAdmin =
-      role === "System_Admin" || role === "System Admin";
+      title: "Role",
+      dataIndex: "roleName",
+      width: 160,
+      render: (role: string) => {
+        const isSystem = role.startsWith("System");
+        const isSuperAdmin = role === "System_Admin" || role === "System Admin";
 
-    const type = isSystem ? "system" : "hr";
+        const type = isSystem ? "system" : "hr";
 
-    // Hiển thị đẹp hơn: đổi "_" thành " "
-    const label = role.replace(/_/g, " ");
+        // Hiển thị đẹp hơn: đổi "_" thành " "
+        const label = role.replace(/_/g, " ");
 
-    return (
-      <Tag
-        className={`role-tag role-tag-${type} ${
-          isSuperAdmin ? "role-tag-super-admin" : ""
-        }`}
-      >
-        {isSuperAdmin && (
-          <CrownOutlined className="role-tag-icon" />
-        )}
-        {label}
-      </Tag>
-    );
-  },
-},
-
+        return (
+          <Tag
+            className={`role-tag role-tag-${type} ${
+              isSuperAdmin ? "role-tag-super-admin" : ""
+            }`}
+          >
+            {isSuperAdmin && <CrownOutlined className="role-tag-icon" />}
+            {label}
+          </Tag>
+        );
+      },
+    },
 
     {
       title: "Status",

@@ -1,6 +1,4 @@
-// src/pages/SystemPages/Taxonomy/RecruitmentTypeList.tsx
-
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card, Form, message } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
 
@@ -15,9 +13,9 @@ const DEFAULT_PAGE_SIZE = 10;
 
 export default function RecruitmentTypeList() {
   const [loading, setLoading] = useState(false);
-  const [recruitmentTypes, setRecruitmentTypes] = useState<RecruitmentType[]>(
-    []
-  );
+
+  // ✅ raw list
+  const [allTypes, setAllTypes] = useState<RecruitmentType[]>([]);
   const [keyword, setKeyword] = useState("");
 
   const [pagination, setPagination] = useState<TablePaginationConfig>({
@@ -31,79 +29,81 @@ export default function RecruitmentTypeList() {
   const [editingItem, setEditingItem] = useState<RecruitmentType | null>(null);
   const [form] = Form.useForm();
 
-  // ✅ giống pattern các file trước: page/pageSize + keyword
-  const fetchData = async (
-    page = 1,
-    pageSize = DEFAULT_PAGE_SIZE,
-    searchKeyword: string = keyword
-  ) => {
+  // ✅ fetch full list (FE search)
+  const fetchData = async () => {
     try {
       setLoading(true);
 
       const response = await recruitmentTypeService.getAll({
-        page,
-        pageSize,
-        keyword: searchKeyword?.trim() ? searchKeyword.trim() : undefined,
+        page: 1,
+        pageSize: 1000,
+        keyword: undefined, // ✅ không search BE nữa
       });
 
       const apiRes = response.data;
 
       if (apiRes.status !== "Success" || !apiRes.data) {
         message.error(apiRes.message || "Failed to load recruitment types");
-        setRecruitmentTypes([]);
-        setPagination((prev) => ({
-          ...prev,
-          current: page,
-          pageSize,
-          total: 0,
-        }));
+        setAllTypes([]);
+        setPagination((prev) => ({ ...prev, total: 0 }));
         return;
       }
 
       const payload = apiRes.data;
-
-      // ✅ BE trả data.employmentTypes
-      setRecruitmentTypes(payload.employmentTypes || []);
-
-      setPagination((prev) => ({
-        ...prev,
-        current: payload.currentPage ?? page,
-        pageSize: payload.pageSize ?? pageSize,
-        total: payload.totalCount ?? 0,
-        showSizeChanger: true,
-      }));
+      setAllTypes(payload.employmentTypes || []);
     } catch (error: any) {
       message.error(
         error?.response?.data?.message ||
           "Failed to load recruitment types. Please try again."
       );
+      setAllTypes([]);
+      setPagination((prev) => ({ ...prev, total: 0 }));
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData(1, DEFAULT_PAGE_SIZE, "");
+    fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ✅ realtime filter (case-insensitive)
+  const filteredTypes = useMemo(() => {
+    const kw = keyword.trim().toLowerCase();
+    if (!kw) return allTypes;
+    return allTypes.filter((t) => (t.name ?? "").toLowerCase().includes(kw));
+  }, [allTypes, keyword]);
+
+  // ✅ update total + reset về page 1 khi keyword đổi
+  useEffect(() => {
+    setPagination((prev) => ({
+      ...prev,
+      current: 1,
+      total: filteredTypes.length,
+    }));
+  }, [filteredTypes.length]);
+
+  // ✅ FE paging slice
+  const pagedTypes = useMemo(() => {
+    const current = pagination.current || 1;
+    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
+    const start = (current - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredTypes.slice(start, end);
+  }, [filteredTypes, pagination.current, pagination.pageSize]);
+
   const handleTableChange = (pag: TablePaginationConfig) => {
-    const current = pag.current || 1;
-    const size = pag.pageSize || DEFAULT_PAGE_SIZE;
-
-    setPagination((prev) => ({ ...prev, current, pageSize: size }));
-    fetchData(current, size, keyword);
-  };
-
-  const handleSearch = (value: string) => {
-    const trimmed = value.trim();
-    setKeyword(trimmed);
-    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE, trimmed);
+    setPagination((prev) => ({
+      ...prev,
+      current: pag.current || 1,
+      pageSize: pag.pageSize || DEFAULT_PAGE_SIZE,
+    }));
   };
 
   const handleReset = () => {
     setKeyword("");
-    fetchData(1, pagination.pageSize || DEFAULT_PAGE_SIZE, "");
+    setPagination((prev) => ({ ...prev, current: 1 }));
   };
 
   const openCreateModal = () => {
@@ -129,7 +129,6 @@ export default function RecruitmentTypeList() {
       }
 
       if (editingItem) {
-        // ✅ type mới: employTypeId
         await recruitmentTypeService.update(editingItem.employTypeId, { name });
         message.success("Recruitment type updated successfully.");
       } else {
@@ -140,11 +139,7 @@ export default function RecruitmentTypeList() {
       setIsModalOpen(false);
       setEditingItem(null);
       form.resetFields();
-
-      fetchData(
-        pagination.current || 1,
-        pagination.pageSize || DEFAULT_PAGE_SIZE
-      );
+      await fetchData();
     } catch (error: any) {
       if (error?.errorFields) return;
       message.error(
@@ -159,10 +154,7 @@ export default function RecruitmentTypeList() {
       setLoading(true);
       await recruitmentTypeService.remove(id);
       message.success("Recruitment type deleted successfully.");
-      fetchData(
-        pagination.current || 1,
-        pagination.pageSize || DEFAULT_PAGE_SIZE
-      );
+      await fetchData();
     } catch (error: any) {
       message.error(
         error?.response?.data?.message ||
@@ -173,11 +165,6 @@ export default function RecruitmentTypeList() {
     }
   };
 
-  // ✅ UI giữ nguyên: filter FE trong page hiện tại
-  const filteredData = recruitmentTypes.filter((item) =>
-    (item.name ?? "").toLowerCase().includes(keyword.toLowerCase())
-  );
-
   return (
     <div>
       <Card className="aices-card">
@@ -186,7 +173,6 @@ export default function RecruitmentTypeList() {
             <RecruitmentTypeToolbar
               keyword={keyword}
               onKeywordChange={setKeyword}
-              onSearch={handleSearch}
               onReset={handleReset}
               onCreate={openCreateModal}
             />
@@ -196,11 +182,13 @@ export default function RecruitmentTypeList() {
         <div className="accounts-table-wrapper">
           <RecruitmentTypeTable
             loading={loading}
-            data={filteredData}
-            pagination={pagination}
+            data={pagedTypes}
+            pagination={{
+              ...pagination,
+              total: filteredTypes.length,
+            }}
             onChangePage={handleTableChange}
             onEdit={openEditModal}
-            // ⚠️ nhớ truyền đúng id khi bấm delete ở Table: record.employTypeId
             onDelete={handleDelete}
           />
         </div>

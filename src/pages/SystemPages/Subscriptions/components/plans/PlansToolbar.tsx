@@ -1,48 +1,56 @@
 import { Input, Button } from "antd";
-import { ReloadOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  SearchOutlined,
+  PlusOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 
 interface PlansToolbarProps {
-  onReload: () => void;
+  keyword: string;
+  onKeywordChange: (value: string) => void;
+  onReset: () => void;
   onCreate: () => void;
 }
 
-export default function PlansToolbar({ onReload, onCreate }: PlansToolbarProps) {
+export default function PlansToolbar({
+  keyword,
+  onKeywordChange,
+  onReset,
+  onCreate,
+}: PlansToolbarProps) {
   return (
-    <div className="accounts-toolbar">
-      <div className="accounts-toolbar-left">
+    <div className="company-header-row">
+      {/* LEFT - Search realtime + Reset */}
+      <div className="company-left" style={{ display: "flex", gap: 8 }}>
         <Input
-          placeholder="Search plans..."
-          allowClear
+          placeholder="Search subscription plans..."
           prefix={<SearchOutlined />}
+          value={keyword}
+          onChange={(e) => onKeywordChange(e.target.value)}
+          allowClear
           className="toolbar-search-input"
-          style={{ width: 300 }}
+          style={{ height: 36, width: 260 }}
         />
-
-        <Button
-          className="btn-search"
-          icon={<SearchOutlined />}
-          onClick={onReload}
-        >
-          Search
-        </Button>
 
         <Button
           className="accounts-reset-btn"
           icon={<ReloadOutlined />}
-          onClick={onReload}
+          onClick={onReset}
         >
           Reset
         </Button>
       </div>
 
-      <Button
-        type="primary"
-        className="accounts-new-btn"
-        icon={<PlusOutlined />}
-        onClick={onCreate}
-      >
-        New Plan
-      </Button>
+      {/* RIGHT - Add Plan */}
+      <div className="company-right">
+        <Button
+          icon={<PlusOutlined />}
+          className="accounts-new-btn"
+          onClick={onCreate}
+        >
+          New Plan
+        </Button>
+      </div>
     </div>
   );
 }

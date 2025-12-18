@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { TablePaginationConfig } from "antd/es/table";
 import { Card, message } from "antd";
 
@@ -13,37 +13,39 @@ const DEFAULT_PAGE_SIZE = 10;
 
 export default function BannerList() {
   const [loading, setLoading] = useState(false);
-  const [banners, setBanners] = useState<BannerConfig[]>([]);
+
+  // ✅ raw list
+  const [allBanners, setAllBanners] = useState<BannerConfig[]>([]);
   const [keyword, setKeyword] = useState("");
 
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
     pageSize: DEFAULT_PAGE_SIZE,
     total: 0,
+    showSizeChanger: true,
   });
 
   const [open, setOpen] = useState(false);
   const [editData, setEditData] = useState<BannerConfig | null>(null);
 
+  // ✅ fetch full list (không search BE)
   const fetchData = async () => {
     try {
       setLoading(true);
 
       const res = await bannerService.getAllSystem({
-        page: pagination.current,
-        pageSize: pagination.pageSize,
-        search: keyword || undefined,
+        page: 1,
+        pageSize: 1000,
+        search: undefined, // ✅ FE filter only
       });
 
-      const data = res.data.data;
+      const data = res?.data?.data;
+      const list: BannerConfig[] = data?.bannerConfigs || [];
 
-      setBanners(data.bannerConfigs);
-      setPagination((prev) => ({
-        ...prev,
-        total: data.totalPages * (prev.pageSize || DEFAULT_PAGE_SIZE),
-      }));
-    } catch (error) {
+      setAllBanners(list);
+    } catch {
       message.error("Failed to load banners");
+      setAllBanners([]);
     } finally {
       setLoading(false);
     }
@@ -52,12 +54,41 @@ export default function BannerList() {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.current, keyword]);
+  }, []);
+
+  // ✅ realtime filter (case-insensitive)
+  const filtered = useMemo(() => {
+    const kw = keyword.trim().toLowerCase();
+    if (!kw) return allBanners;
+
+    return allBanners.filter((b) =>
+      String(b.title || "").toLowerCase().includes(kw)
+    );
+  }, [allBanners, keyword]);
+
+  // ✅ update total + reset page when keyword changes
+  useEffect(() => {
+    setPagination((prev) => ({
+      ...prev,
+      current: 1,
+      total: filtered.length,
+    }));
+  }, [filtered.length]);
+
+  // ✅ slice for table
+  const paged = useMemo(() => {
+    const current = pagination.current || 1;
+    const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
+    const start = (current - 1) * pageSize;
+    const end = start + pageSize;
+    return filtered.slice(start, end);
+  }, [filtered, pagination.current, pagination.pageSize]);
 
   const handleTableChange = (p: TablePaginationConfig) => {
     setPagination((prev) => ({
       ...prev,
       current: p.current || 1,
+      pageSize: p.pageSize || prev.pageSize || DEFAULT_PAGE_SIZE,
     }));
   };
 
@@ -71,15 +102,10 @@ export default function BannerList() {
     }
   };
 
-  const handleSearch = () => {
-    // reset về page 1 rồi effect fetch lại
-    setPagination((prev) => ({
-      ...prev,
-      current: 1,
-    }));
-  };
-
   const handleReload = () => {
+    // ✅ đúng nghĩa Reload: refetch + clear search + back page 1
+    setKeyword("");
+    setPagination((prev) => ({ ...prev, current: 1 }));
     fetchData();
   };
 
@@ -96,32 +122,31 @@ export default function BannerList() {
   return (
     <div>
       <Card className="aices-card">
-        {/* 🔥 TOP BAR CHUẨN SYSTEM */}
         <div className="company-header-row">
           <div className="company-left">
             <BannerToolbar
               keyword={keyword}
               onKeywordChange={setKeyword}
-              onSearch={handleSearch}
               onReload={handleReload}
               onCreate={handleOpenCreate}
             />
           </div>
         </div>
 
-        {/* TABLE */}
         <div className="accounts-table-wrapper">
           <BannerTable
             loading={loading}
-            data={banners}
-            pagination={pagination}
+            data={paged}
+            pagination={{
+              ...pagination,
+              total: filtered.length,
+            }}
             onChangePage={handleTableChange}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
         </div>
 
-        {/* MODAL */}
         {open && (
           <BannerModal
             open={open}

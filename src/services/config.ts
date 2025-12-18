@@ -369,9 +369,16 @@ export const API_ENDPOINTS = {
 
     // Delete a resume
     COMPANY_DELETE: (applicationId: number) => `/resumes/${applicationId}`,
+    // Adjusted score for a resume application
+    ADJUSTED_SCORE: (applicationId: number) => `/resume-applications/${applicationId}/adjusted-score`,
     // Applications associated with a candidate's resume
     APPLICATIONS_BY_RESUME: (resumeId: number) => `/candidates/resumes/${resumeId}/applications`,
     APPLICATION_BY_ID: (resumeId: number, applicationId: number) => `/candidates/resumes/${resumeId}/applications/${applicationId}`,
+    // Resume comparison endpoints
+    COMPARE: `/resumes/compare`,
+    COMPARISON_RESULT_AI: `/resumes/result/ai/comparison`,
+    GET_COMPARISON_BY_ID: (comparisonId: number) => `/resumes/comparisons/${comparisonId}`,
+    GET_COMPARISONS_BY_JOB_CAMPAIGN: (jobId: number, campaignId: number) => `/resumes/comparisons/job/${jobId}/campaign/${campaignId}`,
   },
 
   CAMPAIGN: {
@@ -567,7 +574,7 @@ export const APP_ROUTES = {
   COMPANY_AI_SCREENING: "/company/ai-screening",
   COMPANY_AI_SCREENING_RESUMES:
     "/company/ai-screening/:campaignId/:jobId/resumes",
-  COMPANY_CANDIDATE_COMPARE: "/company/candidate/compare",
+  COMPANY_AI_SCREENING_RESUMES_COMPARE: "/company/ai-screening/:campaignId/:jobId/resumes/compare",
   COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
   COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
   COMPANY_PAYMENT_HISTORY: "/company/payment-history",

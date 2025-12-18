@@ -12,6 +12,9 @@ import {
 	SearchOutlined,
 } from "@ant-design/icons";
 import resumeService from "../../../services/resumeService";
+import { APP_ROUTES } from "../../../services/config";
+import { Swords } from "lucide-react";
+// APP_ROUTES not needed here after wiring compare modal
 import { toastError, toastSuccess } from "../../../components/UI/Toast";
 import { useResumeSignalR } from "../../../hooks/useResumeSignalR";
 import ScoreFilter from "./component/ScoreFilter";
@@ -43,6 +46,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 	const [loadingDetail, setLoadingDetail] = useState(false);
 	const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
 	const [uploading, setUploading] = useState(false);
+	const tableRef = useRef<{ openCompare: () => void } | null>(null);
 	// removed batch-delete state
 	// removed selectedRowKeys/editMode/multi-delete related state
 	const [currentPage, setCurrentPage] = useState(1);
@@ -110,67 +114,71 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				// data may itself be the object or an object with `data` inside
 				jobData = (resp as any).data.data ?? (resp as any).data;
 			} else {
-						jobData = resp;
-					}
-					setJobTitle(jobData?.title ?? "");
-					setTargetQuantity(jobData?.targetQuantity ?? jobData?.target ?? undefined);
-				} catch (e) {
-					console.error("Failed to load job info:", e);
-				}
-			}, [jobId]);
+				jobData = resp;
+			}
+			setJobTitle(jobData?.title ?? "");
+			setTargetQuantity(jobData?.targetQuantity ?? jobData?.target ?? undefined);
+		} catch (e) {
+			console.error("Failed to load job info:", e);
+		}
+	}, [jobId]);
 
-			const loadResumes = useCallback(async () => {
-				if (!jobId) return;
-				setLoading(true);
-				try {
-					const resp = campaignId
-						? await resumeService.getByJob(Number(campaignId), Number(jobId))
-						: await resumeService.getByJob(Number(jobId));
+	const loadResumes = useCallback(async () => {
+		if (!jobId) return;
+		setLoading(true);
+		try {
+			const resp = campaignId
+				? await resumeService.getByJob(Number(campaignId), Number(jobId))
+				: await resumeService.getByJob(Number(jobId));
 
-					if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
-						const raw = resp.data as any;
-						let resumeList: any[] = [];
-						if (Array.isArray(raw)) resumeList = raw;
-						else if (Array.isArray(raw.data)) resumeList = raw.data;
-						else if (Array.isArray(raw.resumes)) resumeList = raw.resumes;
-						else if (Array.isArray(raw.items)) resumeList = raw.items;
-						else resumeList = [];
+			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
+				const raw = resp.data as any;
+				let resumeList: any[] = [];
+				if (Array.isArray(raw)) resumeList = raw;
+				else if (Array.isArray(raw.data)) resumeList = raw.data;
+				else if (Array.isArray(raw.resumes)) resumeList = raw.resumes;
+				else if (Array.isArray(raw.items)) resumeList = raw.items;
+				else resumeList = [];
 
-						const mapped: UIResume[] = resumeList.map((r: any) => ({
-							resumeId: (r.resumeId ?? r.applicationId) as number,
-							applicationId: (r.applicationId ?? r.resumeId) as number,
-							fullName: r.fullName || r.candidateName || "Unknown",
-							status: r.applicationStatus || r.status || r.stage || "Processing",
-							totalResumeScore: (r.adjustedScore ?? r.totalScore ?? null) ?? null,
-							email: r.email,
-							phoneNumber: r.phone || r.phoneNumber,
-							fileUrl: r.fileUrl,
-							aiExplanation: r.aiExplanation,
-							scoreDetails: r.scoreDetails,
-						}));
+				const mapped: UIResume[] = resumeList.map((r: any) => ({
+					resumeId: (r.resumeId ?? r.applicationId) as number,
+					applicationId: (r.applicationId ?? r.resumeId) as number,
+					fullName: r.fullName || r.candidateName || "Unknown",
+					status: r.applicationStatus || r.status || r.stage || "Processing",
+					// preserve raw scores from backend
+					totalScore: (r.totalScore ?? null) as number | null,
+					adjustedScore: (r.adjustedScore ?? null) as number | null,
+					// totalResumeScore is the value used for sorting/display when totalScore missing
+					totalResumeScore: (r.totalScore ?? r.adjustedScore ?? null) ?? null,
+					email: r.email,
+					phoneNumber: r.phone || r.phoneNumber,
+					fileUrl: r.fileUrl,
+					aiExplanation: r.aiExplanation,
+					scoreDetails: r.scoreDetails,
+				}));
 
-						const sortedList = mapped.slice().sort((a, b) => {
-							const aS = a.totalResumeScore;
-							const bS = b.totalResumeScore;
-							if (aS == null && bS == null) return a.resumeId - b.resumeId;
-							if (aS == null) return 1;
-							if (bS == null) return -1;
-							if (bS !== aS) return bS - aS;
-							return a.resumeId - b.resumeId;
-						});
+				const sortedList = mapped.slice().sort((a, b) => {
+					const aS = a.totalResumeScore;
+					const bS = b.totalResumeScore;
+					if (aS == null && bS == null) return a.resumeId - b.resumeId;
+					if (aS == null) return 1;
+					if (bS == null) return -1;
+					if (bS !== aS) return bS - aS;
+					return a.resumeId - b.resumeId;
+				});
 
-						setResumes(sortedList);
-						resumesRef.current = sortedList; // Update ref
-					} else {
-						message.error(resp?.message || "Unable to load resumes");
-					}
-				} catch (e) {
-					console.error("Failed to load resumes:", e);
-					toastError("Unable to load resumes");
-				} finally {
-					setLoading(false);
-				}
-			}, [jobId, campaignId]);
+				setResumes(sortedList);
+				resumesRef.current = sortedList; // Update ref
+			} else {
+				message.error(resp?.message || "Unable to load resumes");
+			}
+		} catch (e) {
+			console.error("Failed to load resumes:", e);
+			toastError("Unable to load resumes");
+		} finally {
+			setLoading(false);
+		}
+	}, [jobId, campaignId]);
 
 	useEffect(() => {
 		if (jobId) {
@@ -433,7 +441,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					// prefer latest ai score, otherwise fall back to top-level adjusted/total score
 					totalResumeScore:
 						latestScore?.totalResumeScore ??
-						((data as any).adjustedScore ?? (data as any).totalScore ?? null),
+						((data as any).totalScore ?? (data as any).adjustedScore ?? null),
 					email: data.email,
 					phoneNumber: data.phoneNumber,
 					fileUrl: data.fileUrl,
@@ -534,7 +542,25 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 								{jobTitle}
 							</span>
 						</div>
+
 						<div className="flex gap-2 items-center">
+							<Button
+								className="company-btn"
+								icon={<Swords size={16} />}
+								onClick={() => {
+									// Navigate to compare page for this campaign/job
+									const cid = campaignId ?? "0";
+									const jid = jobId ?? "0";
+									try {
+										navigate(`/company/ai-screening/${cid}/${jid}/resumes/compare`);
+									} catch (e) {
+										// fallback to APP_ROUTES template
+										navigate(APP_ROUTES.COMPANY_AI_SCREENING_RESUMES_COMPARE.replace(":campaignId", String(cid)).replace(":jobId", String(jid)));
+									}
+								}}
+							>
+								<span>Compare Candidate</span>
+							</Button>
 							<Button
 								className="company-btn--filled"
 								onClick={() => setUploadDrawerOpen(true)}
@@ -577,8 +603,10 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					})()}
 				</div>
 				<ResumeTable
+					ref={tableRef}
 					loading={loading}
 					dataSource={sortedResumes}
+					campaignId={campaignId}
 					currentPage={currentPage}
 					pageSize={pageSize}
 					onPageChange={(page, size) => {

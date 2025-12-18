@@ -73,7 +73,7 @@ const CandidateManagement = lazy(
 );
 const CandidateDetail = lazy(() => import("../pages/CompanyPages/Candidate/components/CandidateDetail"));
 const CompareResumes = lazy(
-  () => import("../pages/CompanyPages/AIScreening/component/CompareResumes")
+  () => import("../pages/CompanyPages/CompareResume/CompareResumes")
 );
 const CompanySubscription = lazy(
   () => import("../pages/CompanyPages/CompanySubsriptions/CompanySubscription")
@@ -266,7 +266,7 @@ export const router = createBrowserRouter([
         element: <CampaignDetail />,
       },
       {
-        path: APP_ROUTES.COMPANY_CANDIDATE_COMPARE,
+        path: APP_ROUTES.COMPANY_AI_SCREENING_RESUMES_COMPARE,
         element: <CompareResumes />,
       },
       {

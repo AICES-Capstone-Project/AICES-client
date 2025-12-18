@@ -463,7 +463,6 @@ export default function CompanyCreate() {
                               />
                             </Form.Item>
 
-                            {/* Upload file (do not bind input value to Form.Item) */}
                             <Form.Item
                               name={[field.name, "file"]}
                               style={{ flex: 1, marginBottom: 0 }}
@@ -472,77 +471,103 @@ export default function CompanyCreate() {
                               rules={[
                                 {
                                   validator: async () => {
-                                    // we read the file from form state instead of the validator value
-                                    const fields = form.getFieldValue("documents") || [];
-                                    const fileObj = fields[field.name]?.file;
+                                    const docs = form.getFieldValue("documents") || [];
+                                    const fileObj = docs[field.name]?.file;
                                     if (!fileObj) {
                                       return Promise.reject(new Error("Please select a document file"));
                                     }
                                     const validation = validateFile(fileObj);
-                                    return validation.isValid ? Promise.resolve() : Promise.reject(new Error(validation.message));
+                                    return validation.isValid
+                                      ? Promise.resolve()
+                                      : Promise.reject(new Error(validation.message));
                                   },
                                 },
                               ]}
                             >
-                              <input
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
+                              <div
                                 style={{
-                                  display: "block",
-                                  height: "32px",
-                                  lineHeight: "32px",
-                                  padding: "0 10px",
+                                  position: "relative",
+                                  height: 32,
                                   border: "1px solid #d9d9d9",
                                   borderRadius: 6,
-                                  width: "100%",
-                                  cursor: "pointer",
+                                  padding: "0 10px",
+                                  display: "flex",
+                                  alignItems: "center",
                                   background: "#fff",
-                                  color: "#bfbfbf",
+                                  cursor: "pointer",
                                 }}
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  const fields = form.getFieldValue("documents") || [];
-                                  if (!file) {
-                                    // clear file value and set error
-                                    fields[field.name] = { ...(fields[field.name] || {}), file: undefined };
+                              >
+                                {/* Fake placeholder / filename */}
+                                <span
+                                  style={{
+                                    color:
+                                      form.getFieldValue(["documents", field.name, "file"])
+                                        ? "#000"
+                                        : "#9ca3af",
+                                    fontSize: 14,
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                    pointerEvents: "none",
+                                  }}
+                                >
+                                  {form.getFieldValue(["documents", field.name, "file"])?.name ||
+                                    "Select document file"}
+                                </span>
+
+                                {/* Real file input (hidden) */}
+                                <input
+                                  type="file"
+                                  accept=".pdf,.jpg,.jpeg,.png"
+                                  style={{
+                                    position: "absolute",
+                                    inset: 0,
+                                    opacity: 0,
+                                    cursor: "pointer",
+                                  }}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    const fields = form.getFieldValue("documents") || [];
+
+                                    if (!file) {
+                                      fields[field.name] = { ...(fields[field.name] || {}), file: undefined };
+                                      form.setFieldsValue({ documents: fields });
+                                      form.setFields([
+                                        {
+                                          name: ["documents", field.name, "file"],
+                                          errors: ["Please select a document file"],
+                                        },
+                                      ]);
+                                      return;
+                                    }
+
+                                    const validation = validateFile(file);
+                                    if (!validation.isValid) {
+                                      fields[field.name] = { ...(fields[field.name] || {}), file: undefined };
+                                      form.setFieldsValue({ documents: fields });
+                                      form.setFields([
+                                        {
+                                          name: ["documents", field.name, "file"],
+                                          errors: [validation.message || "Invalid document"],
+                                        },
+                                      ]);
+                                      e.target.value = "";
+                                      return;
+                                    }
+
+                                    fields[field.name] = { ...(fields[field.name] || {}), file };
                                     form.setFieldsValue({ documents: fields });
                                     form.setFields([
                                       {
                                         name: ["documents", field.name, "file"],
-                                        errors: ["Please select a document file"],
+                                        errors: [],
                                       },
                                     ]);
-                                    return;
-                                  }
 
-                                  // Validate file
-                                  const validation = validateFile(file);
-                                  if (!validation.isValid) {
-                                    // set error on the specific field so Ant displays it inline
-                                    fields[field.name] = { ...(fields[field.name] || {}), file: undefined };
-                                    form.setFieldsValue({ documents: fields });
-                                    form.setFields([
-                                      {
-                                        name: ["documents", field.name, "file"],
-                                        errors: [validation.message || "Invalid document"],
-                                      },
-                                    ]);
-                                    e.target.value = ""; // Clear the input
-                                    return;
-                                  }
-
-                                  // Valid file: clear any previous errors and set the file into the form field
-                                  fields[field.name] = { ...(fields[field.name] || {}), file };
-                                  form.setFieldsValue({ documents: fields });
-                                  form.setFields([
-                                    {
-                                      name: ["documents", field.name, "file"],
-                                      errors: [],
-                                    },
-                                  ]);
-                                  toastSuccess("Document selected", `Selected: ${file.name}`);
-                                }}
-                              />
+                                    toastSuccess("Document selected", `Selected: ${file.name}`);
+                                  }}
+                                />
+                              </div>
                             </Form.Item>
 
                             {/* Remove button (-) */}

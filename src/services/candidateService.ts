@@ -5,7 +5,7 @@ import type { ApiResponse } from "../types/api.types";
 export const candidateService = {
   // [CHANGED] Cập nhật hàm getCandidates để nhận thêm tham số search
   getCandidates: async (
-    params?: { page?: number; pageSize?: number; search?: string }
+    params?: { page?: number; pageSize?: number; search?: string; sortBy?: string; sortOrder?: 'asc' | 'desc' }
   ): Promise<ApiResponse<any>> => {
     
     // Lấy giá trị default
@@ -19,6 +19,14 @@ export const candidateService = {
     if (params?.search) {
       // encodeURIComponent để xử lý các ký tự đặc biệt (dấu cách, tiếng Việt,...)
       queryString += `&search=${encodeURIComponent(params.search)}`;
+    }
+
+    // Nếu có sortBy/sortOrder, nối vào
+    if (params?.sortBy) {
+      queryString += `&sortBy=${encodeURIComponent(params.sortBy)}`;
+    }
+    if (params?.sortOrder) {
+      queryString += `&sortOrder=${encodeURIComponent(params.sortOrder)}`;
     }
 
     return await get<any>(`${API_ENDPOINTS.CANDIDATE.COMPANY_GET_ALL}${queryString}`);

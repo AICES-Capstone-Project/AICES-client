@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { Card, Input, Table, Button, Tooltip, Space, Modal, message } from "antd";
+import { Card, Input, Table, Button, Tooltip, Space, Modal, message, Tag } from "antd";
 import { EyeOutlined, SearchOutlined, DeleteOutlined } from "@ant-design/icons";
-import { Swords } from "lucide-react";
-import { APP_ROUTES } from "../../../services/config";
+
 import { useNavigate } from "react-router-dom";
 import type { ColumnsType } from "antd/es/table";
 import candidateService from "../../../services/candidateService";
@@ -29,11 +28,14 @@ const CandidateManagement = () => {
     const loadCandidates = async (page = 1, size = pageSize, searchKey = "") => {
         setLoading(true);
         try {
-            const resp = await candidateService.getCandidates({
-                page,
-                pageSize: size,
-                search: searchKey,
-            });
+                    const resp = await candidateService.getCandidates({
+                        page,
+                        pageSize: size,
+                        search: searchKey,
+                        // request server-side sorting A -> Z by full name
+                        sortBy: 'fullName',
+                        sortOrder: 'asc'
+                    });
 
             if (resp?.status?.toLowerCase() === "success") {
                 const payload = resp.data ?? {};
@@ -45,6 +47,7 @@ const CandidateManagement = () => {
                         candidateName: c.fullName ?? c.name,
                         email: c.email,
                         phone: c.phoneNumber,
+                        createdAt: c.createdAt ?? c.created_at ?? c.createdAtUtc ?? null,
                     }))
                 );
 
@@ -133,7 +136,17 @@ const CandidateManagement = () => {
             align: "center",
             width: "40%",
             ellipsis: true,
-            render: (v: string) => v || "-",
+            // server-side sorted A-Z; render name with optional 'New' tag
+            render: (v: string, record: any) => {
+                const created = record?.createdAt ? new Date(record.createdAt) : null;
+                const isNew = created ? (Date.now() - created.getTime()) <= 7 * 24 * 60 * 60 * 1000 : false;
+                return (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+                        <span>{v || "-"}</span>
+                        {isNew && <Tag color="blue">New</Tag>}
+                    </div>
+                );
+            }
         },
         { title: "Email", dataIndex: "email", key: "email", align: "center", width: "25%", ellipsis: true, render: (v: string) => v || "-" },
         { title: "Phone", dataIndex: "phone", key: "phone", align: "center", width: "20%", render: (v: string) => v || "-" },
@@ -185,13 +198,7 @@ const CandidateManagement = () => {
                             onPressEnter={handleSearch}
                         />
                     </div>
-                    <Button
-                        className="company-btn"
-                        icon={<Swords size={16} />}
-                        onClick={() => navigate(APP_ROUTES.COMPANY_CANDIDATE_COMPARE)}
-                    >
-                        <span>Compare Candidate</span>
-                    </Button>
+                    
                 </div>
             }
             style={{

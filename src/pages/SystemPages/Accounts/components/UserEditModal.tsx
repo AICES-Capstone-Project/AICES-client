@@ -21,14 +21,18 @@ export default function UserEditModal({
   return (
     <Modal
       open={open}
-      title={`Edit user`}
+      title="Edit user"
       onCancel={onCancel}
       onOk={onUpdate}
       okText="Save"
       cancelText="Cancel"
       destroyOnClose
       centered
-      className="system-modal" // 🔹 dùng chung style với create
+      className="system-modal"
+      okButtonProps={{ className: "system-modal-btn system-modal-btn-primary" }}
+      cancelButtonProps={{
+        className: "system-modal-btn system-modal-btn-cancel",
+      }}
     >
       <div className="system-modal-section-title">ACCOUNT INFORMATION</div>
 
@@ -43,10 +47,7 @@ export default function UserEditModal({
           </Form.Item>
 
           <Form.Item name="roleId" label="Role" rules={[{ required: true }]}>
-            <Select
-              options={roleOptions}
-              className="system-role-select"
-            />
+            <Select options={roleOptions} className="system-role-select" />
           </Form.Item>
         </div>
       </Form>

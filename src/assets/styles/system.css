@@ -5,7 +5,62 @@
 :root {
   --aices-green: #28623a;
   --aices-green-dark: #1f4f31;
+  --aices-green-light: #3a7a4f;
   --aices-green-soft: #e5f3ea;
+
+  --aices-text: #111827;
+  --aices-muted: #6b7280;
+  --aices-border: #e5e7eb;
+  --aices-bg: #ffffff;
+  --aices-bg-soft: #f9fafb;
+}
+
+/* =========================
+   GLOBAL ANT BUTTON (SYSTEM)
+   - Đổi toàn bộ primary từ vàng -> xanh AICES
+   - Giữ logic cũ, chỉ đổi màu + hover/active
+   ========================= */
+/* ✅ Dangerous primary: giữ đỏ, tránh bị global primary/hover đổi xanh */
+.ant-btn-dangerous.ant-btn-primary {
+  background: #ef4444 !important;
+  border-color: #ef4444 !important;
+}
+.ant-btn-dangerous.ant-btn-primary:hover,
+.ant-btn-dangerous.ant-btn-primary:focus {
+  background: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+
+.ant-btn-primary {
+  background: var(--aices-green) !important;
+  border-color: var(--aices-green) !important;
+  box-shadow: none !important;
+}
+
+.ant-btn-primary:hover,
+.ant-btn-primary:focus {
+  background: var(--aices-green-light) !important;
+  border-color: var(--aices-green-light) !important;
+  box-shadow: none !important;
+}
+
+.ant-btn-primary:active {
+  background: var(--aices-green-dark) !important;
+  border-color: var(--aices-green-dark) !important;
+  box-shadow: none !important;
+}
+
+/* Default button hover => xanh AICES nhẹ (không đổi nền) */
+.ant-btn-default:hover,
+.ant-btn-default:focus {
+  color: var(--aices-green) !important;
+  border-color: var(--aices-green) !important;
+}
+
+/* Link/Text button hover => xanh AICES */
+.ant-btn-link:hover,
+.ant-btn-text:hover {
+  color: var(--aices-green) !important;
 }
 
 /* =========================

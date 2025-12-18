@@ -1,6 +1,10 @@
+// UserCreateModal.tsx
 import { Modal, Form, Input, Select, Button } from "antd";
 import type { FormInstance } from "antd/es/form";
 import type { CreateUserRequest } from "../../../../types/user.types";
+
+const PASSWORD_REGEX =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$/;
 
 interface UserCreateModalProps {
   open: boolean;
@@ -28,53 +32,59 @@ export default function UserCreateModal({
       className="system-modal"
     >
       <Form form={form} layout="vertical">
-        {/* Section label nhỏ cho đẹp */}
-        <div className="system-modal-section-title">
-          Account information
-        </div>
+        <div className="system-modal-section-title">Account information</div>
 
         <div className="system-modal-grid">
-          {/* Hàng 1: 2 cột */}
           <Form.Item
             name="email"
             label="Email"
             className="system-modal-grid-item"
             rules={[
-              { required: true, message: "Please enter email" },
-              { type: "email", message: "Invalid email" },
+              { required: true, message: "Email is required." },
+              { type: "email", message: "Invalid email format." },
+              { min: 5, message: "Email must be at least 5 characters." },
+              { max: 255, message: "Email cannot exceed 255 characters." },
             ]}
           >
-            <Input placeholder="Enter email" />
+            <Input placeholder="user@example.com" />
           </Form.Item>
 
           <Form.Item
             name="fullName"
             label="Full name"
             className="system-modal-grid-item"
-            rules={[{ required: true, message: "Please enter full name" }]}
+            rules={[
+              { required: true, message: "Full name is required." },
+              { min: 2, message: "Full name must be at least 2 characters." },
+              { max: 100, message: "Full name cannot exceed 100 characters." },
+            ]}
           >
-            <Input placeholder="Enter full name" />
+            <Input placeholder="Nguyen Van FPT" />
           </Form.Item>
 
-          {/* Hàng 2: full width */}
           <Form.Item
             name="password"
             label="Password"
             className="system-modal-grid-item full-row"
             rules={[
-              { required: true, message: "Please enter password" },
-              { min: 6, message: "Password must be at least 6 characters" },
+              { required: true, message: "Password is required." },
+              { min: 8, message: "Password must be at least 8 characters." },
+              { max: 100, message: "Password cannot exceed 100 characters." },
+              {
+                pattern: PASSWORD_REGEX,
+                message:
+                  "Password must include one uppercase, one lowercase, one number, and one special character.",
+              },
             ]}
           >
-            <Input.Password placeholder="Enter password" />
+            <Input.Password placeholder="Abc@12345" />
           </Form.Item>
 
-          {/* Hàng 3: full width */}
           <Form.Item
             name="roleId"
             label="Role"
             className="system-modal-grid-item full-row"
-            rules={[{ required: true, message: "Please select role" }]}
+            rules={[{ required: true, message: "Role ID is required." }]}
           >
             <Select
               placeholder="Select role"
@@ -85,7 +95,6 @@ export default function UserCreateModal({
           </Form.Item>
         </div>
 
-        {/* Footer custom */}
         <div className="system-modal-footer">
           <Button
             onClick={onCancel}

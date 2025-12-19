@@ -3,7 +3,7 @@ import React, { useCallback, useMemo } from "react";
 import { Button } from "antd";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import "./Hero.css";
+import "./hero.css";
 import heroBg from "../../../../assets/homepage/homepage.png";
 
 import { APP_ROUTES, STORAGE_KEYS } from "../../../../services/config";

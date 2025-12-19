@@ -6,49 +6,51 @@ const Compliance = () => {
       <div className="compliance-inner">
         {/* HEADING */}
         <h2 className="compliance-title">
-          Compliant with{" "}
-          <span className="compliance-title-accent">
-            Global Data Protection Standards
-          </span>
+          Security &{" "}
+          <span className="compliance-title-accent">Privacy by Design</span>
         </h2>
 
         <p className="compliance-subtitle">
-          AICES ensures robust protection under GDPR, CCPA, and emerging AI
-          regulations.
+          AICES protects candidate and company data with role-based access,
+          controlled visibility, and secure handling throughout the recruitment
+          workflow.
         </p>
 
         {/* CARDS */}
         <div className="compliance-cards">
-          {/* GDPR */}
+          {/* RBAC */}
           <div className="compliance-card">
             <div className="compliance-icon">
-              <span className="compliance-icon-label">EU</span>
+              <span className="compliance-icon-label">RB</span>
             </div>
-            <h3 className="compliance-card-title">GDPR Compliant</h3>
+            <h3 className="compliance-card-title">Role-Based Access</h3>
             <p className="compliance-card-text">
-              EU General Data Protection Regulation.
+              Clear permissions by user roles to ensure the right people access
+              the right data.
             </p>
           </div>
 
-          {/* CCPA */}
+          {/* Data Privacy */}
           <div className="compliance-card">
             <div className="compliance-icon">
-              <span className="compliance-icon-label">CA</span>
+              <span className="compliance-icon-label">PR</span>
             </div>
-            <h3 className="compliance-card-title">CCPA Compliant</h3>
+            <h3 className="compliance-card-title">Data Privacy</h3>
             <p className="compliance-card-text">
-              California Consumer Privacy Act.
+              Candidate information is managed with controlled sharing and
+              minimized exposure.
             </p>
           </div>
 
-          {/* EU AI ACT */}
+          {/* Secure Storage */}
           <div className="compliance-card">
             <div className="compliance-icon">
-              <span className="compliance-icon-label">AI</span>
+              <span className="compliance-icon-label">SC</span>
             </div>
-            <h3 className="compliance-card-title">EU AI Compliant</h3>
+            <h3 className="compliance-card-title">Secure Handling</h3>
             <p className="compliance-card-text">
-              EU Artificial Intelligence Act and upcoming AI regulations.
+              Files and recruitment data are handled securely to support safe,
+              reliable system operation.
             </p>
           </div>
         </div>

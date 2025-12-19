@@ -1,62 +1,87 @@
 // src/pages/Homepage/partials/Hero/Hero.tsx
-
+import React, { useCallback, useMemo } from "react";
 import { Button } from "antd";
-import "./hero.css";
+import { useLocation, useNavigate } from "react-router-dom";
 
-import mainMockup from "../../../../assets/homepage/main.jpg";
-import detailMockup from "../../../../assets/homepage/detail.jpg";
-import pipelineMockup from "../../../../assets/homepage/pipeline.jpg";
+import "./Hero.css";
+import heroBg from "../../../../assets/homepage/homepage.png";
 
-const Hero = () => {
-	return (
-		<section className="hero-section">
-			{/* Soft Gradient Blobs */}
-			<div className="hero-bg-blob hero-bg-blob-left" />
-			<div className="hero-bg-blob hero-bg-blob-right" />
+import { APP_ROUTES, STORAGE_KEYS } from "../../../../services/config";
+import { useAppDispatch, useAppSelector } from "../../../../hooks/redux";
+import { fetchUser } from "../../../../stores/slices/authSlice";
+import { getRoleBasedRoute } from "../../../../routes/navigation";
 
-			{/* Content */}
-			<div className="hero-content">
-				<h1 className="hero-title">
-					<span className="hero-title-accent">10x Faster</span> Resume Screening
-				</h1>
+const normalizeRoleKey = (raw?: string | null) => {
+  if (!raw) return null;
+  // "System Manager" | "SYSTEM_MANAGER" | "system manager" -> "system_manager"
+  return raw.trim().toLowerCase().replace(/\s+/g, "_");
+};
 
-				<p className="hero-subtext">
-					Connect your ATS and analyze hundreds of resumes in minutes.
-					<br />
-					Save Time, Hire Faster and Improve Accuracy.
-				</p>
+const Hero: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-				{/* CTA */}
-				<Button type="primary" className="hero-cta-btn">
-					💼 Book a Demo Now
-				</Button>
+  const dispatch = useAppDispatch();
+  const { user, loading } = useAppSelector((state) => state.auth);
 
-				{/* Product Preview Mockups */}
-				<div className="hero-mockups">
-					{/* Ảnh lớn bên trái */}
-					<img
-						src={mainMockup}
-						alt="Candidate ranking table"
-						className="hero-mockup-main"
-					/>
+  const token = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    return localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
+  }, []);
 
-					{/* Cột 2 ảnh bên phải */}
-					<div className="hero-mockup-column">
-						<img
-							src={detailMockup}
-							alt="Candidate detail report"
-							className="hero-mockup-small hero-mockup-top"
-						/>
-						<img
-							src={pipelineMockup}
-							alt="Candidate pipeline"
-							className="hero-mockup-small hero-mockup-bottom"
-						/>
-					</div>
-				</div>
-			</div>
-		</section>
-	);
+  const handleGetStarted = useCallback(async () => {
+    const redirect = location.pathname + location.search + location.hash;
+
+    // Guest -> login
+    if (!token) {
+      navigate(`${APP_ROUTES.LOGIN}?redirect=${encodeURIComponent(redirect)}`);
+      return;
+    }
+
+    // Logged in but user not loaded yet -> fetch then route
+    let roleName = user?.roleName;
+
+    if (!roleName) {
+      try {
+        const fetched = await dispatch(fetchUser()).unwrap();
+        roleName = fetched?.roleName;
+      } catch {
+        // token có nhưng fetch fail -> đưa về login cho chắc
+        navigate(`${APP_ROUTES.LOGIN}?redirect=${encodeURIComponent(redirect)}`);
+        return;
+      }
+    }
+
+    const roleKey = normalizeRoleKey(roleName);
+    navigate(getRoleBasedRoute(roleKey));
+  }, [dispatch, location, navigate, token, user?.roleName]);
+
+  return (
+    <section className="hero-bg" style={{ backgroundImage: `url(${heroBg})` }}>
+      <div className="hero-bg-overlay" />
+
+      <div className="hero-bg-content">
+        <h1 className="hero-bg-title">
+          <span className="hero-bg-accent">10x Faster</span> Resume Screening
+        </h1>
+
+        <p className="hero-bg-subtext">
+          Automate resume parsing, scoring, and ranking to screen faster.
+          <br />
+          Make fairer, more data-driven hiring decisions.
+        </p>
+
+        <Button
+          type="primary"
+          className="hero-bg-cta"
+          onClick={handleGetStarted}
+          loading={!!token && loading}   // có token mà đang fetchUser -> show loading
+        >
+          Get Started
+        </Button>
+      </div>
+    </section>
+  );
 };
 
 export default Hero;

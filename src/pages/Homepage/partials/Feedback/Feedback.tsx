@@ -3,79 +3,66 @@ import "./Feedback.css";
 const Feedback = () => {
   return (
     <section className="fb-section">
-
       <h2 className="fb-title">
-        Trusted by <span className="fb-accent">Top Companies</span> Around the World
+        What teams say about <span className="fb-accent">AICES</span>
       </h2>
 
       <p className="fb-subtitle">
-        HR professionals, hiring managers, and directors are using AICES to
-        streamline their companies' recruitment processes.
+        Built to help HR teams and recruiters automate resume parsing, score and
+        rank candidates, and make faster, more consistent hiring decisions.
       </p>
 
       <div className="fb-grid">
         {/* CARD 1 */}
         <div className="fb-card">
-          <h3 className="fb-company">Quandri ●</h3>
+          <h3 className="fb-company">NovaHR</h3>
           <p className="fb-quote">
-            “The main benefit of AICES is being able to put in the core
-            competencies that we need people to have, and then it basically sorts
-            all applicants based on who best matches those criteria. The outcome
-            I like most is that AICES helps us review applicants in the right
-            order instead of missing great candidates simply because we never get
-            to them.”
+            “AICES helped us move from manual CV screening to a structured flow.
+            Resume parsing is fast, and the scoring + ranking gives our team a
+            clear starting point for shortlisting.”
           </p>
 
           <div className="fb-author">
-            <div className="fb-avatar">RW</div>
+            <div className="fb-avatar">MT</div>
             <div>
-              <p className="fb-author-name">Rachel Ward</p>
-              <p className="fb-author-role">
-                People & Talent Operations, Quandri
-              </p>
+              <p className="fb-author-name">Minh Tran</p>
+              <p className="fb-author-role">HR Specialist</p>
             </div>
           </div>
         </div>
 
         {/* CARD 2 */}
         <div className="fb-card">
-          <h3 className="fb-company">Pomelo</h3>
+          <h3 className="fb-company">HorizonWorks</h3>
           <p className="fb-quote">
-            “AICES replaced the one-by-one manual review of 180+ applications per
-            role with real-time shortlists ordered by match score. It doesn't
-            matter if a candidate applies last — if they’re the best match, they
-            show up first.”
+            “The biggest win is consistency. With the same evaluation criteria,
+            we avoid missing strong candidates and reduce subjective screening.
+            It makes hiring discussions much more data-driven.”
           </p>
 
           <div className="fb-author">
-            <div className="fb-avatar">AD</div>
+            <div className="fb-avatar">LN</div>
             <div>
-              <p className="fb-author-name">Angeles Donelly</p>
-              <p className="fb-author-role">
-                Regional Talent Partner Manager
-              </p>
+              <p className="fb-author-name">Linh Nguyen</p>
+              <p className="fb-author-role">Recruitment Lead</p>
             </div>
           </div>
         </div>
 
         {/* CARD 3 */}
         <div className="fb-card">
-          <h3 className="fb-company">Accelon</h3>
+          <h3 className="fb-company">BluePeak Tech</h3>
           <p className="fb-quote">
-            “What we find most useful is the ability to fine-tune the analysis.
-            It helps us look beyond strict job descriptions and consider
-            candidates who might otherwise be missed. The ranking and gap
-            analysis provide a solid starting point for focusing on the right
-            profiles early on.”
+            “We like how AICES centralizes candidates and highlights skills
+            gaps. It saves time during initial screening so we can focus on
+            interviews and final decisions.”
           </p>
 
           <div className="fb-author">
-            <div className="fb-avatar">PS</div>
+            <div className="fb-avatar">QP</div>
             <div>
-              <p className="fb-author-name">Puja Singla</p>
-              <p className="fb-author-role">
-                Talent & Tech Senior Manager
-              </p>
+              <p className="fb-author-name">Quang Pham</p>
+              <p className="fb-author-role">Hiring Manager</p>
             </div>
           </div>
         </div>

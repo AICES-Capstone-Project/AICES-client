@@ -114,18 +114,35 @@ radial-gradient(
   align-items: center;
   justify-content: center;
   margin-bottom: 20px;
+  position: relative;
 
+  /* AICES orb */
   background:
-    radial-gradient(circle at 30% 30%, #ffffff 0, #ffffff 45%, transparent 60%),
-    radial-gradient(circle at 70% 70%, #4169e1 0, #4169e1 55%, #3554c1 80%);
-  box-shadow: 0 10px 22px rgba(65, 105, 225, 0.35);
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95) 0, rgba(255,255,255,0.9) 45%, transparent 62%),
+    radial-gradient(circle at 70% 70%, #28623a 0, #28623a 56%, #1f4f31 84%);
+
+  box-shadow:
+    0 14px 28px rgba(40, 98, 58, 0.32),
+    0 0 0 6px rgba(40, 98, 58, 0.10);
+}
+
+.compliance-icon::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  border: 1px solid rgba(40, 98, 58, 0.16);
+  pointer-events: none;
 }
 
 .compliance-icon-label {
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
   color: #ffffff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.18);
 }
+
 
 /* CARD TEXT */
 .compliance-card-title {
@@ -168,4 +185,16 @@ radial-gradient(
   .compliance-card {
     padding: 32px 24px 30px;
   }
+}
+.compliance-card {
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  border: 1px solid rgba(15, 32, 39, 0.06);
+}
+
+.compliance-card:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 34px 80px rgba(0, 0, 0, 0.14),
+    0 0 0 1px rgba(40, 98, 58, 0.16);
+  border-color: rgba(40, 98, 58, 0.18);
 }

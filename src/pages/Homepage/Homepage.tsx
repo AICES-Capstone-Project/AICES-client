@@ -1,4 +1,4 @@
-import Hero from "./partials/Hero/Hero";
+import Hero from "./partials/hero/Hero";
 import TimeSaving from "./partials/TimeSaving/TimeSaving";
 import Feedback from "./partials/Feedback/Feedback";
 import RecruiterDesigned from "./partials/RecruiterDesigned/RecruiterDesigned";

@@ -11,7 +11,6 @@ import CompanyDetail from "../pages/SystemPages/Company/components/CompanyDetail
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
 import ResumeDetail from "../pages/SystemPages/Company/ResumeDetail";
 
-
 const ErrorPage = lazy(() => import("../pages/ErrorPage"));
 const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
 
@@ -31,6 +30,31 @@ const ProfileLayout = lazy(() => import("../components/Layout/ProfileLayout"));
 
 /* ============== General Pages ==============*/
 const Home = lazy(() => import("../pages/Homepage/Homepage"));
+/* ===== RANKING ===== */
+const Ranking = lazy(() => import("../pages/Ranking"));
+
+/* ============== Legal & Trust Pages ==============*/
+const TermsOfService = lazy(
+  () => import("../pages/Legal/TermsOfService/TermsOfService")
+);
+const PrivacyPolicy = lazy(
+  () => import("../pages/Legal/PrivacyPolicy/PrivacyPolicy")
+);
+const SecurityPrivacy = lazy(
+  () => import("../pages/Legal/SecurityPrivacy/SecurityPrivacy")
+);
+/* ============== Product Pages ==============*/
+const HowItWorks = lazy(() => import("../pages/Product/HowItWorks/HowItWorks"));
+const NoAts = lazy(() => import("../pages/Product/NoAts/NoAts"));
+
+/* ============== Resources Pages ==============*/
+const Blog = lazy(() => import("../pages/Resources/Blog/Blog.tsx"));
+
+const HelpCenter = lazy(
+  () => import("../pages/Resources/HelpCenter/HelpCenter")
+);
+const ContactUs = lazy(() => import("../pages/Resources/ContactUs/ContactUs"));
+
 const Subscriptions = lazy(() => import("../pages/Pricing/Subscriptions"));
 const Login = lazy(() => import("../pages/Login/Login"));
 const VerifyEmailPage = lazy(() => import("../pages/SignUp/VerifyEmailPage"));
@@ -71,7 +95,9 @@ const Notification = lazy(
 const CandidateManagement = lazy(
   () => import("../pages/CompanyPages/Candidate/CandidateManagement")
 );
-const CandidateDetail = lazy(() => import("../pages/CompanyPages/Candidate/components/CandidateDetail"));
+const CandidateDetail = lazy(
+  () => import("../pages/CompanyPages/Candidate/components/CandidateDetail")
+);
 const CompareResumes = lazy(
   () => import("../pages/CompanyPages/CompareResume/CompareResumes")
 );
@@ -124,8 +150,9 @@ const BlogList = lazy(
 );
 
 //Feedback
-const FeedbackList = lazy(() => import("../pages/SystemPages/Feedback/FeedbackList"));
-
+const FeedbackList = lazy(
+  () => import("../pages/SystemPages/Feedback/FeedbackList")
+);
 
 const PaymentSuccess = lazy(
   () =>
@@ -184,7 +211,6 @@ const systemChildren = [
     element: <ResumeDetail />,
   },
   { path: "feedbacks", element: <FeedbackList /> },
-
 ];
 
 export const router = createBrowserRouter([
@@ -196,6 +222,22 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: APP_ROUTES.SUBSCRIPTIONS, element: <Subscriptions /> },
+      /* ===== RANKING ===== */
+      { path: APP_ROUTES.RANKING, element: <Ranking /> },
+
+      /* ===== Legal & Trust ===== */
+      { path: APP_ROUTES.LEGAL_TERMS, element: <TermsOfService /> },
+      { path: APP_ROUTES.LEGAL_PRIVACY, element: <PrivacyPolicy /> },
+      { path: APP_ROUTES.LEGAL_SECURITY, element: <SecurityPrivacy /> },
+      /* ===== Product ===== */
+      { path: APP_ROUTES.PRODUCT_HOW_IT_WORKS, element: <HowItWorks /> },
+      { path: APP_ROUTES.PRODUCT_NO_ATS, element: <NoAts /> },
+
+      /* ===== Resources ===== */
+      { path: APP_ROUTES.RESOURCES_BLOG, element: <Blog /> },
+      { path: APP_ROUTES.RESOURCES_HELP_CENTER, element: <HelpCenter /> },
+      { path: APP_ROUTES.RESOURCES_CONTACT_US, element: <ContactUs /> },
+
       {
         path: APP_ROUTES.PROFILE, // /profile
         element: (

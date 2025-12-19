@@ -1,0 +1,13 @@
+/* src/pages/Resources/Blog/Blog.css */
+
+.resources-title-accent {
+  background: linear-gradient(90deg, #0f2027, #28623a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Optional: slight spacing polish for blog */
+.resources-section-title {
+  margin-bottom: 10px !important;
+}

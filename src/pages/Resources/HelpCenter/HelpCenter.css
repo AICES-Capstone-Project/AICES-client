@@ -1,0 +1,9 @@
+/* src/pages/Resources/HelpCenter/HelpCenter.css */
+
+/* Keep this light; global layout is in resources.css */
+.resources-title-accent {
+  background: linear-gradient(90deg, #0f2027, #28623a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

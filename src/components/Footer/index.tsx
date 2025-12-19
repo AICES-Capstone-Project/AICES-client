@@ -8,6 +8,7 @@ import {
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import Logo from "../../assets/logo/logo_white.png";
+import { APP_ROUTES } from "../../services/config";
 
 const { Footer: AntFooter } = Layout;
 const { Title, Text } = Typography;
@@ -76,10 +77,13 @@ export const Footer: React.FC = () => {
             </Title>
             <Space direction="vertical">
               <FooterLink
-                to="/how-it-works"
+                to={APP_ROUTES.PRODUCT_HOW_IT_WORKS}
                 label={t("footer.product.howItWorks")}
               />
-              <FooterLink to="/no-ats" label={t("footer.product.noAts")} />
+              <FooterLink
+                to={APP_ROUTES.PRODUCT_NO_ATS}
+                label={t("footer.product.noAts")}
+              />
             </Space>
           </Col>
 
@@ -88,9 +92,18 @@ export const Footer: React.FC = () => {
               {t("footer.legalTitle")}
             </Title>
             <Space direction="vertical">
-              <FooterLink to="/terms" label={t("footer.legal.terms")} />
-              <FooterLink to="/privacy" label={t("footer.legal.privacy")} />
-              <FooterLink to="/security" label={t("footer.legal.security")} />
+              <FooterLink
+                to={APP_ROUTES.LEGAL_TERMS}
+                label={t("footer.legal.terms")}
+              />
+              <FooterLink
+                to={APP_ROUTES.LEGAL_PRIVACY}
+                label={t("footer.legal.privacy")}
+              />
+              <FooterLink
+                to={APP_ROUTES.LEGAL_SECURITY}
+                label={t("footer.legal.security")}
+              />
             </Space>
           </Col>
 
@@ -99,13 +112,16 @@ export const Footer: React.FC = () => {
               {t("footer.resourcesTitle")}
             </Title>
             <Space direction="vertical">
-              <FooterLink to="/blog" label={t("footer.resources.blog")} />
               <FooterLink
-                to="/help-center"
+                to={APP_ROUTES.RESOURCES_BLOG}
+                label={t("footer.resources.blog")}
+              />
+              <FooterLink
+                to={APP_ROUTES.RESOURCES_HELP_CENTER}
                 label={t("footer.resources.helpCenter")}
               />
               <FooterLink
-                to="/contact-us"
+                to={APP_ROUTES.RESOURCES_CONTACT_US}
                 label={t("footer.resources.contact")}
               />
             </Space>

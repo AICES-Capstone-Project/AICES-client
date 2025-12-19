@@ -48,256 +48,318 @@ const AppHeader: React.FC = () => {
     // Nếu đã có user (hoặc token), phải gọi API lấy thông báo ngay lập tức
     // để cái chuông (NotificationDropdown) có số count hiển thị.
     if (token) {
-        // dispatch(fetchNotifications({ page: 1, limit: 10 })); // <-- Bỏ comment và dùng action của bạn
+      // dispatch(fetchNotifications({ page: 1, limit: 10 })); // <-- Bỏ comment và dùng action của bạn
     }
+  }, [dispatch, user]);
 
-  }, [dispatch, user]); 
+  /** ===== Resources dropdown items ===== */
+  const resourcesMenuItems: MenuProps["items"] = [
+    {
+      key: APP_ROUTES.RESOURCES_BLOG,
+      label: (
+        <NavLink
+          to={APP_ROUTES.RESOURCES_BLOG}
+          onClick={() => setDrawerOpen(false)}
+          className={({ isActive }) =>
+            isActive ? "font-semibold" : "text-slate-800"
+          }
+        >
+          Blog
+        </NavLink>
+      ),
+    },
+    {
+      key: APP_ROUTES.RESOURCES_HELP_CENTER,
+      label: (
+        <NavLink
+          to={APP_ROUTES.RESOURCES_HELP_CENTER}
+          onClick={() => setDrawerOpen(false)}
+          className={({ isActive }) =>
+            isActive ? "font-semibold" : "text-slate-800"
+          }
+        >
+          Help Center
+        </NavLink>
+      ),
+    },
+    {
+      key: APP_ROUTES.RESOURCES_CONTACT_US,
+      label: (
+        <NavLink
+          to={APP_ROUTES.RESOURCES_CONTACT_US}
+          onClick={() => setDrawerOpen(false)}
+          className={({ isActive }) =>
+            isActive ? "font-semibold" : "text-slate-800"
+          }
+        >
+          Contact Us
+        </NavLink>
+      ),
+    },
+  ];
 
-  // ... (Phần code Menu bên dưới giữ nguyên không đổi) ...
-  
+  /** ===== Top nav ===== */
   const navItems: MenuProps["items"] = [
     {
-        key: "/how-it-works",
-        label: (
-            <NavLink
-                to="/how-it-works"
-                className={({ isActive }) =>
-                    isActive ? "font-semibold" : "text-slate-800"
-                }
-                onClick={() => setDrawerOpen(false)}
-            >
-                {t("app.howItWorks")}
-            </NavLink>
-        ),
+      key: APP_ROUTES.PRODUCT_HOW_IT_WORKS,
+      label: (
+        <NavLink
+          to={APP_ROUTES.PRODUCT_HOW_IT_WORKS}
+          className={({ isActive }) =>
+            isActive ? "font-semibold" : "text-slate-800"
+          }
+          onClick={() => setDrawerOpen(false)}
+        >
+          {t("app.howItWorks")}
+        </NavLink>
+      ),
     },
     {
-        key: "/resources",
-        label: (
-            <NavLink
-                to="/resources"
-                className={({ isActive }) =>
-                    isActive ? "font-semibold" : "text-slate-800"
-                }
-                onClick={() => setDrawerOpen(false)}
-            >
-                {t("app.resources")}
-            </NavLink>
-        ),
+      key: "resources",
+      label: <span className="text-slate-800">{t("app.resources")}</span>,
+      children: resourcesMenuItems,
     },
     {
-        key: "/subscriptions",
-        label: (
-            <NavLink
-                to="/subscriptions"
-                className={({ isActive }) =>
-                    isActive ? "font-semibold" : "text-slate-800"
-                }
-                onClick={() => setDrawerOpen(false)}
-            >
-                {t("app.subscriptions")}
-            </NavLink>
-        ),
+      key: APP_ROUTES.SUBSCRIPTIONS,
+      label: (
+        <NavLink
+          to={APP_ROUTES.SUBSCRIPTIONS}
+          className={({ isActive }) =>
+            isActive ? "font-semibold" : "text-slate-800"
+          }
+          onClick={() => setDrawerOpen(false)}
+        >
+          {t("app.subscriptions")}
+        </NavLink>
+      ),
     },
-];
+    {
+      key: APP_ROUTES.RANKING,
+      label: (
+        <NavLink
+          to={APP_ROUTES.RANKING}
+          end
+          className={({ isActive }) =>
+            isActive ? "font-semibold" : "text-slate-800"
+          }
+          onClick={() => setDrawerOpen(false)}
+        >
+          Ranking
+        </NavLink>
+      ),
+    },
+  ];
 
-const userMenuItems: MenuProps["items"] = [
+  /** ===== Menu selected key (supports submenu active) ===== */
+  const selectedKey = location.pathname.startsWith(
+    APP_ROUTES.PRODUCT_HOW_IT_WORKS
+  )
+    ? APP_ROUTES.PRODUCT_HOW_IT_WORKS
+    : location.pathname.startsWith("/resources")
+    ? "resources"
+    : location.pathname;
+
+  const userMenuItems: MenuProps["items"] = [
     {
-        key: "works",
-        label: <span>{t("app.works", "Works")}</span>,
+      key: "works",
+      label: <span>{t("app.works", "Works")}</span>,
     },
     { type: "divider" },
     {
-        key: "logout",
-        danger: true,
-        label: <span>{t("app.logout", "Log out")}</span>,
+      key: "logout",
+      danger: true,
+      label: <span>{t("app.logout", "Log out")}</span>,
     },
-];
+  ];
 
-const languageMenuItems: MenuProps["items"] = [
+  const languageMenuItems: MenuProps["items"] = [
     {
-        key: "en",
-        label: (
-            <span>
-                <span role="img" aria-label="globe">
-                    🌐
-                </span>{" "}
-                English
-            </span>
-        ),
+      key: "en",
+      label: (
+        <span>
+          <span role="img" aria-label="globe">
+            🌐
+          </span>{" "}
+          English
+        </span>
+      ),
     },
     {
-        key: "vi",
-        label: (
-            <span className="flex items-center gap-2">
-                <img
-                    src={VietnamFlag}
-                    alt="Vietnam flag"
-                    style={{ width: 14, height: 14 }}
-                />
-                Tiếng Việt
-            </span>
-        ),
+      key: "vi",
+      label: (
+        <span className="flex items-center gap-2">
+          <img
+            src={VietnamFlag}
+            alt="Vietnam flag"
+            style={{ width: 14, height: 14 }}
+          />
+          Tiếng Việt
+        </span>
+      ),
     },
-];
+  ];
 
-const handleUserMenuClick: MenuProps["onClick"] = (e) => {
+  const handleUserMenuClick: MenuProps["onClick"] = (e) => {
     if (e.key === "logout") {
-        dispatch(logoutUser());
-        navigate(APP_ROUTES.HOME);
+      dispatch(logoutUser());
+      navigate(APP_ROUTES.HOME);
     }
 
     if (e.key === "works") {
-        // navigate to role-based route
-        const roleName = user?.roleName ?? null;
-        const route = getRoleBasedRoute(roleName);
-        navigate(route);
+      // navigate to role-based route
+      const roleName = user?.roleName ?? null;
+      const route = getRoleBasedRoute(roleName);
+      navigate(route);
     }
-};
+  };
 
-return (
+  return (
     <>
-        <AntHeader
-            className="flex items-center justify-between h-[70px] px-6 md:px-24 border-b border-gray-100"
-            style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                backgroundColor: "#fff",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-                zIndex: 1000,
+      <AntHeader
+        className="flex items-center justify-between h-[70px] px-6 md:px-24 border-b border-gray-100"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100%",
+          backgroundColor: "#fff",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+          zIndex: 1000,
+        }}
+      >
+        <Link to="/" className="flex items-center">
+          <img
+            src={logo}
+            alt="AICES Logo"
+            style={{ height: 50, width: "auto", cursor: "pointer" }}
+          />
+        </Link>
+
+        <div className="hidden md:flex flex-1 justify-center">
+          <Menu
+            mode="horizontal"
+            selectedKeys={[selectedKey]}
+            items={navItems}
+            rootClassName="custom-menu"
+            className="app-header-menu"
+            style={{ borderBottom: "none" }}
+            overflowedIndicator={null} // ⬅️ QUAN TRỌNG
+            disabledOverflow
+          />
+        </div>
+
+        <Space size={16} align="center" className="hidden md:flex">
+          {user ? (
+            <>
+              <NotificationDropdown style={{ margin: "10px" }} />
+              <Dropdown
+                menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
+                placement="bottomRight"
+                trigger={["click"]}
+              >
+                <Space className="cursor-pointer">
+                  <Avatar
+                    size={36}
+                    src={user.avatarUrl || defaultAvatar}
+                    icon={<UserOutlined />}
+                  />
+                  <Text className="hidden md:inline text-slate-900 font-semibold">
+                    {user.fullName || user.email}
+                  </Text>
+                </Space>
+              </Dropdown>
+            </>
+          ) : (
+            <>
+              <Button
+                style={{
+                  color: "var(--color-primary-dark)",
+                  borderColor: "var(--color-primary-dark)",
+                }}
+              >
+                <Link to={APP_ROUTES.LOGIN}>{t("app.signIn")}</Link>
+              </Button>
+
+              <Button
+                type="primary"
+                style={{
+                  backgroundColor: "var(--color-primary-dark)",
+                  borderColor: "var(--color-primary-dark)",
+                }}
+              >
+                <Link to={APP_ROUTES.SIGN_UP}>{t("app.signUp")}</Link>
+              </Button>
+            </>
+          )}
+        </Space>
+
+        <div className="ml-4">
+          {/* Language selector */}
+          <Dropdown
+            menu={{
+              items: languageMenuItems,
+              onClick: (e) => {
+                const lang = e.key as "en" | "vi";
+                i18n.changeLanguage(lang);
+                localStorage.setItem("lang", lang);
+              },
             }}
-        >
-            <Link to="/" className="flex items-center">
-                <img
-                    src={logo}
-                    alt="AICES Logo"
-                    style={{ height: 50, width: "auto", cursor: "pointer" }}
-                />
-            </Link>
-
-            <div className="hidden md:flex flex-1 justify-center">
-                <Menu
-                    mode="horizontal"
-                    selectedKeys={[location.pathname]}
-                    items={navItems}
-                    rootClassName="custom-menu"
-                    style={{ borderBottom: "none" }}
-                />
-            </div>
-
-            <Space size={16} align="center" className="hidden md:flex">
-                {user ? (
-                    <>
-                        <NotificationDropdown style={{ margin: '10px' }}/>
-                        <Dropdown
-                            menu={{ items: userMenuItems, onClick: handleUserMenuClick }}
-                            placement="bottomRight"
-                            trigger={["click"]}
-                        >
-                            <Space className="cursor-pointer">
-                                <Avatar
-                                    size={36}
-                                    src={user.avatarUrl || defaultAvatar}
-                                    icon={<UserOutlined />}
-                                />
-                                <Text className="hidden md:inline text-slate-900 font-semibold">
-                                    {user.fullName || user.email}
-                                </Text>
-                            </Space>
-                        </Dropdown>
-                    </>
-                ) : (
-                    <>
-                        <Button
-                            style={{
-                                color: "var(--color-primary-dark)",
-                                borderColor: "var(--color-primary-dark)",
-                            }}
-                        >
-                            <Link to={APP_ROUTES.LOGIN}>{t("app.signIn")}</Link>
-                        </Button>
-
-                        <Button
-                            type="primary"
-                            style={{
-                                backgroundColor: "var(--color-primary-dark)",
-                                borderColor: "var(--color-primary-dark)",
-                            }}
-                        >
-                            <Link to={APP_ROUTES.SIGN_UP}>{t("app.signUp")}</Link>
-                        </Button>
-                    </>
-                )}
-            </Space>
-
-            <div className="ml-4">
-                {/* Language selector */}
-                <Dropdown
-                    menu={{
-                        items: languageMenuItems,
-                        onClick: (e) => {
-                            const lang = e.key as "en" | "vi";
-                            i18n.changeLanguage(lang);
-                            localStorage.setItem("lang", lang);
-                        },
-                    }}
-                    placement="bottomRight"
-                >
-                    <Button
-                        type="text"
-                        aria-label="language selector"
-                        style={{ marginTop: 20 }}
-                    >
-                        {i18n.language === "vi" ? (
-                            <span className="flex items-center gap-1">
-                                <img
-                                    src={VietnamFlag}
-                                    alt="Vietnam flag"
-                                    style={{ width: 18, height: 18 }}
-                                />
-                                VI
-                            </span>
-                        ) : (
-                            <span>🌐 EN</span>
-                        )}
-                    </Button>
-                </Dropdown>
-            </div>
-
+            placement="bottomRight"
+          >
             <Button
-                className="inline-flex md:!hidden"
-                type="text"
-                icon={<MenuOutlined className="text-[22px]" />}
-                onClick={() => setDrawerOpen(true)}
-            />
-        </AntHeader>
+              type="text"
+              aria-label="language selector"
+              style={{ marginTop: 20 }}
+            >
+              {i18n.language === "vi" ? (
+                <span className="flex items-center gap-1">
+                  <img
+                    src={VietnamFlag}
+                    alt="Vietnam flag"
+                    style={{ width: 18, height: 18 }}
+                  />
+                  VI
+                </span>
+              ) : (
+                <span>🌐 EN</span>
+              )}
+            </Button>
+          </Dropdown>
+        </div>
 
-        <Drawer
-            title={
-                <div className="flex justify-between items-center">
-                    <span className="font-semibold">Menu</span>
-                    <Button
-                        type="text"
-                        icon={<CloseOutlined />}
-                        onClick={() => setDrawerOpen(false)}
-                    />
-                </div>
-            }
-            placement="right"
-            onClose={() => setDrawerOpen(false)}
-            open={drawerOpen}
-            styles={{ body: { padding: 0 } }}
-        >
-            <Menu
-                mode="vertical"
-                selectedKeys={[location.pathname]}
-                items={navItems}
-                className="border-none"
+        <Button
+          className="inline-flex md:!hidden"
+          type="text"
+          icon={<MenuOutlined className="text-[22px]" />}
+          onClick={() => setDrawerOpen(true)}
+        />
+      </AntHeader>
+
+      <Drawer
+        title={
+          <div className="flex justify-between items-center">
+            <span className="font-semibold">Menu</span>
+            <Button
+              type="text"
+              icon={<CloseOutlined />}
+              onClick={() => setDrawerOpen(false)}
             />
-        </Drawer>
+          </div>
+        }
+        placement="right"
+        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        styles={{ body: { padding: 0 } }}
+      >
+        <Menu
+          mode="vertical"
+          selectedKeys={[selectedKey]}
+          items={navItems}
+          className="border-none"
+        />
+      </Drawer>
     </>
-);
+  );
 };
 
 export default AppHeader;

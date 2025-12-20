@@ -123,7 +123,7 @@ export const API_ENDPOINTS = {
       `/candidates/${candidateId}/resumes`,
     COMPANY_DELETE: (candidateId: number) => `/candidates/${candidateId}`,
 
-    
+
     SYSTEM_UPDATE: (blogId: number) => `/companies/blogs/${blogId}`,
     SYSTEM_DELETE: (blogId: number) => `/companies/blogs/${blogId}`,
 
@@ -371,6 +371,8 @@ export const API_ENDPOINTS = {
     COMPANY_DELETE: (applicationId: number) => `/resumes/${applicationId}`,
     // Adjusted score for a resume application
     ADJUSTED_SCORE: (applicationId: number) => `/resume-applications/${applicationId}/adjusted-score`,
+    // Update application status (PATCH body: { status: string, note?: string })
+    UPDATE_STATUS: (applicationId: number) => `/resume-applications/${applicationId}/status`,
     // Applications associated with a candidate's resume
     APPLICATIONS_BY_RESUME: (resumeId: number) => `/candidates/resumes/${resumeId}/applications`,
     APPLICATION_BY_ID: (resumeId: number, applicationId: number) => `/candidates/resumes/${resumeId}/applications/${applicationId}`,
@@ -570,6 +572,9 @@ export const APP_ROUTES = {
   COMPANY_MY_APARTMENTS: "/company/my-apartments",
   COMPANY_PENDING_APPROVAL: "/company/pending-approval",
   COMPANY_CAMPAIN: "/company/campaign",
+  COMPANY_CAMPAIN_DETAIL: "/company/campaign/:campaignId",
+  // Hiring tracking (standalone page)
+  HIRING_TRACKING: "/company/campaign/:campaignId/:jobId/hiring-tracking",
   COMPANY_NOTIFICATION: "/company/notification",
   COMPANY_AI_SCREENING: "/company/ai-screening",
   COMPANY_AI_SCREENING_RESUMES:
@@ -579,6 +584,7 @@ export const APP_ROUTES = {
   COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
   COMPANY_PAYMENT_HISTORY: "/company/payment-history",
   COMPANY_CANDIDATE: "/company/candidate",
+  COMPANY_CANDIDATE_DETAIL: "/company/candidate/:candidateId",
 } as const;
 
 export const ROLES = {

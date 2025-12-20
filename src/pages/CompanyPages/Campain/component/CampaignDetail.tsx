@@ -5,11 +5,12 @@ import CampaignInfoCard from './CampaignInfoCard';
 import CampaignJobsTable from './CampaignJobsTable';
 import { APP_ROUTES } from '../../../../services/config';
 import type { ColumnsType } from 'antd/es/table';
-import { ArrowLeftOutlined, MinusCircleOutlined, DeleteOutlined, MoreOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, MinusCircleOutlined, DeleteOutlined, MoreOutlined, EyeOutlined } from '@ant-design/icons';
+import { ClipboardList, Send } from 'lucide-react';
 import reportService from '../../../../services/reportService';
+import hiringTrackingService from '../../../../services/hiringTrackingService';
 import { campaignService } from '../../../../services/campaignService';
 import { jobService } from '../../../../services/jobService';
-import { EyeOutlined } from '@ant-design/icons';
 import JobViewDrawer from '../../JobManagement/components/JobViewDrawer';
 
 const CampaignDetail: React.FC = () => {
@@ -29,6 +30,7 @@ const CampaignDetail: React.FC = () => {
     const [apiError, setApiError] = useState<string | null>(null);
     const fieldKeyMap = useRef<Map<any, string>>(new Map());
     const fieldKeyCounter = useRef<number>(0);
+    const iconStyle = { color: "var(--light)", fontWeight: "bold" };
 
     // Load campaign detail from API
     const loadCampaign = async () => {
@@ -88,6 +90,37 @@ const CampaignDetail: React.FC = () => {
                                 level,
                             };
                         });
+                        // Fetch hired counts per job and override 'filled' with actual hired resume counts
+                        try {
+                            const counts = await Promise.all(merged.map(async (j: any) => {
+                                const jid = Number(j.jobId);
+                                if (!Number.isFinite(jid)) return 0;
+                                try {
+                                    const resp = await hiringTrackingService.getByJob(campaignData.campaignId, jid, { page: 1, pageSize: 1000 });
+                                    const payload = resp && (resp as any).data ? (resp as any).data : resp;
+                                    const list = hiringTrackingService._normalizeList(payload);
+                                    const hired = (list || []).filter((r: any) => {
+                                        const statusKey = String(r?.applicationStatus ?? r?.status ?? r?.stage ?? '')
+                                            .trim()
+                                            .toLowerCase()
+                                            .replace(/[\s_-]+/g, '');
+                                        return statusKey === 'hired';
+                                    }).length;
+                                    return hired;
+                                } catch (err) {
+                                    console.error('Failed to fetch resumes for job', jid, err);
+                                    return Number(j.filled ?? 0) || 0;
+                                }
+                            }));
+
+                            // Apply counts back to merged entries
+                            merged.forEach((m: any, idx: number) => {
+                                m.filled = counts[idx] ?? Number(m.filled ?? 0);
+                            });
+                        } catch (err) {
+                            console.error('Failed to compute hired counts for campaign jobs', err);
+                        }
+
                         campaignData.jobs = merged;
                     } catch (err) {
                         console.error('Failed to load jobs for campaign', err);
@@ -161,6 +194,16 @@ const CampaignDetail: React.FC = () => {
         const cid = campaignIdParam ?? id;
         // Navigate to the resume list route for that job
         const routeTemplate = APP_ROUTES.COMPANY_AI_SCREENING_RESUMES || '/company/ai-screening/:campaignId/:jobId/resumes';
+        const route = routeTemplate.replace(':campaignId', String(cid)).replace(':jobId', String(jid));
+        navigate(route);
+    };
+
+    // Open hiring tracking page for this job (navigate to HIRING_TRACKING route)
+    const openTracking = (job: any, campaignIdParam?: number) => {
+        if (!job) return;
+        const jid = Number(job.jobId ?? job.jobId);
+        const cid = campaignIdParam ?? id;
+        const routeTemplate = APP_ROUTES.HIRING_TRACKING || '/company/campaign/:campaignId/:jobId/hiring-tracking';
         const route = routeTemplate.replace(':campaignId', String(cid)).replace(':jobId', String(jid));
         navigate(route);
     };
@@ -240,25 +283,34 @@ const CampaignDetail: React.FC = () => {
         {
             title: 'No',
             align: 'center',
-            width: 60,
+            width: "7%",
             render: (_: any, __: any, index: number) =>
                 (currentPage - 1) * PAGE_SIZE + index + 1,
         }
         ,
-        { title: 'Job Title', align: 'center', dataIndex: 'title', key: 'title' },
-        { title: 'Target', dataIndex: 'target', key: 'target', width: 100, align: 'center' },
-        { title: 'Filled', dataIndex: 'filled', key: 'filled', width: 100, align: 'center' },
-        { title: 'Remaining', key: 'remaining', width: 120, align: 'center', render: (_: any, r: any) => Math.max(0, (r.target || 0) - (r.filled || 0)) },
+        { title: 'Job Title', align: 'center',width: "40%", dataIndex: 'title', key: 'title' },
+        { title: 'Target', dataIndex: 'target', key: 'target', width: "7%", align: 'center' },
+        { title: 'Filled', dataIndex: 'filled', key: 'filled', width: "7%", align: 'center' },
+        { title: 'Remaining', key: 'remaining', width: "7%", align: 'center', render: (_: any, r: any) => Math.max(0, (r.target || 0) - (r.filled || 0)) },
         {
-            title: 'Resumes', key: 'resumes', width: 120, align: 'center', render: (_: any, r: any) => (
-                <Button type="text" className="company-btn" size="small" onClick={() => openResumes(r, id)}>List Resumes</Button>
+            title: 'Tracking', key: 'tracking', width: "10%", align: 'center', render: (_: any, r: any) => (
+                <Tooltip title="View Tracking">
+                    <Button type="text" size="small" style={{ color: 'var(--color-primary-light)' }} icon={<Send size={16} style={iconStyle} />} onClick={() => openTracking(r)} />
+                </Tooltip>
             )
         },
         {
-            title: 'Action', dataIndex: 'action', key: 'action', width: 140, align: 'center', render: (_: any, r: any) => (
+            title: 'Resumes', key: 'resumes', width: "10%", align: 'center', render: (_: any, r: any) => (
+                <Tooltip title="List resumes">
+                    <Button type="text" size="small" style={{ color: 'var(--color-primary-light)' }} icon={<ClipboardList size={16} style={iconStyle} />} onClick={() => openResumes(r, id)} />
+                </Tooltip>
+            )
+        },
+        {
+            title: 'Action', dataIndex: 'action', key: 'action', width: "12%", align: 'center', render: (_: any, r: any) => (
                 <Space>
                     <Tooltip title="View job details">
-                        <Button type="text" icon={<EyeOutlined />} size="small" onClick={() => openJobView(r)} />
+                        <Button type="text" icon={<EyeOutlined style={iconStyle} />} size="small" onClick={() => openJobView(r)} />
                     </Tooltip>
                     
                     <Tooltip title="Delete job in campaign">
@@ -423,12 +475,12 @@ const CampaignDetail: React.FC = () => {
                                             fieldKeyMap.current.set(field.key, uniqueKey);
                                         }
                                         return (
-                                            <div key={uniqueKey} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                                            <div key={uniqueKey} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, minWidth: 0  }}>
                                                 <Form.Item
                                                     {...field}
                                                     name={[field.name, 'jobId']}
                                                     rules={[{ required: true, message: 'Please select a job' }]}
-                                                    style={{ flex: 1, marginBottom: 0 }}
+                                                    style={{ flex: 1, marginBottom: 0, minWidth: 0  }}
                                                 >
                                                     <Select
                                                         placeholder={jobLoading ? 'Loading jobs...' : 'Select job'}
@@ -437,6 +489,7 @@ const CampaignDetail: React.FC = () => {
                                                         showSearch
                                                         optionFilterProp="label"
                                                         className="company-select"
+                                                        style={{ minWidth: 0 }}
                                                     />
                                                 </Form.Item>
 

@@ -66,6 +66,32 @@ export const resumeService = {
     return await get<Paginated<Resume>>(`/jobs/${jobId}/resumes${q}`);
   },
 
+  // Backwards-compatible fetch helper with signature (jobId, campaignId?, params?)
+  fetchResumes: async (
+    jobId: number,
+    campaignIdOrParams?: number | { page?: number; pageSize?: number },
+    maybeParams?: { page?: number; pageSize?: number }
+  ): Promise<ApiResponse<Paginated<Resume>>> => {
+    let campaignId: number | null = null;
+    let actualJobId: number = jobId;
+    let params: { page?: number; pageSize?: number } | undefined;
+
+    if (typeof campaignIdOrParams === "number") {
+      campaignId = campaignIdOrParams;
+      params = maybeParams;
+    } else {
+      params = campaignIdOrParams as { page?: number; pageSize?: number } | undefined;
+    }
+
+    const q = params ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}` : "";
+
+    if (campaignId != null) {
+      return await get<Paginated<Resume>>(`${API_ENDPOINTS.RESUME.COMPANY_GET(campaignId, actualJobId)}${q}`);
+    }
+
+    return await get<Paginated<Resume>>(`/jobs/${actualJobId}/resumes${q}`);
+  },
+
   getById: async (
     idOrCampaignId: number,
     maybeJobIdOrResumeId: number,
@@ -102,6 +128,11 @@ export const resumeService = {
   // Update adjusted score for an application
   updateAdjustedScore: async (applicationId: number, adjustedScore: number): Promise<ApiResponse<null>> => {
     return await patch<null>(API_ENDPOINTS.RESUME.ADJUSTED_SCORE(applicationId), { adjustedScore });
+  },
+
+  // Update application status (e.g., Pending, Reviewed, Rejected)
+  updateApplicationStatus: async (applicationId: number, status: string, note?: string): Promise<ApiResponse<null>> => {
+    return await patch<null>(API_ENDPOINTS.RESUME.UPDATE_STATUS(applicationId), { status, note });
   },
 
   // Delete a resume

@@ -9,6 +9,15 @@
 	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+
+	--color-primary-dark: #052e16;
+	--color-primary: #065f46;
+	--color-primary-medium: #2f6c2b;
+	--color-primary-light: #4d7c0f;
+	font-size: clamp(14px, 1vw + 10px, 16px);
+    
+    /* Tạo biến khoảng cách thông minh */
+    --global-padding: clamp(1rem, 3vw, 2rem);
 }
 
 * {
@@ -45,14 +54,6 @@ svg {
 button {
 	cursor: pointer;
 }
-
-:root {
-	--color-primary-dark: #052e16;
-	--color-primary: #065f46;
-	--color-primary-medium: #2f6c2b;
-	--color-primary-light: #4d7c0f;
-}
-
 
 /* ---------------TailwindCSS Customization --------------- */
 @layer components {
@@ -108,6 +109,37 @@ button {
 	.custom-menu.ant-menu-inline .ant-menu-item:hover .ant-menu-title-content a {
 		color: var(--color-primary) !important;
 	}
+
+	/* Icon mặc định khi sidebar collapsed */
+.custom-menu.ant-menu-inline-collapsed 
+.ant-menu-item 
+.ant-menu-item-icon {
+	color: var(--color-primary-light) !important;
+}
+
+/* Icon khi hover (collapsed) */
+.custom-menu.ant-menu-inline-collapsed 
+.ant-menu-item:hover 
+.ant-menu-item-icon {
+	color: var(--color-primary) !important;
+}
+
+/* Icon khi active / selected (collapsed) */
+.custom-menu.ant-menu-inline-collapsed 
+.ant-menu-item-selected 
+.ant-menu-item-icon {
+	color: var(--color-primary) !important;
+}
+/* ===== Active background ONLY when sidebar is collapsed ===== */
+.custom-menu.ant-menu-inline-collapsed 
+.ant-menu-item-selected {
+	background-color: color-mix(
+		in srgb,
+		var(--color-primary-dark) 12%,
+		transparent
+	) !important;
+}
+
 
 	/* 👇👇👇 PHẦN THÊM MỚI: Style cho InputNumber ở Dashboard 👇👇👇
     /* Chỉ đổi màu khi không có lỗi (status != error) */
@@ -268,6 +300,18 @@ button {
 	/* Remove extra visual layers */
 	.company-select .ant-select-selection-item {
 		line-height: normal !important;
+		overflow: hidden !important;
+		text-overflow: ellipsis !important;
+		white-space: nowrap !important;
+	}
+
+	/* Ensure the visible selector also truncates long selected labels */
+	.company-select .ant-select-selector,
+	.company-select .ant-select-selection-placeholder,
+	.company-select .ant-select-selection-item {
+		overflow: hidden !important;
+		text-overflow: ellipsis !important;
+		white-space: nowrap !important;
 	}
 	.company-select.ant-select-multiple .ant-select-selection-item {
 		background: #f0f0f0 !important;
@@ -636,7 +680,6 @@ button {
 	background-color: color-mix(in srgb, var(--color-primary-light) 12%, white) !important;
 	color: var(--color-primary-dark) !important;
 	border-color: var(--color-primary-light) !important;
-
 }
 
 .company-btn .anticon {
@@ -842,4 +885,194 @@ button {
 .ant-table-tbody
 .ant-table-row.ant-table-row-selected:hover > td {
   background-color: color-mix(in srgb, var(--color-primary-light) 10%, white) !important;
+}
+
+/* =================== PENDING CAMPAIGN ITEM HOVER CARD =================== */
+@layer components {
+	.pending-campaign-item {
+		transition: transform 180ms cubic-bezier(.2,.9,.2,1), box-shadow 180ms cubic-bezier(.2,.9,.2,1), background-color 180ms ease;
+		will-change: transform, box-shadow;
+		background: transparent;
+	}
+
+	.pending-campaign-item > .ant-list-item-meta,
+	.pending-campaign-item {
+		border-radius: 8px;
+	}
+
+	.pending-campaign-item:hover {
+		transform: translateY(-6px);
+		box-shadow: 0 10px 30px rgba(16,24,40,0.12);
+		background: #fff;
+		z-index: 6;
+	}
+
+	/* Make the inner content keep its spacing when elevated */
+	.pending-campaign-item .ant-btn,
+	.pending-campaign-item .ant-tag {
+		transition: color 120ms ease, background-color 120ms ease;
+	}
+}
+@layer components {
+  .campaign-status-switch {
+    min-width: 44px !important;
+    height: 22px !important;
+    background-color: rgba(0, 0, 0, 0.15) !important; /* Màu nền khi tắt đậm hơn chút cho rõ */
+    border: none !important;
+  }
+
+  /* Tinh chỉnh nút tròn (handle) */
+  .campaign-status-switch .ant-switch-handle {
+    width: 18px !important;  /* Tăng nhẹ kích thước */
+    height: 18px !important;
+    top: 2px !important;     /* Căn lề trên */
+    inset-inline-start: 2px !important; /* Căn lề trái */
+    transition: all 0.2s ease-in-out !important;
+  }
+
+  /* Nút tròn bên trong */
+  .campaign-status-switch .ant-switch-handle::before {
+    background: #fff !important;
+    border-radius: 50% !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  }
+
+  /* Khi Switch được bật */
+  .campaign-status-switch.ant-switch-checked {
+    background-color: var(--color-primary-medium) !important;
+  }
+
+  /* Di chuyển nút tròn khi bật - tính toán dựa trên chiều dài switch */
+  .campaign-status-switch.ant-switch-checked .ant-switch-handle {
+    /* (Tổng chiều dài 44px) - (Rộng nút 18px) - (Padding 2px) = 24px */
+    transform: translateX(22px) !important; 
+  }
+
+  /* Hiệu ứng gợn sóng khi nhấn (tùy chọn) */
+  .campaign-status-switch:focus {
+    box-shadow: 0 0 0 2px rgba(47, 108, 43, 0.2) !important;
+  }
+}
+
+/* =================== RESPONSIVE ADJUSTMENTS =================== */
+/* Keep original behavior; only tweak sizes/paddings for smaller viewports */
+@media (max-width: 1024px) {
+	.custom-menu.ant-menu-horizontal {
+		height: 64px !important;
+	}
+
+	.custom-menu.ant-menu-horizontal > .ant-menu-item {
+		padding: 0 14px !important;
+		margin: 10px 6px !important;
+		height: 44px !important;
+		line-height: 44px !important;
+		border-radius: 6px !important;
+	}
+
+	.custom-menu.ant-menu-inline .ant-menu-item {
+		padding-left: 16px !important;
+		margin: 3px 6px !important;
+	}
+
+	.company-select .ant-select-selector {
+		min-height: 30px !important;
+		height: 30px !important;
+		padding: 3px 10px !important;
+	}
+
+	.company-input-number .ant-input {
+		font-size: 14px !important;
+	}
+
+	.custom-confirm-wrapper .ant-modal {
+		width: 90% !important;
+		max-width: 90% !important;
+	}
+
+	.pricing-carousel .slick-slide {
+		padding: 0 12px !important;
+	}
+}
+
+@media (max-width: 768px) {
+	:root {
+		--global-padding: clamp(0.75rem, 4vw, 1.25rem);
+	}
+
+	.custom-menu.ant-menu-horizontal {
+		height: 60px !important;
+	}
+
+	.custom-menu.ant-menu-horizontal > .ant-menu-item {
+		padding: 0 10px !important;
+		margin: 8px 4px !important;
+		height: 40px !important;
+		line-height: 40px !important;
+		border-radius: 6px !important;
+		font-size: 14px !important;
+	}
+
+	.custom-menu.ant-menu-inline .ant-menu-item {
+		padding-left: 14px !important;
+		margin: 2px 4px !important;
+	}
+
+	.company-select .ant-select-selector {
+		min-height: 28px !important;
+		height: 28px !important;
+		padding: 2px 8px !important;
+	}
+
+	.number-input.ant-input-number,
+	.company-input-number.ant-input-number {
+		border-radius: 4px !important;
+	}
+
+	.pricing-carousel .slick-list {
+		padding: 12px 0 !important;
+	}
+}
+
+@media (max-width: 480px) {
+	.custom-menu.ant-menu-horizontal {
+		height: 56px !important;
+	}
+
+	.custom-menu.ant-menu-horizontal > .ant-menu-item {
+		padding: 0 8px !important;
+		margin: 6px 4px !important;
+		height: 36px !important;
+		line-height: 36px !important;
+		font-size: 13px !important;
+		border-radius: 6px !important;
+	}
+
+	.custom-menu.ant-menu-inline .ant-menu-item {
+		padding-left: 12px !important;
+		margin: 2px 4px !important;
+	}
+
+	.company-select .ant-select-selector {
+		min-height: 26px !important;
+		height: 26px !important;
+		padding: 2px 6px !important;
+	}
+
+	.custom-confirm-wrapper .ant-modal {
+		width: 95% !important;
+		max-width: 95% !important;
+		padding: 8px !important;
+	}
+
+	/* Reduce spacing for small carousel items */
+	.pricing-carousel .slick-slide {
+		padding: 0 8px !important;
+	}
+
+	/* Slightly reduce heavy shadows/glows on very small screens */
+	.company-input-number.ant-input-number:not(.ant-input-number-status-error):hover,
+	.company-input-number.ant-input-number:not(.ant-input-number-status-error):focus,
+	.company-input-number.ant-input-number-focused:not(.ant-input-number-status-error) {
+		box-shadow: 0 0 0 1px rgba(77, 124, 15, 0.12) !important;
+	}
 }

@@ -219,7 +219,7 @@ const CandidateManagement = () => {
                     showSizeChanger: false,
                     total: apiTotal,
                     showTotal: (total) => `Total ${total} candidates`,
-                    showQuickJumper: true,
+                    showQuickJumper: false,
                     showPrevNextJumpers: true,
                     showLessItems: false,
                     onChange: (page, size) => {

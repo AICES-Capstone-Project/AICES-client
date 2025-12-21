@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Spin, Modal, Tooltip, Space, Select, Form, InputNumber, message, Popconfirm, Dropdown } from 'antd';
+import { Card, Button, Spin, Modal, Tooltip, Space, Select, Form, InputNumber, message, Dropdown, Input } from 'antd';
 import CampaignInfoCard from './CampaignInfoCard';
 import CampaignJobsTable from './CampaignJobsTable';
 import { APP_ROUTES } from '../../../../services/config';
@@ -25,6 +25,10 @@ const CampaignDetail: React.FC = () => {
     const [jobLoading, setJobLoading] = useState(false);
     const [jobViewOpen, setJobViewOpen] = useState(false);
     const [jobToView, setJobToView] = useState<any | null>(null);
+    const [confirmJobModalOpen, setConfirmJobModalOpen] = useState(false);
+    const [deletingJob, setDeletingJob] = useState<any | null>(null);
+    const [confirmJobInput, setConfirmJobInput] = useState('');
+    const [deletingJobLoading, setDeletingJobLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const PAGE_SIZE = 5;
     const [apiError, setApiError] = useState<string | null>(null);
@@ -290,7 +294,7 @@ const CampaignDetail: React.FC = () => {
         ,
         { title: 'Job Title', align: 'center',width: "40%", dataIndex: 'title', key: 'title' },
         { title: 'Target', dataIndex: 'target', key: 'target', width: "7%", align: 'center' },
-        { title: 'Filled', dataIndex: 'filled', key: 'filled', width: "7%", align: 'center' },
+        { title: 'Hired', dataIndex: 'filled', key: 'filled', width: "7%", align: 'center' },
         { title: 'Remaining', key: 'remaining', width: "7%", align: 'center', render: (_: any, r: any) => Math.max(0, (r.target || 0) - (r.filled || 0)) },
         {
             title: 'Tracking', key: 'tracking', width: "10%", align: 'center', render: (_: any, r: any) => (
@@ -314,20 +318,17 @@ const CampaignDetail: React.FC = () => {
                     </Tooltip>
                     
                     <Tooltip title="Delete job in campaign">
-                        <Popconfirm
-                            title="Delete this job in campaign?"
-                            onConfirm={async () => {
-                                try {
-                                    await onDelete(r);
-                                } catch (err) {
-                                    message.error('Delete failed');
-                                }
+                        <Button
+                            type="text"
+                            icon={<DeleteOutlined />}
+                            size="small"
+                            danger
+                            onClick={() => {
+                                setDeletingJob(r);
+                                setConfirmJobInput('');
+                                setConfirmJobModalOpen(true);
                             }}
-                            okText="Delete"
-                            cancelText="Cancel"
-                        >
-                            <Button type="text" icon={<DeleteOutlined />} size="small" danger />
-                        </Popconfirm>
+                        />
                     </Tooltip>
                     <Dropdown
                         menu={{
@@ -518,6 +519,47 @@ const CampaignDetail: React.FC = () => {
                         }}
                     </Form.List>
                 </Form>
+            </Modal>
+
+            <Modal
+                title="Delete job from campaign"
+                open={confirmJobModalOpen}
+                onCancel={() => { setConfirmJobModalOpen(false); setDeletingJob(null); setConfirmJobInput(''); }}
+                footer={
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                        <div>
+                            <Button className="company-btn" onClick={() => { setConfirmJobModalOpen(false); setDeletingJob(null); setConfirmJobInput(''); }}>Cancel</Button>
+                        </div>
+                        <div>
+                            <Button
+                                danger
+                                loading={deletingJobLoading}
+                                onClick={async () => {
+                                    if (!deletingJob) return;
+                                    if (confirmJobInput !== (deletingJob.title ?? deletingJob.jobTitle ?? '')) return;
+                                    try {
+                                        setDeletingJobLoading(true);
+                                        await onDelete(deletingJob);
+                                        setConfirmJobModalOpen(false);
+                                        setDeletingJob(null);
+                                        setConfirmJobInput('');
+                                    } catch (err) {
+                                        console.error('Delete job failed', err);
+                                        message.error('Delete job failed');
+                                    } finally {
+                                        setDeletingJobLoading(false);
+                                    }
+                                }}
+                                disabled={confirmJobInput !== (deletingJob?.title ?? deletingJob?.jobTitle ?? '')}
+                            >Delete</Button>
+                        </div>
+                    </div>
+                }
+            >
+                <div style={{ marginBottom: 12 }}>
+                    Type the job title to confirm deletion: <span style={{ fontWeight: 700 }}>{deletingJob?.title ?? deletingJob?.jobTitle}</span>
+                </div>
+                <Input placeholder="Type job title exactly" value={confirmJobInput} onChange={(e) => setConfirmJobInput(e.target.value)} />
             </Modal>
 
         </Card>

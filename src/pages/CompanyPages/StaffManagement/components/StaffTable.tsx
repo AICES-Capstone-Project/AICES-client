@@ -62,7 +62,12 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
             <Avatar src={record.avatarUrl} icon={<UserOutlined />} size={40} />
           </div>
           <div style={{ flex: 1, textAlign: "center" }}>
-            <div style={{ fontWeight: 500 }}>{record.fullName || "No Name"}</div>
+            <div
+              title={record.fullName || "No Name"}
+              style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+            >
+              {record.fullName || "No Name"}
+            </div>
           </div>
         </div>
       ),
@@ -73,7 +78,9 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
       key: "email",
       width: "17%",
       align: "center",
-      render: (email: string) => <div style={{ textAlign: "center", fontSize: 13, color: "#333" }}>{email}</div>,
+      render: (email: string) => (
+        <div title={email} style={{ textAlign: "center", fontSize: 13, color: "#333", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{email}</div>
+      ),
     },
     {
       title: "Phone Number",
@@ -81,7 +88,9 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
       key: "phoneNumber",
       width: "12%",
       align: "center",
-      render: (phoneNumber: string) => <div style={{ textAlign: "center", fontSize: 13, color: "#333" }}>{phoneNumber}</div>,
+      render: (phoneNumber: string) => (
+        <div title={phoneNumber} style={{ textAlign: "center", fontSize: 13, color: "#333", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{phoneNumber}</div>
+      ),
     },
     {
       title: "Address",
@@ -89,7 +98,11 @@ const StaffTable: React.FC<Props> = ({ members, loading, onDelete }) => {
       key: "address",
       width: "20%",
       align: "center",
-      render: (address: string) => <div style={{ textAlign: "center", fontSize: 13, color: "#333" }}>{address}</div>,
+      render: (address: string) => (
+        <Tooltip title={address} placement="topLeft">
+          <div style={{ textAlign: "center", fontSize: 13, color: "#333", overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{address}</div>
+        </Tooltip>
+      ),
     },
     {
       title: "Role",

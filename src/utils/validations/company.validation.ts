@@ -6,7 +6,7 @@ const companyNameSchema = z
   .min(1, "Company name is required.")
   .min(2, "Company name must be at least 2 characters.")
   .max(100, "Company name cannot exceed 100 characters.")
-  .regex(/^[a-zA-Z0-9\s&.,'-]+$/, "Company name contains invalid characters.")
+  .regex(/^[\p{L}0-9\s&.,'()\/:\-+]+$/u, "Company name contains invalid characters.")
   .trim();
 
 // Website URL validation
@@ -25,12 +25,16 @@ const addressSchema = z
   .max(200, "Address cannot exceed 200 characters.")
   .trim();
 
-// Tax code validation (Vietnam format)
+// Tax code validation
+// Acceptable formats:
+// - 10 digits (standard company/personal tax code)
+// - 12 digits (personal ID replacement from 01/07/2025)
+// - 13 digits (branch), either as 13 continuous digits or as 10-3 with a hyphen after the 10th digit
 const taxCodeSchema = z
   .string()
   .min(1, "Tax code is required.")
-  .regex(/^\d{10}(-\d{3})?$/, "Tax code must be 10 digits or 10 digits followed by -XXX format.")
-  .length(10, "Tax code must be exactly 10 digits.");
+  .regex(/^(?:\d{10}|\d{12}|\d{13}|\d{10}-\d{3})$/, "Tax code must be 10, 12, or 13 digits (optional hyphen after 10 digits, e.g. 1234567890-001).")
+  .trim();
 
 // Description validation
 const descriptionSchema = z
@@ -46,7 +50,7 @@ const documentTypeSchema = z
   .min(1, "Document type is required.")
   .min(3, "Document type must be at least 3 characters.")
   .max(50, "Document type cannot exceed 50 characters.")
-  .regex(/^[a-zA-Z0-9\s&.,'-]+$/, "Document type contains invalid characters.")
+  .regex(/^[\p{L}0-9\s&.,'()\/:\-+]+$/u, "Document type contains invalid characters.")
   .trim();
 
 // File validation (for client-side validation)

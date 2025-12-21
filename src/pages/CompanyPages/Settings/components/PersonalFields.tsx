@@ -1,22 +1,9 @@
-import { Form, Input, DatePicker } from "antd";
-import type { Dayjs } from "dayjs";
+import { Form, Input } from "antd";
 import dayjs from "dayjs";
 
 export default function PersonalFields() {
-  // const prefixSelector = (
-  //   <div className="flex items-center gap-2 px-2">
-  //     <img
-  //       src="https://flagcdn.com/24x18/vn.png"
-  //       alt="Vietnam flag"
-  //       className="w-5 h-[18px] object-cover"
-  //     />
-  //     <span className="text-gray-700 font-medium whitespace-nowrap">+84</span>
-  //   </div>
-  // );
-
   return (
     <>
-      {/* Username */}
       <Form.Item
         name="fullName"
         label="Full Name:"
@@ -29,10 +16,9 @@ export default function PersonalFields() {
           { max: 50, message: "Full name must be at most 50 characters" },
         ]}
       >
-        <Input size="large" placeholder="Enter full name" />
+        <Input size="large" placeholder="Enter full name" maxLength={50} showCount />
       </Form.Item>
 
-      {/* Email */}
       <Form.Item
         name="email"
         label="Email:"
@@ -46,8 +32,6 @@ export default function PersonalFields() {
         />
       </Form.Item>
 
-
-      {/* Phone + Birthday */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-20">
         <Form.Item
           name="phoneNumber"
@@ -63,6 +47,8 @@ export default function PersonalFields() {
           <Input
             size="large"
             placeholder="Enter phone number"
+            maxLength={11}
+            showCount
             addonBefore={
               <div
                 style={{
@@ -90,38 +76,45 @@ export default function PersonalFields() {
           labelCol={{ span: 24 }}
           wrapperCol={{ span: 24 }}
           hasFeedback
+          normalize={(val: string) => {
+            if (!val) return val;
+            const parsed = dayjs(val, [
+              'DD/MM/YYYY',
+              'D/M/YYYY',
+              'DD-MM-YYYY',
+              'DD MMM YYYY',
+              'DD/MMM/YYYY',
+              'DD-MMM-YYYY',
+            ], true);
+            if (parsed.isValid()) return parsed.format('DD/MM/YYYY');
+            return val;
+          }}
           rules={[
-            { required: true, message: "Please select your birthday" },
+            { required: true, message: "Please enter your birthday" },
             {
-              validator: (_, value: Dayjs) => {
+              validator: (_, value: string) => {
                 if (!value) return Promise.resolve();
-                if (value.isAfter(dayjs())) {
-                  return Promise.reject(new Error("Birthday cannot be in the future"));
-                }
-                const age = dayjs().diff(value, "year");
-                if (age < 18) {
-                  return Promise.reject(new Error("You must be at least 18 years old"));
-                }
+                const parsed = dayjs(value, [
+                  'DD/MM/YYYY',
+                  'DD/MMM/YYYY',
+                  'D/M/YYYY',
+                  'DD-MM-YYYY',
+                  'DD MMM YYYY',
+                  'DD-MMM-YYYY',
+                ], true);
+                if (!parsed.isValid()) return Promise.reject(new Error("Please enter date in DD/MM/YYYY format"));
+                if (parsed.isAfter(dayjs(), 'day')) return Promise.reject(new Error("Birthday cannot be in the future"));
+                const age = dayjs().diff(parsed, 'year');
+                if (age < 18) return Promise.reject(new Error("You must be at least 18 years old"));
                 return Promise.resolve();
               },
             },
           ]}
         >
-          <DatePicker
-            size="large"
-            format="DD/MM/YYYY"
-            className="w-full"
-            placeholder="Select your birthday"
-            popupClassName="max-h-[300px]"
-            disabledDate={(current) =>
-              current &&
-              (current > dayjs().endOf("day") ||
-                current.isAfter(dayjs().subtract(18, "year")))}
-          />
+          <Input size="large" placeholder="DD/MM/YYYY" maxLength={10} />
         </Form.Item>
       </div>
 
-      {/* Address */}
       <Form.Item
         name="address"
         label="Address:"
@@ -134,7 +127,7 @@ export default function PersonalFields() {
           { max: 100, message: "Address must be at most 100 characters" },
         ]}
       >
-        <Input.TextArea rows={3} placeholder="Enter your address" />
+        <Input.TextArea rows={3} placeholder="Enter your address" maxLength={100} showCount />
       </Form.Item>
     </>
   );

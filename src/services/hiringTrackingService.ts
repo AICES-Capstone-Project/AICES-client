@@ -63,6 +63,7 @@ export const hiringTrackingService = {
             email: r.email ?? null,
             phone: r.phone ?? r.phoneNumber ?? null,
             fileUrl: r.fileUrl ?? null,
+            note: r.note ?? null,
             // expose score fields so UI can render correctly
             totalScore: r.totalScore ?? null,
             adjustedScore: r.adjustedScore ?? null,

@@ -15,6 +15,7 @@ export interface Company {
   createdBy?: string | number | null;
   approvalBy?: string | number | null;
   createdAt?: string; // ISO
+  managerName?: string | null;
 
   documents?: CompanyDocument[];
 }

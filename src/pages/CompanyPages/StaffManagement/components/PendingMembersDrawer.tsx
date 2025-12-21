@@ -27,11 +27,18 @@ const PendingMembersDrawer: React.FC<Props> = ({ open, onClose, requests, onAppr
   const [selectedRequest, setSelectedRequest] = useState<JoinRequest | null>(null);
   const [approving, setApproving] = useState(false);
   const [rejecting, setRejecting] = useState(false);
+  const [confirmRejectVisible, setConfirmRejectVisible] = useState(false);
   const [detailRequest, setDetailRequest] = useState<JoinRequest | null>(null);
 
   const handleApproveClick = (r: JoinRequest) => {
     setSelectedRequest(r);
     setConfirmVisible(true);
+  };
+
+  const handleRejectClick = (r: JoinRequest | null) => {
+    if (!r) return;
+    setSelectedRequest(r);
+    setConfirmRejectVisible(true);
   };
 
   const handleShowDetail = (r: JoinRequest) => {
@@ -47,6 +54,21 @@ const PendingMembersDrawer: React.FC<Props> = ({ open, onClose, requests, onAppr
       setApproving(false);
       setConfirmVisible(false);
       setSelectedRequest(null);
+    }
+  };
+
+  const handleConfirmReject = async () => {
+    if (!selectedRequest || !onReject) return;
+    setRejecting(true);
+    try {
+      await onReject(selectedRequest);
+      setConfirmRejectVisible(false);
+      setSelectedRequest(null);
+      window.location.reload();
+    } catch (e) {
+      console.error('Reject error', e);
+    } finally {
+      setRejecting(false);
     }
   };
 
@@ -110,23 +132,9 @@ const PendingMembersDrawer: React.FC<Props> = ({ open, onClose, requests, onAppr
             Requested at: {formatDateTime(detailRequest.createdAt)}
           </div>
           <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-
             <Button
               danger
-              onClick={async () => {
-                if (!detailRequest) return;
-                if (onReject) {
-                  try {
-                    setRejecting(true);
-                    await onReject(detailRequest);
-                    setDetailRequest(null);
-                  } catch (e) {
-                    console.error('Reject error', e);
-                  } finally {
-                    setRejecting(false);
-                  }
-                }
-              }}
+              onClick={() => handleRejectClick(detailRequest)}
               loading={rejecting}
             >
               Reject
@@ -180,7 +188,7 @@ const PendingMembersDrawer: React.FC<Props> = ({ open, onClose, requests, onAppr
           <div key="footer" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
             <Button
               key="cancel"
-              className="company-btn"
+              danger
               onClick={() => {
                 setConfirmVisible(false);
                 setSelectedRequest(null);
@@ -201,7 +209,41 @@ const PendingMembersDrawer: React.FC<Props> = ({ open, onClose, requests, onAppr
         ]}
       >
         <div style={{ textAlign: "center", fontSize: 16, marginTop: 8 }}>
-          <span>Are you sure you want to approve <strong>{selectedRequest?.fullName || selectedRequest?.email}</strong> staff?</span>
+          <span>Are you sure you want to approve <strong>{selectedRequest?.fullName || selectedRequest?.email}</strong> recruiter?</span>
+        </div>
+      </Modal>
+
+      <Modal
+        open={confirmRejectVisible}
+        onCancel={() => {
+          setConfirmRejectVisible(false);
+          setSelectedRequest(null);
+        }}
+        footer={[
+          <div key="footer-reject" style={{ display: "flex", justifyContent: "space-between", width: "100%" }}>
+            <Button
+              key="cancel"
+              onClick={() => {
+                setConfirmRejectVisible(false);
+                setSelectedRequest(null);
+              }}
+            >
+              Cancel
+            </Button>
+
+            <Button
+              key="reject"
+              danger
+              onClick={handleConfirmReject}
+              loading={rejecting}
+            >
+              Reject
+            </Button>
+          </div>,
+        ]}
+      >
+        <div style={{ textAlign: "center", fontSize: 16, marginTop: 8 }}>
+          <span>Are you sure you want to reject <strong>{selectedRequest?.fullName || selectedRequest?.email}</strong>?</span>
         </div>
       </Modal>
 

@@ -29,7 +29,7 @@ export default function Setting() {
     formProfile.setFieldsValue({
       fullName: user.fullName || "",
       email: user.email || "",
-      birthday: user.dateOfBirth ? dayjs(user.dateOfBirth) : null,
+      birthday: user.dateOfBirth ? dayjs(user.dateOfBirth).format('DD/MM/YYYY') : null,
       address: user.address || "",
       phoneNumber: user.phoneNumber || "",
       prefix: "+84",
@@ -47,7 +47,12 @@ export default function Setting() {
       if (values.fullName?.trim()) form.append("FullName", values.fullName.trim());
       if (values.address?.trim()) form.append("Address", values.address.trim());
       if (values.phoneNumber?.trim()) form.append("PhoneNumber", values.phoneNumber.trim());
-      if (values.birthday) form.append("DateOfBirth", values.birthday.format("YYYY-MM-DD"));
+      if (values.birthday) {
+        const parsed = typeof values.birthday === 'string'
+          ? dayjs(values.birthday, 'DD/MM/YYYY', true)
+          : dayjs(values.birthday);
+        if (parsed.isValid()) form.append('DateOfBirth', parsed.format('YYYY-MM-DD'));
+      }
 
       const avatarField = values.AvatarFile;
       if (Array.isArray(avatarField) && avatarField.length > 0) {

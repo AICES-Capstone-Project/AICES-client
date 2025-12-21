@@ -79,7 +79,7 @@ const SubmissionPending = lazy(
   () => import("../pages/CompanyPages/MyApartment/SubmissionPending")
 );
 const Campain = lazy(
-  () => import("../pages/CompanyPages/Campain/CampainManagement")
+  () => import("../pages/CompanyPages/Campain/CampaignManagement.tsx")
 );
 const CampaignDetail = lazy(
   () => import("../pages/CompanyPages/Campain/component/CampaignDetail")

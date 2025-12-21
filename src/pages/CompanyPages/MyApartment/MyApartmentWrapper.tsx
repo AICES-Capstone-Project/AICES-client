@@ -3,7 +3,7 @@ import { Spin, Alert } from "antd";
 import { authService } from "../../../services/authService";
 import { companyService } from "../../../services/companyService";
 import type { ProfileResponse } from "../../../types/auth.types";
-import MyApartment from "./MyApartment";
+import RegisterCompany from "./RegisterCompany";
 import SubmissionPending from "./SubmissionPending";
 import CompanyView from "./CompanyView";
 import CompanyRejected from "./CompanyRejected";
@@ -24,7 +24,6 @@ export default function MyApartmentWrapper() {
         if (response?.status === "Success" && response?.data) {
           setUser(response.data);
 
-          // Nếu user đã có công ty → lấy chi tiết công ty
           if (response.data.companyName) {
             try {
               const companyResponse = await companyService.getSelf();
@@ -32,7 +31,6 @@ export default function MyApartmentWrapper() {
                 setCompanyData(companyResponse.data);
               }
             } catch {
-              // Bỏ qua lỗi fetch công ty
             }
           }
         } else {
@@ -48,7 +46,6 @@ export default function MyApartmentWrapper() {
     fetchUserData();
   }, []);
 
-  // Loading
   if (loading) {
     return (
       <div
@@ -66,7 +63,6 @@ export default function MyApartmentWrapper() {
     );
   }
 
-  // Error
   if (error) {
     return (
       <div style={{ padding: "24px", maxWidth: "800px", margin: "0 auto" }}>
@@ -75,12 +71,10 @@ export default function MyApartmentWrapper() {
     );
   }
 
-  // Logic render component theo trạng thái công ty
   const companyStatus = user?.companyStatus;
   const joinStatus = user?.joinStatus;
   const rejectionReason = companyData?.rejectionReason || user?.rejectionReason;
 
-  // If the profile indicates a join request pending, show SubmissionPending
   if (joinStatus && joinStatus.toLowerCase() === "pending") return <SubmissionPending />;
 
   if (companyStatus === "Approved") return <CompanyView />;
@@ -88,8 +82,7 @@ export default function MyApartmentWrapper() {
   if (companyStatus === "Rejected")
     return <CompanyRejected rejectionReason={rejectionReason} />;
 
-  // Only show MyApartment when user has no company and no active join request
-  if (!user?.companyName && !joinStatus || joinStatus === "NotApplied") return <MyApartment />;
+  if (!user?.companyName && !joinStatus || joinStatus === "NotApplied") return <RegisterCompany />;
 
   return <SubmissionPending />;
 }

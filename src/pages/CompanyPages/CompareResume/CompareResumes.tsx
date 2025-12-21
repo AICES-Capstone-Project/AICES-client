@@ -6,7 +6,7 @@ import resumeService from "../../../services/resumeService";
 import compareResumeService from "../../../services/compareResumeService";
 import HistoryDrawer from './HistoryDrawer';
 import ResumeDetailDrawer from '../AIScreening/component/ResumeDetailDrawer';
-import { EyeOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { EyeOutlined, ArrowLeftOutlined, CrownOutlined } from "@ant-design/icons";
 import { toastError } from "../../../components/UI/Toast";
 
 interface Resume {
@@ -39,7 +39,7 @@ const CompareResumes: React.FC = () => {
     const [submitting, setSubmitting] = useState(false);
     const [polling, setPolling] = useState(false);
     const [comparisonResult, setComparisonResult] = useState<any>(null);
-    const [comparisonId, setComparisonId] = useState<number | null>(null);
+    const [comparisonName, setComparisonName] = useState<string | null>(null);
     const pollingRef = React.useRef<number | null>(null);
     const [selectionEnabled, setSelectionEnabled] = useState(false);
 
@@ -141,11 +141,18 @@ const CompareResumes: React.FC = () => {
             if (typeof campaignId === 'number') body.campaignId = campaignId;
             const resp = await compareResumeService.compare(body);
             const ok = resp && (String(resp.status || '').toLowerCase() === 'success' || resp.data);
+            // helper: try several common shapes to find comparisonName
+            const extractComparisonName = (obj: any) => {
+                if (!obj) return null;
+                return obj.comparisonName ?? obj.comparison_name ?? obj.name ?? obj.title ?? obj.data?.comparisonName ?? obj.data?.comparison_name ?? obj.data?.name ?? obj.data?.title ?? obj.resultData?.comparisonName ?? obj.resultData?.comparison_name ?? null;
+            };
+
             if (ok) {
-                // Try to read comparisonId from response
-                const id = resp.data?.comparisonId ?? resp.data?.id ?? null;
+                // Try to read comparisonId and comparisonName from response
+                const id = resp.data?.comparisonId ?? resp.data?.id ?? resp.data?.data?.comparisonId ?? null;
+                const name = extractComparisonName(resp.data ?? resp);
+                setComparisonName(name ? String(name) : (id ? String(id) : null));
                 if (id) {
-                    setComparisonId(Number(id));
                     setPolling(true);
                     message.success('Compare request sent. Starting comparison...');
                     // start polling every 3s
@@ -159,7 +166,10 @@ const CompareResumes: React.FC = () => {
                                 window.clearInterval(pollingRef.current ?? undefined);
                                 pollingRef.current = null;
                                 setPolling(false);
-                                const result = r.data?.resultJson ?? r.data?.result ?? r.data;
+                                // prefer server-provided comparisonName if present
+                                const remoteName = extractComparisonName(r?.data ?? r);
+                                if (remoteName) setComparisonName(String(remoteName));
+                                const result = r.data?.resultJson ?? r.data?.result ?? r.data?.resultData ?? r.data;
                                 setComparisonResult(result);
                             } else {
                                 // still pending/processing, keep waiting
@@ -289,19 +299,32 @@ const CompareResumes: React.FC = () => {
     ];
 
     const renderComparisonTable = (data: any) => {
-        let resultObj = data;
-        // prefer nested resultJson/result fields
-        if (resultObj && resultObj.resultJson) resultObj = resultObj.resultJson;
+        let resultObj: any = undefined;
+        if (!data) return <div style={{ padding: 20, textAlign: 'center' }}>No data.</div>;
+
+        if (data.resultJson !== undefined) {
+            resultObj = data.resultJson;
+        } else if (data.resultData !== undefined) {
+            resultObj = data.resultData;
+        } else if (data.data && (data.data.resultJson || data.data.resultData)) {
+            resultObj = data.data.resultJson ?? data.data.resultData;
+        } else if (Array.isArray(data.candidates)) {
+            resultObj = { candidates: data.candidates };
+        } else {
+            resultObj = data;
+        }
+
         if (typeof resultObj === 'string') {
             try {
                 resultObj = JSON.parse(resultObj);
             } catch (e) {
-                return <pre>{String(resultObj)}</pre>;
+                return <pre>{resultObj}</pre>;
             }
         }
 
         const candidates = resultObj?.candidates || [];
-        if (!Array.isArray(candidates) || candidates.length === 0) {
+
+        if (candidates.length === 0) {
             // Try fallback: use jobFit/recommendation/etc if present
             if (resultObj && (resultObj.jobFit || resultObj.recommendation || resultObj.technicalStackMatch)) {
                 return (
@@ -333,12 +356,30 @@ const CompareResumes: React.FC = () => {
             return <pre>{JSON.stringify(resultObj, null, 2)}</pre>;
         }
 
-        // Layout: criteria 10%, candidate columns share remaining 90%
+        // helper to read analysis fields with several possible key names
+        const getAnalysisValue = (analysis: any, variants: string[]) => {
+            if (!analysis) return '';
+            for (const k of variants) {
+                if (analysis[k] !== undefined && analysis[k] !== null) return analysis[k];
+            }
+            return '';
+        };
+
+        const fieldDefs = [
+            { key: 'jobFit', label: 'Job Fit', variants: ['jobFit', 'Job Fit', 'job_fit'] },
+            { key: 'techStack', label: 'Technical Stack', variants: ['Technical Stack Match', 'Technical Stack', 'techStack', 'technical_stack'] },
+            { key: 'culture', label: 'Culture & Logistics', variants: ['Culture & Logistics Fit', 'Culture & Logistics', 'culture'] },
+            { key: 'softSkills', label: 'Soft Skills', variants: ['Methodology & Soft Skills', 'Soft Skills', 'softSkills'] },
+            { key: 'metrics', label: 'Exp & Metrics', variants: ['Experience & Performance Metrics', 'Experience & Metrics', 'metrics'] },
+            { key: 'overall', label: 'Overall Summary', variants: ['overallSummary', 'overall', 'Overall Summary'] },
+        ];
+
+        // Layout: criteria column 10%, candidate columns share remaining 90%
         const candidateCount = candidates.length;
         const criteriaWidth = '10%';
         const candidateWidth = candidateCount === 2 ? '45%' : `${Math.max(20, Math.floor(90 / candidateCount))}%`;
 
-        const tableColumns = [
+        const columns = [
             {
                 title: 'Criteria',
                 dataIndex: 'criteria',
@@ -346,41 +387,53 @@ const CompareResumes: React.FC = () => {
                 width: criteriaWidth,
                 render: (text: string) => <strong>{text}</strong>,
             },
-            ...candidates.map((c: any, index: number) => ({
-                title: `Candidate ${index + 1} (Rank: ${c.analysis?.recommendation?.rank || 'N/A'})`,
-                dataIndex: `candidate_${index}`,
-                key: `candidate_${index}`,
-                width: candidateWidth,
-                render: (_: any, record: any) => {
-                    const field = record.key;
-                    const analysis = c.analysis || {};
-                    let value = '';
-                    if (field === 'jobFit') value = analysis.jobFit;
-                    else if (field === 'techStack') value = analysis['Technical Stack Match'];
-                    else if (field === 'culture') value = analysis['Culture & Logistics Fit'];
-                    else if (field === 'softSkills') value = analysis['Methodology & Soft Skills'];
-                    else if (field === 'metrics') value = analysis['Experience & Performance Metrics'];
-                    else if (field === 'overall') value = analysis.overallSummary;
+            ...candidates.map((c: any, index: number) => {
+                const analysis = c.analysis ?? c.analysisData ?? c;
+                const candidateName = getAnalysisValue(analysis, ['candidateName', 'candidate_name']) || c.candidateName || `Candidate ${index + 1}`;
+                const rank = getAnalysisValue(analysis, ['recommendation'])?.rank ?? getAnalysisValue(analysis, ['recommendation', 'rank']) ?? (analysis?.recommendation?.rank ?? 'N/A');
+                const rankText = rank === undefined || rank === null ? 'N/A' : rank;
+                const rankNum = Number(rankText);
+                const rankColor = Number.isFinite(rankNum)
+                    ? (rankNum === 1 ? 'green' : rankNum === 2 ? 'geekblue' : rankNum === 3 ? 'orange' : 'red')
+                    : 'default';
 
-                    return (
-                        <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>{value}</div>
-                    );
-                }
-            }))
+                return {
+                    title: (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            {rankNum === 1 && <CrownOutlined style={{ color: '#fa1414ff', fontSize: 20 }} />}
+                            <span style={{ fontWeight: 700 }}>{candidateName}</span>
+                            <Tag color={rankColor}>{`Rank ${rankText}`}</Tag>
+                        </div>
+                    ),
+                    dataIndex: `candidate_${index}`,
+                    key: `candidate_${index}`,
+                    width: candidateWidth,
+                    render: (_: any, record: any) => {
+                        const field = record.key;
+                        const def = fieldDefs.find(f => f.key === field);
+                        const val = def ? getAnalysisValue(analysis, def.variants) : '';
+                        return (
+                            <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                                {val}
+                            </div>
+                        );
+                    }
+                };
+            })
         ];
 
-        const dataSource = [
-            { key: 'jobFit', criteria: 'Job Fit' },
-            { key: 'techStack', criteria: 'Technical Stack' },
-            { key: 'culture', criteria: 'Culture & Logistics' },
-            { key: 'softSkills', criteria: 'Soft Skills' },
-            { key: 'metrics', criteria: 'Exp & Metrics' },
-            { key: 'overall', criteria: 'Overall Summary' },
-        ];
+        const dataSource = fieldDefs.map(f => ({ key: f.key, criteria: f.label }));
 
         return (
             <div style={{ width: '100%', overflowX: 'hidden' }}>
-                <Table columns={tableColumns} dataSource={dataSource} pagination={false} bordered size="middle" style={{ width: '100%' }} />
+                <Table
+                    columns={columns}
+                    dataSource={dataSource}
+                    pagination={false}
+                    bordered
+                    size="middle"
+                    style={{ width: '100%' }}
+                />
             </div>
         );
     };
@@ -402,7 +455,7 @@ const CompareResumes: React.FC = () => {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', gap: 8 }}>
-                                <Button className="company-btn" onClick={openHistory}>View History</Button>
+                                
                                 {selectionEnabled && (
                                     <Button danger onClick={() => { setSelectedKeys([]); setSelectionEnabled(false); }}>Cancel</Button>
                                 )}
@@ -420,6 +473,7 @@ const CompareResumes: React.FC = () => {
                                 >
                                     {selectionEnabled ? `Compare (${selectedKeys.length})` : 'Compare'}
                                 </Button>
+                                <Button className="company-btn" onClick={openHistory}>View History</Button>
                             </div>
                         </div>
                     </div>
@@ -464,7 +518,7 @@ const CompareResumes: React.FC = () => {
 
                         {/* Comparison result */}
                         {comparisonResult && (
-                            <Card title={`Comparison Result${comparisonId ? ` (#${comparisonId})` : ''}`} style={{ marginTop: 12 }}>
+                            <Card title={`Comparison Result: ${comparisonName ? ` ${comparisonName}` : ''}`} style={{ marginTop: 12 }}>
                                 {renderComparisonTable(comparisonResult)}
                             </Card>
                         )}

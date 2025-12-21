@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import { Card, Input, Button, message, Badge} from "antd";
+import { Card, Input, Button, message, Badge, Select } from "antd";
 import { SearchOutlined, PlusOutlined, BellOutlined } from "@ant-design/icons";
 import CampaignCreateDrawer from './component/CampaignCreateDrawer';
 import CampaignEditDrawer from './component/CampaignEditDrawer';
@@ -22,6 +22,7 @@ const CampaignManagement = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [pageSize] = useState<number>(12);
     const [searchText, setSearchText] = useState("");
+    const [statusFilter, setStatusFilter] = useState<string>('all');
     const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
     const [editDrawerOpen, setEditDrawerOpen] = useState(false);
     const [editingCampaign, setEditingCampaign] = useState<any | null>(null);
@@ -55,53 +56,78 @@ const CampaignManagement = () => {
         try {
             const response = await campaignService.getCampaigns();
             if (response.status === "Success" && response.data) {
-                    let campaignList = response.data.campaigns || response.data;
-                    campaignList = Array.isArray(campaignList) ? campaignList : [];
+                let campaignList = response.data.campaigns || response.data;
+                campaignList = Array.isArray(campaignList) ? campaignList : [];
 
-                    // Enrich jobs with `filled` counts when possible by fetching resumes per job
-                    // This is optional but ensures progress uses accurate totalHired values.
-                    const enriched = await Promise.all(
-                        campaignList.map(async (camp: any) => {
-                            const jobs = Array.isArray(camp.jobs) ? camp.jobs : [];
-                            if (!jobs.length) return camp;
+                // Enrich jobs with `filled` counts when possible by fetching resumes per job
+                // This is optional but ensures progress uses accurate totalHired values.
+                const enriched = await Promise.all(
+                    campaignList.map(async (camp: any) => {
+                        const jobs = Array.isArray(camp.jobs) ? camp.jobs : [];
+                        if (!jobs.length) return camp;
 
-                            // For each job, if there's already a numeric filled/hired, keep it.
-                            // Otherwise, fetch resumes for that job and count statuses == 'Hired'.
-                            const jobsWithCounts = await Promise.all(
-                                jobs.map(async (job: any) => {
-                                    const hasNumeric = Number(job?.filled ?? job?.filledCount ?? job?.hired ?? job?.hiredCount ?? 0) > 0;
-                                    if (hasNumeric) return job;
+                        // For each job, if there's already a numeric filled/hired, keep it.
+                        // Otherwise, fetch resumes for that job and count statuses == 'Hired'.
+                        const jobsWithCounts = await Promise.all(
+                            jobs.map(async (job: any) => {
+                                const hasNumeric = Number(job?.filled ?? job?.filledCount ?? job?.hired ?? job?.hiredCount ?? 0) > 0;
+                                if (hasNumeric) return job;
 
-                                    try {
-                                        const resp = await hiringTrackingService.getByJob(camp.campaignId ?? camp.campaign_id ?? camp.id, job.jobId ?? job.jobId ?? job.id, { page: 1, pageSize: 1 });
-                                        const payload = resp && (resp as any).data ? (resp as any).data : resp;
-                                        const list = hiringTrackingService._normalizeList(payload || resp);
-                                        // count hired
-                                        const count = (list || []).filter((r: any) => {
-                                            const st = String(r?.applicationStatus ?? r?.status ?? r?.stage ?? '').toLowerCase().replace(/[\s_-]+/g, '');
-                                            return st === 'hired';
-                                        }).length;
-                                        return { ...job, filled: count };
-                                    } catch (e) {
-                                        return job;
-                                    }
-                                })
-                            );
+                                try {
+                                    const resp = await hiringTrackingService.getByJob(camp.campaignId ?? camp.campaign_id ?? camp.id, job.jobId ?? job.jobId ?? job.id, { page: 1, pageSize: 1 });
+                                    const payload = resp && (resp as any).data ? (resp as any).data : resp;
+                                    const list = hiringTrackingService._normalizeList(payload || resp);
+                                    // count hired
+                                    const count = (list || []).filter((r: any) => {
+                                        const st = String(r?.applicationStatus ?? r?.status ?? r?.stage ?? '').toLowerCase().replace(/[\s_-]+/g, '');
+                                        return st === 'hired';
+                                    }).length;
+                                    return { ...job, filled: count };
+                                } catch (e) {
+                                    return job;
+                                }
+                            })
+                        );
 
-                            return { ...camp, jobs: jobsWithCounts };
-                        })
-                    );
+                        return { ...camp, jobs: jobsWithCounts };
+                    })
+                );
 
-                    setCampaigns(enriched);
+                setCampaigns(enriched);
             } else {
                 console.error("Failed to fetch campaigns:", response);
-                    setCampaigns([]);
+                setCampaigns([]);
             }
         } catch (error) {
             console.error("Error loading campaigns:", error);
             setCampaigns([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Load pending campaigns by filtering all campaigns (server no longer provides pending endpoint)
+    const loadPendingCampaigns = async () => {
+        setPendingLoading(true);
+        try {
+            const response = await campaignService.getCampaigns();
+            if (response?.status === 'Success' && response.data) {
+                let list = response.data.campaigns || response.data;
+                list = Array.isArray(list) ? list : [];
+                const pending = list.filter((c: any) => String(c?.status ?? '').toLowerCase() === 'pending');
+                setPendingCampaigns(pending);
+            } else if (response) {
+                // Try to handle other shapes
+                const list = Array.isArray(response) ? response : [];
+                setPendingCampaigns(list.filter((c: any) => String(c?.status ?? '').toLowerCase() === 'pending'));
+            } else {
+                setPendingCampaigns([]);
+            }
+        } catch (err) {
+            console.error('Failed to load pending campaigns', err);
+            setPendingCampaigns([]);
+        } finally {
+            setPendingLoading(false);
         }
     };
 
@@ -130,30 +156,11 @@ const CampaignManagement = () => {
 
     // (removed loadPendingCount — badge uses pendingCampaigns.length directly)
 
-    const loadPendingCampaigns = async () => {
-        setPendingLoading(true);
-        try {
-            const resp = await campaignService.getPendingCampaigns();
-            if (resp?.status === 'Success' && resp.data) {
-                const list = resp.data.campaigns || resp.data || [];
-                setPendingCampaigns(Array.isArray(list) ? list : []);
-            } else if (Array.isArray(resp)) {
-                setPendingCampaigns(resp);
-            } else {
-                setPendingCampaigns([]);
-            }
-        } catch (err) {
-            console.error('Failed to load pending campaigns', err);
-            setPendingCampaigns([]);
-        } finally {
-            setPendingLoading(false);
-        }
-    };
 
     const handleViewPending = async (campaignId: number) => {
         setPendingDetailLoading(true);
         try {
-            const resp = await campaignService.getPendingCampaignById(campaignId);
+            const resp = await campaignService.getCampaignById(campaignId);
             let detail = null;
             if (resp?.status === 'Success' && resp.data) {
                 detail = resp.data.campaign || resp.data;
@@ -161,7 +168,6 @@ const CampaignManagement = () => {
                 detail = resp;
             }
             setPendingDetail(detail);
-            // ensure pending drawer is open
             setPendingDrawerOpen(true);
         } catch (err) {
             console.error('Failed to load pending campaign detail', err);
@@ -177,7 +183,7 @@ const CampaignManagement = () => {
         try {
             const resp = await campaignService.updateCampaignStatus(pendingDetail.campaignId, 'Published');
             const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
-                if (ok) {
+            if (ok) {
                 message.success('Campaign approved');
                 await loadPendingCampaigns();
                 await loadCampaigns();
@@ -199,7 +205,7 @@ const CampaignManagement = () => {
         try {
             const resp = await campaignService.updateCampaignStatus(pendingDetail.campaignId, 'Rejected');
             const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
-                if (ok) {
+            if (ok) {
                 message.success('Campaign rejected');
                 await loadPendingCampaigns();
                 await loadCampaigns();
@@ -227,9 +233,14 @@ const CampaignManagement = () => {
                     c.department?.toLowerCase().includes(v)
             );
         }
+
+        if (statusFilter && statusFilter !== 'all') {
+            result = result.filter((c) => String(c?.status ?? '').toLowerCase() === statusFilter);
+        }
+
         setFiltered(result);
         setCurrentPage(1);
-    }, [campaigns, searchText]);
+    }, [campaigns, searchText, statusFilter]);
 
     // columns moved into CampaignTable component
 
@@ -245,9 +256,23 @@ const CampaignManagement = () => {
                             placeholder="Search campaign name, description or department..."
                             prefix={<SearchOutlined />}
                             allowClear
-                            style={{ width: 400 }}
+                            style={{ width: 360 }}
                             value={searchText}
                             onChange={(e) => setSearchText(e.target.value)}
+                        />
+                        <Select
+                            className="company-select"
+                            value={statusFilter}
+                            onChange={(v) => setStatusFilter(String(v))}
+                            style={{ width: 160 }}
+                            options={[
+                                { label: 'All statuses', value: 'all' },
+                                { label: 'Published', value: 'published' },
+                                { label: 'Paused', value: 'paused' },
+                                { label: 'Pending', value: 'pending' },
+                                { label: 'Rejected', value: 'rejected' },
+                                { label: 'Draft', value: 'draft' },
+                            ]}
                         />
                     </div>
                     {isHrManager && (

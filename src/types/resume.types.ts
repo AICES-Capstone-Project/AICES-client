@@ -47,4 +47,5 @@ export type ResumeLocal = Partial<Resume> & {
   errorMessage?: string | null;
   scoreDetails?: ScoreDetail[];
   aiScores?: AiScore[] | undefined;
+  note?: string | null;
 };

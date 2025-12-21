@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
-import { Form, Input, Button, Card, Row, Col, Modal, Select, Spin } from "antd";
+import { useState } from "react";
+import { Form, Input, Button, Card, Row, Col, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import AvatarUploader from "../Settings/components/AvatarUploader";
+import JoinCompanyModal from "./JoinCompanyModal";
 import { companyService } from "../../../services/companyService";
 import {
   validateCompanyName,
@@ -14,7 +15,7 @@ import {
   validateFile,
   validateLogoFile,
 } from "../../../utils/validations/company.validation";
-import { toastError, toastSuccess, toastWarning } from "../../../components/UI/Toast";
+import { toastError, toastSuccess } from "../../../components/UI/Toast";
 
 interface CompanyFormValues {
   name: string;
@@ -29,17 +30,11 @@ interface CompanyFormValues {
 export default function CompanyCreate() {
   const [loading, setLoading] = useState(false);
   const [logoFile, setLogoFile] = useState<File | null>(null);
-  const logoutTimerRef = useRef<number | null>(null);
+
   const [form] = Form.useForm();
   const navigate = useNavigate();
-
-  // Join company modal state
   const [joinModalOpen, setJoinModalOpen] = useState(false);
-  const [companies, setCompanies] = useState<any[]>([]);
-  const [companiesLoading, setCompaniesLoading] = useState(false);
-  const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
 
-  // Handle logo file change with validation
   const handleLogoChange = (file: File | null) => {
     if (file) {
       const validation = validateLogoFile(file);
@@ -49,20 +44,12 @@ export default function CompanyCreate() {
       }
     }
     setLogoFile(file);
+    form.setFieldsValue({ logoFile: file });
   };
 
   const handleSubmit = async (values: any) => {
     setLoading(true);
     try {
-      // Quick client-side check: ensure we have an access token
-      const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
-      if (!token) {
-        toastError("Authentication required", "You must be logged in to submit a company request. Please login first.");
-        setLoading(false);
-        navigate("/login");
-        return;
-      }
-      // Build FormData for file upload
       const formData = new FormData();
       formData.append("name", values.name || "");
       formData.append("description", values.description || "");
@@ -70,14 +57,12 @@ export default function CompanyCreate() {
       formData.append("website", values.website || "");
       formData.append("taxCode", values.taxCode || "");
 
-      if (logoFile) {
-        formData.append("logoFile", logoFile, logoFile.name);
+      const logoFromForm = form.getFieldValue("logoFile");
+      const logoToSend = logoFromForm instanceof File ? logoFromForm : logoFile;
+      if (logoToSend instanceof File) {
+        formData.append("logoFile", logoToSend, logoToSend.name);
       }
-
-      // documents is expected as an array of { type, file }
       const documents = values.documents || [];
-
-      // Validate at least one document with both type and file
       const validDocs = documents.filter((d: any) => d?.type && d?.file instanceof File);
       if (validDocs.length === 0) {
         toastError("Missing documents", "Please provide at least one document with type and file.");
@@ -90,48 +75,18 @@ export default function CompanyCreate() {
         formData.append(`documentFiles`, doc.file, doc.file.name);
       });
 
-      // Log FormData content
-      console.log("[API SUBMIT] FormData content:");
-      for (const pair of (formData as any).entries()) {
-        // If file, log name and type
-        if (pair[1] instanceof File) {
-          console.log(pair[0], `File(name=${pair[1].name}, type=${pair[1].type}, size=${pair[1].size})`);
-        } else {
-          console.log(pair[0], pair[1]);
-        }
-      }
-
       const resp = await companyService.createForm(formData);
-      console.log("[API RESPONSE]", resp);
 
-      // Handle HTTP status codes returned by request wrapper (it may return numeric status)
       const statusStr = String(resp?.status || "").toLowerCase();
       if (statusStr === "401" || statusStr === "403" || statusStr.includes("unauthor")) {
-        toastError("Unauthorized", "You are not authorized to perform this action. Please login or contact support.");
-        // force redirect to login to refresh credentials
+        toastError("You are not authorized to perform this action. Please login or contact support.");
         navigate("/login");
         return;
       }
 
       if (String(resp?.status).toLowerCase() === "success") {
-        toastSuccess("Company request submitted", "Company account creation request submitted successfully.");
-        // Inform user they will need to re-login and schedule an auto-logout in 10 seconds
-        toastWarning("Session refresh required", "You will be logged out in 10 seconds. Please log in again to refresh your session.");
-        // Navigate to pending approval screen
+        toastSuccess("Company account creation request submitted successfully.");
         navigate("/company/pending-approval");
-        // Schedule auto-logout after 10 seconds
-        if (typeof window !== "undefined") {
-          // store timer id so we can clear it on unmount
-          logoutTimerRef.current = window.setTimeout(() => {
-            try {
-              localStorage.removeItem("access_token");
-              localStorage.removeItem("refresh_token");
-            } catch (err) {
-              // ignore
-            }
-            navigate("/login");
-          }, 10 * 1000);
-        }
       } else {
         toastError("Failed to submit request", resp?.message);
       }
@@ -143,76 +98,7 @@ export default function CompanyCreate() {
     }
   };
 
-  // Fetch companies for join modal
-  const fetchCompanies = async () => {
-    setCompaniesLoading(true);
-    try {
-      // Try public companies endpoint first (no auth required)
-      const publicResp = await companyService.getPublicCompanies();
-      console.debug("[MyApartment] getPublicCompanies response:", publicResp);
-      if (publicResp?.status === "Success" && Array.isArray(publicResp.data)) {
-        setCompanies(publicResp.data || []);
-        return;
-      }
-
-      // Fallback to admin paginated endpoint
-      const resp = await companyService.getAll({ page: 1, pageSize: 1000 });
-      console.debug("[MyApartment] getAll response:", resp);
-      if (resp?.status === "Success" && resp.data && Array.isArray((resp.data as any).items)) {
-        setCompanies((resp.data as any).items || []);
-        return;
-      }
-
-      // Final fallback to older list endpoint
-      const fallback = await companyService.getCompanies();
-      console.debug("[MyApartment] getCompanies fallback response:", fallback);
-      if (fallback?.status === "Success" && Array.isArray(fallback.data)) {
-        setCompanies(fallback.data || []);
-      } else {
-        setCompanies([]);
-      }
-    } catch (err) {
-      console.error(err);
-      setCompanies([]);
-    } finally {
-      setCompaniesLoading(false);
-    }
-  };
-
-  const handleOpenJoin = () => {
-    setJoinModalOpen(true);
-    fetchCompanies();
-  };
-
-  const handleConfirmJoin = async () => {
-    if (!selectedCompanyId) {
-      toastWarning("Please select a company to join");
-      return;
-    }
-    try {
-      const resp = await companyService.joinCompany(selectedCompanyId);
-      if (String(resp?.status).toLowerCase() === "success") {
-        toastSuccess("Join request submitted successfully");
-        setJoinModalOpen(false);
-        navigate("/company/pending-approval");
-      } else {
-        toastError("Failed to submit join request", resp?.message);
-      }
-    } catch (err) {
-      console.error(err);
-      toastError("An error occurred while joining the company");
-    }
-  };
-
-  // Clear scheduled logout timer if component unmounts
-  useEffect(() => {
-    return () => {
-      if (logoutTimerRef.current) {
-        clearTimeout(logoutTimerRef.current);
-        logoutTimerRef.current = null;
-      }
-    };
-  }, []);
+  const handleOpenJoin = () => setJoinModalOpen(true);
 
   return (
     <>
@@ -239,9 +125,7 @@ export default function CompanyCreate() {
       >
         <div className="w-full">
           <Form<CompanyFormValues> form={form} layout="vertical" onFinish={handleSubmit} initialValues={{ documents: [{}] }}>
-            {/* === ROW 1: Logo - Name + Website === */}
             <Row gutter={32} align="stretch">
-              {/* LEFT - LOGO */}
               <Col span={7}>
                 <div
                   style={{
@@ -253,12 +137,25 @@ export default function CompanyCreate() {
                     paddingRight: 16,
                   }}
                 >
-                  <Form.Item style={{ marginBottom: 0 }}>
+                  <Form.Item
+                    name="logoFile"
+                    valuePropName="file"
+                    getValueFromEvent={() => undefined}
+                    rules={[
+                      {
+                        validator: () => {
+                          const f = form.getFieldValue("logoFile") || logoFile;
+                          return f ? Promise.resolve() : Promise.reject(new Error("Please upload a logo"));
+                        },
+                      },
+                    ]}
+                    style={{ marginBottom: 0 }}
+                  >
                     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
-                      {/* <span style={{ fontWeight: 500 }}> <span style={{ color: "#ff4d4f", marginLeft: 4 }}>*</span>Company logo</span> */}
                       <AvatarUploader
                         initialUrl="https://placehold.co/120x120?text=Logo"
                         onFileChange={handleLogoChange}
+                        hoverText="Upload logo"
                         size={130}
                       />
                     </div>
@@ -266,7 +163,6 @@ export default function CompanyCreate() {
                 </div>
               </Col>
 
-              {/* RIGHT - INFORMATION */}
               <Col span={17}>
                 <Row gutter={16}>
                   <Col span={12}>
@@ -287,7 +183,7 @@ export default function CompanyCreate() {
                       ]}
                       style={{ marginBottom: 12 }}
                     >
-                      <Input placeholder="Enter company name" />
+                      <Input placeholder="Enter company name" maxLength={120} showCount/>
                     </Form.Item>
                   </Col>
 
@@ -309,14 +205,13 @@ export default function CompanyCreate() {
                       ]}
                       style={{ marginBottom: 12 }}
                     >
-                      <Input placeholder="https://example.com" />
+                      <Input placeholder="https://example.com" maxLength={50} showCount/>
                     </Form.Item>
                   </Col>
                 </Row>
 
                 <Row gutter={16}>
                   <Col span={12}>
-                    {/* Address */}
                     <Form.Item
                       name="address"
                       label="Address"
@@ -335,39 +230,51 @@ export default function CompanyCreate() {
                       ]}
                       style={{ marginBottom: 12 }}
                     >
-                      <Input placeholder="Enter company address" maxLength={60} />
+                      <Input placeholder="Enter company address" maxLength={100} showCount/>
                     </Form.Item>
                   </Col>
 
                   <Col span={12}>
                     <Form.Item
-                      name="taxCode"
-                      label="Tax Code"
-                      rules={[
-                        { required: true, message: "Please enter the tax code" },
-                        {
-                          validator: (_, value) => {
-                            if (!value) return Promise.resolve();
-                            const validation = validateTaxCode(value);
-                            return validation.isValid
-                              ? Promise.resolve()
-                              : Promise.reject(new Error(validation.message));
+                        name="taxCode"
+                        label="Tax Code"
+                        rules={[
+                          { required: true, message: "Please enter the tax code" },
+                          {
+                            validator: (_, value) => {
+                              if (!value) return Promise.resolve();
+                              const validation = validateTaxCode(value);
+                              return validation.isValid
+                                ? Promise.resolve()
+                                : Promise.reject(new Error(validation.message));
+                            }
                           }
-                        }
-                      ]}
-                      style={{ marginBottom: 12 }}
-                    >
-                      <Input placeholder="Enter tax code (10 digits)" />
-                    </Form.Item>
+                        ]}
+                        style={{ marginBottom: 12 }}
+                      >
+                        <Input
+                          placeholder="Enter tax code — valid: 10, 12, or 13 digits (e.g. 0123456789, 012345678901, or 0123456789-001)"
+                          maxLength={14}
+                          onChange={(e) => {
+                            const raw = e.target.value || "";
+                            const digits = raw.replace(/\D/g, "");
+                            let formatted = digits;
+
+                            if (digits.length > 10 && digits.length <= 13) {
+                              formatted = digits.slice(0, 10) + "-" + digits.slice(10);
+                            }
+
+                            if (formatted.length > 14) formatted = formatted.slice(0, 14);
+                            form.setFieldsValue({ taxCode: formatted });
+                          }}
+                        />
+                      </Form.Item>
                   </Col>
                 </Row>
-
               </Col>
             </Row>
 
-            {/* === ROW 2: Full width section below === */}
             <div style={{ marginTop: 12 }}>
-              {/* Attached documents */}
               <div
                 style={{
                   border: "1px solid #e5e5e5",
@@ -381,21 +288,13 @@ export default function CompanyCreate() {
                   overflow: "hidden",
                 }}
               >
-                <label
-                  style={{
-                    fontWeight: 500,
-                    display: "block",
-                    marginBottom: 8,
-                  }}
-                >
-                  Attached documents
-                  <span style={{ color: "#ff4d4f", marginLeft: 4 }}>*</span>
-                </label>
-
-
                 <Form.List name="documents">
                   {(fields, { add, remove }) => (
                     <>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <div style={{ fontWeight: 500 }}>Attached documents (max 10 files) <span style={{ color: "#ff4d4f", marginLeft: 4 }}>*</span></div>
+                        <div style={{ fontSize: 12, color: '#666' }}>Files: {fields.length}/10</div>
+                      </div>
                       <div
                         style={{
                           flex: 1,
@@ -415,7 +314,6 @@ export default function CompanyCreate() {
                               marginBottom: 8,
                             }}
                           >
-                            {/* Add button (+) */}
                             <div
                               style={{
                                 width: 40,
@@ -428,7 +326,13 @@ export default function CompanyCreate() {
                               }}
                             >
                               <PlusCircleOutlined
-                                onClick={() => add()}
+                                onClick={() => {
+                                  if ((fields || []).length >= 10) {
+                                    message.error('You can add up to 10 documents only');
+                                    return;
+                                  }
+                                  add();
+                                }}
                                 style={{
                                   fontSize: 18,
                                   color: "var(--color-primary-light)",
@@ -437,7 +341,6 @@ export default function CompanyCreate() {
                               />
                             </div>
 
-                            {/* Document type */}
                             <Form.Item
                               {...field}
                               name={[field.name, "type"]}
@@ -460,6 +363,7 @@ export default function CompanyCreate() {
                                 style={{
                                   borderRadius: 6,
                                 }}
+                                maxLength={100}
                               />
                             </Form.Item>
 
@@ -497,7 +401,6 @@ export default function CompanyCreate() {
                                   cursor: "pointer",
                                 }}
                               >
-                                {/* Fake placeholder / filename */}
                                 <span
                                   style={{
                                     color:
@@ -515,7 +418,6 @@ export default function CompanyCreate() {
                                     "Select document file"}
                                 </span>
 
-                                {/* Real file input (hidden) */}
                                 <input
                                   type="file"
                                   accept=".pdf,.jpg,.jpeg,.png"
@@ -570,7 +472,6 @@ export default function CompanyCreate() {
                               </div>
                             </Form.Item>
 
-                            {/* Remove button (-) */}
                             <div
                               style={{
                                 width: 40,
@@ -594,7 +495,6 @@ export default function CompanyCreate() {
                           </div>
                         ))}
 
-                        {/* 🔹 Note (short, centered) */}
                         <div
                           style={{
                             fontSize: 12,
@@ -621,10 +521,11 @@ export default function CompanyCreate() {
                               justifyItems: "start",
                             }}
                           >
-                            <li style={{ textAlign: "left" }}><b>Required:</b> At least 2 documents must be provided</li>
+                            <li style={{ textAlign: "left" }}><b>Required:</b> At least 2 documents must be provided (maximum 10 files)</li>
+                            <li style={{ textAlign: "left" }}><b>Document types:</b> Business license, Certificate of incorporation, Tax registration, etc.</li>
                             <li style={{ textAlign: "left" }}><b>File format:</b> PDF, JPG, or PNG only</li>
                             <li style={{ textAlign: "left" }}><b>File size:</b> Maximum 10MB per file</li>
-                            <li style={{ textAlign: "left" }}><b>Document types:</b> Business license, Certificate of incorporation, Tax registration, etc.</li>
+
                           </ul>
                         </div>
 
@@ -634,8 +535,6 @@ export default function CompanyCreate() {
                 </Form.List>
               </div>
 
-
-              {/* Description */}
               <Form.Item
                 name="description"
                 label="Description"
@@ -656,7 +555,7 @@ export default function CompanyCreate() {
                   rows={2}
                   placeholder="Short introduction about the company (minimum 20 characters)"
                   showCount
-                  maxLength={150}
+                  maxLength={400}
                 />
               </Form.Item>
 
@@ -671,36 +570,8 @@ export default function CompanyCreate() {
           </Form>
         </div>
       </Card>
-      {/* Join Company Modal */}
-      <Modal
-        title="Join a Company"
-        open={joinModalOpen}
-        onCancel={() => setJoinModalOpen(false)}
-        footer={
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <Button key="cancel" className="company-btn" onClick={() => setJoinModalOpen(false)}>
-              Cancel
-            </Button>,
-            <Button key="join" className="company-btn--filled" onClick={handleConfirmJoin}>
-              Join
-            </Button>
-          </div>
 
-        }
-      >
-        {companiesLoading ? (
-          <div style={{ textAlign: 'center' }}><Spin /></div>
-        ) : (
-          <Select
-            className="join-company-select"
-            style={{ width: '100%' }}
-            placeholder="Select a company to join"
-            value={selectedCompanyId || undefined}
-            onChange={(val) => setSelectedCompanyId(Number(val))}
-            options={companies.map((c) => ({ label: c.name, value: c.companyId }))}
-          />
-        )}
-      </Modal>
+      <JoinCompanyModal open={joinModalOpen} onClose={() => setJoinModalOpen(false)} />
     </>
   );
 }

@@ -1,33 +1,7 @@
 import { post, postForm, get, put, patchForm, remove } from "./api";
 import { API_ENDPOINTS } from "./config";
 import type { ApiResponse } from "../types/api.types";
-import type { CreateCompanyRequest } from "../types/company.types";
-
-interface CompanyData {
-  companyId: number;
-  name: string;
-  description?: string;
-  address?: string;
-  websiteUrl?: string;
-  taxCode?: string | null;
-  logoUrl?: string;
-  companyStatus:
-    | "Pending"
-    | "Approved"
-    | "Rejected"
-    | "Suspended"
-    | "Canceled"
-    | string;
-
-  rejectionReason?: string | null;
-  managerName?: string | null;
-  documents?: { documentType: string; fileUrl: string }[];
-
-  createdBy?: string | number | null;
-  approvalBy?: string | number | null;
-
-  createdAt?: string;
-}
+import type { CreateCompanyRequest, Company } from "../types/company.types";
 
 export const companyService = {
   create: async (data: CreateCompanyRequest): Promise<ApiResponse<null>> => {
@@ -46,8 +20,8 @@ export const companyService = {
   },
 
   // Get current user's company
-  getSelf: async (): Promise<ApiResponse<CompanyData>> => {
-    return await get<CompanyData>(API_ENDPOINTS.COMPANY.COMPANY_GET_PROFILE);
+  getSelf: async (): Promise<ApiResponse<Company>> => {
+    return await get<Company>(API_ENDPOINTS.COMPANY.COMPANY_GET_PROFILE);
   },
   // Get company members (paged)
   getMembers: async (
@@ -67,7 +41,7 @@ export const companyService = {
   },
 
   getById: async (companyId: number) => {
-    return await get<CompanyData>(
+    return await get<Company>(
       API_ENDPOINTS.COMPANY.PUBLIC_GET_BY_ID(companyId)
     );
   },
@@ -131,12 +105,12 @@ export const companyService = {
   },
 
   // Get public list of companies (for joining)
-  getPublicCompanies: async (): Promise<ApiResponse<CompanyData[]>> => {
-    return await get<CompanyData[]>(API_ENDPOINTS.COMPANY.PUBLIC_GET);
+  getPublicCompanies: async (): Promise<ApiResponse<Company[]>> => {
+    return await get<Company[]>(API_ENDPOINTS.COMPANY.PUBLIC_GET);
   },
 
-  getCompanies: async (): Promise<ApiResponse<CompanyData[]>> => {
-    return await get<CompanyData[]>(API_ENDPOINTS.COMPANY.SYSTEM_GET);
+  getCompanies: async (): Promise<ApiResponse<Company[]>> => {
+    return await get<Company[]>(API_ENDPOINTS.COMPANY.SYSTEM_GET);
   },
 
   // Get paginated companies (for admin listing)
@@ -147,7 +121,7 @@ export const companyService = {
     search?: string;
   }): Promise<
     ApiResponse<{
-      companies: CompanyData[];
+      companies: Company[];
       totalPages: number;
       currentPage: number;
       pageSize: number;
@@ -159,7 +133,7 @@ export const companyService = {
         }`
       : "";
     return await get<{
-      companies: CompanyData[];
+      companies: Company[];
       totalPages: number;
       currentPage: number;
       pageSize: number;
@@ -237,7 +211,7 @@ export const companyService = {
 
   // 🔹 System Admin: lấy chi tiết company qua /system/companies/{id}
   getSystemCompanyById: async (companyId: number) => {
-    return await get<CompanyData>(
+    return await get<Company>(
       API_ENDPOINTS.COMPANY.SYSTEM_GET_BY_ID(companyId)
     );
   },

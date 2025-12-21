@@ -75,7 +75,10 @@ const ProfileDetail: React.FC = () => {
 			if (address?.trim()) form.append("Address", address.trim());
 			if (phoneNumber?.trim()) form.append("PhoneNumber", phoneNumber.trim());
 			// backend yêu cầu $date (string). Gửi "YYYY-MM-DD" là chuẩn.
-			if (birthday) form.append("DateOfBirth", birthday.format("YYYY-MM-DD"));
+			if (birthday) {
+				const parsed = typeof (birthday as any) === 'string' ? dayjs(birthday as any, 'DD/MM/YYYY', true) : dayjs(birthday);
+				if (parsed.isValid()) form.append('DateOfBirth', parsed.format('YYYY-MM-DD'));
+			}
 			if (avatarFile) form.append("AvatarFile", avatarFile); // file binary
 
 			const response = await profileService.updateMultipart(form);

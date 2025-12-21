@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Drawer, Spin, List, Button, Table, Tag, Typography } from 'antd';
-import { ClockCircleOutlined, RightOutlined, LeftOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import { ClockCircleOutlined, RightOutlined, LeftOutlined, CheckCircleOutlined, CrownOutlined } from '@ant-design/icons';
 import compareResumeService from '../../../services/compareResumeService';
 
 const { Title } = Typography;
@@ -23,7 +23,7 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
   const drawerTitle = selectedItem ? (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
       <div style={{ fontWeight: 700 }}>{drawerTitleText}</div>
-      <Button type="link" icon={<LeftOutlined />} onClick={() => setSelectedItem(null)}>Back</Button>
+      <Button className="company-btn" icon={<LeftOutlined />} onClick={() => setSelectedItem(null)} aria-label="Back" />
     </div>
   ) : drawerTitleText;
 
@@ -52,9 +52,22 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
     }
   };
 
-  // Hàm render Bảng So Sánh từ dữ liệu JSON
   const renderComparisonTable = (data: any) => {
-    let resultObj = data.resultJson;
+    let resultObj: any = undefined;
+    if (!data) return <div style={{ padding: 20, textAlign: 'center' }}>No data.</div>;
+
+    if (data.resultJson !== undefined) {
+      resultObj = data.resultJson;
+    } else if (data.resultData !== undefined) {
+      resultObj = data.resultData;
+    } else if (data.data && (data.data.resultJson || data.data.resultData)) {
+      resultObj = data.data.resultJson ?? data.data.resultData;
+    } else if (Array.isArray(data.candidates)) {
+      resultObj = { candidates: data.candidates };
+    } else {
+      resultObj = data;
+    }
+
     if (typeof resultObj === 'string') {
       try {
         resultObj = JSON.parse(resultObj);
@@ -74,47 +87,70 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
     const criteriaWidth = '10%';
     const candidateWidth = candidateCount === 2 ? '45%' : `${Math.max(20, Math.floor(90 / candidateCount))}%`;
 
+    // helper to read analysis fields with several possible key names
+    const getAnalysisValue = (analysis: any, variants: string[]) => {
+      if (!analysis) return '';
+      for (const k of variants) {
+        if (analysis[k] !== undefined && analysis[k] !== null) return analysis[k];
+      }
+      return '';
+    };
+
+    const fieldDefs = [
+      { key: 'jobFit', label: 'Job Fit', variants: ['jobFit', 'Job Fit', 'job_fit'] },
+      { key: 'techStack', label: 'Technical Stack', variants: ['Technical Stack Match', 'Technical Stack', 'techStack', 'technical_stack'] },
+      { key: 'culture', label: 'Culture & Logistics', variants: ['Culture & Logistics Fit', 'Culture & Logistics', 'culture'] },
+      { key: 'softSkills', label: 'Soft Skills', variants: ['Methodology & Soft Skills', 'Soft Skills', 'softSkills'] },
+      { key: 'metrics', label: 'Exp & Metrics', variants: ['Experience & Performance Metrics', 'Experience & Metrics', 'metrics'] },
+      { key: 'overall', label: 'Overall Summary', variants: ['overallSummary', 'overall', 'Overall Summary'] },
+    ];
+
     const columns = [
       {
-        title: 'Criteria',
+        title: <strong>Criteria</strong>,
         dataIndex: 'criteria',
         key: 'criteria',
         width: criteriaWidth,
         render: (text: string) => <strong>{text}</strong>,
       },
-      ...candidates.map((c: any, index: number) => ({
-        title: `Candidate ${index + 1} (Rank: ${c.analysis?.recommendation?.rank || 'N/A'})`,
-        dataIndex: `candidate_${index}`,
-        key: `candidate_${index}`,
-        width: candidateWidth,
-        render: (_: any, record: any) => {
-          const field = record.key;
-          const analysis = c.analysis || {};
-          let value = '';
-          if (field === 'jobFit') value = analysis.jobFit;
-          else if (field === 'techStack') value = analysis['Technical Stack Match'];
-          else if (field === 'culture') value = analysis['Culture & Logistics Fit'];
-          else if (field === 'softSkills') value = analysis['Methodology & Soft Skills'];
-          else if (field === 'metrics') value = analysis['Experience & Performance Metrics'];
-          else if (field === 'overall') value = analysis.overallSummary;
+      ...candidates.map((c: any, index: number) => {
+        const analysis = c.analysis ?? c.analysisData ?? c;
+        const candidateName = getAnalysisValue(analysis, ['candidateName', 'candidate_name']) || c.candidateName || `Candidate ${index + 1}`;
+        const rank = getAnalysisValue(analysis, ['recommendation'])?.rank ?? getAnalysisValue(analysis, ['recommendation', 'rank']) ?? (analysis?.recommendation?.rank ?? 'N/A');
+        const rankText = rank === undefined || rank === null ? 'N/A' : rank;
 
-          return (
-            <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-              {value}
+        // choose a color to highlight rank: 1=green, 2=geekblue, 3=orange, >3=red, else default
+        const rankNum = Number(rankText);
+        const rankColor = Number.isFinite(rankNum)
+          ? (rankNum === 1 ? 'green' : rankNum === 2 ? 'geekblue' : rankNum === 3 ? 'orange' : 'red')
+          : 'default';
+
+        return {
+          title: (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <strong>{candidateName}</strong>
+              {rankNum === 1 && <CrownOutlined style={{ color: '#fa1414ff', fontSize: 20 }} />}
+              <Tag color={rankColor}>{`Rank ${rankText}`}</Tag>
             </div>
-          );
-        }
-      }))
+          ),
+          dataIndex: `candidate_${index}`,
+          key: `candidate_${index}`,
+          width: candidateWidth,
+          render: (_: any, record: any) => {
+            const field = record.key;
+            const def = fieldDefs.find(f => f.key === field);
+            const val = def ? getAnalysisValue(analysis, def.variants) : '';
+            return (
+              <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
+                {val}
+              </div>
+            );
+          }
+        };
+      })
     ];
 
-    const dataSource = [
-      { key: 'jobFit', criteria: 'Job Fit' },
-      { key: 'techStack', criteria: 'Technical Stack' },
-      { key: 'culture', criteria: 'Culture & Logistics' },
-      { key: 'softSkills', criteria: 'Soft Skills' },
-      { key: 'metrics', criteria: 'Exp & Metrics' },
-      { key: 'overall', criteria: 'Overall Summary' },
-    ];
+    const dataSource = fieldDefs.map(f => ({ key: f.key, criteria: f.label }));
 
     return (
       <div style={{ width: '100%', overflowX: 'hidden' }}>
@@ -142,7 +178,7 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
               <Title level={4} style={{ margin: 0 }}>Candidate Comparison Analysis</Title>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, color: '#9aa0a6', fontSize: 13 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 13 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                 <ClockCircleOutlined />
                 <span>{formatTimestamp(selectedItem.createdAt ?? selectedItem.created_at ?? selectedItem.createdAtUtc)}</span>
@@ -163,8 +199,9 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
       ) : (
         <List
           dataSource={list}
-          renderItem={(item: any) => {
+          renderItem={(item: any, index: number) => {
             const id = item.id ?? item.comparisonId;
+            const no = (typeof index === 'number') ? index + 1 : undefined;
             const status = (item.status ?? item.state ?? '').toString();
             const ts = formatTimestamp(item.createdAt ?? item.created_at ?? item.createdAtUtc);
             const isHovered = hoveredId === id;
@@ -188,8 +225,8 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
               >
                 <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    <div style={{ fontWeight: 700, fontSize: 16 }}>
-                      #{id} {item.comparisonName ? `- ${item.comparisonName}` : ''}
+                    <div>
+                     <strong>{typeof no === 'number' ? `${no}` : `No.`} {item.comparisonName ? `. ${item.comparisonName}` : ''}</strong>
                     </div>
                     <div style={{ color: '#9aa0a6', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <ClockCircleOutlined />

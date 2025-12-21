@@ -447,6 +447,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					missingSkills: (data as any).missingSkills,
 					totalScore: (data as any).totalScore ?? null,
 					adjustedScore: (data as any).adjustedScore ?? null,
+					note: (data as any).note ?? (latestScore as any)?.note ?? null,
 					// prefer latest ai score, otherwise fall back to top-level adjusted/total score
 					totalResumeScore:
 						latestScore?.totalResumeScore ??

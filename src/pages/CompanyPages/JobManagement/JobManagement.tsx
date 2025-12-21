@@ -1,41 +1,34 @@
 import { useState, useEffect } from "react";
 import { Card, Button, Badge, Form, Input, Select } from "antd";
-import { BellOutlined, PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { BellOutlined, PlusOutlined, SearchOutlined, HistoryOutlined } from "@ant-design/icons";
 
-// --- SERVICES ---
 import { jobService } from "../../../services/jobService";
 import { categoryService } from "../../../services/categoryService";
 import type { CompanyJob } from "../../../services/jobService";
 
-// --- HOOKS & CONFIG ---
 import { useAppSelector } from "../../../hooks/redux";
 import { ROLES } from "../../../services/config";
 import { toastError, toastSuccess } from "../../../components/UI/Toast";
 
-// --- COMPONENTS ---
 import JobTable from "./components/JobTable";
 import JobViewDrawer from "./components/JobViewDrawer";
 import PendingDrawer from "./components/PendingDrawer";
 import JobEditDrawer from "./components/JobEditDrawer";
 import JobCreateDrawer from "./components/JobCreateDrawer";
-// import PostedJobsDrawer from "./components/JobPostedDrawer";
+import PostedDrawer from "./components/JobPostedDrawer";
 
 const JobManagement = () => {
-  // --- STATE DỮ LIỆU ---
   const [jobs, setJobs] = useState<CompanyJob[]>([]);
   const [filteredJobs, setFilteredJobs] = useState<CompanyJob[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // --- STATE FILTER & METADATA ---
   const [searchText, setSearchText] = useState("");
   const [categories, setCategories] = useState<any[]>([]);
   const [specializations, setSpecializations] = useState<any[]>([]);
 
-  // Lưu NAME để filter
   const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(null);
   const [selectedSpecName, setSelectedSpecName] = useState<string | null>(null);
 
-  // --- STATE DRAWER ---
   const [pendingDrawerOpen, setPendingDrawerOpen] = useState(false);
   const [pendingJobs, setPendingJobs] = useState<CompanyJob[]>([]);
   const [pendingCount, setPendingCount] = useState(0);
@@ -46,15 +39,15 @@ const JobManagement = () => {
   const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingJob, setEditingJob] = useState<CompanyJob | null>(null);
   const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
-  // const [postedDrawerOpen, setPostedDrawerOpen] = useState(false);
-  // const [postedJobs, setPostedJobs] = useState<CompanyJob[]>([]);
+  const [postedDrawerOpen, setPostedDrawerOpen] = useState(false);
+  const [postedJobs, setPostedJobs] = useState<CompanyJob[]>([]);
   const [form] = Form.useForm();
   const [saving, setSaving] = useState(false);
 
   const { user } = useAppSelector((s) => s.auth);
   const isHrManager = (user?.roleName || "").toLowerCase() === (ROLES.Hr_Manager || "").toLowerCase();
+  const isHrRecruiter = (user?.roleName || "").toLowerCase() === (ROLES.Hr_Recruiter || "").toLowerCase();
 
-  // --- API CALLS ---
   const sortByTitle = (arr: CompanyJob[] = []) =>
     arr.slice().sort((a, b) => (a.title || "").localeCompare(b.title || ""));
 
@@ -85,18 +78,17 @@ const JobManagement = () => {
     }
   };
 
-  // const fetchPostedJobs = async () => {
-  //   try {
-  //     const resp = await jobService.getPostedJobs(1, 20);
-  //     if (resp?.status?.toLowerCase() === "success") {
-  //       setPostedJobs(resp.data?.jobs || []);
-  //     }
-  //   } catch {
-  //     setPostedJobs([]);
-  //   }
-  // };
+  const fetchPostedJobs = async () => {
+    try {
+      const resp = await jobService.getPostedJobs(1, 20);
+      if (resp?.status?.toLowerCase() === "success") {
+        setPostedJobs(resp.data?.jobs || []);
+      }
+    } catch {
+      setPostedJobs([]);
+    }
+  };
 
-  // Logic Fetch Categories
   const fetchCategories = async () => {
     try {
       const catsResp = await categoryService.getAll({ page: 1, pageSize: 100 });
@@ -114,11 +106,9 @@ const JobManagement = () => {
     }
   };
 
-  // Logic Handle Category Change
   const handleCategoryChange = async (catName: string) => {
     setSelectedCategoryName(catName);
     
-    // Reset Spec
     setSelectedSpecName(null);
     setSpecializations([]);
 
@@ -138,7 +128,6 @@ const JobManagement = () => {
     }
   };
 
-  // --- CRUD HANDLERS ---
   const handleEdit = (job: CompanyJob) => { setEditingJob(job); setEditDrawerOpen(true); };
   
   const handleCreate = async (values: any) => {
@@ -280,25 +269,22 @@ const JobManagement = () => {
     return false;
   };
 
-  // --- EFFECTS ---
   useEffect(() => {
     fetchJobs();
     fetchPendingJobs();
     fetchCategories(); 
   }, []);
 
-  // Polling fallback for realtime updates (refresh jobs and pending jobs periodically)
   useEffect(() => {
-    if (!isHrManager) return; // only poll for HR managers who care about pending
+    if (!isHrManager) return; 
     let mounted = true;
-    const intervalMs = 10000; // 10 seconds
+    const intervalMs = 10000; 
     const id = setInterval(async () => {
       if (!mounted) return;
       try {
         await fetchPendingJobs();
         await fetchJobs();
       } catch (e) {
-        // ignore polling errors
       }
     }, intervalMs);
 
@@ -308,7 +294,6 @@ const JobManagement = () => {
     };
   }, [isHrManager]);
 
-  // Filter Logic
   useEffect(() => {
     let result = [...jobs];
 
@@ -351,8 +336,8 @@ const JobManagement = () => {
               onChange={(e) => setSearchText(e.target.value)}
             />
             
-            {/* SELECT CATEGORY */}
             <Select
+            className="company-select"
               placeholder="Select Category"
               allowClear
               style={{ width: 180 }}
@@ -364,7 +349,6 @@ const JobManagement = () => {
               }))}
             />
 
-            {/* 🔥 SELECT SPECIALIZATION - CHỈ HIỆN KHI CÓ CATEGORY */}
             {selectedCategoryName && (
               <Select
                 placeholder="Select Specialization"
@@ -395,16 +379,18 @@ const JobManagement = () => {
                   <span>Pending</span>
                 </Button>
               )}
-              {/* <Button
-                className="company-btn"
-                icon={<HistoryOutlined />}
-                onClick={async () => {
-                  await fetchPostedJobs();
-                  setPostedDrawerOpen(true);
-                }}
-              >
-                My posted
-              </Button> */}
+              {isHrRecruiter && (
+                <Button
+                  className="company-btn"
+                  icon={<HistoryOutlined />}
+                  onClick={async () => {
+                    await fetchPostedJobs();
+                    setPostedDrawerOpen(true);
+                  }}
+                >
+                  My posted
+                </Button>
+              )}
               <Button
                 className="company-btn--filled"
                 icon={<PlusOutlined />}
@@ -471,11 +457,11 @@ const JobManagement = () => {
         saving={saving}
       />
 
-      {/* <PostedJobsDrawer
+      <PostedDrawer
         open={postedDrawerOpen}
         onClose={() => setPostedDrawerOpen(false)}
         postedJobs={postedJobs}
-      /> */}
+      />
     </Card>
   );
 };

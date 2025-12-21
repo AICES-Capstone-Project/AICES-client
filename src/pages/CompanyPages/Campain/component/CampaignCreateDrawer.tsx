@@ -233,7 +233,7 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
         </Form.Item>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-          <Button onClick={() => { onClose(); form.resetFields(); }}>Cancel</Button>
+          <Button danger onClick={() => { onClose(); form.resetFields(); }}>Cancel</Button>
           <Button className="company-btn--filled" loading={loading} onClick={() => form.submit()}>{campaignId ? 'Save' : 'Create'}</Button>
         </div>
       </Form>

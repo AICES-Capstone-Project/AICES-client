@@ -28,16 +28,6 @@ export const campaignService = {
     );
   },
 
-  // Get pending campaigns (for HR_Manager)
-  getPendingCampaigns: async () => {
-    return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_PENDING);
-  },
-
-  // Get a single pending campaign by ID
-  getPendingCampaignById: async (campaignId: number) => {
-    return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_PENDING_BY_ID(campaignId));
-  },
-
   // Update campaign status
   updateCampaignStatus: async (
     campaignId: number,

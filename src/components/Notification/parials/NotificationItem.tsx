@@ -43,9 +43,7 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
 
   return (
     <div
-      className={`group relative flex items-center px-3 py-3 w-full rounded-lg cursor-pointer transition-colors 
-        ${!notif.isRead ? "bg-blue-50/50" : "hover:bg-green-100"} 
-      `}
+      className={`group relative flex items-center px-3 py-3 w-full rounded-lg cursor-pointer transition-colors hover:bg-green-100`}
       onClick={(e) => {
         if (!notif.isRead) {
           onMarkRead(notif.notifId, e);
@@ -53,9 +51,8 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         onClick(notif);
       }}
 
-      style={{ margin: '5px 5px 0 5px' }}
+      style={{ margin: '5px 5px 0 5px', backgroundColor: !notif.isRead ? 'color-mix(in srgb, var(--color-primary-light) 10%, transparent)' : undefined }}
     >
-      {/* --- LEFT COLUMN: Avatar --- */}
       <div className="flex-shrink-0 w-[60px] flex items-center justify-center mr-3">
         <Avatar
           size={48}
@@ -65,27 +62,22 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         />
       </div>
 
-      {/* --- RIGHT COLUMN: Content --- */}
       <div className="flex-1 min-w-0 pr-6">
 
-        {/* Message: Bold if unread */}
         <div className={`text-[14px] leading-5 mb-1 ${!notif.isRead ? "text-[#050505] font-bold" : "text-gray-600"}`}>
           <span className="line-clamp-3" dangerouslySetInnerHTML={{ __html: notif.message }} />
         </div>
 
-        {/* Detail (Optional) */}
         {notif.detail && (
           <div className={`text-[13px] line-clamp-2 mt-0.5 mb-1 ${!notif.isRead ? "text-gray-700 font-medium" : "text-gray-500"}`}>
             {notif.detail}
           </div>
         )}
 
-        {/* Time */}
         <div className={`text-[12px] ${!notif.isRead ? "text-[var(--color-primary)] font-semibold" : "text-gray-400"}`}>
           {formatTimeAgo(notif.createdAt)}
         </div>
 
-        {/* Invitation Logic */}
         {notif.invitation && (
           <div className="mt-3">
             {isPending ? (
@@ -117,7 +109,6 @@ const NotificationItem: React.FC<NotificationItemProps> = ({
         )}
       </div>
 
-      {/* Đã xóa dấu chấm tròn xanh ở đây */}
       <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center z-10">
         {menuItems.length > 0 && (
           <Dropdown menu={{ items: menuItems }} trigger={["click"]} placement="bottomRight">

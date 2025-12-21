@@ -10,7 +10,7 @@ type Props = {
 const JobSummary: React.FC<Props> = ({ jobTarget, jobHiredCount, remaining }) => {
   return (
     <div style={{ marginTop: 8, marginBottom: 8, display: 'flex', justifyContent: 'center' }}>
-      <div style={{ padding: '5px auto', borderRadius: 8, background: '#fff', width: '100%', maxWidth: 500, boxShadow: '0 1px 6px rgba(16,24,40,0.06)' }}>
+      <div style={{ padding: '10px', borderRadius: 8, background: '#fff', width: '100%', maxWidth: 500, boxShadow: '0 1px 6px rgba(16,24,40,0.06)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
           <div style={{ display: 'flex', gap: 18, alignItems: 'center', fontSize: 14 }}>
             <div style={{ textAlign: 'center' }}>

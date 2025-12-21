@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, Alert, Button, Typography } from "antd";
 import { ExclamationCircleOutlined, ReloadOutlined } from "@ant-design/icons";
-import MyApartment from "./MyApartment";
+import MyApartment from "./RegisterCompany";
 
 const { Text } = Typography;
 
@@ -33,64 +33,50 @@ export default function CompanyRejected({ rejectionReason }: CompanyRejectedProp
             }}
           />
 
-          {/* ✅ Căn giữa toàn bộ Alert */}
           <div style={{ display: "flex", justifyContent: "center" }}>
             <Alert
-              message={
-                <div style={{ textAlign: "center", width: "100%" }}>
-                  Yêu cầu tạo công ty của bạn đã bị từ chối
-                </div>
-              }
-              description={
-                <div
-                  style={{
-                    marginTop: "12px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                    flexWrap: "wrap",
-                    textAlign: "center",
-                  }}
-                >
-                  <Text strong>Lý do:</Text>
-                  <div>
-                    <Text>{rejectionReason || "Không có lý do cụ thể được cung cấp."}</Text>
+                message={
+                  <div style={{ textAlign: "center", width: "100%" }}>
+                    Your company creation request has been rejected
                   </div>
-                </div>
-              }
-              type="error"
-              showIcon={false}
-              style={{
-                marginBottom: "24px",
-                width: "100%",
-                maxWidth: "600px",
-                textAlign: "center",
-              }}
-            />
+                }
+                description={
+                  <div
+                    style={{
+                      marginTop: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "8px",
+                      flexWrap: "wrap",
+                      textAlign: "center",
+                    }}
+                  >
+                    <Text strong>Reason:</Text>
+                    <div>
+                      <Text>{rejectionReason || "No specific reason provided."}</Text>
+                    </div>
+                  </div>
+                }
+                type="error"
+                showIcon={false}
+                style={{
+                  marginBottom: "24px",
+                  width: "100%",
+                  maxWidth: "600px",
+                  textAlign: "center",
+                }}
+              />
           </div>
 
           <div style={{ marginTop: "24px" }}>
             <Button
-              type="primary"
               size="large"
               icon={<ReloadOutlined />}
               onClick={() => setShowForm(true)}
-              className="!bg-[var(--color-primary-light)] 
-                         hover:!bg-[var(--color-primary)] 
-                         !text-white 
-                         !border-none 
-                         px-8 py-6 
-                         rounded-2xl 
-                         shadow-md 
-                         hover:shadow-lg 
-                         transition-all 
-                         duration-300 
-                         flex items-center gap-2
-                         max-w-md
-                         mx-auto"
+              className="company-btn"
             >
-              Hãy bấm vào đây để tạo lại công ty của bạn
+              Click here to create your company again
             </Button>
           </div>
         </div>

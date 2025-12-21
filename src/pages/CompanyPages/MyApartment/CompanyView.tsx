@@ -3,25 +3,11 @@ import { Card, Row, Col, Spin, message, Modal, Button } from "antd";
 import CompanyEditModal from "./components/CompanyEditModal";
 import { companyService } from "../../../services/companyService";
 import { useAppSelector } from "../../../hooks/redux";
-
-interface CompanyData {
-  companyId: number;
-  name: string;
-  description?: string;
-  address?: string;
-  websiteUrl?: string;
-  taxCode?: string | null;
-  logoUrl?: string;
-  companyStatus: string;
-  rejectionReason?: string | null;
-  managerName?: string | null;
-  documents?: { documentType: string; fileUrl: string }[];
-}
+import type { Company } from "../../../types/company.types";
 
 export default function CompanyView() {
-  const [company, setCompany] = useState<CompanyData | null>(null);
+  const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState(true);
-  // (managerName read from company object) -- no separate hrManager state needed
   const [previewVisible, setPreviewVisible] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewType, setPreviewType] = useState<string>("");
@@ -33,10 +19,9 @@ export default function CompanyView() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // 1️⃣ Fetch company data
         const companyResp = await companyService.getSelf();
         if (companyResp?.status === "success" || companyResp?.status === "Success") {
-          const companyData = companyResp.data as CompanyData;
+          const companyData = companyResp.data as Company;
           setCompany(companyData);
         } else {
           message.error("Failed to load company details");
@@ -109,7 +94,6 @@ export default function CompanyView() {
               margin: "0 auto",
             }}
           >
-            {/* LEFT: Logo */}
             <Col span={9} style={{ textAlign: "center" }}>
               <img
                 src={company.logoUrl || "https://placehold.co/200x200?text=Logo"}
@@ -125,7 +109,6 @@ export default function CompanyView() {
                 }}
               />
             </Col>
-            {/* RIGHT: Info */}
             <Col span={15} >
               <div style={{ maxWidth: 600 }}>
                 <div style={{ marginBottom: 10 }}>
@@ -147,7 +130,6 @@ export default function CompanyView() {
             </Col>
           </div>
 
-          {/* Description on its own full-width row */}
           <Col span={24}>
             <div style={{ maxWidth: 900, margin: '5px auto' }}>
               <div
@@ -168,7 +150,6 @@ export default function CompanyView() {
           </Col>
         </Row>
 
-        {/* Documents */}
         <div
           style={{
             border: "1px solid #e5e5e5",
@@ -251,7 +232,6 @@ export default function CompanyView() {
         </div>
       </Card>
 
-      {/* Popup (Modal preview) */}
       <Modal
         open={previewVisible}
         title={previewType || "Document preview"}
@@ -272,7 +252,6 @@ export default function CompanyView() {
           (() => {
             const fileExtension = previewUrl.split(".").pop()?.toLowerCase();
 
-            // ✅ Nếu là ảnh (jpg, png, jpeg, gif, webp)
             if (["jpg", "jpeg", "png", "gif", "webp"].includes(fileExtension || "")) {
               return (
                 <div
@@ -297,7 +276,6 @@ export default function CompanyView() {
               );
             }
 
-            // ✅ Nếu là PDF
             if (fileExtension === "pdf") {
               return (
                 <div
@@ -324,7 +302,6 @@ export default function CompanyView() {
               );
             }
 
-            // ✅ Nếu là loại khác (docx, xlsx, zip, ...)
             return (
               <div
                 style={{
@@ -357,7 +334,6 @@ export default function CompanyView() {
         )}
       </Modal>
 
-      {/* Edit Company Info Modal */}
       <CompanyEditModal
         open={editModalOpen}
         onClose={() => setEditModalOpen(false)}

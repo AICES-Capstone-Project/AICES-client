@@ -18,6 +18,7 @@ type Row = {
   appliedAt?: string | null;
   email?: string | null;
   phone?: string | null;
+  note?: string | null;
   totalScore?: number | null;
   adjustedScore?: number | null;
   totalResumeScore?: number | null;
@@ -91,6 +92,7 @@ const HiringTracking: React.FC = () => {
           appliedAt: r.appliedAt ?? r.createdAt ?? r.submittedAt ?? null,
           email: r.email ?? null,
           phone: r.phone ?? r.phoneNumber ?? null,
+          note: r.note ?? null,
           totalScore: r.totalScore ?? null,
           adjustedScore: r.adjustedScore ?? null,
           totalResumeScore: r.totalResumeScore ?? (r.totalScore ?? r.adjustedScore ?? null),
@@ -317,9 +319,41 @@ const HiringTracking: React.FC = () => {
         setLoading(true);
         const resp = await resumeService.updateApplicationStatus(appId, newStatus, actionModalNote || undefined);
         const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
+        const respData = resp && (resp as any).data ? (resp as any).data : resp;
         if (ok) {
           message.success('Status updated');
-          setRows(prev => prev.map(row => (row.applicationId === appId || row.resumeId === appId) ? { ...row, status: newStatus } : row));
+          // adjust jobHiredCount if status changed to/from 'hired'
+          try {
+            const prevRow = rows.find(r => (r.applicationId === appId || r.resumeId === appId));
+            const prevKey = String(prevRow?.status ?? '').trim().toLowerCase().replace(/[\s_-]+/g, '');
+            const newKey = String(newStatus || '').trim().toLowerCase().replace(/[\s_-]+/g, '');
+            const prevIsHired = prevKey === 'hired';
+            const newIsHired = newKey === 'hired';
+            const delta = (newIsHired ? 1 : 0) - (prevIsHired ? 1 : 0);
+            if (delta !== 0) {
+              setJobHiredCount((c) => {
+                const base = c == null ? 0 : c;
+                const updated = base + delta;
+                return updated < 0 ? 0 : updated;
+              });
+            }
+          } catch (e) {
+            // ignore
+          }
+
+          setRows(prev => prev.map(row => {
+            if (row.applicationId === appId || row.resumeId === appId) {
+              return {
+                ...row,
+                status: newStatus,
+                note: (actionModalNote || respData?.note) ?? row.note,
+                adjustedScore: respData?.adjustedScore ?? row.adjustedScore,
+                totalScore: respData?.totalScore ?? row.totalScore,
+                totalResumeScore: respData?.totalResumeScore ?? row.totalResumeScore,
+              } as Row;
+            }
+            return row;
+          }));
           setActionModalOpen(false);
           setActionModalPayload(null);
           setActionModalNote("");
@@ -407,9 +441,41 @@ const HiringTracking: React.FC = () => {
       try {
         const resp = await resumeService.updateApplicationStatus(appId, newStatus, actionModalNote || undefined);
         const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
+        const respData = resp && (resp as any).data ? (resp as any).data : resp;
         if (ok) {
           message.success('Status updated');
-          setRows(prev => prev.map(row => (row.applicationId === appId || row.resumeId === appId) ? { ...row, status: newStatus } : row));
+          // adjust jobHiredCount if status changed to/from 'hired'
+          try {
+            const prevRow = rows.find(r => (r.applicationId === appId || r.resumeId === appId));
+            const prevKey = String(prevRow?.status ?? '').trim().toLowerCase().replace(/[\s_-]+/g, '');
+            const newKey = String(newStatus || '').trim().toLowerCase().replace(/[\s_-]+/g, '');
+            const prevIsHired = prevKey === 'hired';
+            const newIsHired = newKey === 'hired';
+            const delta = (newIsHired ? 1 : 0) - (prevIsHired ? 1 : 0);
+            if (delta !== 0) {
+              setJobHiredCount((c) => {
+                const base = c == null ? 0 : c;
+                const updated = base + delta;
+                return updated < 0 ? 0 : updated;
+              });
+            }
+          } catch (e) {
+            // ignore
+          }
+
+          setRows(prev => prev.map(row => {
+            if (row.applicationId === appId || row.resumeId === appId) {
+              return {
+                ...row,
+                status: newStatus,
+                note: (actionModalNote || respData?.note) ?? row.note,
+                adjustedScore: respData?.adjustedScore ?? row.adjustedScore,
+                totalScore: respData?.totalScore ?? row.totalScore,
+                totalResumeScore: respData?.totalResumeScore ?? row.totalResumeScore,
+              } as Row;
+            }
+            return row;
+          }));
           setActionModalOpen(false);
           setActionModalPayload(null);
           setActionModalNote("");

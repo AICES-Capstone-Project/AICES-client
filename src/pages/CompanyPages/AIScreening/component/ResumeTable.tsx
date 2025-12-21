@@ -59,7 +59,15 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 	// Inline edit state for adjusted score
 	const [editingAppId, setEditingAppId] = React.useState<number | null>(null);
 	const [editValue, setEditValue] = React.useState<string>("");
+	const [editingOriginalValue, setEditingOriginalValue] = React.useState<string>("");
 	const [savingAppId, setSavingAppId] = React.useState<number | null>(null);
+
+	// confirmation for adjusted score updates
+	const [adjConfirmOpen, setAdjConfirmOpen] = React.useState(false);
+	const [adjPendingAppId, setAdjPendingAppId] = React.useState<number | null>(null);
+	const [adjPendingValue, setAdjPendingValue] = React.useState<number | null>(null);
+	const [adjPendingName, setAdjPendingName] = React.useState<string | null>(null);
+	const [adjConfirmLoading, setAdjConfirmLoading] = React.useState(false);
 	const [adjustedOverrides, setAdjustedOverrides] = React.useState<Map<number, number | null>>(() => new Map());
 	const [hoveredAppId, setHoveredAppId] = React.useState<number | null>(null);
 	// compare state
@@ -218,11 +226,13 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 					if (!editable) return;
 					setEditingAppId(applicationId);
 					setEditValue(val != null ? String(val) : "");
+					setEditingOriginalValue(val != null ? String(val) : "");
 				};
 
 				const cancelEdit = () => {
 					setEditingAppId(null);
 					setEditValue("");
+					setEditingOriginalValue("");
 				};
 
 				const saveEdit = async () => {
@@ -237,22 +247,16 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 						return;
 					}
 
-					setSavingAppId(applicationId);
-					try {
-						await resumeService.updateAdjustedScore(applicationId, Math.round(n));
-						setAdjustedOverrides(prev => {
-							const next = new Map(prev);
-							next.set(applicationId, Math.round(n));
-							return next;
-						});
-						message.success("Adjusted score updated");
+					// If value didn't change, just cancel edit and return
+					if (v === editingOriginalValue) {
 						cancelEdit();
-					} catch (err) {
-						console.error(err);
-						message.error("Failed to update adjusted score");
-					} finally {
-						setSavingAppId(null);
+						return;
 					}
+					// Open confirmation modal and wait for user to confirm before calling API
+					setAdjPendingAppId(applicationId);
+					setAdjPendingValue(Math.round(n));
+					setAdjPendingName(record.fullName ?? null);
+					setAdjConfirmOpen(true);
 				};
 
 				const hovered = hoveredAppId === applicationId;
@@ -367,6 +371,37 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 			),
 		},
 	];
+
+	// Confirmation modal for adjusted score
+	const confirmAdjusted = async () => {
+		if (adjPendingAppId == null) return;
+		setAdjConfirmLoading(true);
+		setSavingAppId(adjPendingAppId);
+		try {
+			await resumeService.updateAdjustedScore(adjPendingAppId, adjPendingValue ?? 0);
+			setAdjustedOverrides(prev => {
+				const next = new Map(prev);
+				next.set(adjPendingAppId, adjPendingValue ?? null);
+				return next;
+			});
+			message.success("Adjusted score updated");
+			// clear editing state if it was the same app
+			if (editingAppId === adjPendingAppId) {
+				setEditingAppId(null);
+				setEditValue("");
+			}
+		} catch (err) {
+			console.error(err);
+			message.error("Failed to update adjusted score");
+		} finally {
+			setSavingAppId(null);
+			setAdjConfirmLoading(false);
+			setAdjConfirmOpen(false);
+			setAdjPendingAppId(null);
+			setAdjPendingValue(null);
+			setAdjPendingName(null);
+		}
+	};
 
 	const openCompare = React.useCallback(() => {
 		// Toggle compare mode; clear any existing selections when toggling
@@ -576,6 +611,33 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 						Type <strong>{pendingDelete?.name}</strong> to confirm deletion.
 					</p>
 					<Input style={{ margin: '0 auto', display: 'block', maxWidth: "100%" }} value={confirmInput} onChange={(e) => setConfirmInput(e.target.value)} placeholder="Enter full name to confirm" />
+				</div>
+			</Modal>
+
+			{/* Confirm adjusted score modal */}
+			<Modal
+				title={<div style={{ textAlign: 'center', width: '100%' }}>Confirm adjusted score change</div>}
+				open={adjConfirmOpen}
+				onCancel={() => {
+					setAdjConfirmOpen(false);
+					setAdjPendingName(null);
+					setAdjPendingValue(null);
+				}}
+				footer={
+					<div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, width: '100%' }}>
+						<div>
+							<Button danger onClick={() => { setAdjConfirmOpen(false); setAdjPendingAppId(null); setAdjPendingValue(null); }}>Cancel</Button>
+						</div>
+						<div>
+							<Button className="company-btn--filled" loading={adjConfirmLoading} onClick={confirmAdjusted}>Confirm</Button>
+						</div>
+					</div>
+				}
+			>
+				<div style={{ textAlign: 'center' }}>
+					<p style={{ marginBottom: 12 }}>
+						You are about to change adjusted score to <strong>{adjPendingValue ?? '—'}</strong> for <strong>{adjPendingName ?? '—'}</strong>.
+					</p>
 				</div>
 			</Modal>
 		</>

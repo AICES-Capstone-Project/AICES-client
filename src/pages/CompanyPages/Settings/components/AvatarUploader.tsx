@@ -8,9 +8,10 @@ type Props = {
   initialUrl?: string | null;
   onFileChange?: (file: File | null) => void;
   size?: number;
+  hoverText?: string;
 };
 
-export default function AvatarUploader({ initialUrl, onFileChange, size = 100 }: Props) {
+export default function AvatarUploader({ initialUrl, onFileChange, size = 100, hoverText = "Edit avatar" }: Props) {
 
   const [preview, setPreview] = useState<string | undefined>(initialUrl || undefined);
   const [isLocalPreview, setIsLocalPreview] = useState(false);
@@ -107,7 +108,7 @@ export default function AvatarUploader({ initialUrl, onFileChange, size = 100 }:
             className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 flex items-center justify-center text-white font-medium text-base transition-opacity duration-300"
             style={{ borderRadius: "10%" }}
           >
-            Edit avatar
+            {hoverText}
           </div>
         </div>
       </Upload>

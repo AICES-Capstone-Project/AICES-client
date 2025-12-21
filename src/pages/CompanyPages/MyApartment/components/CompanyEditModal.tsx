@@ -2,25 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Drawer, Form, Input, Upload, Button } from "antd";
 import { companyService } from "../../../../services/companyService";
 import { toastError, toastSuccess } from "../../../../components/UI/Toast";
-
-type CompanyData = {
-  companyId: number;
-  name: string;
-  description?: string;
-  address?: string;
-  websiteUrl?: string;
-  taxCode?: string | null;
-  logoUrl?: string;
-  companyStatus: string;
-  rejectionReason?: string | null;
-  documents?: { documentType: string; fileUrl: string }[];
-};
+import { validateWebsite } from "../../../../utils/validations/company.validation";
+import type { Company } from "../../../../types/company.types";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  company: CompanyData | null;
-  onUpdated?: (newCompany: CompanyData) => void;
+  company: Company | null;
+  onUpdated?: (newCompany: Company) => void;
 };
 
 const CompanyEditModal: React.FC<Props> = ({ open, onClose, company, onUpdated }) => {
@@ -60,7 +49,7 @@ const CompanyEditModal: React.FC<Props> = ({ open, onClose, company, onUpdated }
         toastSuccess("Company profile updated");
         const refreshed = await companyService.getSelf();
         if (refreshed?.status === "Success" || refreshed?.status === "success") {
-          onUpdated && onUpdated(refreshed.data as CompanyData);
+          onUpdated && onUpdated(refreshed.data as Company);
         }
         onClose();
       } else {
@@ -116,24 +105,47 @@ const CompanyEditModal: React.FC<Props> = ({ open, onClose, company, onUpdated }
             </Upload>
           </div>
         </Form.Item>
-        <Form.Item label="Address" name="address" rules={[{ max: 65, message: 'Address cannot exceed 65 characters' }]}>
-          <Input maxLength={65} showCount/>
+        <Form.Item
+          label="Address"
+          name="address"
+          rules={[
+            { required: true, message: 'Please enter the company address' },
+            { max: 65, message: 'Address cannot exceed 65 characters' },
+          ]}
+        >
+          <Input maxLength={65} showCount />
         </Form.Item>
-        <Form.Item label="Website" name="websiteUrl">
-          <Input />
+
+        <Form.Item
+          label="Website"
+          name="websiteUrl"
+          rules={[
+            { required: true, message: 'Please enter a website URL' },
+            {
+              validator: (_, value) => {
+                if (!value) return Promise.resolve();
+                const validation = validateWebsite(value);
+                return validation.isValid
+                  ? Promise.resolve()
+                  : Promise.reject(new Error(validation.message));
+              }
+            },
+          ]}
+        >
+          <Input maxLength={50} showCount />
         </Form.Item>
         <Form.Item
           label="Description"
           name="description"
           rules={[
-            { max: 150, message: 'Description cannot exceed 150 characters' },
+            { max: 400, message: 'Description cannot exceed 400 characters' },
           ]}
         >
-          <Input.TextArea rows={3} maxLength={150} showCount />
+          <Input.TextArea rows={3} maxLength={400} showCount />
         </Form.Item>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginTop: 12 }}>
-          <Button onClick={onClose}>Cancel</Button>
+          <Button danger onClick={onClose}>Cancel</Button>
           <Button className="company-btn--filled" onClick={handleSubmit} loading={saving}>Save</Button>
         </div>
       </Form>

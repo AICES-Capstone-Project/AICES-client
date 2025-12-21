@@ -1,15 +1,12 @@
+// PlansToolbar.tsx
 import { Input, Button } from "antd";
-import {
-  SearchOutlined,
-  PlusOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
+import { SearchOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 
 interface PlansToolbarProps {
   keyword: string;
   onKeywordChange: (value: string) => void;
   onReset: () => void;
-  onCreate: () => void;
+  onCreate?: () => void; // ✅ optional
 }
 
 export default function PlansToolbar({
@@ -20,7 +17,6 @@ export default function PlansToolbar({
 }: PlansToolbarProps) {
   return (
     <div className="company-header-row">
-      {/* LEFT - Search realtime + Reset */}
       <div className="company-left" style={{ display: "flex", gap: 8 }}>
         <Input
           placeholder="Search subscription plans..."
@@ -32,25 +28,19 @@ export default function PlansToolbar({
           style={{ height: 36, width: 260 }}
         />
 
-        <Button
-          className="accounts-reset-btn"
-          icon={<ReloadOutlined />}
-          onClick={onReset}
-        >
+        <Button className="accounts-reset-btn" icon={<ReloadOutlined />} onClick={onReset}>
           Reset
         </Button>
       </div>
 
-      {/* RIGHT - Add Plan */}
-      <div className="company-right">
-        <Button
-          icon={<PlusOutlined />}
-          className="accounts-new-btn"
-          onClick={onCreate}
-        >
-          New Plan
-        </Button>
-      </div>
+      {/* ✅ chỉ render khi có quyền */}
+      {onCreate && (
+        <div className="company-right">
+          <Button icon={<PlusOutlined />} className="accounts-new-btn" onClick={onCreate}>
+            New Plan
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Card, Form, message, Input, Button, Modal } from "antd";
+import { useAppSelector } from "../../../hooks/redux";
 
 import { subscriptionService } from "../../../services/subscriptionService";
 import type { SubscriptionPlan } from "../../../types/subscription.types";
@@ -13,6 +14,12 @@ import PlansToolbar from "./components/plans/PlansToolbar";
 
 export default function PlansPage() {
   const [loading, setLoading] = useState(false);
+  // ================= PERMISSION =================
+  const { user } = useAppSelector((state) => state.auth);
+  const normalizedRole = (user?.roleName || "")
+    .replace(/_/g, " ")
+    .toLowerCase();
+  const canManagePlans = normalizedRole === "system admin"; // ✅ chỉ admin được tạo/sửa/xóa
 
   // ✅ giữ raw plans, filter realtime bằng useMemo
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -158,16 +165,16 @@ export default function PlansPage() {
           keyword={filter}
           onKeywordChange={setFilter}
           onReset={() => setFilter("")}
-          onCreate={handleOpenCreate}
+          onCreate={canManagePlans ? handleOpenCreate : undefined}
         />
 
         {/* Table */}
         <div className="accounts-table-wrapper">
           <PlansTable
             loading={loading}
-            plans={filteredPlans} // ✅ dùng list đã filter
-            onEdit={handleOpenEdit}
-            onDelete={handleOpenDeleteConfirm}
+            plans={filteredPlans}
+            onEdit={canManagePlans ? handleOpenEdit : undefined}
+            onDelete={canManagePlans ? handleOpenDeleteConfirm : undefined}
           />
         </div>
       </Card>

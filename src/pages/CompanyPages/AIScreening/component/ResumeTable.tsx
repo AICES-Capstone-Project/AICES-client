@@ -113,7 +113,7 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 			},
 		},
 		{
-			title: "Screening status",
+			title: "Hiring status",
 			dataIndex: "status",
 			align: "center" as const,
 			width: "18%",
@@ -286,7 +286,7 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 					cursor: editable ? "pointer" : "default",
 				};
 
-				const hidePencil = key === "failed";
+				const hidePencil = !editable;
 
 				const content = display != null ? (
 					<>

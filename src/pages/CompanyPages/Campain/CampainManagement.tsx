@@ -7,6 +7,7 @@ import CampaignEditDrawer from './component/CampaignEditDrawer';
 import CampaignTable from './component/CampaignTable';
 import PendingCampaignsDrawer from './component/PendingCampaignsDrawer';
 import { campaignService } from "../../../services/campaignService";
+import { hiringTrackingService } from '../../../services/hiringTrackingService';
 import { useNotificationSignalR } from '../../../hooks/useNotificationSignalR';
 import { useAppSelector } from "../../../hooks/redux";
 import { ROLES } from "../../../services/config";
@@ -54,11 +55,47 @@ const CampaignManagement = () => {
         try {
             const response = await campaignService.getCampaigns();
             if (response.status === "Success" && response.data) {
-                const campaignList = response.data.campaigns || response.data;
-                setCampaigns(Array.isArray(campaignList) ? campaignList : []);
+                    let campaignList = response.data.campaigns || response.data;
+                    campaignList = Array.isArray(campaignList) ? campaignList : [];
+
+                    // Enrich jobs with `filled` counts when possible by fetching resumes per job
+                    // This is optional but ensures progress uses accurate totalHired values.
+                    const enriched = await Promise.all(
+                        campaignList.map(async (camp: any) => {
+                            const jobs = Array.isArray(camp.jobs) ? camp.jobs : [];
+                            if (!jobs.length) return camp;
+
+                            // For each job, if there's already a numeric filled/hired, keep it.
+                            // Otherwise, fetch resumes for that job and count statuses == 'Hired'.
+                            const jobsWithCounts = await Promise.all(
+                                jobs.map(async (job: any) => {
+                                    const hasNumeric = Number(job?.filled ?? job?.filledCount ?? job?.hired ?? job?.hiredCount ?? 0) > 0;
+                                    if (hasNumeric) return job;
+
+                                    try {
+                                        const resp = await hiringTrackingService.getByJob(camp.campaignId ?? camp.campaign_id ?? camp.id, job.jobId ?? job.jobId ?? job.id, { page: 1, pageSize: 1 });
+                                        const payload = resp && (resp as any).data ? (resp as any).data : resp;
+                                        const list = hiringTrackingService._normalizeList(payload || resp);
+                                        // count hired
+                                        const count = (list || []).filter((r: any) => {
+                                            const st = String(r?.applicationStatus ?? r?.status ?? r?.stage ?? '').toLowerCase().replace(/[\s_-]+/g, '');
+                                            return st === 'hired';
+                                        }).length;
+                                        return { ...job, filled: count };
+                                    } catch (e) {
+                                        return job;
+                                    }
+                                })
+                            );
+
+                            return { ...camp, jobs: jobsWithCounts };
+                        })
+                    );
+
+                    setCampaigns(enriched);
             } else {
                 console.error("Failed to fetch campaigns:", response);
-                setCampaigns([]);
+                    setCampaigns([]);
             }
         } catch (error) {
             console.error("Error loading campaigns:", error);

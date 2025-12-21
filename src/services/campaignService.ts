@@ -99,6 +99,16 @@ export const campaignService = {
     }
   },
 
+  // Get jobs that belong to a campaign
+  getCampaignJobs: async (campaignId: number) => {
+    try {
+      return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_ADD_JOBS(campaignId));
+    } catch (error) {
+      console.error("Failed to fetch campaign jobs:", error);
+      throw error;
+    }
+  },
+
   // Remove jobs from campaign
   removeJobsFromCampaign: async (campaignId: number, jobIds: number[]) => {
     try {

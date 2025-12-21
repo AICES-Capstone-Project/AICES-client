@@ -26,6 +26,8 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
   React.useEffect(() => {
     if (initialValues) {
       const values = { ...initialValues };
+      // Remove legacy `status` field — campaigns no longer use status
+      if ('status' in values) delete (values as any).status;
       // convert ISO strings to dayjs for DatePicker
       if (values.startDate) values.startDate = dayjs(values.startDate);
       if (values.endDate) values.endDate = dayjs(values.endDate);
@@ -68,10 +70,23 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
   const handleFinish = async (values: any) => {
     setLoading(true);
     try {
+      // Prevent duplicate job selections
+      if (values.jobs && Array.isArray(values.jobs)) {
+        const seen = new Set<string>();
+        for (const j of values.jobs) {
+          const id = String(j?.jobId ?? '');
+          if (!id) continue;
+          if (seen.has(id)) {
+            message.error('Duplicate job selected. Remove duplicates before saving.');
+            setLoading(false);
+            return;
+          }
+          seen.add(id);
+        }
+      }
       const payload: any = {
         title: values.title,
         description: values.description,
-        status: values.status,
       };
       if (values.startDate) payload.startDate = values.startDate.toISOString();
       if (values.endDate) payload.endDate = values.endDate.toISOString();
@@ -121,37 +136,61 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
       onClose={() => { onClose(); form.resetFields(); }}
       destroyOnClose
     >
-      <Form layout="vertical" form={form} initialValues={{ status: 'Published' }} onFinish={handleFinish}>
-        <Form.Item name="title" label="Title" rules={[{ required: true, message: 'Please input title' }]}>
-          <Input />
+      <Form layout="vertical" form={form} onFinish={handleFinish}>
+        <Form.Item
+          name="title"
+          label="Title"
+          rules={[
+            { required: true, message: 'Please input title' },
+            { min: 3, message: 'Title must be at least 3 characters' },
+            { max: 100, message: 'Title must be at most 100 characters' },
+          ]}
+        >
+          <Input maxLength={100} placeholder="Enter campaign title (max 100 chars)" />
         </Form.Item>
-        <Form.Item name="description" label="Description">
-          <Input.TextArea rows={4} />
+        <Form.Item name="description" label="Description" rules={[{ max: 1000, message: 'Description must be at most 1000 characters' }]}>
+          <Input.TextArea rows={4} maxLength={1000} showCount placeholder="Enter campaign description (max 1000 chars)" />
         </Form.Item>
         <Form.Item name="startDate" label="Start Date">
-          <DatePicker showTime style={{ width: '100%' }} />
+          <DatePicker
+            showTime
+            size="small"
+            style={{ width: '100%' }}
+            disabledDate={(current) => !!current && current.startOf('day').isBefore(dayjs().startOf('day'))}
+          />
         </Form.Item>
-        <Form.Item name="endDate" label="End Date">
-          <DatePicker showTime style={{ width: '100%' }} />
+        <Form.Item
+          name="endDate"
+          label="End Date"
+          rules={[{
+            validator: (_: any, value: any) => {
+              const start = form.getFieldValue('startDate');
+              if (start && value && start.isAfter && start.isAfter(value)) {
+                return Promise.reject(new Error('End date must be after start date'));
+              }
+              return Promise.resolve();
+            }
+          }]}
+        >
+          <DatePicker
+            showTime
+            size="small"
+            style={{ width: '100%' }}
+            disabledDate={(current) => !!current && current.startOf('day').isBefore(dayjs().startOf('day'))}
+          />
         </Form.Item>
-        <Form.Item name="status" label="Status">
-          <Select>
-            <Select.Option value="Published">Published</Select.Option>
-            <Select.Option value="Private">Private</Select.Option>
-            <Select.Option value="Expired">Expired</Select.Option>
-          </Select>
-        </Form.Item>
+        {/* Status removed: campaigns no longer use a status field */}
         <Form.Item label="Jobs (optional)">
           <Form.List name="jobs">
             {(fields, { add, remove }) => (
               <>
                 {fields.map((field) => (
-                  <div key={`${field.key}-${field.name}`} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+                  <div key={`${field.key}-${field.name}`} style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, minWidth: 0 }}>
                     <Form.Item
                       {...field}
                       name={[field.name, 'jobId']}
                       rules={[{ required: true, message: 'Please select a job' }]}
-                      style={{ flex: 1, marginBottom: 0 }}
+                      style={{ flex: 1, marginBottom: 0, minWidth: 0 }}
                     >
                       <Select
                         placeholder={jobLoading ? 'Loading jobs...' : 'Select job'}
@@ -160,23 +199,22 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
                         showSearch
                         optionFilterProp="label"
                         className="company-select"
+                        style={{ minWidth: 0 }}
                       />
                     </Form.Item>
 
                     <Form.Item
                       {...field}
                       name={[field.name, 'targetQuantity']}
-                      // initialValue={1}
                       rules={[{ required: true, message: 'Please input target quantity' }]}
                       style={{ width: 160, marginBottom: 0 }}
                     >
-                        <InputNumber
-                          className="company-input"
-                          placeholder="Target Quantity"
-                          min={1}
-                          step={1}
-                          style={{ width: '100%', borderColor: 'var(--color-primary-light)' }}
-                        />
+                      <InputNumber
+                        className="company-input-number"
+                        min={1}
+                        style={{ width: '100%' }}
+                        placeholder="Target quantity"
+                      />
                     </Form.Item>
 
                     <MinusCircleOutlined
@@ -186,7 +224,7 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
                   </div>
                 ))}
 
-                <Button className="company-btn" onClick={() => add({ jobId: undefined, targetQuantity: "" })} icon={<PlusCircleOutlined />} style={{width: '100%'}}>
+                <Button className="company-btn" onClick={() => add({ jobId: undefined, targetQuantity: "" })} icon={<PlusCircleOutlined />} style={{ width: '100%' }}>
                   Add job
                 </Button>
               </>

@@ -86,6 +86,7 @@ const Campain = lazy(
 const CampaignDetail = lazy(
   () => import("../pages/CompanyPages/Campain/component/CampaignDetail")
 );
+const HiringTracking = lazy(() => import("../pages/CompanyPages/HiringTracking/HiringTracking"));
 const ResumeList = lazy(
   () => import("../pages/CompanyPages/AIScreening/ResumeList")
 );
@@ -288,7 +289,7 @@ export const router = createBrowserRouter([
       { path: APP_ROUTES.COMPANY_JOBS, element: <JobManagement /> },
       { path: APP_ROUTES.COMPANY_NOTIFICATION, element: <Notification /> },
       { path: APP_ROUTES.COMPANY_CANDIDATE, element: <CandidateManagement /> },
-      { path: "/company/candidate/:candidateId", element: <CandidateDetail /> },
+      { path: APP_ROUTES.COMPANY_CANDIDATE_DETAIL, element: <CandidateDetail /> },
       { path: APP_ROUTES.COMPANY_SETTINGS, element: <Setting /> },
       {
         path: APP_ROUTES.COMPANY_MY_APARTMENTS,
@@ -298,15 +299,15 @@ export const router = createBrowserRouter([
         path: APP_ROUTES.COMPANY_PENDING_APPROVAL,
         element: <SubmissionPending />,
       },
-
       {
         path: APP_ROUTES.COMPANY_CAMPAIN,
         element: <Campain />,
       },
       {
-        path: "/company/campaign/:campaignId",
+        path: APP_ROUTES.COMPANY_CAMPAIN_DETAIL,
         element: <CampaignDetail />,
       },
+      { path: APP_ROUTES.HIRING_TRACKING, element: <HiringTracking /> },
       {
         path: APP_ROUTES.COMPANY_AI_SCREENING_RESUMES_COMPARE,
         element: <CompareResumes />,

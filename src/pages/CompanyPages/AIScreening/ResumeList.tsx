@@ -157,7 +157,16 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					scoreDetails: r.scoreDetails,
 				}));
 
-				const sortedList = mapped.slice().sort((a, b) => {
+				// If caller requested only scored resumes via query param, filter here
+				const qp = new URLSearchParams(location.search);
+				const onlyScored = qp.get("onlyScored") === "1" || qp.get("onlyScored") === "true";
+
+				let filteredMapped = mapped;
+				if (onlyScored) {
+					filteredMapped = mapped.filter((m) => m.totalResumeScore != null && m.totalResumeScore > 0);
+				}
+
+				const sortedList = filteredMapped.slice().sort((a, b) => {
 					const aS = a.totalResumeScore;
 					const bS = b.totalResumeScore;
 					if (aS == null && bS == null) return a.resumeId - b.resumeId;

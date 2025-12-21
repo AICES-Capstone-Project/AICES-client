@@ -107,7 +107,7 @@ const PendingCampaignsDrawer: React.FC<Props> = ({
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 12 }}>
               <Button danger icon={<CloseOutlined />} onClick={onReject} loading={pendingActionLoading}>Reject</Button>
-              <Button className="company-btn" icon={<CheckOutlined />} onClick={onApprove} loading={pendingActionLoading}>Approve</Button>
+              <Button className="company-btn--filled" icon={<CheckOutlined />} onClick={onApprove} loading={pendingActionLoading}>Approve</Button>
             </div>
           </div>
         )
@@ -118,6 +118,7 @@ const PendingCampaignsDrawer: React.FC<Props> = ({
           renderItem={(item: any, idx) => (
             <List.Item
               key={item.campaignId}
+              className="pending-campaign-item"
               style={{ padding: 12, borderRadius: 8 }}
             >
               <div style={{ display: 'flex', alignItems: 'center', width: '100%', gap: 12 }}>

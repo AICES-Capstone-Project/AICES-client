@@ -10,9 +10,10 @@ export interface FeedbackListParams {
 
 export const feedbackSystemService = {
   getFeedbacks(params?: FeedbackListParams) {
-    return api.get<ApiResponse<FeedbackListData>>(API_ENDPOINTS.FEEDBACK.SYSTEM_GET_ALL, {
-      params,
-    });
+    return api.get<ApiResponse<FeedbackListData>>(
+      API_ENDPOINTS.FEEDBACK.SYSTEM_GET_ALL,
+      { params }
+    );
   },
 
   getFeedbackById(feedbackId: number) {

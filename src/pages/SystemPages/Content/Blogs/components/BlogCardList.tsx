@@ -66,14 +66,21 @@ export default function BlogCardList({
                     </div>
                   }
                   actions={[
-                    <Space key="actions" size="small">
-                      <Button
-                        type="default"
-                        shape="circle"
-                        size="small"
-                        icon={<EditOutlined />}
-                        onClick={() => onEdit(blog)}
-                      />
+                    <Button
+                      key="edit"
+                      type="default"
+                      shape="circle"
+                      size="small"
+                      icon={<EditOutlined />}
+                      onClick={() => onEdit(blog)}
+                    />,
+                    <span
+                      key="delete"
+                      style={{
+                        display: "inline-flex",
+                        justifyContent: "center",
+                      }}
+                    >
                       <Popconfirm
                         title="Delete this blog?"
                         okText="Delete"
@@ -88,12 +95,10 @@ export default function BlogCardList({
                           icon={<DeleteOutlined />}
                         />
                       </Popconfirm>
-                    </Space>,
+                    </span>,
                   ]}
                 >
-                  <div
-                    style={{ display: "flex", flexDirection: "column", gap: 8 }}
-                  >
+                  <div className="aices-blog-card-body">
                     <Title
                       level={5}
                       className="aices-blog-card-title"
@@ -110,7 +115,7 @@ export default function BlogCardList({
                       {blog.content || "—"}
                     </Paragraph>
 
-                    <Space size={6} wrap>
+                    <Space size={6} wrap className="aices-blog-card-meta">
                       <Text type="secondary">
                         {blog.createdAt
                           ? dayjs(blog.createdAt).format("DD/MM/YYYY HH:mm")

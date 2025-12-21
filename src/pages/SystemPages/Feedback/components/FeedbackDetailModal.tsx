@@ -1,4 +1,4 @@
-import { Card, Descriptions, Modal, Rate, Space, Tag, Typography } from "antd";
+import { Avatar, Card, Descriptions, Modal, Rate, Space, Tag, Typography } from "antd";
 import type { FeedbackDetail } from "../../../../types/feedback.types";
 
 const { Title, Text, Paragraph } = Typography;
@@ -27,7 +27,6 @@ export default function FeedbackDetailModal({
       centered
       destroyOnClose
       width={820}
-      confirmLoading={loading}
       className="system-modal"
     >
       {!data ? (
@@ -55,21 +54,26 @@ export default function FeedbackDetailModal({
               </Descriptions.Item>
 
               <Descriptions.Item label="Company">
-                {data.companyName}
-                <Tag style={{ marginLeft: 8 }}>ID: {data.companyId}</Tag>
+                <Space size={8}>
+                  <Avatar
+                    shape="square"
+                    size={22}
+                    src={data.companyLogoUrl ?? undefined}
+                  >
+                    {(data.companyName || "?").charAt(0).toUpperCase()}
+                  </Avatar>
+                  <span style={{ fontWeight: 600 }}>{data.companyName}</span>
+                  <Tag>ID: {data.companyId}</Tag>
+                </Space>
               </Descriptions.Item>
 
               <Descriptions.Item label="Company User ID">
                 {data.comUserId}
               </Descriptions.Item>
 
-              <Descriptions.Item label="User Name">
-                {data.userName}
-              </Descriptions.Item>
+              <Descriptions.Item label="User Name">{data.userName}</Descriptions.Item>
 
-              <Descriptions.Item label="User Email">
-                {data.userEmail}
-              </Descriptions.Item>
+              <Descriptions.Item label="User Email">{data.userEmail}</Descriptions.Item>
             </Descriptions>
           </Card>
 
@@ -79,12 +83,20 @@ export default function FeedbackDetailModal({
               align="start"
               style={{ width: "100%", justifyContent: "space-between" }}
             >
-              <div>
-                <Title level={5} style={{ margin: 0 }}>
-                  {data.userFullName || data.userName || "Unknown user"}
-                </Title>
-                <Text type="secondary">{data.userEmail || data.userName}</Text>
-              </div>
+              <Space align="start" size={12}>
+                <Avatar size={44} src={data.userAvatarUrl ?? undefined}>
+                  {(data.userFullName || data.userName || "?")
+                    .charAt(0)
+                    .toUpperCase()}
+                </Avatar>
+
+                <div>
+                  <Title level={5} style={{ margin: 0 }}>
+                    {data.userFullName || data.userName || "Unknown user"}
+                  </Title>
+                  <Text type="secondary">{data.userEmail || data.userName}</Text>
+                </div>
+              </Space>
 
               <div style={{ textAlign: "right" }}>
                 <Rate disabled value={data.rating} />

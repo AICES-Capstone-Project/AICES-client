@@ -30,8 +30,6 @@ const ProfileLayout = lazy(() => import("../components/Layout/ProfileLayout"));
 
 /* ============== General Pages ==============*/
 const Home = lazy(() => import("../pages/Homepage/Homepage"));
-/* ===== RANKING ===== */
-const Ranking = lazy(() => import("../pages/Ranking"));
 
 /* ============== Legal & Trust Pages ==============*/
 const TermsOfService = lazy(
@@ -223,8 +221,6 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: APP_ROUTES.SUBSCRIPTIONS, element: <Subscriptions /> },
-      /* ===== RANKING ===== */
-      { path: APP_ROUTES.RANKING, element: <Ranking /> },
 
       /* ===== Legal & Trust ===== */
       { path: APP_ROUTES.LEGAL_TERMS, element: <TermsOfService /> },

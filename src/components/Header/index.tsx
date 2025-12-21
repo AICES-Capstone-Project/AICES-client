@@ -133,21 +133,6 @@ const AppHeader: React.FC = () => {
         </NavLink>
       ),
     },
-    {
-      key: APP_ROUTES.RANKING,
-      label: (
-        <NavLink
-          to={APP_ROUTES.RANKING}
-          end
-          className={({ isActive }) =>
-            isActive ? "font-semibold" : "text-slate-800"
-          }
-          onClick={() => setDrawerOpen(false)}
-        >
-          Ranking
-        </NavLink>
-      ),
-    },
   ];
 
   /** ===== Menu selected key (supports submenu active) ===== */

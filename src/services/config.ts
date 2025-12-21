@@ -484,8 +484,6 @@ export const APP_ROUTES = {
 	TEST: "/test",
 	NOTFOUND: "*",
 
-	/* ===== RANKING ===== */
-	RANKING: "/ranking",
 	/* ===== Legal & Trust ===== */
 	LEGAL_TERMS: "/legal/terms",
 	LEGAL_PRIVACY: "/legal/privacy",

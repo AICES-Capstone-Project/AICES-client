@@ -1264,6 +1264,13 @@
   opacity: 0.35;
   cursor: not-allowed !important;
 }
+.aices-blog-card-cover .ant-image,
+.aices-blog-card-cover .ant-image-img {
+  width: 100% !important;
+  height: 180px !important;
+  object-fit: cover !important;
+  display: block;
+}
 
 .blog-card-pagination {
   margin-top: 14px;
@@ -1302,6 +1309,61 @@
   background-color: #f3f4f6 !important;
   color: #111827 !important;
 }
+/* Grid: giúp các Col stretch theo chiều cao */
+.blog-card-grid .ant-row {
+  align-items: stretch;
+}
+
+/* Card full height */
+.aices-blog-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Cover cố định chiều cao */
+.aices-blog-card-cover {
+  height: 180px;
+  overflow: hidden;
+}
+
+.aices-blog-card-img {
+  width: 100% !important;
+  height: 180px !important;
+  object-fit: cover;
+  display: block;
+}
+
+/* Empty thumb cũng đúng height */
+.aices-blog-card-img--empty {
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f9fafb;
+  border-bottom: 1px solid #eef2f7;
+}
+
+/* Ant Card body phải flex: 1 để đẩy actions xuống */
+.aices-blog-card .ant-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Body wrapper cũng flex: 1 */
+.aices-blog-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Meta nằm dưới cùng (đẹp hơn) */
+.aices-blog-card-meta {
+  margin-top: auto;
+}
+
 
 /* Sidebar scroll (System Admin) */
 .aices-sider .aices-sider-scroll {

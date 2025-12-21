@@ -1,10 +1,23 @@
 export interface FeedbackEntity {
   feedbackId: number;
+
+  // Company
+  companyId: number;
+  companyName: string;
+  companyLogoUrl: string | null;
+
+  // User
+  comUserId: number;
   userName: string;
+  userFullName: string;
+  userEmail: string;
+  userAvatarUrl: string | null;
+
+  // Feedback
+  comment: string | null;
   rating: number;
   createdAt: string;
 }
-
 export interface FeedbackListData {
   feedbacks: FeedbackEntity[];
   totalPages: number;
@@ -12,16 +25,23 @@ export interface FeedbackListData {
   pageSize: number;
   totalCount: number;
 }
-
 export interface FeedbackDetail {
-  comUserId: number;
-  companyName: string;
-  companyId: number;
-  userEmail: string;
-  userFullName: string;
-  comment: string;
   feedbackId: number;
+
+  // Company
+  companyId: number;
+  companyName: string;
+  companyLogoUrl: string | null;
+
+  // User
+  comUserId: number;
   userName: string;
+  userFullName: string;
+  userEmail: string;
+  userAvatarUrl: string | null;
+
+  // Feedback
+  comment: string | null;
   rating: number;
   createdAt: string;
 }

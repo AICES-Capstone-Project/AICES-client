@@ -1,8 +1,10 @@
-import { Button, Table } from "antd";
+import { Avatar, Button, Space, Table, Typography } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import { EyeOutlined } from "@ant-design/icons";
 
 import type { FeedbackEntity } from "../../../../types/feedback.types";
+
+const { Text } = Typography;
 
 interface FeedbackTableProps {
   loading: boolean;
@@ -19,13 +21,12 @@ export default function FeedbackTable({
   pagination,
   onChangePage,
   onView,
-  formatDate,
 }: FeedbackTableProps) {
   const columns: ColumnsType<FeedbackEntity> = [
     {
       title: "No.",
       key: "no",
-      width: 90,
+      width: 80,
       align: "center",
       render: (_: any, __: any, index: number) => {
         const current = pagination.current ?? 1;
@@ -34,28 +35,58 @@ export default function FeedbackTable({
       },
     },
 
+    // ===== USER =====
     {
-      title: "User Name",
-      dataIndex: "userName",
-      render: (v) => <span style={{ fontWeight: 500 }}>{v}</span>,
+      title: "User",
+      key: "user",
+      render: (_, r) => (
+        <Space>
+          <Avatar src={r.userAvatarUrl ?? undefined}>
+            {(r.userFullName || r.userName || "?").charAt(0).toUpperCase()}
+          </Avatar>
+
+          <div style={{ lineHeight: 1.2 }}>
+            <div style={{ fontWeight: 600 }}>
+              {r.userFullName || r.userName}
+            </div>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              {r.userEmail}
+            </Text>
+          </div>
+        </Space>
+      ),
+    },
+
+    // ===== COMPANY =====
+    {
+      title: "Company",
+      key: "company",
+      render: (_, r) => (
+        <Space>
+          <Avatar shape="square" src={r.companyLogoUrl ?? undefined}>
+            {(r.companyName || "?").charAt(0).toUpperCase()}
+          </Avatar>
+
+          <div style={{ lineHeight: 1.2 }}>
+            <div style={{ fontWeight: 600 }}>{r.companyName}</div>
+            <Text type="secondary" style={{ fontSize: 12 }}>
+              ID: {r.companyId}
+            </Text>
+          </div>
+        </Space>
+      ),
     },
     {
       title: "Rating",
       dataIndex: "rating",
-      width: 120,
+      width: 110,
       align: "center",
       render: (v: number) => <span style={{ fontWeight: 600 }}>{v}/5</span>,
     },
     {
-      title: "Created At",
-      dataIndex: "createdAt",
-      width: 220,
-      render: (v: string) => formatDate(v),
-    },
-    {
       title: "Actions",
       key: "actions",
-      width: 110,
+      width: 90,
       align: "center",
       render: (_, record) => (
         <Button

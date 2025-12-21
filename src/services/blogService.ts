@@ -6,8 +6,6 @@ import { API_ENDPOINTS } from "./config";
 import type {
   Blog,
   BlogListData,
-  CreateBlogRequest,
-  UpdateBlogRequest,
   GetMyBlogsResponse,
   CreateBlogResponse,
 } from "../types/blog.types";
@@ -24,21 +22,45 @@ export const blogService = {
   getPublicBlogs(params?: { page?: number; pageSize?: number }) {
     return api.get<BlogListData>(BLOG.PUBLIC_GET_ALL, { params });
   },
-  // POST /system/blogs
-  createBlog(payload: CreateBlogRequest) {
-    return api.post<CreateBlogResponse>(BLOG.SYSTEM_CREATE, payload);
+
+  /** ✅ POST /system/blogs (multipart/form-data) */
+  createBlogForm(payload: {
+    title: string;
+    content: string;
+    thumbnailFile?: File | null;
+  }) {
+    const fd = new FormData();
+    fd.append("Title", payload.title);
+    fd.append("Content", payload.content);
+    if (payload.thumbnailFile) fd.append("ThumbnailFile", payload.thumbnailFile);
+
+    return api.post<CreateBlogResponse>(BLOG.SYSTEM_CREATE, fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   },
 
-  // PUT /system/blogs/{id}
-  updateBlog(id: number, payload: UpdateBlogRequest) {
-    return api.put<CreateBlogResponse>(BLOG.SYSTEM_UPDATE(id), payload);
+  /** ✅ PUT /system/blogs/{id} (multipart/form-data) */
+  updateBlogForm(
+    id: number,
+    payload: {
+      title?: string;
+      content?: string;
+      thumbnailFile?: File | null;
+    }
+  ) {
+    const fd = new FormData();
+    if (payload.title !== undefined) fd.append("Title", payload.title);
+    if (payload.content !== undefined) fd.append("Content", payload.content);
+    if (payload.thumbnailFile) fd.append("ThumbnailFile", payload.thumbnailFile);
+
+    return api.put<CreateBlogResponse>(BLOG.SYSTEM_UPDATE(id), fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   },
 
   // DELETE /system/blogs/{id}
   deleteBlog(id: number) {
-    return api.delete<{ status: string; message: string }>(
-      BLOG.SYSTEM_DELETE(id)
-    );
+    return api.delete<{ status: string; message: string }>(BLOG.SYSTEM_DELETE(id));
   },
 };
 

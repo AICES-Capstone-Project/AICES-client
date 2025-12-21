@@ -111,21 +111,31 @@ export default function BlogList() {
     }
   };
 
-  const handleSubmit = async (values: BlogFormValues) => {
+  const handleSubmit = async (
+    values: BlogFormValues,
+    thumbnailFile?: File | null
+  ) => {
     try {
       setModalSubmitting(true);
 
       if (modalMode === "create") {
-        const res = await blogService.createBlog(values);
+        const res = await blogService.createBlogForm({
+          title: values.title,
+          content: values.content,
+          thumbnailFile: thumbnailFile ?? null,
+        });
         message.success(res.data.message || "Blog created successfully");
       } else if (modalMode === "edit" && currentBlog) {
-        const res = await blogService.updateBlog(currentBlog.blogId, values);
+        const res = await blogService.updateBlogForm(currentBlog.blogId, {
+          title: values.title,
+          content: values.content,
+          thumbnailFile: thumbnailFile ?? null, // edit có thể null => giữ ảnh cũ (BE quyết)
+        });
         message.success(res.data.message || "Blog updated successfully");
       }
 
       setModalOpen(false);
       setCurrentBlog(null);
-
       fetchBlogs(pagination.current ?? 1, pagination.pageSize ?? 10);
     } catch (error: any) {
       const errMsg =
@@ -173,12 +183,13 @@ export default function BlogList() {
         loading={modalSubmitting}
         initialValues={
           currentBlog
-            ? {
-                title: currentBlog.title,
-                content: currentBlog.content,
-                thumbnailUrl: currentBlog.thumbnailUrl || undefined,
-              }
+            ? { title: currentBlog.title, content: currentBlog.content }
             : undefined
+        }
+        initialThumbnailName={
+          currentBlog?.thumbnailUrl
+            ? currentBlog.thumbnailUrl.split("/").pop() ?? "Existing thumbnail"
+            : null
         }
         onSubmit={handleSubmit}
         onCancel={handleCancelModal}

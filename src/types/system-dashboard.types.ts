@@ -33,7 +33,6 @@ export interface SystemCompaniesStatsData {
   approvedCompanies: number;
   pendingCompanies: number;
   rejectedCompanies: number;
-  suspendedCompanies: number;
   newCompaniesThisMonth: number;
 }
 

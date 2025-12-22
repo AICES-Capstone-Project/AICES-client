@@ -14,10 +14,6 @@ export const companyService = {
   createForm: async (formData: FormData): Promise<ApiResponse<null>> => {
     return await postForm<null>(API_ENDPOINTS.COMPANY.COMPANY_CREATE, formData);
   },
-  // === NEW: Create company as System Admin (POST /api/companies) ===
-  createAdminForm: async (formData: FormData): Promise<ApiResponse<null>> => {
-    return await postForm<null>(API_ENDPOINTS.COMPANY.SYSTEM_CREATE, formData);
-  },
 
   // Get current user's company
   getSelf: async (): Promise<ApiResponse<Company>> => {
@@ -193,13 +189,10 @@ export const companyService = {
     );
   },
 
-  deleteCompany: async (companyId: number): Promise<ApiResponse<null>> => {
-    return await remove<null>(API_ENDPOINTS.COMPANY.SYSTEM_DELETE(companyId));
-  },
   updateStatus: async (
     companyId: number,
     payload: {
-      status: "Approved" | "Rejected" | "Pending" | "Suspended";
+      status: "Approved" | "Rejected" | "Pending" ;
       rejectionReason?: string | null;
     }
   ): Promise<ApiResponse<null>> => {

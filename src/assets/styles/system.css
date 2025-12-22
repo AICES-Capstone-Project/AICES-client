@@ -1372,12 +1372,11 @@
   background: #ef4444;
 }
 
-.company-status-suspended,
+
 .company-status-canceled {
   background: #e5e7eb;
   color: #374151;
 }
-.company-status-suspended::before,
 .company-status-canceled::before {
   background: #6b7280;
 }

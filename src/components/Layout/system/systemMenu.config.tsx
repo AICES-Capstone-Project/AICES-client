@@ -61,7 +61,11 @@ export const buildSystemMenuItems = (cfg: SystemRoleConfig): ItemType[] => {
         },
         {
           key: join(bp, "subscriptions/companies"),
-          label: <Link to={join(bp, "subscriptions/companies")}>Subscribed Companies</Link>,
+          label: (
+            <Link to={join(bp, "subscriptions/companies")}>
+              Subscribed Companies
+            </Link>
+          ),
         },
       ],
     },
@@ -102,12 +106,20 @@ export const buildSystemMenuItems = (cfg: SystemRoleConfig): ItemType[] => {
         {
           key: join(bp, "taxonomy/specializations"),
           icon: <ApartmentOutlined />,
-          label: <Link to={join(bp, "taxonomy/specializations")}>Specializations</Link>,
+          label: (
+            <Link to={join(bp, "taxonomy/specializations")}>
+              Specializations
+            </Link>
+          ),
         },
         {
           key: join(bp, "taxonomy/recruitment-types"),
           icon: <BranchesOutlined />,
-          label: <Link to={join(bp, "taxonomy/recruitment-types")}>Recruitment Types</Link>,
+          label: (
+            <Link to={join(bp, "taxonomy/recruitment-types")}>
+              Recruitment Types
+            </Link>
+          ),
         },
       ],
     },
@@ -131,6 +143,12 @@ export const buildSystemMenuItems = (cfg: SystemRoleConfig): ItemType[] => {
           label: <Link to={join(bp, "content/blogs")}>Blogs</Link>,
         },
       ],
+    },
+    // Reports (all 3 roles) - single page
+    {
+      key: join(bp, "reports"),
+      icon: <BarChartOutlined />,
+      label: <Link to={join(bp, "reports")}>Reports</Link>,
     },
 
     // Feedbacks (all 3 roles)

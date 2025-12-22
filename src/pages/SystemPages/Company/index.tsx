@@ -9,11 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { companyService } from "../../../services/companyService";
 import type { Company } from "../../../types/company.types";
 
-import {
-  toastError,
-  toastSuccess,
-  toastWarning,
-} from "../../../components/UI/Toast";
+import { toastError, toastSuccess, toastWarning } from "../../../components/UI/Toast";
 import { useAppSelector } from "../../../hooks/redux";
 
 import CompanySearchBar from "./components/CompanySearchBar";
@@ -37,9 +33,7 @@ export default function CompanyList() {
     pageSize: DEFAULT_PAGE_SIZE,
   });
 
-  const [rejectingCompany, setRejectingCompany] = useState<Company | null>(
-    null
-  );
+  const [rejectingCompany, setRejectingCompany] = useState<Company | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
 
   const nav = useNavigate();
@@ -101,9 +95,7 @@ export default function CompanyList() {
         const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
 
         const source = statusFilter
-          ? rawList.filter(
-              (c: Company) => (c.companyStatus || "") === statusFilter
-            )
+          ? rawList.filter((c: Company) => (c.companyStatus || "") === statusFilter)
           : rawList;
 
         applyFilterAndPaging(source, keyword, page, pageSize);
@@ -121,6 +113,7 @@ export default function CompanyList() {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
   useEffect(() => {
     const t = setTimeout(() => {
       const page = 1;
@@ -139,7 +132,7 @@ export default function CompanyList() {
   // ================== STATUS HANDLERS ==================
   const updateCompanyStatus = async (
     companyId: number,
-    status: "Approved" | "Rejected" | "Suspended", // ⭐ thêm "Suspended"
+    status: "Approved" | "Rejected",
     reason?: string
   ) => {
     setLoading(true);
@@ -155,8 +148,6 @@ export default function CompanyList() {
             ? "Company approved successfully"
             : status === "Rejected"
             ? "Company rejected successfully"
-            : status === "Suspended"
-            ? "Company suspended successfully"
             : "Company status updated successfully";
 
         toastSuccess(msg);
@@ -178,11 +169,7 @@ export default function CompanyList() {
     }
     if (!rejectingCompany) return;
 
-    await updateCompanyStatus(
-      rejectingCompany.companyId,
-      "Rejected",
-      rejectionReason
-    );
+    await updateCompanyStatus(rejectingCompany.companyId, "Rejected", rejectionReason);
 
     setRejectingCompany(null);
     setRejectionReason("");
@@ -190,10 +177,6 @@ export default function CompanyList() {
 
   const handleApprove = (companyId: number) =>
     updateCompanyStatus(companyId, "Approved");
-
-  // ⭐ NEW: tạm ngưng company
-  const handleSuspend = (companyId: number) =>
-    updateCompanyStatus(companyId, "Suspended");
 
   const companiesByStatus = statusFilter
     ? allCompanies.filter((c) => (c.companyStatus || "") === statusFilter)
@@ -232,9 +215,7 @@ export default function CompanyList() {
   return (
     <div className="page-layout">
       <Card className="aices-card">
-        {/* 🔥 HÀNG TOP: Search + Search/Reset + Status + Add Company */}
         <div className="company-header-row">
-          {/* LEFT - Search */}
           <div className="company-left">
             <CompanySearchBar
               keyword={keyword}
@@ -247,9 +228,7 @@ export default function CompanyList() {
             />
           </div>
 
-          {/* RIGHT - Status + Add Company */}
           <div className="company-right">
-            {/* ⭐ Dropdown filter status */}
             <Select
               value={statusFilter || ""} // "" = All
               onChange={handleChangeStatusFilter}
@@ -259,13 +238,11 @@ export default function CompanyList() {
               <Select.Option value="Pending">Pending</Select.Option>
               <Select.Option value="Approved">Approved</Select.Option>
               <Select.Option value="Rejected">Rejected</Select.Option>
-              <Select.Option value="Suspended">Suspended</Select.Option>
               <Select.Option value="Canceled">Canceled</Select.Option>
             </Select>
           </div>
         </div>
 
-        {/* TABLE */}
         <div className="accounts-table-wrapper">
           <CompanyTable
             loading={loading}
@@ -274,18 +251,16 @@ export default function CompanyList() {
             total={total}
             defaultPageSize={DEFAULT_PAGE_SIZE}
             onChangePagination={handleChangeTable}
-            onOpenDetail={(id) => nav(`${baseSystemPath}/company/${id}`)} // ⭐ sửa ở đây
+            onOpenDetail={(id) => nav(`${baseSystemPath}/company/${id}`)}
             onApprove={handleApprove}
             onOpenReject={(c) => {
               setRejectingCompany(c);
               setRejectionReason("");
             }}
-            onSuspend={handleSuspend} // ⭐ thêm dòng này
           />
         </div>
       </Card>
 
-      {/* MODALS */}
       <RejectCompanyModal
         open={!!rejectingCompany}
         loading={loading}

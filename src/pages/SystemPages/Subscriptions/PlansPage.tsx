@@ -69,9 +69,11 @@ export default function PlansPage() {
     form.resetFields();
     form.setFieldsValue({
       price: 0,
-      duration: "monthly",
+      duration: "Monthly", // ✅ FIX: đúng case theo BE
       resumeLimit: 0,
       hoursLimit: 0,
+      compareLimit: 0, // ✅ ADD
+      compareHoursLimit: 1, // ✅ ADD (default hợp lý)
       stripePriceId: "",
     });
     setModalVisible(true);
@@ -87,6 +89,10 @@ export default function PlansPage() {
       duration: record.duration,
       resumeLimit: record.resumeLimit,
       hoursLimit: record.hoursLimit,
+
+      compareLimit: record.compareLimit, // ✅ ADD
+      compareHoursLimit: record.compareHoursLimit, // ✅ ADD
+
       stripePriceId: record.stripePriceId,
     });
     setModalVisible(true);
@@ -134,6 +140,10 @@ export default function PlansPage() {
         duration: values.duration,
         resumeLimit: values.resumeLimit,
         hoursLimit: values.hoursLimit,
+
+        compareLimit: values.compareLimit, // ✅ ADD
+        compareHoursLimit: values.compareHoursLimit, // ✅ ADD
+
         stripePriceId: values.stripePriceId,
       };
 
@@ -184,7 +194,11 @@ export default function PlansPage() {
         loading={loading}
         editingPlan={editingPlan}
         form={form}
-        onCancel={() => setModalVisible(false)}
+        onCancel={() => {
+          setModalVisible(false);
+          setEditingPlan(null);
+          form.resetFields();
+        }}
         onSubmit={handleSubmit}
       />
 

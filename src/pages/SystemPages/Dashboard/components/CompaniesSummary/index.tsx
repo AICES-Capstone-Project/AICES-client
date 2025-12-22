@@ -4,7 +4,6 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
-  StopOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
 import type { SystemCompaniesStatsData } from "../../../../../types/system-dashboard.types";
@@ -216,19 +215,7 @@ const CompaniesSummary: React.FC<CompaniesSummaryProps> = ({ data }) => {
           </Row>
         </Col>
 
-        {/* ===== Row 2: Suspended + New this month (same pill style) ===== */}
-        <Col xs={24} sm={12} lg={12}>
-          <StatusPill
-            title="Suspended"
-            value={data.suspendedCompanies ?? 0}
-            dot="#8C8C8C"
-            bg="linear-gradient(135deg, rgba(140,140,140,0.14) 0%, rgba(140,140,140,0.05) 100%)"
-            icon={<StopOutlined style={{ color: "#8C8C8C" }} />}
-            chipText="Suspended"
-            chipBg="rgba(0,0,0,0.06)"
-            chipColor="rgba(0,0,0,0.65)"
-          />
-        </Col>
+
 
         <Col xs={24} sm={12} lg={12}>
           <StatusPill

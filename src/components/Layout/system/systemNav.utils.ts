@@ -6,8 +6,14 @@ type ItemType = NonNullable<MenuProps["items"]>[number];
 const isObject = (v: unknown): v is Record<string, any> =>
   typeof v === "object" && v !== null;
 
-const hasChildren = (item: ItemType): item is ItemType & { children: ItemType[] } => {
-  return isObject(item) && "children" in item && Array.isArray((item as any).children);
+const hasChildren = (
+  item: ItemType
+): item is ItemType & { children: ItemType[] } => {
+  return (
+    isObject(item) &&
+    "children" in item &&
+    Array.isArray((item as any).children)
+  );
 };
 
 const getKey = (item: ItemType): string | null => {
@@ -38,13 +44,14 @@ export const flattenMenuKeys = (items: ItemType[]): string[] => {
   return out;
 };
 
-
 export const getSelectedKeyByLocation = (
   pathname: string,
   items: ItemType[],
   fallback?: string
 ): string => {
-  const keys = flattenMenuKeys(items).filter((k) => k !== "companies" && k !== "taxonomy" && k !== "content");
+  const keys = flattenMenuKeys(items).filter(
+    (k) => !["companies", "taxonomy", "content"].includes(k)
+  );
 
   // exact match first
   if (keys.includes(pathname)) return pathname;
@@ -74,7 +81,9 @@ export const getOpenKeysBySelectedKey = (
         // if any descendant matches selectedKey prefix, open this group
         const descendantKeys = flattenMenuKeys(kids);
         if (
-          descendantKeys.some((dk) => dk === selectedKey || selectedKey.startsWith(dk))
+          descendantKeys.some(
+            (dk) => dk === selectedKey || selectedKey.startsWith(dk)
+          )
         ) {
           if (k) open.push(k);
         }

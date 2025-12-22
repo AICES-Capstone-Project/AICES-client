@@ -84,7 +84,9 @@ const Campain = lazy(
 const CampaignDetail = lazy(
   () => import("../pages/CompanyPages/Campain/component/CampaignDetail")
 );
-const HiringTracking = lazy(() => import("../pages/CompanyPages/HiringTracking/HiringTracking"));
+const HiringTracking = lazy(
+  () => import("../pages/CompanyPages/HiringTracking/HiringTracking")
+);
 const ResumeList = lazy(
   () => import("../pages/CompanyPages/AIScreening/ResumeList")
 );
@@ -160,6 +162,12 @@ const PaymentSuccess = lazy(
     )
 );
 
+// ===== Reports System Pages =====
+const ReportsOverview = lazy(
+  () => import("../pages/SystemPages/Reports/ReportsOverview")
+);
+
+
 // ===== System children routes dùng chung cho Admin / Manager / Staff =====
 const systemChildren = [
   { index: true, element: <SystemDashboard /> },
@@ -200,6 +208,9 @@ const systemChildren = [
     path: "content/blogs",
     element: <BlogList />,
   },
+
+  // ================= Reports =================
+  { path: "reports", element: <ReportsOverview /> },
 
   // Company detail pages (System xem & quản lý company)
   { path: "company", element: <CompanyList /> },
@@ -285,7 +296,10 @@ export const router = createBrowserRouter([
       { path: APP_ROUTES.COMPANY_JOBS, element: <JobManagement /> },
       { path: APP_ROUTES.COMPANY_NOTIFICATION, element: <Notification /> },
       { path: APP_ROUTES.COMPANY_CANDIDATE, element: <CandidateManagement /> },
-      { path: APP_ROUTES.COMPANY_CANDIDATE_DETAIL, element: <CandidateDetail /> },
+      {
+        path: APP_ROUTES.COMPANY_CANDIDATE_DETAIL,
+        element: <CandidateDetail />,
+      },
       { path: APP_ROUTES.COMPANY_SETTINGS, element: <Setting /> },
       {
         path: APP_ROUTES.COMPANY_MY_APARTMENTS,

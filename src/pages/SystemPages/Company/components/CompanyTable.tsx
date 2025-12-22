@@ -2,12 +2,7 @@ import { Button, Space, Table, Tooltip, Popconfirm, Avatar } from "antd";
 
 import { useAppSelector } from "../../../../hooks/redux";
 
-import {
-  EyeOutlined,
-  CheckOutlined,
-  CloseOutlined,
-  PauseCircleOutlined,
-} from "@ant-design/icons";
+import { EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { Company } from "../../../../types/company.types";
@@ -22,7 +17,6 @@ interface CompanyTableProps {
   onOpenDetail: (companyId: number) => void;
   onApprove: (companyId: number) => void;
   onOpenReject: (c: Company) => void;
-  onSuspend: (companyId: number) => void; // ⭐ NEW
 }
 
 export default function CompanyTable({
@@ -35,7 +29,6 @@ export default function CompanyTable({
   onOpenDetail,
   onApprove,
   onOpenReject,
-  onSuspend,
 }: CompanyTableProps) {
   const { user } = useAppSelector((state) => state.auth);
   const normalizedRole = (user?.roleName || "")
@@ -91,6 +84,7 @@ export default function CompanyTable({
       render: (status: string | undefined) => {
         if (!status) return "—";
 
+        
         const cls =
           status === "Approved"
             ? "company-status company-status-approved"
@@ -98,11 +92,13 @@ export default function CompanyTable({
             ? "company-status company-status-pending"
             : status === "Rejected"
             ? "company-status company-status-rejected"
-            : status === "Suspended"
-            ? "company-status company-status-suspended"
             : "company-status company-status-canceled";
 
-        return <span className={cls}>{status}</span>;
+        const displayText = status;
+
+
+
+        return <span className={cls}>{displayText}</span>;
       },
     },
 
@@ -124,29 +120,21 @@ export default function CompanyTable({
       title: "Actions",
       width: 180,
       align: "center",
-      render: (_, record) => {
+      render: (_: any, record) => {
         const status = (record.companyStatus || "").toString();
 
-        // ===== RULE CHUYỂN TRẠNG THÁI (VERSION MỚI) =====
-        // Pending   -> Approved / Rejected / Suspended
-        // Approved  -> Suspended
-        // Suspended -> Approved
-        // Rejected  -> (terminal, giống Canceled)
-        // Canceled  -> (terminal)
+        // Pending   -> Approved / Rejected
+        // Approved  -> (no extra action)
+        // Rejected  -> terminal
+        // Canceled  -> terminal
 
         const isTerminal = status === "Rejected" || status === "Canceled";
 
-        const canApprove =
-          (status === "Pending" || status === "Suspended") && !isTerminal;
-
+        const canApprove = status === "Pending" && !isTerminal;
         const canReject = status === "Pending" && !isTerminal;
-
-        const canSuspend =
-          (status === "Pending" || status === "Approved") && !isTerminal;
 
         const disabledApprove = !canApprove;
         const disabledReject = !canReject;
-        const disabledSuspend = !canSuspend;
 
         // ⭐ System Staff: CHỈ ĐƯỢC XEM
         if (isStaff) {
@@ -164,7 +152,7 @@ export default function CompanyTable({
           );
         }
 
-        // ⭐ Admin + Manager: FULL ACTION
+        // ⭐ Admin + Manager: ACTIONS (no suspend)
         return (
           <Space size="small">
             {/* View */}
@@ -214,19 +202,6 @@ export default function CompanyTable({
                 onClick={() => onOpenReject(record)}
               />
             </Tooltip>
-
-            <Tooltip title="Suspend company">
-              <Button
-                size="small"
-                shape="circle"
-                disabled={disabledSuspend}
-                className={
-                  disabledSuspend ? "action-btn disabled" : "action-btn enabled"
-                }
-                icon={<PauseCircleOutlined />}
-                onClick={() => onSuspend(record.companyId)}
-              />
-            </Tooltip>
           </Space>
         );
       },
@@ -234,27 +209,25 @@ export default function CompanyTable({
   ];
 
   return (
-    <>
-      <Table<Company>
-        className="accounts-table"
-        rowKey="companyId"
-        loading={loading}
-        dataSource={companies}
-        columns={columns}
-        pagination={{
-          current: pagination.current,
-          pageSize: pagination.pageSize,
-          total,
-          showSizeChanger: true,
-        }}
-        onChange={(p) =>
-          onChangePagination({
-            ...p,
-            current: p.current || 1,
-            pageSize: p.pageSize || defaultPageSize,
-          })
-        }
-      />
-    </>
+    <Table<Company>
+      className="accounts-table"
+      rowKey="companyId"
+      loading={loading}
+      dataSource={companies}
+      columns={columns}
+      pagination={{
+        current: pagination.current,
+        pageSize: pagination.pageSize,
+        total,
+        showSizeChanger: true,
+      }}
+      onChange={(p) =>
+        onChangePagination({
+          ...p,
+          current: p.current || 1,
+          pageSize: p.pageSize || defaultPageSize,
+        })
+      }
+    />
   );
 }

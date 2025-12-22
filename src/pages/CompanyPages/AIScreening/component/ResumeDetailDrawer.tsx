@@ -12,7 +12,19 @@ type Props = {
 
 const ResumeDetailDrawer: React.FC<Props> = ({ open, loading, selectedResume, onClose }) => {
   const isJobTitleMismatch = Boolean(
-    selectedResume && String(selectedResume.status || "").toLowerCase() === "jobtitlenotmatched"
+    selectedResume && (
+      selectedResume.applicationErrorType?.toLowerCase() === "jobtitlenotmatched" ||
+      String(selectedResume.status || "").toLowerCase() === "jobtitlenotmatched"
+    )
+  );
+
+  const isCompleted = Boolean(
+    selectedResume && (
+      selectedResume.resumeStatus?.toLowerCase() === "completed" ||
+      (selectedResume.applicationStatus && 
+       ["reviewed", "shortlisted", "interview", "hired"].includes(selectedResume.applicationStatus.toLowerCase())) ||
+      String(selectedResume.status || "").toLowerCase() === "completed"
+    )
   );
 
   return (
@@ -57,13 +69,22 @@ const ResumeDetailDrawer: React.FC<Props> = ({ open, loading, selectedResume, on
             </div>
           </Card>
 
-          {selectedResume.status &&
-            String(selectedResume.status).toLowerCase() !== "completed" &&
+          {selectedResume.resumeStatus &&
+            selectedResume.resumeStatus.toLowerCase() !== "completed" &&
             selectedResume.errorMessage && (
               <Alert type="warning" showIcon message={selectedResume.errorMessage} />
             )}
 
-          {!isJobTitleMismatch && String(selectedResume.status || "").toLowerCase() === "completed" && (
+          {selectedResume.applicationErrorType && selectedResume.errorMessage && (
+            <Alert 
+              type="error" 
+              showIcon 
+              message={`Application Error: ${selectedResume.applicationErrorType}`}
+              description={selectedResume.errorMessage}
+            />
+          )}
+
+          {!isJobTitleMismatch && isCompleted && (
             <Card
               size="small"
               title={
@@ -103,7 +124,7 @@ const ResumeDetailDrawer: React.FC<Props> = ({ open, loading, selectedResume, on
             </Card>
           )}
 
-          {!isJobTitleMismatch && String(selectedResume.status || "").toLowerCase() === "completed" && selectedResume.scoreDetails && selectedResume.scoreDetails.length > 0 && (
+          {!isJobTitleMismatch && isCompleted && selectedResume.scoreDetails && selectedResume.scoreDetails.length > 0 && (
             <Card size="small" title="Criteria Scores">
               <Space direction="vertical" style={{ width: "100%" }} size="middle">
                 {selectedResume.scoreDetails.map((detail: ScoreDetail) => (

@@ -144,7 +144,12 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					resumeId: (r.resumeId ?? r.applicationId) as number,
 					applicationId: (r.applicationId ?? r.resumeId) as number,
 					fullName: r.fullName || r.candidateName || "Unknown",
-					status: r.applicationStatus || r.status || r.stage || "Processing",
+					// New API response structure
+					resumeStatus: r.resumeStatus || undefined,
+					applicationStatus: r.applicationStatus || undefined, 
+					applicationErrorType: r.applicationErrorType || undefined,
+					// Backward compatibility for legacy status field
+					status: r.status || r.applicationStatus || r.resumeStatus || "Processing",
 					// preserve raw scores from backend
 					totalScore: (r.totalScore ?? null) as number | null,
 					adjustedScore: (r.adjustedScore ?? null) as number | null,
@@ -155,6 +160,8 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					fileUrl: r.fileUrl,
 					aiExplanation: r.aiExplanation,
 					scoreDetails: r.scoreDetails,
+					errorMessage: r.errorMessage,
+					note: r.note,
 				}));
 
 				// If caller requested only scored resumes via query param, filter here
@@ -213,7 +220,16 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 			// Check if there are any Pending resumes before polling (use ref for latest value)
 			const currentResumes = resumesRef.current;
 			const hasPendingResumes = currentResumes.some(
-				(r) => r.status === "Pending" || r.status === "pending"
+				(r) => {
+					// Check both legacy status and new status fields
+					const applicationStatus = r.applicationStatus?.toLowerCase();
+					const resumeStatus = r.resumeStatus?.toLowerCase(); 
+					const legacyStatus = r.status?.toLowerCase();
+					
+					return applicationStatus === "pending" || 
+						   resumeStatus === "pending" || 
+						   legacyStatus === "pending";
+				}
 			);
 
 			if (!hasPendingResumes) {
@@ -272,11 +288,13 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				return;
 			}
 
-			// If status changed to Completed, Failed, or Invalid, reload the entire list
+			// If status changed to terminal states, reload the entire list
 			// to get full updated data (scores, details, etc.)
 			if (
 				eventType === "status_changed" &&
-				(status === "Completed" || status === "Failed" || status === "Invalid")
+				(status === "Completed" || status === "Failed" || status === "Invalid" ||
+				 status === "Reviewed" || status === "Shortlisted" || status === "Interview" ||
+				 status === "Rejected" || status === "Hired")
 			) {
 				console.log(
 					`🔄 Status changed to ${status} for resume ${resumeId}, reloading resume list...`
@@ -292,6 +310,11 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					Failed: "❌ Resume analysis failed",
 					Invalid: "⚠️ Invalid resume file",
 					Pending: "⏳ Resume analysis in progress",
+					Reviewed: "✅ Resume reviewed",
+					Shortlisted: "📋 Resume shortlisted", 
+					Interview: "🗣️ Interview scheduled",
+					Rejected: "❌ Resume rejected",
+					Hired: "🎉 Candidate hired",
 				};
 				const statusMessage =
 					statusMessages[status] || `Resume status changed to ${status}`;
@@ -328,7 +351,9 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					const updated = [...prevResumes];
 					updated[existingIndex] = {
 						...updated[existingIndex],
+						// Map status to appropriate fields based on event data
 						status: status || updated[existingIndex].status,
+						applicationStatus: status || updated[existingIndex].applicationStatus,
 						fullName: fullName || updated[existingIndex].fullName,
 						totalResumeScore:
 							totalResumeScore != null
@@ -345,13 +370,18 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				}
 			});
 
-			// Show notification for other status changes (not Completed/Failed/Invalid)
+			// Show notification for other status changes (not already handled above)
 			if (eventType === "status_changed") {
 				const statusMessages: Record<string, string> = {
 					Completed: "✅ Resume analysis completed",
-					Failed: "❌ Resume analysis failed",
+					Failed: "❌ Resume analysis failed", 
 					Invalid: "⚠️ Invalid resume file",
 					Pending: "⏳ Resume analysis in progress",
+					Reviewed: "✅ Resume reviewed",
+					Shortlisted: "📋 Resume shortlisted",
+					Interview: "🗣️ Interview scheduled", 
+					Rejected: "❌ Resume rejected",
+					Hired: "🎉 Candidate hired",
 				};
 				const statusMessage =
 					statusMessages[status] || `Resume status changed to ${status}`;

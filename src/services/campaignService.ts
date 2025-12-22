@@ -4,12 +4,20 @@ import { API_ENDPOINTS } from "./config";
 export const campaignService = {
   // Get all campaigns for company
   getCampaigns: async () => {
-    return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_GET);
+    try {
+      return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_GET);
+    } catch (error) {
+      throw error;
+    }
   },
 
   // Get campaign by ID
   getCampaignById: async (campaignId: number) => {
-    return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_GET_BY_ID(campaignId));
+    try {
+      return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_GET_BY_ID(campaignId));
+    } catch (error) {
+      throw error;
+    }
   },
 
   // Create new campaign
@@ -22,10 +30,14 @@ export const campaignService = {
     owner?: string;
     jobIds?: number[];
   }) => {
-    return await post<any, typeof data>(
-      API_ENDPOINTS.CAMPAIGN.COMPANY_POST,
-      data
-    );
+    try {
+      return await post<any, typeof data>(
+        API_ENDPOINTS.CAMPAIGN.COMPANY_POST,
+        data
+      );
+    } catch (error) {
+      throw error;
+    }
   },
 
   // Update campaign status
@@ -33,18 +45,26 @@ export const campaignService = {
     campaignId: number,
     status: string
   ) => {
-    return await patch<any, { status: string }>(
-      API_ENDPOINTS.CAMPAIGN.COMPANY_UPDATE_STATUS(campaignId),
-      { status }
-    );
+    try {
+      return await patch<any, { status: string }>(
+        API_ENDPOINTS.CAMPAIGN.COMPANY_UPDATE_STATUS(campaignId),
+        { status }
+      );
+    } catch (error) {
+      throw error;
+    }
   },
 
   // Update campaign (partial)
   updateCampaign: async (campaignId: number, data: any) => {
-    return await patch<any, typeof data>(
-      API_ENDPOINTS.CAMPAIGN.COMPANY_UPDATE(campaignId),
-      data
-    );
+    try {
+      return await patch<any, typeof data>(
+        API_ENDPOINTS.CAMPAIGN.COMPANY_UPDATE(campaignId),
+        data
+      );
+    } catch (error) {
+      throw error;
+    }
   },
 
   // Patch campaign (full/partial update) with normalized response
@@ -60,15 +80,23 @@ export const campaignService = {
       jobIds?: number[];
     }
   ) => {
-    return await patch<any, typeof data>(
-      API_ENDPOINTS.CAMPAIGN.COMPANY_UPDATE(campaignId),
-      data
-    );
+    try {
+      return await patch<any, typeof data>(
+        API_ENDPOINTS.CAMPAIGN.COMPANY_UPDATE(campaignId),
+        data
+      );
+    } catch (error) {
+      throw error;
+    }
   },
 
   // Delete campaign
   deleteCampaign: async (campaignId: number) => {
-    return await remove<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_DELETE(campaignId));
+    try {
+      return await remove<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_DELETE(campaignId));
+    } catch (error) {
+      throw error;
+    }
   },
 
   // Add jobs to campaign. Accepts either an array of jobIds (number[])
@@ -94,7 +122,6 @@ export const campaignService = {
     try {
       return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_ADD_JOBS(campaignId));
     } catch (error) {
-      console.error("Failed to fetch campaign jobs:", error);
       throw error;
     }
   },
@@ -107,7 +134,6 @@ export const campaignService = {
         { data: { jobIds } }
       );
     } catch (error) {
-      console.error("Failed to remove jobs from campaign:", error);
       throw error;
     }
   },

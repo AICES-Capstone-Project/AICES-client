@@ -239,7 +239,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
           { required: true, message: "Please input description" },
           { max: 3000, message: "Description must not exceed 3000 characters" }
         ]}>
-          <Input.TextArea rows={2} maxLength={300} showCount />
+          <Input.TextArea rows={2} maxLength={3000} showCount />
         </Form.Item>
 
         <Form.Item name="requirements" label="Requirements" rules={[

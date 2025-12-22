@@ -433,7 +433,10 @@ export const API_ENDPOINTS = {
 	COMPANY_DASHBOARD: {
 		TOP_CATE_SPEC: "/dashboard/top-category-spec",
 		SUMMARY: "/dashboard/summary",
+		PIPELINE_FUNNEL: "/dashboard/pipeline/funnel",
 		TOP_RATE_RESUME: "/dashboard/top-rated-candidates",
+		SUBSCRIPTION_USAGE_HISTORY: "/dashboard/subscription/usage-history",
+		STATS_OVERVIEW: "/dashboard/stats/overview",
 	},
 
 	COMPANY_REPORT: {

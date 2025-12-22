@@ -299,7 +299,6 @@ export default function CompanyLayout() {
                     )}
                 </div>
 
-                {/* Main Menu (70% height when expanded, scrollable) */}
                 <div style={{ height: collapsed ? "calc(100vh - 64px - 80px)" : "77vh", overflow: "auto" }}>
                     <Menu
                         mode="inline"
@@ -313,10 +312,9 @@ export default function CompanyLayout() {
                     />
                 </div>
 
-                {/* User Menu (footer) - 20% height when expanded */}
                 <div
                     style={{
-                        height: collapsed ? 80 : "13vh",
+                        height: collapsed ? 100 : "13vh",
                         padding: collapsed ? "4px" : "4px",
                         boxSizing: "border-box",
                         background: "transparent",

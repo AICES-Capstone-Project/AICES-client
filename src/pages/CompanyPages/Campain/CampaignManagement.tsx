@@ -13,8 +13,6 @@ import { useAppSelector } from "../../../hooks/redux";
 import { ROLES } from "../../../services/config";
 
 const CampaignManagement = () => {
-
-
     const [campaigns, setCampaigns] = useState<any[]>([]);
     const [filtered, setFiltered] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -35,7 +33,7 @@ const CampaignManagement = () => {
 
     const navigate = useNavigate();
 
-    const { user } = useAppSelector((s) => s.auth);
+    const { user } = useAppSelector((s: any) => s.auth);
     const isHrManager = (user?.roleName || "").toLowerCase() === (ROLES.Hr_Manager || "").toLowerCase();
 
     // Calculate table height
@@ -59,15 +57,11 @@ const CampaignManagement = () => {
                 let campaignList = response.data.campaigns || response.data;
                 campaignList = Array.isArray(campaignList) ? campaignList : [];
 
-                // Enrich jobs with `filled` counts when possible by fetching resumes per job
-                // This is optional but ensures progress uses accurate totalHired values.
                 const enriched = await Promise.all(
                     campaignList.map(async (camp: any) => {
                         const jobs = Array.isArray(camp.jobs) ? camp.jobs : [];
                         if (!jobs.length) return camp;
 
-                        // For each job, if there's already a numeric filled/hired, keep it.
-                        // Otherwise, fetch resumes for that job and count statuses == 'Hired'.
                         const jobsWithCounts = await Promise.all(
                             jobs.map(async (job: any) => {
                                 const hasNumeric = Number(job?.filled ?? job?.filledCount ?? job?.hired ?? job?.hiredCount ?? 0) > 0;
@@ -106,7 +100,6 @@ const CampaignManagement = () => {
         }
     };
 
-    // Load pending campaigns by filtering all campaigns (server no longer provides pending endpoint)
     const loadPendingCampaigns = async () => {
         setPendingLoading(true);
         try {
@@ -117,7 +110,6 @@ const CampaignManagement = () => {
                 const pending = list.filter((c: any) => String(c?.status ?? '').toLowerCase() === 'pending');
                 setPendingCampaigns(pending);
             } else if (response) {
-                // Try to handle other shapes
                 const list = Array.isArray(response) ? response : [];
                 setPendingCampaigns(list.filter((c: any) => String(c?.status ?? '').toLowerCase() === 'pending'));
             } else {
@@ -133,11 +125,9 @@ const CampaignManagement = () => {
 
     useEffect(() => {
         loadCampaigns();
-        // load pending campaigns on mount for realtime header badge
         loadPendingCampaigns();
     }, []);
 
-    // Realtime: listen to notifications (server may emit campaign-related events)
     useNotificationSignalR({
         onNewNotification: (notif) => {
             try {
@@ -153,9 +143,6 @@ const CampaignManagement = () => {
         },
         enabled: true,
     });
-
-    // (removed loadPendingCount — badge uses pendingCampaigns.length directly)
-
 
     const handleViewPending = async (campaignId: number) => {
         setPendingDetailLoading(true);
@@ -182,14 +169,15 @@ const CampaignManagement = () => {
         setPendingActionLoading(true);
         try {
             const resp = await campaignService.updateCampaignStatus(pendingDetail.campaignId, 'Published');
-            const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
+            const ok = resp?.status === 'Success';
             if (ok) {
                 message.success('Campaign approved');
                 await loadPendingCampaigns();
                 await loadCampaigns();
                 setPendingDetail(null);
             } else {
-                message.error('Approve failed');
+                const errorMsg = resp?.message || 'Approve failed';
+                message.error(errorMsg);
             }
         } catch (err) {
             console.error('Approve error', err);
@@ -204,14 +192,15 @@ const CampaignManagement = () => {
         setPendingActionLoading(true);
         try {
             const resp = await campaignService.updateCampaignStatus(pendingDetail.campaignId, 'Rejected');
-            const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
+            const ok = resp?.status === 'Success';
             if (ok) {
                 message.success('Campaign rejected');
                 await loadPendingCampaigns();
                 await loadCampaigns();
                 setPendingDetail(null);
             } else {
-                message.error('Reject failed');
+                const errorMsg = resp?.message || 'Reject failed';
+                message.error(errorMsg);
             }
         } catch (err) {
             console.error('Reject error', err);
@@ -221,7 +210,6 @@ const CampaignManagement = () => {
         }
     };
 
-    // Search/filter campaigns
     useEffect(() => {
         let result = [...campaigns];
         if (searchText) {
@@ -241,8 +229,6 @@ const CampaignManagement = () => {
         setFiltered(result);
         setCurrentPage(1);
     }, [campaigns, searchText, statusFilter]);
-
-    // columns moved into CampaignTable component
 
     return (
         <Card
@@ -271,7 +257,7 @@ const CampaignManagement = () => {
                                 { label: 'Paused', value: 'paused' },
                                 { label: 'Pending', value: 'pending' },
                                 { label: 'Rejected', value: 'rejected' },
-                                { label: 'Draft', value: 'draft' },
+                                { label: 'Completed', value: 'completed' },
                             ]}
                         />
                     </div>
@@ -346,7 +332,6 @@ const CampaignManagement = () => {
                 onPageChange={(page, size) => {
                     setCurrentPage(page);
                     if (size && size !== pageSize) {
-                        // no-op for now
                     }
                 }}
                 onView={(record) => navigate(`/company/campaign/${record.campaignId}`)}
@@ -354,12 +339,13 @@ const CampaignManagement = () => {
                 onDelete={async (record) => {
                     try {
                         const resp = await campaignService.deleteCampaign(record.campaignId);
-                        const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
+                        const ok = resp?.status === 'Success';
                         if (ok) {
                             message.success('Campaign deleted');
                             await loadCampaigns();
                         } else {
-                            message.error('Failed to delete campaign');
+                            const errorMsg = resp?.message || 'Failed to delete campaign';
+                            message.error(errorMsg);
                         }
                     } catch (err) {
                         console.error('Delete campaign error', err);

@@ -150,7 +150,7 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
             case 'pending':
               return 'blue';
             case 'rejected':
-              return 'red';
+              return 'yellow';
             case 'expired':
               return 'red';
             case 'draft':

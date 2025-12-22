@@ -317,7 +317,7 @@ const HiringTracking: React.FC = () => {
       // If changing to Hired, check job target and current hired count to warn user
       const proceedUpdate = async () => {
         setLoading(true);
-        const resp = await resumeService.updateApplicationStatus(appId, newStatus, actionModalNote || undefined);
+        const resp = await resumeService.updateApplicationStatus(appId, newStatus, actionModalNote.trim() || undefined);
         const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
         const respData = resp && (resp as any).data ? (resp as any).data : resp;
         if (ok) {
@@ -439,7 +439,7 @@ const HiringTracking: React.FC = () => {
       // default: directly update
       setLoading(true);
       try {
-        const resp = await resumeService.updateApplicationStatus(appId, newStatus, actionModalNote || undefined);
+        const resp = await resumeService.updateApplicationStatus(appId, newStatus, actionModalNote.trim() || undefined);
         const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
         const respData = resp && (resp as any).data ? (resp as any).data : resp;
         if (ok) {
@@ -581,7 +581,7 @@ const HiringTracking: React.FC = () => {
             </div>
             <div>
               <Button
-                className="company-btn"
+                className="company-btn--filled"
                 type="primary"
                 danger={actionModalPayload?.newStatus === 'Rejected'}
                 loading={loading}
@@ -593,14 +593,16 @@ const HiringTracking: React.FC = () => {
           </div>
         }
       >
-        <p>You're about to change status to <strong>{actionModalPayload?.newStatus}</strong>. This action cannot be undone.</p>
-        {actionModalPayload?.newStatus === 'Hired' && (
-          <div style={{ marginBottom: 12, display: 'flex', gap: 10, alignItems: 'center' }}>
-            <Tag icon={<InfoCircleOutlined />} color="blue">Job target: {jobTarget ?? 'Unknown'}</Tag>
-            <Tag icon={<CheckCircleOutlined />} color="green">Hired: {jobHiredCount ?? 0}</Tag>
-            <Tag icon={<ExclamationCircleOutlined />} color={remaining == null ? 'default' : remaining > 0 ? 'geekblue' : remaining === 0 ? 'green' : 'red'}>Remaining: {remaining != null ? remaining : 'N/A'}</Tag>
-          </div>
-        )}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <p style={{ margin: 0, textAlign: 'center' }}>You're about to change status to <strong>{actionModalPayload?.newStatus}</strong>. This action cannot be undone.</p>
+          {actionModalPayload?.newStatus === 'Hired' && (
+            <div style={{ margin: 5, display: 'flex', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+              <Tag icon={<InfoCircleOutlined />} color="blue">Job target: {jobTarget ?? 'Unknown'}</Tag>
+              <Tag icon={<CheckCircleOutlined />} color="green">Hired: {jobHiredCount ?? 0}</Tag>
+              <Tag icon={<ExclamationCircleOutlined />} color={remaining == null ? 'default' : remaining > 0 ? 'geekblue' : remaining === 0 ? 'green' : 'red'}>Remaining: {remaining != null ? remaining : 'N/A'}</Tag>
+            </div>
+          )}
+        </div>
         <Input.TextArea rows={4} placeholder="Add a note (reason, comment)..." value={actionModalNote} onChange={(e) => setActionModalNote(e.target.value)} />
       </Modal>
     </Card>

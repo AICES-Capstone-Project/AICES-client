@@ -110,7 +110,7 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
         resp = await campaignService.createCampaign(payload);
       }
       console.log('campaign save resp', resp);
-      const ok = resp?.status === 'Success' || resp?.statusCode === 200 || resp?.message;
+      const ok = resp?.status === 'Success';
       if (ok) {
         message.success(campaignId ? 'Campaign updated' : 'Campaign created');
         form.resetFields();
@@ -118,7 +118,9 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
         else onCreated && onCreated();
         onClose();
       } else {
-        message.error(campaignId ? 'Failed to update campaign' : 'Failed to create campaign');
+        // Display specific error message from API if available
+        const errorMsg = resp?.message || (campaignId ? 'Failed to update campaign' : 'Failed to create campaign');
+        message.error(errorMsg);
       }
     } catch (error) {
       console.error('Create campaign error', error);

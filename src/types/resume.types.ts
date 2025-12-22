@@ -1,13 +1,46 @@
+// Resume Status Enums (based on new API response structure)
+export type ResumeStatus = 
+  | "Pending" 
+  | "Completed" 
+  | "Failed" 
+  | "InvalidResumeData" 
+  | "CorruptedFile" 
+  | "Timeout" 
+  | "Canceled"
+  | string;
+
+export type ApplicationStatus = 
+  | "Pending" 
+  | "Failed" 
+  | "Reviewed" 
+  | "Shortlisted" 
+  | "Interview" 
+  | "Rejected" 
+  | "Hired"
+  | string;
+
+export type ApplicationErrorType = 
+  | "InvalidJobData" 
+  | "JobTitleNotMatched" 
+  | "TechnicalError" 
+  | null;
+
 export interface Resume {
   resumeId: number;
   queueJobId?: string;
   fileUrl?: string;
-  status: "Completed" | "Pending" | "Failed" | string;
+  // New status structure
+  resumeStatus?: ResumeStatus;
+  applicationStatus?: ApplicationStatus;
+  applicationErrorType?: ApplicationErrorType;
+  // Backward compatibility for old API responses
+  status?: string; // Will be mapped to resumeStatus/applicationStatus
   createdAt?: string;
   candidateId?: number;
   fullName?: string;
   email?: string;
   phoneNumber?: string;
+  errorMessage?: string;
   aiScores?: AiScore[];
   // allow extra fields from backend
   [key: string]: any;
@@ -34,13 +67,18 @@ export type ResumeLocal = Partial<Resume> & {
   // required locally
   resumeId: number;
   fullName?: string;
+  // New status fields from API
+  resumeStatus?: ResumeStatus;
+  applicationStatus?: ApplicationStatus;
+  applicationErrorType?: ApplicationErrorType;
+  // Backward compatibility
   status?: string;
   applicationId?: number;
-  applicationStatus?: string;
   campaignId?: number;
   matchSkills?: string;
   missingSkills?: string;
   score?: number | null;
+  totalScore?: number | null;
   adjustedScore?: number | null;
   totalResumeScore?: number | null;
   aiExplanation?: string | null;

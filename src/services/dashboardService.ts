@@ -2,15 +2,11 @@ import api from "./api";
 import { get } from "./api";
 import { API_ENDPOINTS } from "./config";
 
-// (removed unused ApiResponse import)
-
-// ================== TYPES / INTERFACES ==================
-
 export interface DashboardSummary {
-  activeJobs: number;       // Thay cho totalJobs
-  totalMembers: number;  // Thay cho totalResumes
-  aiProcessed: number;      // Thay cho totalViews
-  creditsRemaining: number; // Trường mới
+  activeJobs: number;      
+  totalMembers: number; 
+  aiProcessed: number;     
+  creditsRemaining: number; 
 }
 
 export interface TopCategory {
@@ -18,30 +14,58 @@ export interface TopCategory {
   categoryName: string;
   specializationId: number;
   specializationName: string;
-  resumeCount: number; // API trả về resumeCount
+  resumeCount: number; 
 }
 
 export interface TopCandidate {
-  name: string;       // Thay vì fullName
-  jobTitle: string;   // Thay vì email
-  aiScore: number;    // Thay vì totalScore
+  name: string;      
+  jobTitle: string;  
+  aiScore: number;    
   status: string;
   avatar?: string;
 }
 
-// ================== SERVICE ==================
+export interface SubscriptionUsageHistory {
+  range: string;
+  unit: string;
+  labels: string[];
+  resumeUploads: number[];
+  aiComparisons: number[];
+  resumeLimit: number;
+  aiComparisonLimit: number;
+}
 
-// Helper delay for mock fallback
 const delay = (ms: number) => new Promise((res) => setTimeout(res, ms));
 
 const dashboardService = {
-  // Try to fetch real summary from API, otherwise return mock
   async getSummary() {
     try {
       const resp = await get(API_ENDPOINTS.COMPANY_DASHBOARD.SUMMARY);
-      // support both shapes: { data: {...} } or direct object
-      return (resp && (resp as any).data) ? (resp as any).data : resp;
+      console.log('Summary API response:', resp);
+      
+      // Handle API response format: { status: "Success", message: "...", data: {...} }
+      if (resp && resp.status === 'Success' && resp.data) {
+        const apiData: any = resp.data;
+        // Map API response to expected Dashboard format
+        return {
+          campaigns: 0, // This field might need separate API call
+          jobs: apiData.activeJobs || 0,
+          cvSubmitted: 0, // This field might need separate API call  
+          cvHired: 0, // This field might need separate API call
+          totalCandidates: 0, // This field might need separate API call
+          interviewsToday: 0, // This field might need separate API call
+          // Add the actual API data for reference
+          activeJobs: apiData.activeJobs || 0,
+          totalMembers: apiData.totalMembers || 0,
+          aiProcessed: apiData.aiProcessed || 0,
+          creditsRemaining: apiData.creditsRemaining || 0,
+        };
+      } else if (resp && resp.data) {
+        return resp.data;
+      }
+      return resp;
     } catch (err) {
+      console.error('getSummary error:', err);
       await delay(300);
       return {
         campaigns: 18,
@@ -49,14 +73,13 @@ const dashboardService = {
         cvSubmitted: 320,
         cvHired: 48,
         totalCandidates: 560,
+        interviewsToday: 0,
       };
     }
   },
 
   async getKpiJob() {
-    // No dedicated endpoint in config — return mocked KPI for now
     try {
-      // if API existed, call it here
       await delay(200);
       return { successOnTime: 32, failed: 10 };
     } catch (err) {
@@ -73,7 +96,6 @@ const dashboardService = {
     }
   },
 
-  // Top categories - attempt API then fallback
   async getTopCategorySpec(top: number = 10) {
     try {
       const res = await api.get(API_ENDPOINTS.COMPANY_DASHBOARD.TOP_CATE_SPEC, { params: { top } });
@@ -91,6 +113,69 @@ const dashboardService = {
     } catch (err) {
       await delay(200);
       return [];
+    }
+  },
+
+  async getPipelineFunnel(params?: { jobId?: number; campaignId?: number; startDate?: string; endDate?: string }) {
+    try {
+      const res = await api.get(API_ENDPOINTS.COMPANY_DASHBOARD.PIPELINE_FUNNEL, { params: params || {} });
+      return (res && (res as any).data) ? (res as any).data : res;
+    } catch (err) {
+      await delay(200);
+      return { stages: [] };
+    }
+  },
+
+  async getSubscriptionUsageHistory(range: string = "month") {
+    try {
+      const res = await api.get(API_ENDPOINTS.COMPANY_DASHBOARD.SUBSCRIPTION_USAGE_HISTORY, { 
+        params: { range } 
+      });
+      console.log('Raw API response:', res);
+      // Extract data from ApiResponse structure: { status, message, data }
+      if (res && res.data && res.data.status === 'Success') {
+        return res.data.data; // Return the nested data object
+      } else if (res && res.data) {
+        return res.data; // Fallback if structure is different
+      }
+      return res;
+    } catch (err) {
+      console.error('Usage history API error:', err);
+      await delay(200);
+      return {
+        range: "month",
+        unit: "day",
+        labels: [],
+        resumeUploads: [],
+        aiComparisons: [],
+        resumeLimit: 100,
+        aiComparisonLimit: 100
+      };
+    }
+  },
+
+  async getStatsOverview() {
+    try {
+      const res = await api.get(API_ENDPOINTS.COMPANY_DASHBOARD.STATS_OVERVIEW);
+      console.log('Stats overview API response:', res);
+      // Extract data from ApiResponse structure: { status, message, data }
+      if (res && res.data && res.data.status === 'Success') {
+        return res.data.data; // Return the nested data object
+      } else if (res && res.data) {
+        return res.data; // Fallback if structure is different
+      }
+      return res;
+    } catch (err) {
+      console.error('Stats overview API error:', err);
+      await delay(200);
+      return {
+        totalJobs: 0,
+        top5JobsInCampaigns: [],
+        top5CampaignsWithMostJobs: [],
+        top5CandidatesWithMostJobs: [],
+        top5HighestScoreCVs: [],
+        onTimeCampaignsThisMonth: 0
+      };
     }
   },
 };

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Drawer, Spin, Table, Tag, Button, Divider, Typography, List } from 'antd';
-import { EyeOutlined } from '@ant-design/icons';
+import { EyeOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import candidateService from '../../../../services/candidateService';
 
 type Props = {
@@ -40,7 +40,7 @@ export default function CandidateApplicationsDrawer({ open, onClose, resumeId, r
   return (
     <Drawer
       title={`Applications for resume ${resumeName ?? resumeId ?? ''}`}
-      extra={detailOpen ? <Button onClick={() => setDetailOpen(false)}>Back</Button> : undefined}
+      extra={detailOpen ? <Button type="text" icon={<ArrowLeftOutlined />} title="Back" onClick={() => setDetailOpen(false)} /> : undefined}
       open={open}
       onClose={onClose}
       width={1000}

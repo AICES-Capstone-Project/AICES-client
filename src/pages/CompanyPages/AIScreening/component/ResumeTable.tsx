@@ -1,12 +1,12 @@
 import React from "react";
 import { Table, Tag, Button, Space, Tooltip, Modal, Input, message } from "antd";
-// import { useNavigate } from "react-router-dom";
 import { Flame, Pencil } from "lucide-react";
 import { EyeOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { ColumnsType } from "antd/es/table";
 import type { ResumeLocal } from "../../../../types/resume.types";
 import resumeService from "../../../../services/resumeService";
 import compareResumeService from "../../../../services/compareResumeService";
+import { getStatusColor, getStatusLabel, isSelectableForComparison, isQualifiedCandidate } from "../../../../utils/statusHelpers";
 
 type Resume = ResumeLocal;
 
@@ -44,25 +44,19 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 		pageSize,
 		onViewDetail,
 		onDelete,
-		// scoreCounts,
 		jobId,
 		campaignId,
 		targetQuantity,
 	} = props;
-	// const navigate = useNavigate();
 
 	const [confirmModalOpen, setConfirmModalOpen] = React.useState(false);
 	const [pendingDelete, setPendingDelete] = React.useState<{ resumeId: number; name: string } | null>(null);
 	const [confirmInput, setConfirmInput] = React.useState("");
 	const [confirmLoading, setConfirmLoading] = React.useState(false);
-
-	// Inline edit state for adjusted score
 	const [editingAppId, setEditingAppId] = React.useState<number | null>(null);
 	const [editValue, setEditValue] = React.useState<string>("");
 	const [editingOriginalValue, setEditingOriginalValue] = React.useState<string>("");
 	const [savingAppId, setSavingAppId] = React.useState<number | null>(null);
-
-	// confirmation for adjusted score updates
 	const [adjConfirmOpen, setAdjConfirmOpen] = React.useState(false);
 	const [adjPendingAppId, setAdjPendingAppId] = React.useState<number | null>(null);
 	const [adjPendingValue, setAdjPendingValue] = React.useState<number | null>(null);
@@ -70,24 +64,16 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 	const [adjConfirmLoading, setAdjConfirmLoading] = React.useState(false);
 	const [adjustedOverrides, setAdjustedOverrides] = React.useState<Map<number, number | null>>(() => new Map());
 	const [hoveredAppId, setHoveredAppId] = React.useState<number | null>(null);
-	// compare state
 	const [compareSelectedKeys, setCompareSelectedKeys] = React.useState<React.Key[]>([]);
 	const [compareLoading, setCompareLoading] = React.useState(false);
 	const [compareMode, setCompareMode] = React.useState(false);
 
-	// Only resumes with normalized status 'completed' can be selected for compare
 	const isSelectable = React.useCallback((record: Resume) => {
-		const key = String(record.status || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
-		return key === "completed";
+		return isSelectableForComparison(record);
 	}, []);
 
-	const isQualifiedCandidate = React.useCallback((index: number, record: Resume) => {
-		// Must have score >= 50
-		if (record.totalScore == null || record.totalScore < 50) {
-			return false;
-		}
-		// Check if this candidate is within the top qualified range
-		return targetQuantity ? index < targetQuantity : false;
+	const isQualified = React.useCallback((index: number, record: Resume) => {
+		return isQualifiedCandidate(record, index, targetQuantity);
 	}, [targetQuantity]);
 
 	const columns: ColumnsType<Resume> = [
@@ -104,7 +90,7 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 			width: "15%",
 			align: "center" as const,
 			render: (text: string, record: Resume, index: number) => {
-				const isTopCandidate = isQualifiedCandidate(index, record);
+				const isTopCandidate = isQualified(index, record);
 				return (
 					<Space>
 						{isTopCandidate && (
@@ -125,69 +111,16 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 			dataIndex: "status",
 			align: "center" as const,
 			width: "18%",
-			render: (status: string) => {
-				const STATUS_COLORS: Record<string, string> = {
-					// pipeline/application statuses
-					pending: "blue",
-					reviewed: "green",
-					shortlisted: "cyan",
-					interview: "gold",
-					rejected: "red",
-					hired: "purple",
-					failed: "red",
-					// screening/error statuses
-					completed: "green",
-					timeout: "orange",
-					invalidjobdata: "orange",
-					invalidresumedata: "orange",
-					jobtitlenotmatched: "orange",
-					canceled: "default",
-					corruptedfile: "red",
-					duplicateresume: "purple",
-					servererror: "red",
-				};
-				const key = String(status || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
-				const color = STATUS_COLORS[key] ?? "default";
-
-				const STATUS_LABELS: Record<string, string> = {
-					pending: "Pending",
-					completed: "Completed",
-					failed: "Failed",
-					timeout: "Timeout",
-					invalidjobdata: "Invalid Job Data",
-					invalidresumedata: "Invalid Resume Data",
-					jobtitlenotmatched: "Job Title Not Matched",
-					canceled: "Canceled",
-					corruptedfile: "Corrupted File",
-					duplicateresume: "Duplicate Resume",
-					servererror: "Server Error",
-					reviewed: "Reviewed",
-					shortlisted: "Shortlisted",
-					interview: "Interview",
-					rejected: "Rejected",
-					hired: "Hired",
-				};
-
-				const humanize = (s: string) => {
-					if (!s) return "Processing";
-					if (STATUS_LABELS[key]) return STATUS_LABELS[key];
-					const spaced = String(s)
-						.replace(/[_-]+/g, " ")
-						.replace(/([a-z])([A-Z])/g, "$1 $2")
-						.replace(/\s+/g, " ")
-						.trim();
-					return spaced
-						.split(" ")
-						.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-						.join(" ");
-				};
+			render: (_: string, record: Resume) => {
+				const color = getStatusColor(record);
+				const label = getStatusLabel(record);
 
 				return (
 					<Tag
 						color={color}
 						style={{ display: "inline-flex", justifyContent: "center", alignItems: "center", padding: "0 8px", whiteSpace: "nowrap" }}
 					>
-						{humanize(status)}
+						{label}
 					</Tag>
 				);
 			},
@@ -215,8 +148,10 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 			align: "center" as const,
 			render: (adjustedScore: number | null, record: Resume) => {
 				const applicationId = Number(record.applicationId ?? record.resumeId);
-				const key = String(record.status || "").trim().toLowerCase().replace(/[\s_-]+/g, "");
-				const editable = key === "reviewed";
+				const applicationStatus = record.applicationStatus?.toLowerCase();
+				const legacyStatus = record.status?.toLowerCase();
+				const editable = applicationStatus === "reviewed" || 
+								(legacyStatus === "reviewed" && !applicationStatus);
 
 				const display = adjustedOverrides.has(applicationId)
 					? adjustedOverrides.get(applicationId)
@@ -247,12 +182,10 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 						return;
 					}
 
-					// If value didn't change, just cancel edit and return
 					if (v === editingOriginalValue) {
 						cancelEdit();
 						return;
 					}
-					// Open confirmation modal and wait for user to confirm before calling API
 					setAdjPendingAppId(applicationId);
 					setAdjPendingValue(Math.round(n));
 					setAdjPendingName(record.fullName ?? null);
@@ -278,7 +211,6 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 						/>
 					);
 				}
-				// wrapper provides hover background & cursor changes
 				const cellStyle: React.CSSProperties = {
 					display: "inline-flex",
 					alignItems: "center",
@@ -302,7 +234,6 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 						)}
 					</>
 				) : (
-					// empty state: encourage adding score
 					<>
 						<span style={{ color: editable ? "#6b7280" : "#9ca3af", marginRight: 6 }}>{editable ? "Add score" : "—"}</span>
 						{!hidePencil && (
@@ -372,7 +303,6 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 		},
 	];
 
-	// Confirmation modal for adjusted score
 	const confirmAdjusted = async () => {
 		if (adjPendingAppId == null) return;
 		setAdjConfirmLoading(true);
@@ -385,7 +315,6 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 				return next;
 			});
 			message.success("Adjusted score updated");
-			// clear editing state if it was the same app
 			if (editingAppId === adjPendingAppId) {
 				setEditingAppId(null);
 				setEditValue("");
@@ -404,10 +333,8 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 	};
 
 	const openCompare = React.useCallback(() => {
-		// Toggle compare mode; clear any existing selections when toggling
 		setCompareSelectedKeys([]);
 		setCompareMode((prev) => !prev);
-		// keep modal closed; we'll use table selection UI instead
 	}, []);
 
 	React.useImperativeHandle(ref, () => ({
@@ -427,7 +354,6 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 		const applicationIds = compareSelectedKeys.map((k) => Number(k));
 		console.debug("Compare triggered", { jobId, campaignId, selectedKeys: compareSelectedKeys });
 
-		// Log selected records from current dataSource for debugging
 		try {
 			const selectedRecords = compareSelectedKeys.map((k) => {
 				const id = Number(k);
@@ -436,11 +362,9 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 			console.debug("Selected records (from table dataSource):", selectedRecords);
 			const missing = selectedRecords.map((r, i) => (r ? null : compareSelectedKeys[i])).filter(Boolean);
 			if (missing.length) console.warn("Some selected applicationIds not found in current table data:", missing);
-			// Check for possible job/campaign mismatch if records contain those fields
 			const mismatches: any[] = [];
 			selectedRecords.forEach((rec, idx) => {
 				if (!rec) return;
-				// check campaignId and jobId if present on the record
 				if (typeof (rec as any).campaignId !== 'undefined' && campaignId != null && Number((rec as any).campaignId) !== Number(campaignId)) {
 					mismatches.push({ applicationId: compareSelectedKeys[idx], field: 'campaignId', record: (rec as any).campaignId });
 				}
@@ -461,7 +385,6 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 
 			const resp = await compareResumeService.compare(body);
 			console.debug("compare response:", resp);
-			// Normalize response handling: prefer explicit message or data
 			if (resp) {
 				const statusStr = String(resp.status || "");
 				if (statusStr.toLowerCase() === "success" || resp.data) {
@@ -469,11 +392,9 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 					setCompareMode(false);
 					setCompareSelectedKeys([]);
 				} else {
-					// Try to show useful error detail
 					let errMsg = resp.message || "Compare request failed";
 					try {
 						if (!errMsg && resp.data) errMsg = JSON.stringify(resp.data);
-						// If API returned structured errors
 						if (resp.data && (resp.data as any).errors) {
 							errMsg = (resp.data as any).errors.join ? (resp.data as any).errors.join("; ") : JSON.stringify((resp.data as any).errors);
 						}
@@ -514,7 +435,6 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 							selectedRowKeys: compareSelectedKeys,
 							columnWidth: '2%',
 							onChange: (keys) => {
-								// Filter out any keys that are for non-selectable rows (e.g., not 'completed')
 								const attempted = (keys as React.Key[]) || [];
 								const allowed = attempted.filter((k) => {
 									const id = Number(k);
@@ -527,7 +447,6 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 								}
 								setCompareSelectedKeys(allowed);
 							},
-							// Hide/disable checkbox for rows that are not selectable
 							getCheckboxProps: (record: Resume) => {
 								const selectable = isSelectable(record);
 								return {
@@ -554,13 +473,10 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 					showSizeChanger: false,
 					showTotal: (total) => `Total ${total} resumes`,
 					onChange: (page: number, size?: number) => {
-						// notify parent to update current page / page size
 						props.onPageChange(page, size || pageSize);
 					},
 				}}
 			/>
-
-			{/* Compare modal removed: selection now done inline on main table via compareMode */}
 
 			<Modal
 				title={<div style={{ textAlign: 'center', width: '100%' }}>Confirm delete</div>}
@@ -614,7 +530,6 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 				</div>
 			</Modal>
 
-			{/* Confirm adjusted score modal */}
 			<Modal
 				title={<div style={{ textAlign: 'center', width: '100%' }}>Confirm adjusted score change</div>}
 				open={adjConfirmOpen}

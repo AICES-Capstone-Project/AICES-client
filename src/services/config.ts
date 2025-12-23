@@ -350,6 +350,8 @@ export const API_ENDPOINTS = {
     //------------------------------- COMPANY -----------------------------------------
     // Upload resume to a job
     COMPANY_UPLOAD: "/resumes/upload",
+    // Upload multiple resumes to a job
+    COMPANY_UPLOAD_BATCH: "/resumes/upload-batch",
 
     // Get resumes for a job
     COMPANY_GET: (campaignId: number, jobId: number) =>

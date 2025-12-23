@@ -349,7 +349,7 @@ export default function CompanyLayout() {
                             />
 
                             {!collapsed && (
-                                <div style={{ minWidth: 0 }}>
+                                <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
                                     <Text strong ellipsis>
                                         {user?.fullName || user?.email}
                                     </Text>

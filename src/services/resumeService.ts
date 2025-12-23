@@ -36,6 +36,20 @@ export const resumeService = {
     return await postForm<null>(API_ENDPOINTS.RESUME.COMPANY_UPLOAD, formData);
   },
 
+  uploadBatch: async (campaignId: number, jobId: number, files: File[]): Promise<ApiResponse<null>> => {
+    const formData = new FormData();
+    
+    formData.append("CampaignId", String(campaignId));
+    formData.append("JobId", String(jobId));
+    
+    // Append all files to FormData
+    files.forEach(file => {
+      formData.append("Files", file);
+    });
+
+    return await postForm<null>(API_ENDPOINTS.RESUME.COMPANY_UPLOAD_BATCH, formData);
+  },
+
   getByJob: async (
     idOrCampaignId: number,
     maybeJobIdOrParams?: number | { page?: number; pageSize?: number },
@@ -56,7 +70,7 @@ export const resumeService = {
       params = maybeJobIdOrParams as { page?: number; pageSize?: number } | undefined;
     }
 
-    const q = params ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}` : "";
+    const q = params ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 10}` : "";
 
     if (campaignId != null) {
       return await get<Paginated<Resume>>(`${API_ENDPOINTS.RESUME.COMPANY_GET(campaignId, jobId)}${q}`);
@@ -80,7 +94,7 @@ export const resumeService = {
       params = campaignIdOrParams as { page?: number; pageSize?: number } | undefined;
     }
 
-    const q = params ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}` : "";
+    const q = params ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 10}` : "";
 
     if (campaignId != null) {
       return await get<Paginated<Resume>>(`${API_ENDPOINTS.RESUME.COMPANY_GET(campaignId, actualJobId)}${q}`);
@@ -146,7 +160,7 @@ export const resumeService = {
       params = maybeJobIdOrParams as { page?: number; pageSize?: number } | undefined;
     }
 
-    const q = params ? `?page=${params.page || 1}&pageSize=${params.pageSize || 10}` : "";
+    const q = params ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 10}` : "";
 
     if (campaignId != null) {
       return await get<Paginated<Resume>>(`${API_ENDPOINTS.RESUME.COMPANY_GET(campaignId, jobId)}${q}`);

@@ -19,6 +19,7 @@ interface ResumeTableProps {
 	onSelectedRowKeysChange?: (keys: React.Key[]) => void;
 	currentPage: number;
 	pageSize: number;
+	totalCount: number;
 	onPageChange: (page: number, size: number) => void;
 	onViewDetail: (resumeId: number) => void;
 	onDelete: (resumeId: number) => void;
@@ -42,6 +43,8 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 		onSelectedRowKeysChange = () => {},
 		currentPage,
 		pageSize,
+		totalCount,
+		onPageChange,
 		onViewDetail,
 		onDelete,
 		jobId,
@@ -469,12 +472,18 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 				pagination={{
 					current: currentPage,
 					pageSize: pageSize,
-					total: dataSource.length,
-					showSizeChanger: false,
-					showTotal: (total) => `Total ${total} resumes`,
-					onChange: (page: number, size?: number) => {
-						props.onPageChange(page, size || pageSize);
+					total: totalCount,
+					showSizeChanger: true,
+					showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} resumes`,
+					onChange: (page: number, size: number) => {
+						console.log('Pagination onChange:', { page, size });
+						onPageChange(page, size);
 					},
+					onShowSizeChange: (current: number, size: number) => {
+						console.log('Pagination onShowSizeChange:', { current, size });
+						onPageChange(1, size); // Reset to page 1 when changing page size
+					},
+					pageSizeOptions: ['10', '20', '50', '100'],
 				}}
 			/>
 

@@ -5,7 +5,7 @@ import React, {
 	useCallback,
 	useRef,
 } from "react";
-import { Card, Tag, Button, message, Input, Tooltip } from "antd";
+import { Card, Tag, Button, message, Input, Tooltip, Dropdown } from "antd";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
 	ArrowLeftOutlined,
@@ -22,6 +22,7 @@ import ResumeTable from "./component/ResumeTable";
 import ResumeDetailDrawer from "./component/ResumeDetailDrawer";
 import type { ResumeLocal } from "../../../types/resume.types";
 import UploadDrawer from "./component/UploadDrawer";
+import UploadBatchDrawer from "./component/UploadBatchDrawer";
 
 type UIResume = ResumeLocal;
 
@@ -45,61 +46,25 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 	const [selectedResume, setSelectedResume] = useState<UIResume | null>(null);
 	const [loadingDetail, setLoadingDetail] = useState(false);
 	const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
+	const [uploadBatchDrawerOpen, setUploadBatchDrawerOpen] = useState(false);
 	const [uploading, setUploading] = useState(false);
 	const tableRef = useRef<{ openCompare: () => void } | null>(null);
 	// removed batch-delete state
 	// removed selectedRowKeys/editMode/multi-delete related state
 	const [currentPage, setCurrentPage] = useState(1);
 	const [pageSize, setPageSize] = useState(10);
+	const [totalCount, setTotalCount] = useState(0);
 	const [jobTitle, setJobTitle] = useState<string>("");
 	const [targetQuantity, setTargetQuantity] = useState<number | undefined>(undefined);
 	const [searchText, setSearchText] = useState<string>("");
-	const [scoreFilter, setScoreFilter] = useState<{
-		min: number | null;
-		max: number | null;
-	}>({ min: null, max: null });
+	const [scoreFilter, setScoreFilter] = useState<{ min: number | null; max: number | null }>({
+		min: null,
+		max: null,
+	});
 	const resumesRef = useRef<UIResume[]>([]);
 
-	// Ensure displayed order is always by score desc (nulls last)
-	const sortedResumes = useMemo(() => {
-		let filtered = resumes.slice();
-
-		// Apply search filter
-		if (searchText.trim()) {
-			const searchLower = searchText.toLowerCase().trim();
-			filtered = filtered.filter((r) => {
-				const fullName = (r.fullName || "").toLowerCase();
-				const email = (r.email || "").toLowerCase();
-				const phone = (r.phoneNumber || "").toLowerCase();
-				return (
-					fullName.includes(searchLower) ||
-					email.includes(searchLower) ||
-					phone.includes(searchLower)
-				);
-			});
-		}
-
-		// Apply score filter
-		if (scoreFilter.min !== null || scoreFilter.max !== null) {
-			filtered = filtered.filter((r) => {
-				const score = r.totalResumeScore;
-				if (score == null) return false;
-				if (scoreFilter.min !== null && score < scoreFilter.min) return false;
-				if (scoreFilter.max !== null && score > scoreFilter.max) return false;
-				return true;
-			});
-		}
-
-		return filtered.sort((a, b) => {
-			const aS = a.totalResumeScore;
-			const bS = b.totalResumeScore;
-			if (aS == null && bS == null) return a.resumeId - b.resumeId;
-			if (aS == null) return 1;
-			if (bS == null) return -1;
-			if (bS !== aS) return bS - aS;
-			return a.resumeId - b.resumeId;
-		});
-	}, [resumes, scoreFilter, searchText]);
+	// Server handles filtering and sorting, so just use resumes directly
+	const sortedResumes = useMemo(() => resumes, [resumes]);
 
 	const loadJobInfo = useCallback(async () => {
 		if (!jobId) return;
@@ -125,20 +90,59 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 
 	const loadResumes = useCallback(async () => {
 		if (!jobId) return;
+		console.log('🔄 Loading resumes with params:', {
+			jobId, campaignId, currentPage, pageSize, searchText,
+			minScore: scoreFilter.min, maxScore: scoreFilter.max
+		});
 		setLoading(true);
 		try {
+			// Prepare API parameters
+			const params: any = {
+				page: currentPage,
+				pageSize: pageSize,
+			};
+
+			// Add search filter
+			if (searchText.trim()) {
+				params.search = searchText.trim();
+			}
+
+			// Add score filters
+			if (scoreFilter.min !== null) {
+				params.minScore = scoreFilter.min;
+			}
+			if (scoreFilter.max !== null) {
+				params.maxScore = scoreFilter.max;
+			}
+
+			console.log('📤 API request params:', params);
+
 			const resp = campaignId
-				? await resumeService.getByJob(Number(campaignId), Number(jobId))
-				: await resumeService.getByJob(Number(jobId));
+				? await resumeService.getByJob(Number(campaignId), Number(jobId), params)
+				: await resumeService.getByJob(Number(jobId), params);
 
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
 				const raw = resp.data as any;
 				let resumeList: any[] = [];
-				if (Array.isArray(raw)) resumeList = raw;
-				else if (Array.isArray(raw.data)) resumeList = raw.data;
-				else if (Array.isArray(raw.resumes)) resumeList = raw.resumes;
-				else if (Array.isArray(raw.items)) resumeList = raw.items;
-				else resumeList = [];
+				let total = 0;
+
+				// Handle API response structure: data.resumes and data.totalCount
+				if (raw.resumes && Array.isArray(raw.resumes)) {
+					resumeList = raw.resumes;
+					total = raw.totalCount || 0;
+				} else if (raw.items && Array.isArray(raw.items)) {
+					resumeList = raw.items;
+					total = raw.totalCount || raw.total || resumeList.length;
+				} else if (Array.isArray(raw.data)) {
+					resumeList = raw.data;
+					total = raw.totalCount || raw.total || resumeList.length;
+				} else if (Array.isArray(raw)) {
+					resumeList = raw;
+					total = resumeList.length;
+				} else {
+					resumeList = [];
+					total = 0;
+				}
 
 				const mapped: UIResume[] = resumeList.map((r: any) => ({
 					resumeId: (r.resumeId ?? r.applicationId) as number,
@@ -146,7 +150,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					fullName: r.fullName || r.candidateName || "Unknown",
 					// New API response structure
 					resumeStatus: r.resumeStatus || undefined,
-					applicationStatus: r.applicationStatus || undefined, 
+					applicationStatus: r.applicationStatus || undefined,
 					applicationErrorType: r.applicationErrorType || undefined,
 					// Backward compatibility for legacy status field
 					status: r.status || r.applicationStatus || r.resumeStatus || "Processing",
@@ -164,27 +168,10 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					note: r.note,
 				}));
 
-				// If caller requested only scored resumes via query param, filter here
-				const qp = new URLSearchParams(location.search);
-				const onlyScored = qp.get("onlyScored") === "1" || qp.get("onlyScored") === "true";
-
-				let filteredMapped = mapped;
-				if (onlyScored) {
-					filteredMapped = mapped.filter((m) => m.totalResumeScore != null && m.totalResumeScore > 0);
-				}
-
-				const sortedList = filteredMapped.slice().sort((a, b) => {
-					const aS = a.totalResumeScore;
-					const bS = b.totalResumeScore;
-					if (aS == null && bS == null) return a.resumeId - b.resumeId;
-					if (aS == null) return 1;
-					if (bS == null) return -1;
-					if (bS !== aS) return bS - aS;
-					return a.resumeId - b.resumeId;
-				});
-
-				setResumes(sortedList);
-				resumesRef.current = sortedList; // Update ref
+				// Server handles sorting and filtering, so use data as-is
+				setResumes(mapped);
+				setTotalCount(total);
+				resumesRef.current = mapped; // Update ref
 			} else {
 				message.error(resp?.message || "Unable to load resumes");
 			}
@@ -194,14 +181,32 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 		} finally {
 			setLoading(false);
 		}
-	}, [jobId, campaignId]);
+	}, [jobId, campaignId, currentPage, pageSize, searchText, scoreFilter]);
+
+	// Reload data when filters change (with debounce for search)
+	useEffect(() => {
+		const timeoutId = setTimeout(() => {
+			if (jobId) {
+				setCurrentPage(1); // Reset to page 1 when filters change
+			}
+		}, searchText ? 500 : 0); // 500ms debounce for search, immediate for other filters
+
+		return () => clearTimeout(timeoutId);
+	}, [searchText, scoreFilter, jobId]);
+
+	// Reload data when jobId, page, or pageSize changes
+	useEffect(() => {
+		if (jobId) {
+			loadResumes();
+		}
+	}, [loadResumes, jobId]);
 
 	useEffect(() => {
 		if (jobId) {
 			loadJobInfo();
-			loadResumes();
+			// Initial load will be handled by the filter effect above
 		}
-	}, [jobId, loadJobInfo, loadResumes]);
+	}, [jobId, loadJobInfo]);
 
 	// Update ref whenever resumes change
 	useEffect(() => {
@@ -223,12 +228,12 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				(r) => {
 					// Check both legacy status and new status fields
 					const applicationStatus = r.applicationStatus?.toLowerCase();
-					const resumeStatus = r.resumeStatus?.toLowerCase(); 
+					const resumeStatus = r.resumeStatus?.toLowerCase();
 					const legacyStatus = r.status?.toLowerCase();
-					
-					return applicationStatus === "pending" || 
-						   resumeStatus === "pending" || 
-						   legacyStatus === "pending";
+
+					return applicationStatus === "pending" ||
+						resumeStatus === "pending" ||
+						legacyStatus === "pending";
 				}
 			);
 
@@ -293,8 +298,8 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 			if (
 				eventType === "status_changed" &&
 				(status === "Completed" || status === "Failed" || status === "Invalid" ||
-				 status === "Reviewed" || status === "Shortlisted" || status === "Interview" ||
-				 status === "Rejected" || status === "Hired")
+					status === "Reviewed" || status === "Shortlisted" || status === "Interview" ||
+					status === "Rejected" || status === "Hired")
 			) {
 				console.log(
 					`🔄 Status changed to ${status} for resume ${resumeId}, reloading resume list...`
@@ -311,7 +316,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					Invalid: "⚠️ Invalid resume file",
 					Pending: "⏳ Resume analysis in progress",
 					Reviewed: "✅ Resume reviewed",
-					Shortlisted: "📋 Resume shortlisted", 
+					Shortlisted: "📋 Resume shortlisted",
 					Interview: "🗣️ Interview scheduled",
 					Rejected: "❌ Resume rejected",
 					Hired: "🎉 Candidate hired",
@@ -374,12 +379,12 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 			if (eventType === "status_changed") {
 				const statusMessages: Record<string, string> = {
 					Completed: "✅ Resume analysis completed",
-					Failed: "❌ Resume analysis failed", 
+					Failed: "❌ Resume analysis failed",
 					Invalid: "⚠️ Invalid resume file",
 					Pending: "⏳ Resume analysis in progress",
 					Reviewed: "✅ Resume reviewed",
 					Shortlisted: "📋 Resume shortlisted",
-					Interview: "🗣️ Interview scheduled", 
+					Interview: "🗣️ Interview scheduled",
 					Rejected: "❌ Resume rejected",
 					Hired: "🎉 Candidate hired",
 				};
@@ -478,25 +483,16 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					totalScore: (data as any).totalScore ?? null,
 					adjustedScore: (data as any).adjustedScore ?? null,
 					note: (data as any).note ?? (latestScore as any)?.note ?? null,
-					// prefer latest ai score, otherwise fall back to top-level adjusted/total score
 					totalResumeScore:
 						latestScore?.totalResumeScore ??
 						((data as any).totalScore ?? (data as any).adjustedScore ?? null),
 					email: data.email,
 					phoneNumber: data.phoneNumber,
 					fileUrl: data.fileUrl,
-					// prefer per-score explanation when present, otherwise top-level aiExplanation
 					aiExplanation: latestScore?.aiExplanation ?? (data as any).aiExplanation,
 					errorMessage: (data as any).errorMessage ?? null,
-					// prefer detailed score details from latest ai score, else top-level
 					scoreDetails: latestScore?.scoreDetails ?? (data as any).scoreDetails,
-					// aiScores: data.aiScores?.map((score) => ({
-					// 	scoreId: score.scoreId || 0,
-					// 	totalResumeScore: score.totalResumeScore,
-					// 	aiExplanation: score.aiExplanation ?? "",
-					// 	createdAt: score.createdAt ?? "",
-					// 	scoreDetails: score.scoreDetails,
-					// })), // Map to match interface structure
+
 				};
 
 				console.debug("[ResumeList] Mapped resume detail:", mappedResume);
@@ -530,6 +526,50 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 			console.error("Delete resume failed:", e);
 			toastError("Delete failed", (e as Error)?.message ?? String(e));
 		}
+	};
+
+	const handleUploadBatch = async (files: File[]) => {
+		if (!jobId || !campaignId) {
+			message.error('Missing job ID or campaign ID');
+			return false;
+		}
+		setUploading(true);
+		try {
+			console.debug('[ResumeList] calling resumeService.uploadBatch with files:', files.map(f => f.name));
+			const resp = await resumeService.uploadBatch(Number(campaignId), Number(jobId), files);
+			console.debug('[ResumeList] uploadBatch response', resp);
+
+			// Handle batch upload response - check both status and successCount
+			const isSuccess = String(resp?.status || "").toLowerCase() === "success" ||
+				((resp?.data as any)?.successCount > 0);
+
+			if (isSuccess) {
+				const successCount = (resp?.data as any)?.successCount || files.length;
+				const failCount = (resp?.data as any)?.failCount || 0;
+
+				if (failCount > 0) {
+					toastSuccess(
+						"Batch upload completed with warnings",
+						`Uploaded ${successCount}/${files.length} files successfully. ${failCount} files failed.`
+					);
+				} else {
+					toastSuccess(
+						"Batch upload successful",
+						`Uploaded ${successCount} files successfully!`
+					);
+				}
+				await loadResumes();
+			} else {
+				toastError("Batch upload failed", resp?.message);
+			}
+		} catch (e: unknown) {
+			console.error("Batch upload error:", e);
+			const errorMessage = e instanceof Error ? e.message : "Unknown error";
+			toastError("Batch upload failed", errorMessage);
+		} finally {
+			setUploading(false);
+		}
+		return false;
 	};
 
 	const handleUpload = async (file: File) => {
@@ -601,12 +641,28 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 							>
 								<span>Compare Candidate</span>
 							</Button>
-							<Button
-								className="company-btn--filled"
-								onClick={() => setUploadDrawerOpen(true)}
+							<Dropdown
+								menu={{
+									items: [
+										{
+											key: 'single',
+											label: 'Upload Single CV',
+											onClick: () => setUploadDrawerOpen(true),
+										},
+										{
+											key: 'batch',
+											label: 'Upload Multiple CVs',
+											onClick: () => setUploadBatchDrawerOpen(true),
+										},
+									],
+								}}
+								trigger={['click']}
+								placement="bottomRight"
 							>
-								Upload CV
-							</Button>
+								<Button className="company-btn--filled">
+									Upload CV
+								</Button>
+							</Dropdown>
 						</div>
 					</div>
 				}
@@ -649,9 +705,18 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					campaignId={campaignId}
 					currentPage={currentPage}
 					pageSize={pageSize}
+					totalCount={totalCount}
 					onPageChange={(page, size) => {
-						setCurrentPage(page);
-						setPageSize(size);
+						console.log('🔄 Page change triggered:', { page, size, currentPage, pageSize });
+						
+						if (size !== pageSize) {
+							// Page size changed, reset to page 1
+							setPageSize(size);
+							setCurrentPage(1);
+						} else {
+							// Just page changed
+							setCurrentPage(page);
+						}
 					}}
 					onViewDetail={async (resumeId) => {
 						setDrawerOpen(true);
@@ -680,6 +745,14 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				jobTitle={jobTitle}
 				jobId={jobId ? String(jobId) : undefined}
 				onUpload={handleUpload}
+				uploading={uploading}
+			/>
+
+			<UploadBatchDrawer
+				open={uploadBatchDrawerOpen}
+				onClose={() => setUploadBatchDrawerOpen(false)}
+				jobTitle={jobTitle}
+				onUpload={handleUploadBatch}
 				uploading={uploading}
 			/>
 		</>

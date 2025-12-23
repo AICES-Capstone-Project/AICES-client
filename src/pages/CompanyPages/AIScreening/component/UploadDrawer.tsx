@@ -28,7 +28,7 @@ const UploadDrawer: React.FC<UploadDrawerProps> = ({
 			destroyOnClose
 		>
 			<Upload.Dragger
-				multiple
+				multiple={false}
 				beforeUpload={onUpload}
 				accept=".pdf,.doc,.docx"
 				disabled={uploading}

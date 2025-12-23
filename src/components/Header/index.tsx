@@ -20,10 +20,7 @@ import { APP_ROUTES, STORAGE_KEYS } from "../../services/config";
 import { getRoleBasedRoute } from "../../routes/navigation";
 import { useAppDispatch, useAppSelector } from "../../hooks/redux";
 import { fetchUser, logoutUser } from "../../stores/slices/authSlice";
-import VietnamFlag from "../../assets/images/vietnam.png";
-
-// ✨ TODO: Import action fetch thông báo của bạn ở đây
-// import { fetchNotifications } from "../../stores/slices/notificationSlice";
+// import VietnamFlag from "../../assets/images/vietnam.png";
 
 const { Header: AntHeader } = Layout;
 const { Text } = Typography;
@@ -35,24 +32,18 @@ const AppHeader: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
 
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const token = localStorage.getItem(STORAGE_KEYS.ACCESS_TOKEN);
-    // Logic: Nếu có token mà chưa có user -> Fetch User
     if (token && !user) {
       dispatch(fetchUser());
     }
 
-    // ✨ FIX QUAN TRỌNG:
-    // Nếu đã có user (hoặc token), phải gọi API lấy thông báo ngay lập tức
-    // để cái chuông (NotificationDropdown) có số count hiển thị.
     if (token) {
-      // dispatch(fetchNotifications({ page: 1, limit: 10 })); // <-- Bỏ comment và dùng action của bạn
     }
   }, [dispatch, user]);
 
-  /** ===== Resources dropdown items ===== */
   const resourcesMenuItems: MenuProps["items"] = [
     {
       key: APP_ROUTES.RESOURCES_BLOG,
@@ -98,7 +89,6 @@ const AppHeader: React.FC = () => {
     },
   ];
 
-  /** ===== Top nav ===== */
   const navItems: MenuProps["items"] = [
     {
       key: APP_ROUTES.PRODUCT_HOW_IT_WORKS,
@@ -135,7 +125,6 @@ const AppHeader: React.FC = () => {
     },
   ];
 
-  /** ===== Menu selected key (supports submenu active) ===== */
   const selectedKey = location.pathname.startsWith(
     APP_ROUTES.PRODUCT_HOW_IT_WORKS
   )
@@ -157,32 +146,32 @@ const AppHeader: React.FC = () => {
     },
   ];
 
-  const languageMenuItems: MenuProps["items"] = [
-    {
-      key: "en",
-      label: (
-        <span>
-          <span role="img" aria-label="globe">
-            🌐
-          </span>{" "}
-          English
-        </span>
-      ),
-    },
-    {
-      key: "vi",
-      label: (
-        <span className="flex items-center gap-2">
-          <img
-            src={VietnamFlag}
-            alt="Vietnam flag"
-            style={{ width: 14, height: 14 }}
-          />
-          Tiếng Việt
-        </span>
-      ),
-    },
-  ];
+  // const languageMenuItems: MenuProps["items"] = [
+  //   {
+  //     key: "en",
+  //     label: (
+  //       <span>
+  //         <span role="img" aria-label="globe">
+  //           🌐
+  //         </span>{" "}
+  //         English
+  //       </span>
+  //     ),
+  //   },
+  //   {
+  //     key: "vi",
+  //     label: (
+  //       <span className="flex items-center gap-2">
+  //         <img
+  //           src={VietnamFlag}
+  //           alt="Vietnam flag"
+  //           style={{ width: 14, height: 14 }}
+  //         />
+  //         Tiếng Việt
+  //       </span>
+  //     ),
+  //   },
+  // ];
 
   const handleUserMenuClick: MenuProps["onClick"] = (e) => {
     if (e.key === "logout") {
@@ -278,8 +267,8 @@ const AppHeader: React.FC = () => {
           )}
         </Space>
 
-        <div className="ml-4">
-          {/* Language selector */}
+        {/* <div className="ml-4">
+          Language selector
           <Dropdown
             menu={{
               items: languageMenuItems,
@@ -310,7 +299,7 @@ const AppHeader: React.FC = () => {
               )}
             </Button>
           </Dropdown>
-        </div>
+        </div> */}
 
         <Button
           className="inline-flex md:!hidden"

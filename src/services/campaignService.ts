@@ -2,10 +2,20 @@ import { get, post, patch, remove } from "./api";
 import { API_ENDPOINTS } from "./config";
 
 export const campaignService = {
-  // Get all campaigns for company
-  getCampaigns: async () => {
+  // Get all campaigns for company with pagination
+  getCampaigns: async (page?: number, size?: number, search?: string, status?: string) => {
     try {
-      return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_GET);
+      const queryParams = new URLSearchParams();
+      if (page !== undefined) queryParams.append('page', page.toString());
+      if (size !== undefined) queryParams.append('size', size.toString());
+      if (search) queryParams.append('search', search);
+      if (status) queryParams.append('status', status);
+      
+      const url = queryParams.toString() 
+        ? `${API_ENDPOINTS.CAMPAIGN.COMPANY_GET}?${queryParams.toString()}`
+        : API_ENDPOINTS.CAMPAIGN.COMPANY_GET;
+        
+      return await get<any>(url);
     } catch (error) {
       throw error;
     }

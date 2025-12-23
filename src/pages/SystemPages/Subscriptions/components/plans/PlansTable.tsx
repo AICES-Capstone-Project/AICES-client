@@ -77,17 +77,8 @@ export default function PlansTable({
     },
     {
       title: "Compare",
-
       width: 170,
       render: (_: any, r: SubscriptionPlan) => {
-        console.log(
-          "ROW",
-          r.subscriptionId,
-          r.name,
-          r.compareLimit,
-          r.compareHoursLimit
-        );
-
         const limit = Number(r.compareLimit ?? 0);
         const hours = Number(r.compareHoursLimit ?? 0);
 

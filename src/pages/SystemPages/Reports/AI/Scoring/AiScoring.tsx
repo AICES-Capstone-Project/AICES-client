@@ -1,6 +1,7 @@
 // src/pages/SystemPages/Reports/AI/Scoring/AiScoring.tsx
 
-import { Card, Row, Col, Typography, Space, Divider, Tag, Alert } from "antd";
+import { Card, Typography, Table, Alert, Tag } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import type { SystemAiScoringReport } from "../../../../../types/systemReport.types";
 import { fmtNumber, fmtPercent, fmtMs } from "../../components/formatters";
 
@@ -12,62 +13,122 @@ export type AiScoringProps = {
   error?: string;
 };
 
-export default function AiScoring({ loading, data, error }: AiScoringProps) {
+type RowItem = {
+  key: string;
+  label: string;
+  value: React.ReactNode;
+};
+
+export default function AiScoring({
+  loading,
+  data,
+  error,
+}: AiScoringProps) {
+  if (error) {
+    return (
+      <Alert
+        type="warning"
+        showIcon
+        message="AI Scoring Distribution failed to load"
+        description={error}
+        style={{ marginBottom: 16 }}
+      />
+    );
+  }
+
+  const columns: ColumnsType<RowItem> = [
+    { title: "Metric", dataIndex: "label", key: "label" },
+    {
+      title: "Value",
+      dataIndex: "value",
+      key: "value",
+      align: "right",
+    },
+  ];
+
+  const overviewData: RowItem[] = [
+    {
+      key: "successRate",
+      label: "Success Rate",
+      value: (
+        <Tag color="green">{fmtPercent(data?.successRate)}</Tag>
+      ),
+    },
+    {
+      key: "avgTime",
+      label: "Average Processing Time",
+      value: fmtMs(data?.averageProcessingTimeMs),
+    },
+    {
+      key: "totalScored",
+      label: "Total Resumes Scored",
+      value: fmtNumber(data?.statistics?.totalScored),
+    },
+    {
+      key: "avgScore",
+      label: "Average Score",
+      value: fmtNumber(data?.statistics?.averageScore),
+    },
+    {
+      key: "medianScore",
+      label: "Median Score",
+      value: fmtNumber(data?.statistics?.medianScore),
+    },
+  ];
+
+  const distributionData: RowItem[] = [
+    {
+      key: "high",
+      label: "High Score",
+      value: (
+        <Tag color="green">
+          {fmtPercent(data?.scoreDistribution?.high)}
+        </Tag>
+      ),
+    },
+    {
+      key: "medium",
+      label: "Medium Score",
+      value: (
+        <Tag color="gold">
+          {fmtPercent(data?.scoreDistribution?.medium)}
+        </Tag>
+      ),
+    },
+    {
+      key: "low",
+      label: "Low Score",
+      value: (
+        <Tag color="red">
+          {fmtPercent(data?.scoreDistribution?.low)}
+        </Tag>
+      ),
+    },
+  ];
+
   return (
-    <>
-      {error && (
-        <Alert
-          type="warning"
-          showIcon
-          message="AI Scoring Distribution failed to load"
-          description={error}
-          style={{ marginBottom: 16 }}
-        />
-      )}
+    <Card title="Scoring Distribution" loading={loading} className="aices-card">
+      <Text strong>Overview</Text>
+      <Table
+        size="small"
+        style={{ marginTop: 8 }}
+        pagination={false}
+        columns={columns}
+        dataSource={overviewData}
+        rowKey="key"
+      />
 
-      <Card title="Scoring Distribution" loading={loading} className="aices-card">
-        <Row gutter={[12, 12]}>
-          <Col span={8}>
-            <Text type="secondary">Success Rate</Text>
-            <div style={{ fontSize: 20, fontWeight: 800 }}>
-              {fmtPercent(data?.successRate)}
-            </div>
-          </Col>
-          <Col span={8}>
-            <Text type="secondary">Avg Time</Text>
-            <div style={{ fontSize: 20, fontWeight: 800 }}>
-              {fmtMs(data?.averageProcessingTimeMs)}
-            </div>
-          </Col>
-          <Col span={8}>
-            <Text type="secondary">Total Scored</Text>
-            <div style={{ fontSize: 20, fontWeight: 800 }}>
-              {fmtNumber(data?.statistics?.totalScored)}
-            </div>
-          </Col>
-        </Row>
-
-        <Divider style={{ margin: "16px 0" }} />
-
-        <Text strong>Score Buckets</Text>
-        <div style={{ marginTop: 10 }}>
-          <Space wrap>
-            <Tag color="green">High: {fmtPercent(data?.scoreDistribution?.high)}</Tag>
-            <Tag color="gold">Medium: {fmtPercent(data?.scoreDistribution?.medium)}</Tag>
-            <Tag color="red">Low: {fmtPercent(data?.scoreDistribution?.low)}</Tag>
-          </Space>
-        </div>
-
-        <Divider style={{ margin: "16px 0" }} />
-
-        <Text strong>Statistics</Text>
-        <div style={{ marginTop: 8 }}>
-          <Space wrap>
-            <Tag>Avg Score: {fmtNumber(data?.statistics?.averageScore)}</Tag>
-            <Tag>Median: {fmtNumber(data?.statistics?.medianScore)}</Tag>
-          </Space>
-        </div>
-      </Card>
-    </>
+      <Text strong style={{ display: "block", marginTop: 16 }}>
+        Score Distribution
+      </Text>
+      <Table
+        size="small"
+        style={{ marginTop: 8 }}
+        pagination={false}
+        columns={columns}
+        dataSource={distributionData}
+        rowKey="key"
+      />
+    </Card>
   );
 }

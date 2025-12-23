@@ -1,8 +1,16 @@
-// src/pages/SystemPages/Reports/ReportsOverview.tsx
 import React from "react";
-import { Typography, Divider, Row, Col, Alert } from "antd";
+import { Divider, Row, Col, Alert, Tabs, message } from "antd";
 
+import {
+  systemReportExportService,
+  type ReportSection,
+  type ReportExportFormat,
+} from "../../../services/systemReportExportService";
 import { systemReportService } from "../../../services/systemReportService";
+
+import { ReportPage } from "./components";
+import ReportTableCard from "./components/ReportTableCard";
+
 import type {
   SystemExecutiveSummary,
   SystemCompaniesOverviewReport,
@@ -23,9 +31,9 @@ import AiParsing from "./AI/Parsing/AiParsing";
 import AiScoring from "./AI/Scoring/AiScoring";
 import SubscriptionsReport from "./Subscriptions/SubscriptionsReport";
 
-import { ReportHeader, ReportPage } from "./components";
+/* ================= TYPES ================= */
 
-const { Title } = Typography;
+type ReportTabKey = "overview" | "companies" | "jobs" | "ai" | "subscriptions";
 
 type ReportState<T> = {
   loading: boolean;
@@ -33,30 +41,86 @@ type ReportState<T> = {
   error?: string;
 };
 
+/* ================= COMPONENT ================= */
+
 export default function ReportsOverview() {
+  const [activeTab, setActiveTab] = React.useState<ReportTabKey>("overview");
   const [loadingAll, setLoadingAll] = React.useState(false);
 
+  /** exporting per section */
+  const [exportingMap, setExportingMap] = React.useState<
+    Partial<Record<ReportSection, boolean>>
+  >({});
+
+  /* ===== DATA STATES ===== */
   const [exec, setExec] = React.useState<ReportState<SystemExecutiveSummary>>({
     loading: true,
   });
-  const [companiesOverview, setCompaniesOverview] =
-    React.useState<ReportState<SystemCompaniesOverviewReport>>({ loading: true });
-  const [companiesUsage, setCompaniesUsage] =
-    React.useState<ReportState<SystemCompaniesUsageReport>>({ loading: true });
-
-  const [jobsStats, setJobsStats] =
-    React.useState<ReportState<SystemJobsStatisticsReport>>({ loading: true });
-  const [jobsEff, setJobsEff] =
-    React.useState<ReportState<SystemJobsEffectivenessReport>>({ loading: true });
-
-  const [aiParsing, setAiParsing] =
-    React.useState<ReportState<SystemAiParsingReport>>({ loading: true });
-  const [aiScoring, setAiScoring] =
-    React.useState<ReportState<SystemAiScoringReport>>({ loading: true });
-
-  const [subs, setSubs] = React.useState<ReportState<SystemSubscriptionsReport>>({
+  const [companiesOverview, setCompaniesOverview] = React.useState<
+    ReportState<SystemCompaniesOverviewReport>
+  >({
     loading: true,
   });
+  const [companiesUsage, setCompaniesUsage] = React.useState<
+    ReportState<SystemCompaniesUsageReport>
+  >({
+    loading: true,
+  });
+  const [jobsStats, setJobsStats] = React.useState<
+    ReportState<SystemJobsStatisticsReport>
+  >({
+    loading: true,
+  });
+  const [jobsEff, setJobsEff] = React.useState<
+    ReportState<SystemJobsEffectivenessReport>
+  >({
+    loading: true,
+  });
+  const [aiParsing, setAiParsing] = React.useState<
+    ReportState<SystemAiParsingReport>
+  >({
+    loading: true,
+  });
+  const [aiScoring, setAiScoring] = React.useState<
+    ReportState<SystemAiScoringReport>
+  >({
+    loading: true,
+  });
+  const [subs, setSubs] = React.useState<
+    ReportState<SystemSubscriptionsReport>
+  >({
+    loading: true,
+  });
+
+  /* ================= EXPORT ================= */
+
+  const exportSection = React.useCallback(
+    async (section: ReportSection, format: ReportExportFormat) => {
+      try {
+        setExportingMap((m) => ({ ...m, [section]: true }));
+
+        const blob = await systemReportExportService.exportReport(
+          section,
+          format
+        );
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "";
+        a.click();
+        window.URL.revokeObjectURL(url);
+      } catch (err: any) {
+        console.error(err);
+        message.error(err?.message || "Export failed");
+      } finally {
+        setExportingMap((m) => ({ ...m, [section]: false }));
+      }
+    },
+    []
+  );
+
+  /* ================= LOAD DATA ================= */
 
   const pickErr = (e: any) =>
     e?.response?.data?.message || e?.message || "Failed to load data";
@@ -64,15 +128,14 @@ export default function ReportsOverview() {
   const loadAll = React.useCallback(async () => {
     setLoadingAll(true);
 
-    // reset loading + clear errors
-    setExec((s) => ({ ...s, loading: true, error: undefined }));
-    setCompaniesOverview((s) => ({ ...s, loading: true, error: undefined }));
-    setCompaniesUsage((s) => ({ ...s, loading: true, error: undefined }));
-    setJobsStats((s) => ({ ...s, loading: true, error: undefined }));
-    setJobsEff((s) => ({ ...s, loading: true, error: undefined }));
-    setAiParsing((s) => ({ ...s, loading: true, error: undefined }));
-    setAiScoring((s) => ({ ...s, loading: true, error: undefined }));
-    setSubs((s) => ({ ...s, loading: true, error: undefined }));
+    setExec({ loading: true });
+    setCompaniesOverview({ loading: true });
+    setCompaniesUsage({ loading: true });
+    setJobsStats({ loading: true });
+    setJobsEff({ loading: true });
+    setAiParsing({ loading: true });
+    setAiScoring({ loading: true });
+    setSubs({ loading: true });
 
     const tasks = await Promise.allSettled([
       systemReportService.getExecutiveSummary(),
@@ -85,31 +148,64 @@ export default function ReportsOverview() {
       systemReportService.getSubscriptionRevenue(),
     ]);
 
-    if (tasks[0].status === "fulfilled") setExec({ loading: false, data: tasks[0].value });
-    else setExec({ loading: false, error: pickErr(tasks[0].reason) });
+    const [
+      execRes,
+      companiesOverviewRes,
+      companiesUsageRes,
+      jobsStatsRes,
+      jobsEffRes,
+      aiParsingRes,
+      aiScoringRes,
+      subsRes,
+    ] = tasks;
 
-    if (tasks[1].status === "fulfilled")
-      setCompaniesOverview({ loading: false, data: tasks[1].value });
-    else setCompaniesOverview({ loading: false, error: pickErr(tasks[1].reason) });
+    setExec(
+      execRes.status === "fulfilled"
+        ? { loading: false, data: execRes.value }
+        : { loading: false, error: pickErr(execRes.reason) }
+    );
 
-    if (tasks[2].status === "fulfilled")
-      setCompaniesUsage({ loading: false, data: tasks[2].value });
-    else setCompaniesUsage({ loading: false, error: pickErr(tasks[2].reason) });
+    setCompaniesOverview(
+      companiesOverviewRes.status === "fulfilled"
+        ? { loading: false, data: companiesOverviewRes.value }
+        : { loading: false, error: pickErr(companiesOverviewRes.reason) }
+    );
 
-    if (tasks[3].status === "fulfilled") setJobsStats({ loading: false, data: tasks[3].value });
-    else setJobsStats({ loading: false, error: pickErr(tasks[3].reason) });
+    setCompaniesUsage(
+      companiesUsageRes.status === "fulfilled"
+        ? { loading: false, data: companiesUsageRes.value }
+        : { loading: false, error: pickErr(companiesUsageRes.reason) }
+    );
 
-    if (tasks[4].status === "fulfilled") setJobsEff({ loading: false, data: tasks[4].value });
-    else setJobsEff({ loading: false, error: pickErr(tasks[4].reason) });
+    setJobsStats(
+      jobsStatsRes.status === "fulfilled"
+        ? { loading: false, data: jobsStatsRes.value }
+        : { loading: false, error: pickErr(jobsStatsRes.reason) }
+    );
 
-    if (tasks[5].status === "fulfilled") setAiParsing({ loading: false, data: tasks[5].value });
-    else setAiParsing({ loading: false, error: pickErr(tasks[5].reason) });
+    setJobsEff(
+      jobsEffRes.status === "fulfilled"
+        ? { loading: false, data: jobsEffRes.value }
+        : { loading: false, error: pickErr(jobsEffRes.reason) }
+    );
 
-    if (tasks[6].status === "fulfilled") setAiScoring({ loading: false, data: tasks[6].value });
-    else setAiScoring({ loading: false, error: pickErr(tasks[6].reason) });
+    setAiParsing(
+      aiParsingRes.status === "fulfilled"
+        ? { loading: false, data: aiParsingRes.value }
+        : { loading: false, error: pickErr(aiParsingRes.reason) }
+    );
 
-    if (tasks[7].status === "fulfilled") setSubs({ loading: false, data: tasks[7].value });
-    else setSubs({ loading: false, error: pickErr(tasks[7].reason) });
+    setAiScoring(
+      aiScoringRes.status === "fulfilled"
+        ? { loading: false, data: aiScoringRes.value }
+        : { loading: false, error: pickErr(aiScoringRes.reason) }
+    );
+
+    setSubs(
+      subsRes.status === "fulfilled"
+        ? { loading: false, data: subsRes.value }
+        : { loading: false, error: pickErr(subsRes.reason) }
+    );
 
     setLoadingAll(false);
   }, []);
@@ -128,14 +224,33 @@ export default function ReportsOverview() {
     aiScoring.error ||
     subs.error;
 
+  /* ================= UI ================= */
+
   return (
     <ReportPage>
-      <ReportHeader
-        title="System Reports"
-        subtitle="Executive summary & operational insights"
-        loading={loadingAll}
-        onRefresh={loadAll}
-      />
+      {/* ===== STICKY TABS ===== */}
+      <div className="report-tabs-sticky">
+        <Tabs
+          activeKey={activeTab}
+          onChange={(k) => setActiveTab(k as ReportTabKey)}
+          animated
+          items={[
+            { key: "overview", label: "Overview", disabled: loadingAll },
+            {
+              key: "companies",
+              label: "Company Insights",
+              disabled: loadingAll,
+            },
+            { key: "jobs", label: "Job Performance", disabled: loadingAll },
+            { key: "ai", label: "AI Performance", disabled: loadingAll },
+            {
+              key: "subscriptions",
+              label: "Revenue & Plans",
+              disabled: loadingAll,
+            },
+          ]}
+        />
+      </div>
 
       <Divider />
 
@@ -143,86 +258,122 @@ export default function ReportsOverview() {
         <Alert
           type="info"
           showIcon
-          message="Some sections may be incomplete"
-          description="One or more report endpoints failed. You can still view other sections or hit Refresh to retry."
+          message="Some reports may be incomplete"
+          description="One or more report sections failed to load."
           style={{ marginBottom: 16 }}
         />
       )}
 
-      {/* ===== Executive Summary ===== */}
-      <Title level={4} style={{ marginTop: 0 }}>
-        Executive Summary
-      </Title>
-      <ExecutiveSummary loading={exec.loading} data={exec.data} error={exec.error} />
+      {/* ===== CONTENT ===== */}
+      <div key={activeTab} className="report-tab-content">
+        {activeTab === "overview" && (
+          <ReportTableCard
+            title="Executive Summary"
+            section="executive-summary"
+            loading={exec.loading}
+            exporting={exportingMap["executive-summary"]}
+            onExport={exportSection}
+          >
+            <ExecutiveSummary {...exec} />
+          </ReportTableCard>
+        )}
 
-      <Divider />
+        {activeTab === "companies" && (
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={12}>
+              <ReportTableCard
+                title="Company Overview"
+                section="companies-overview"
+                loading={companiesOverview.loading}
+                exporting={exportingMap["companies-overview"]}
+                onExport={exportSection}
+              >
+                <CompaniesOverview {...companiesOverview} />
+              </ReportTableCard>
+            </Col>
 
-      {/* ===== Companies ===== */}
-      <Title level={4} style={{ marginTop: 0 }}>
-        Companies
-      </Title>
+            <Col xs={24} lg={12}>
+              <ReportTableCard
+                title="Company Usage"
+                section="companies-usage"
+                loading={companiesUsage.loading}
+                exporting={exportingMap["companies-usage"]}
+                onExport={exportSection}
+              >
+                <CompaniesUsage {...companiesUsage} />
+              </ReportTableCard>
+            </Col>
+          </Row>
+        )}
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={12}>
-          <CompaniesOverview
-            loading={companiesOverview.loading}
-            data={companiesOverview.data}
-            error={companiesOverview.error}
-          />
-        </Col>
-        <Col xs={24} lg={12}>
-          <CompaniesUsage
-            loading={companiesUsage.loading}
-            data={companiesUsage.data}
-            error={companiesUsage.error}
-          />
-        </Col>
-      </Row>
+        {activeTab === "jobs" && (
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={12}>
+              <ReportTableCard
+                title="Job Statistics"
+                section="jobs-statistics"
+                loading={jobsStats.loading}
+                exporting={exportingMap["jobs-statistics"]}
+                onExport={exportSection}
+              >
+                <JobsStatistics {...jobsStats} />
+              </ReportTableCard>
+            </Col>
 
-      <Divider />
+            <Col xs={24} lg={12}>
+              <ReportTableCard
+                title="Job Effectiveness"
+                section="jobs-effectiveness"
+                loading={jobsEff.loading}
+                exporting={exportingMap["jobs-effectiveness"]}
+                onExport={exportSection}
+              >
+                <JobsEffectiveness {...jobsEff} />
+              </ReportTableCard>
+            </Col>
+          </Row>
+        )}
 
-      {/* ===== Jobs ===== */}
-      <Title level={4} style={{ marginTop: 0 }}>
-        Jobs
-      </Title>
+        {activeTab === "ai" && (
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={12}>
+              <ReportTableCard
+                title="Parsing Quality"
+                section="ai-parsing"
+                loading={aiParsing.loading}
+                exporting={exportingMap["ai-parsing"]}
+                onExport={exportSection}
+              >
+                <AiParsing {...aiParsing} />
+              </ReportTableCard>
+            </Col>
 
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={14}>
-          <JobsStatistics loading={jobsStats.loading} data={jobsStats.data} error={jobsStats.error} />
-        </Col>
-        <Col xs={24} lg={10}>
-          <JobsEffectiveness
-            loading={jobsEff.loading}
-            data={jobsEff.data}
-            error={jobsEff.error}
-          />
-        </Col>
-      </Row>
+            <Col xs={24} lg={12}>
+              <ReportTableCard
+                title="Scoring Distribution"
+                section="ai-scoring"
+                loading={aiScoring.loading}
+                exporting={exportingMap["ai-scoring"]}
+                onExport={exportSection}
+              >
+                <AiScoring {...aiScoring} />
+              </ReportTableCard>
+            </Col>
+          </Row>
+        )}
 
-      <Divider />
-
-      {/* ===== AI ===== */}
-      <Title level={4} style={{ marginTop: 0 }}>
-        AI
-      </Title>
-
-      <Row gutter={[16, 16]}>
-        <Col xs={24} lg={12}>
-          <AiParsing loading={aiParsing.loading} data={aiParsing.data} error={aiParsing.error} />
-        </Col>
-        <Col xs={24} lg={12}>
-          <AiScoring loading={aiScoring.loading} data={aiScoring.data} error={aiScoring.error} />
-        </Col>
-      </Row>
-
-      <Divider />
-
-      {/* ===== Subscriptions ===== */}
-      <Title level={4} style={{ marginTop: 0 }}>
-        Subscriptions
-      </Title>
-
-      <SubscriptionsReport loading={subs.loading} data={subs.data} error={subs.error} />
+        {activeTab === "subscriptions" && (
+          <ReportTableCard
+            title="Revenue & Plans"
+            section="subscriptions"
+            loading={subs.loading}
+            exporting={exportingMap["subscriptions"]}
+            onExport={exportSection}
+          >
+            <SubscriptionsReport {...subs} />
+          </ReportTableCard>
+        )}
+      </div>
     </ReportPage>
   );
 }

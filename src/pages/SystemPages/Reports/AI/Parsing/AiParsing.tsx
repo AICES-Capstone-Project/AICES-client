@@ -1,6 +1,7 @@
 // src/pages/SystemPages/Reports/AI/Parsing/AiParsing.tsx
 
-import { Card, Row, Col, Typography, Divider, Table, Alert } from "antd";
+import { Card, Typography, Table, Alert, Tag } from "antd";
+import type { ColumnsType } from "antd/es/table";
 import type { SystemAiParsingReport } from "../../../../../types/systemReport.types";
 import { fmtNumber, fmtPercent, fmtMs } from "../../components/formatters";
 
@@ -12,63 +13,113 @@ export type AiParsingProps = {
   error?: string;
 };
 
-export default function AiParsing({ loading, data, error }: AiParsingProps) {
+type RowItem = {
+  key: string;
+  label: string;
+  value: React.ReactNode;
+};
+
+export default function AiParsing({
+  loading,
+  data,
+  error,
+}: AiParsingProps) {
+  if (error) {
+    return (
+      <Alert
+        type="warning"
+        showIcon
+        message="AI Parsing Quality failed to load"
+        description={error}
+        style={{ marginBottom: 16 }}
+      />
+    );
+  }
+
+  const columns: ColumnsType<RowItem> = [
+    { title: "Metric", dataIndex: "label", key: "label" },
+    {
+      title: "Value",
+      dataIndex: "value",
+      key: "value",
+      align: "right",
+    },
+  ];
+
+  const overviewData: RowItem[] = [
+    {
+      key: "successRate",
+      label: "Success Rate",
+      value: (
+        <Tag color="green">{fmtPercent(data?.successRate)}</Tag>
+      ),
+    },
+    {
+      key: "total",
+      label: "Total Resumes",
+      value: fmtNumber(data?.totalResumes),
+    },
+    {
+      key: "success",
+      label: "Successfully Parsed",
+      value: fmtNumber(data?.successfulParsing),
+    },
+    {
+      key: "failed",
+      label: "Failed Parsing",
+      value: (
+        <Tag color="red">
+          {fmtNumber(data?.failedParsing)}
+        </Tag>
+      ),
+    },
+    {
+      key: "avgTime",
+      label: "Average Processing Time",
+      value: fmtMs(data?.averageProcessingTimeMs),
+    },
+  ];
+
   return (
-    <>
-      {error && (
-        <Alert
-          type="warning"
-          showIcon
-          message="AI Parsing Quality failed to load"
-          description={error}
-          style={{ marginBottom: 16 }}
-        />
-      )}
+    <Card title="Parsing Quality" loading={loading} className="aices-card">
+      <Text strong>Overview</Text>
+      <Table
+        size="small"
+        style={{ marginTop: 8 }}
+        pagination={false}
+        columns={columns}
+        dataSource={overviewData}
+        rowKey="key"
+      />
 
-      <Card title="Parsing Quality" loading={loading} className="aices-card">
-        <Row gutter={[12, 12]}>
-          <Col span={8}>
-            <Text type="secondary">Success Rate</Text>
-            <div style={{ fontSize: 20, fontWeight: 800 }}>
-              {fmtPercent(data?.successRate)}
-            </div>
-          </Col>
-          <Col span={8}>
-            <Text type="secondary">Total Resumes</Text>
-            <div style={{ fontSize: 20, fontWeight: 800 }}>
-              {fmtNumber(data?.totalResumes)}
-            </div>
-          </Col>
-          <Col span={8}>
-            <Text type="secondary">Avg Time</Text>
-            <div style={{ fontSize: 20, fontWeight: 800 }}>
-              {fmtMs(data?.averageProcessingTimeMs)}
-            </div>
-          </Col>
-        </Row>
-
-        <Divider style={{ margin: "16px 0" }} />
-
-        <Text strong>Common Errors</Text>
-        <Table
-          size="small"
-          style={{ marginTop: 10 }}
-          pagination={false}
-          rowKey={(r) => r.errorType}
-          dataSource={data?.commonErrors || []}
-          columns={[
-            { title: "Type", dataIndex: "errorType", key: "errorType" },
-            { title: "Count", dataIndex: "count", key: "count", width: 120 },
-            {
-              title: "Rate",
-              dataIndex: "percentage",
-              key: "percentage",
-              width: 120,
-              render: (v: number) => fmtPercent(v),
-            },
-          ]}
-        />
-      </Card>
-    </>
+      <Text strong style={{ display: "block", marginTop: 16 }}>
+        Common Errors
+      </Text>
+      <Table
+        size="small"
+        style={{ marginTop: 8 }}
+        pagination={false}
+        rowKey={(r) => r.errorType}
+        dataSource={data?.commonErrors || []}
+        columns={[
+          { title: "Error Type", dataIndex: "errorType", key: "errorType" },
+          {
+            title: "Count",
+            dataIndex: "count",
+            key: "count",
+            width: 120,
+            align: "right",
+          },
+          {
+            title: "Rate",
+            dataIndex: "percentage",
+            key: "percentage",
+            width: 120,
+            align: "right",
+            render: (v: number) => fmtPercent(v),
+          },
+        ]}
+      />
+    </Card>
   );
 }

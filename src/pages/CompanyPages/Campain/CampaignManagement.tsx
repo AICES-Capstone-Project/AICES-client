@@ -18,7 +18,8 @@ const CampaignManagement = () => {
     const [loading, setLoading] = useState(true);
     const [tableHeight, setTableHeight] = useState<number | undefined>(undefined);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize] = useState<number>(12);
+    const [pageSize] = useState<number>(10);
+    const [totalCount, setTotalCount] = useState<number>(0);
     const [searchText, setSearchText] = useState("");
     const [statusFilter, setStatusFilter] = useState<string>('all');
     const [createDrawerOpen, setCreateDrawerOpen] = useState(false);
@@ -49,13 +50,17 @@ const CampaignManagement = () => {
     }, []);
 
     // Load campaigns from API
-    const loadCampaigns = async () => {
+    const loadCampaigns = async (page = currentPage, size = pageSize, search = searchText, status = statusFilter) => {
         setLoading(true);
         try {
-            const response = await campaignService.getCampaigns();
+            const response = await campaignService.getCampaigns(page, size, search, status !== 'all' ? status : undefined);
             if (response.status === "Success" && response.data) {
                 let campaignList = response.data.campaigns || response.data;
                 campaignList = Array.isArray(campaignList) ? campaignList : [];
+                
+                // Extract total count from API response structure
+                const total = response.data.totalCount || campaignList.length;
+                setTotalCount(total);
 
                 const enriched = await Promise.all(
                     campaignList.map(async (camp: any) => {
@@ -127,6 +132,20 @@ const CampaignManagement = () => {
         loadCampaigns();
         loadPendingCampaigns();
     }, []);
+    
+    // Reload campaigns when filters change
+    useEffect(() => {
+        if (currentPage === 1) {
+            loadCampaigns(1, pageSize, searchText, statusFilter);
+        } else {
+            setCurrentPage(1);
+        }
+    }, [searchText, statusFilter]);
+    
+    // Reload campaigns when page changes
+    useEffect(() => {
+        loadCampaigns(currentPage, pageSize, searchText, statusFilter);
+    }, [currentPage]);
 
     useNotificationSignalR({
         onNewNotification: (notif) => {
@@ -211,24 +230,9 @@ const CampaignManagement = () => {
     };
 
     useEffect(() => {
-        let result = [...campaigns];
-        if (searchText) {
-            const v = searchText.trim().toLowerCase();
-            result = result.filter(
-                (c) =>
-                    c.title?.toLowerCase().includes(v) ||
-                    c.description?.toLowerCase().includes(v) ||
-                    c.department?.toLowerCase().includes(v)
-            );
-        }
-
-        if (statusFilter && statusFilter !== 'all') {
-            result = result.filter((c) => String(c?.status ?? '').toLowerCase() === statusFilter);
-        }
-
-        setFiltered(result);
-        setCurrentPage(1);
-    }, [campaigns, searchText, statusFilter]);
+        // No local filtering needed since API handles it
+        setFiltered(campaigns);
+    }, [campaigns]);
 
     return (
         <Card
@@ -329,9 +333,11 @@ const CampaignManagement = () => {
                 tableHeight={tableHeight}
                 currentPage={currentPage}
                 pageSize={pageSize}
+                total={totalCount}
                 onPageChange={(page, size) => {
                     setCurrentPage(page);
                     if (size && size !== pageSize) {
+                        // Handle page size change if needed
                     }
                 }}
                 onView={(record) => navigate(`/company/campaign/${record.campaignId}`)}

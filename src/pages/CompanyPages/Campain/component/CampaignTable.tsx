@@ -12,6 +12,7 @@ type Props = {
   tableHeight?: number;
   currentPage: number;
   pageSize: number;
+  total?: number; // Add total prop for proper pagination
   onPageChange: (page: number, size?: number) => void;
   onView: (record: any) => void;
   onEdit: (record: any) => void;
@@ -19,7 +20,7 @@ type Props = {
   onStatusChange?: (campaignId: number, newStatus: string) => void;
 };
 
-const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPage, pageSize, onView, onEdit, onDelete, onStatusChange }) => {
+const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPage, pageSize, total, onPageChange, onView, onEdit, onDelete, onStatusChange }) => {
   const [updatingIds, setUpdatingIds] = useState<number[]>([]);
   const [localStatus, setLocalStatus] = useState<Record<number, string>>({});
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
@@ -246,14 +247,13 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
         rowKey="campaignId"
         loading={loading}
         pagination={{
-          current: currentPage,
           pageSize: 10,
           showSizeChanger: false,
-          total: data.length,
+          total: total || data.length,
           showTotal: (total) => `Total ${total} campaigns`,
-
+          onChange: onPageChange,
         }}
-        size="middle"
+                style={{ width: "100%" }}
         tableLayout="fixed"
         className="job-table"
         scroll={{ y: tableHeight }}

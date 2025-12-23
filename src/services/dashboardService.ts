@@ -6,7 +6,12 @@ export interface DashboardSummary {
   activeJobs: number;      
   totalMembers: number; 
   aiProcessed: number;     
-  creditsRemaining: number; 
+  resumeCreditsRemaining: number;
+  totalPublicCampaigns: number;
+  totalCampaigns: number;
+  comparisonCreditsRemaining: number;
+  resumeTimeRemaining: string;
+  comparisonTimeRemaining: string;
 }
 
 export interface TopCategory {
@@ -46,19 +51,17 @@ const dashboardService = {
       // Handle API response format: { status: "Success", message: "...", data: {...} }
       if (resp && resp.status === 'Success' && resp.data) {
         const apiData: any = resp.data;
-        // Map API response to expected Dashboard format
+        // Return the actual API data directly
         return {
-          campaigns: 0, // This field might need separate API call
-          jobs: apiData.activeJobs || 0,
-          cvSubmitted: 0, // This field might need separate API call  
-          cvHired: 0, // This field might need separate API call
-          totalCandidates: 0, // This field might need separate API call
-          interviewsToday: 0, // This field might need separate API call
-          // Add the actual API data for reference
           activeJobs: apiData.activeJobs || 0,
           totalMembers: apiData.totalMembers || 0,
           aiProcessed: apiData.aiProcessed || 0,
-          creditsRemaining: apiData.creditsRemaining || 0,
+          resumeCreditsRemaining: apiData.resumeCreditsRemaining || 0,
+          totalPublicCampaigns: apiData.totalPublicCampaigns || 0,
+          totalCampaigns: apiData.totalCampaigns || 0,
+          comparisonCreditsRemaining: apiData.comparisonCreditsRemaining || 0,
+          resumeTimeRemaining: apiData.resumeTimeRemaining || '',
+          comparisonTimeRemaining: apiData.comparisonTimeRemaining || '',
         };
       } else if (resp && resp.data) {
         return resp.data;
@@ -68,12 +71,15 @@ const dashboardService = {
       console.error('getSummary error:', err);
       await delay(300);
       return {
-        campaigns: 18,
-        jobs: 42,
-        cvSubmitted: 320,
-        cvHired: 48,
-        totalCandidates: 560,
-        interviewsToday: 0,
+        activeJobs: 16,
+        totalMembers: 2,
+        aiProcessed: 16,
+        resumeCreditsRemaining: 100,
+        totalPublicCampaigns: 4,
+        totalCampaigns: 18,
+        comparisonCreditsRemaining: 100,
+        resumeTimeRemaining: '2025-12-23T07:00:00Z',
+        comparisonTimeRemaining: '2025-12-23T07:00:00Z',
       };
     }
   },

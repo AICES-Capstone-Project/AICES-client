@@ -9,10 +9,9 @@ import type { ReportExportFormat } from "../../../../services/systemReportExport
 type ReportExportDropdownProps = {
   exporting?: boolean;
   onExport: (format: ReportExportFormat) => void;
-  /** optional: disable 1 format (vd: ["pdf"]) */
   disabledFormats?: ReportExportFormat[];
-  /** optional: button size */
   size?: "small" | "middle" | "large";
+  label?: string;
 };
 
 export default function ReportExportDropdown({
@@ -20,8 +19,12 @@ export default function ReportExportDropdown({
   onExport,
   disabledFormats = [],
   size = "middle",
+  label = "Export",
 }: ReportExportDropdownProps) {
-  const isDisabled = (f: ReportExportFormat) => disabledFormats.includes(f);
+  const isDisabled = React.useCallback(
+    (f: ReportExportFormat) => disabledFormats.includes(f),
+    [disabledFormats]
+  );
 
   const items = React.useMemo<MenuProps["items"]>(
     () => [
@@ -29,21 +32,27 @@ export default function ReportExportDropdown({
         key: "excel",
         label: "Export Excel (.xlsx)",
         disabled: exporting || isDisabled("excel"),
-        onClick: () => onExport("excel"),
       },
       {
         key: "pdf",
         label: "Export PDF (.pdf)",
         disabled: exporting || isDisabled("pdf"),
-        onClick: () => onExport("pdf"),
       },
     ],
-    [exporting, onExport, disabledFormats]
+    [exporting, isDisabled]
+  );
+
+  const handleMenuClick = React.useCallback<NonNullable<MenuProps["onClick"]>>(
+    (info) => {
+      const key = info.key as ReportExportFormat;
+      if (key === "excel" || key === "pdf") onExport(key);
+    },
+    [onExport]
   );
 
   return (
     <Dropdown
-      menu={{ items }}
+      menu={{ items, onClick: handleMenuClick }}
       trigger={["click"]}
       disabled={exporting}
       placement="bottomRight"
@@ -54,7 +63,7 @@ export default function ReportExportDropdown({
         className="btn-aices"
         size={size}
       >
-        <Space>Export</Space>
+        <Space>{label}</Space>
       </Button>
     </Dropdown>
   );

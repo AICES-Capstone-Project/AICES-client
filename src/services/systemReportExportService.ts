@@ -4,54 +4,30 @@ import { API_ENDPOINTS } from "./config";
 
 export type ReportExportFormat = "excel" | "pdf";
 
-export type ReportSection =
-  | "executive-summary"
-  | "companies-overview"
-  | "companies-usage"
-  | "jobs-statistics"
-  | "jobs-effectiveness"
-  | "ai-parsing"
-  | "ai-scoring"
-  | "subscriptions";
+export interface ExportReportResult {
+  blob: Blob;
+  filename?: string;
+}
 
-/**
- * Map section -> endpoint base
- * (KHÓA CONTRACT theo swagger đã check)
- */
-const EXPORT_ENDPOINT_MAP: Record<ReportSection, string> = {
-  "executive-summary":
-    API_ENDPOINTS.SYSTEM_REPORTS.EXECUTIVE_SUMMARY,
-  "companies-overview":
-    API_ENDPOINTS.SYSTEM_REPORTS.COMPANIES_OVERVIEW,
-  "companies-usage":
-    API_ENDPOINTS.SYSTEM_REPORTS.COMPANIES_USAGE,
-  "jobs-statistics":
-    API_ENDPOINTS.SYSTEM_REPORTS.JOBS_STATISTICS,
-  "jobs-effectiveness":
-    API_ENDPOINTS.SYSTEM_REPORTS.JOBS_EFFECTIVENESS,
-  "ai-parsing":
-    API_ENDPOINTS.SYSTEM_REPORTS.AI_PARSING,
-  "ai-scoring":
-    API_ENDPOINTS.SYSTEM_REPORTS.AI_SCORING,
-  "subscriptions":
-    API_ENDPOINTS.SYSTEM_REPORTS.SUBSCRIPTIONS,
+const getFilenameFromContentDisposition = (cd?: string): string | undefined => {
+  if (!cd) return undefined;
+
+  // Support: filename=abc.xlsx OR filename*=UTF-8''abc.xlsx
+  const utf8Match = cd.match(/filename\*=UTF-8''([^;]+)/i);
+  if (utf8Match?.[1]) return decodeURIComponent(utf8Match[1].replace(/"/g, ""));
+
+  const normalMatch = cd.match(/filename=([^;]+)/i);
+  if (normalMatch?.[1]) return normalMatch[1].trim().replace(/"/g, "");
+
+  return undefined;
 };
 
 export const systemReportExportService = {
-  /**
-   * Export report theo section + format (excel/pdf)
-   */
-  async exportReport(
-    section: ReportSection,
-    format: ReportExportFormat
-  ): Promise<Blob> {
-    const baseEndpoint = EXPORT_ENDPOINT_MAP[section];
-
-    if (!baseEndpoint) {
-      throw new Error(`Unsupported report section: ${section}`);
-    }
-
-    const url = `${baseEndpoint}/${format}`;
+  async exportReport(format: ReportExportFormat): Promise<ExportReportResult> {
+    const url =
+      format === "excel"
+        ? API_ENDPOINTS.SYSTEM_REPORTS.EXPORT_EXCEL
+        : API_ENDPOINTS.SYSTEM_REPORTS.EXPORT_PDF;
 
     const response = await api.request({
       url,
@@ -59,6 +35,10 @@ export const systemReportExportService = {
       responseType: "blob",
     });
 
-    return response.data as Blob;
+    const filename = getFilenameFromContentDisposition(
+      response.headers?.["content-disposition"]
+    );
+
+    return { blob: response.data as Blob, filename };
   },
 };

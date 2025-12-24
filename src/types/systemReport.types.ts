@@ -136,3 +136,64 @@ export interface SystemSubscriptionsReport {
   popularPlan: string;
   breakdown: SubscriptionRevenueBreakdown;
 }
+// ===== NEW: AI Health =====
+export interface AiHealthErrorReasonItem {
+  errorType: string;
+  count: number;
+  percentage: number;
+}
+
+export interface SystemAiHealthReport {
+  successRate: number; // 46.43 (đã là %)
+  errorRate: number; // 53.57 (đã là %)
+  errorReasons: AiHealthErrorReasonItem[];
+  averageProcessingTimeSeconds: number; // seconds
+}
+
+// ===== NEW: Client Engagement =====
+export interface ClientUsageFrequency {
+  averageJobsPerCompanyPerMonth: number;
+  averageCampaignsPerCompanyPerMonth: number;
+}
+
+export interface ClientAiTrustLevel {
+  trustPercentage: number; // % (35.71)
+  highScoreCandidatesCount: number;
+  highScoreCandidatesHiredCount: number;
+}
+
+export interface SystemClientEngagementReport {
+  usageFrequency: ClientUsageFrequency;
+  aiTrustLevel: ClientAiTrustLevel;
+}
+
+// ===== NEW: SaaS Metrics =====
+export interface SaasTopCompanyItem {
+  companyId: number;
+  companyName: string;
+  totalResumesUploaded: number;
+  totalJobsCreated: number;
+  totalCampaignsCreated: number;
+  activityScore: number;
+}
+
+export interface SaasFeatureAdoption {
+  screeningUsageCount: number;
+  trackingUsageCount: number;
+  exportUsageCount: number;
+}
+
+export type ChurnRiskLevel = "High" | "Medium" | "Low";
+
+export interface SaasChurnRiskCompanyItem {
+  companyId: number;
+  companyName: string;
+  subscriptionPlan: string;
+  riskLevel: ChurnRiskLevel;
+}
+
+export interface SystemSaasMetricsReport {
+  topCompanies: SaasTopCompanyItem[];
+  featureAdoption: SaasFeatureAdoption;
+  churnRiskCompanies: SaasChurnRiskCompanyItem[];
+}

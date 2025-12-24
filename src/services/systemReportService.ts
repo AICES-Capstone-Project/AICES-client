@@ -12,6 +12,9 @@ import type {
   SystemAiParsingReport,
   SystemAiScoringReport,
   SystemSubscriptionsReport,
+  SystemAiHealthReport,
+  SystemClientEngagementReport,
+  SystemSaasMetricsReport,
 } from "../types/systemReport.types";
 
 const unwrap = <T>(res: ApiResponse<T>): T => {
@@ -77,6 +80,26 @@ export const systemReportService = {
   async getSubscriptionRevenue(): Promise<SystemSubscriptionsReport> {
     const res = await get<SystemSubscriptionsReport>(
       API_ENDPOINTS.SYSTEM_REPORTS.SUBSCRIPTIONS
+    );
+    return unwrap(res);
+  },
+  async getAiHealth(): Promise<SystemAiHealthReport> {
+    const res = await get<SystemAiHealthReport>(
+      API_ENDPOINTS.SYSTEM_REPORTS.AI_HEALTH
+    );
+    return unwrap(res);
+  },
+
+  async getClientEngagement(): Promise<SystemClientEngagementReport> {
+    const res = await get<SystemClientEngagementReport>(
+      API_ENDPOINTS.SYSTEM_REPORTS.CLIENT_ENGAGEMENT
+    );
+    return unwrap(res);
+  },
+
+  async getSaasMetrics(): Promise<SystemSaasMetricsReport> {
+    const res = await get<SystemSaasMetricsReport>(
+      API_ENDPOINTS.SYSTEM_REPORTS.SAAS_METRICS
     );
     return unwrap(res);
   },

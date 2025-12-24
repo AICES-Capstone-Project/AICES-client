@@ -21,4 +21,9 @@ export const feedbackSystemService = {
       API_ENDPOINTS.FEEDBACK.SYSTEM_GET_BY_ID(feedbackId)
     );
   },
+  deleteFeedback(feedbackId: number) {
+    return api.delete<ApiResponse<null>>(
+      API_ENDPOINTS.FEEDBACK.SYSTEM_DELETE(feedbackId)
+    );
+  },
 };

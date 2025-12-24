@@ -223,6 +223,7 @@ export const API_ENDPOINTS = {
   FEEDBACK: {
     SYSTEM_GET_ALL: "/system/feedbacks",
     SYSTEM_GET_BY_ID: (feedbackId: number) => `/system/feedbacks/${feedbackId}`,
+    SYSTEM_DELETE: (feedbackId: number) => `/system/feedbacks/${feedbackId}`,
   },
 
   // Job endpoints
@@ -433,13 +434,26 @@ export const API_ENDPOINTS = {
   // =============================== SYSTEM REPORTS ===============================
   SYSTEM_REPORTS: {
     EXECUTIVE_SUMMARY: "/system/reports/executive-summary",
+
     COMPANIES_OVERVIEW: "/system/reports/companies/overview",
     COMPANIES_USAGE: "/system/reports/companies/usage",
+
     JOBS_STATISTICS: "/system/reports/jobs/statistics",
     JOBS_EFFECTIVENESS: "/system/reports/jobs/effectiveness",
+
     AI_PARSING: "/system/reports/ai/parsing",
     AI_SCORING: "/system/reports/ai/scoring",
+
     SUBSCRIPTIONS: "/system/reports/subscriptions",
+
+    // ===== NEW SECTIONS =====
+    AI_HEALTH: "/system/reports/ai/health",
+    CLIENT_ENGAGEMENT: "/system/reports/client-engagement",
+    SAAS_METRICS: "/system/reports/saas-metrics",
+
+    // ===== EXPORT (ONE FILE) =====
+    EXPORT_EXCEL: "/system/reports/excel",
+    EXPORT_PDF: "/system/reports/pdf",
   },
 
   // =============================== COMPANY DASHBOARD ===============================

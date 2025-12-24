@@ -3,7 +3,10 @@ import { Card, message } from "antd";
 import type { TablePaginationConfig } from "antd/es/table";
 import dayjs from "dayjs";
 
-import type { FeedbackDetail, FeedbackEntity } from "../../../types/feedback.types";
+import type {
+  FeedbackDetail,
+  FeedbackEntity,
+} from "../../../types/feedback.types";
 import { feedbackSystemService } from "../../../services/feedbackService.system";
 
 import FeedbackToolbar from "./components/FeedbackToolbar";
@@ -15,7 +18,6 @@ const DEFAULT_PAGE_SIZE = 10;
 export default function FeedbackList() {
   const [loading, setLoading] = useState(false);
 
-  // ✅ raw list full
   const [all, setAll] = useState<FeedbackEntity[]>([]);
   const [keyword, setKeyword] = useState("");
 
@@ -33,7 +35,6 @@ export default function FeedbackList() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      // ✅ fetch nhiều để FE search toàn bộ
       const res = await feedbackSystemService.getFeedbacks({
         page: 1,
         pageSize: 1000,
@@ -62,17 +63,21 @@ export default function FeedbackList() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ✅ realtime filter (case-insensitive)
+  // ✅ filter match placeholder: email / username / fullname / company
   const filtered = useMemo(() => {
     const kw = keyword.trim().toLowerCase();
     if (!kw) return all;
 
-    return all.filter((x) =>
-      String(x.userName || "").toLowerCase().includes(kw)
-    );
+    return all.filter((x) => {
+      const hay = [x.userName, x.userFullName, x.userEmail, x.companyName]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return hay.includes(kw);
+    });
   }, [all, keyword]);
 
-  // ✅ update total + reset page when keyword changes or list changes
   useEffect(() => {
     setPagination((prev) => ({
       ...prev,
@@ -81,7 +86,6 @@ export default function FeedbackList() {
     }));
   }, [filtered.length]);
 
-  // ✅ slice for table paging
   const paged = useMemo(() => {
     const current = pagination.current || 1;
     const pageSize = pagination.pageSize || DEFAULT_PAGE_SIZE;
@@ -108,19 +112,57 @@ export default function FeedbackList() {
     setDetail(null);
     setDetailLoading(true);
     try {
-      const res = await feedbackSystemService.getFeedbackById(record.feedbackId);
+      const res = await feedbackSystemService.getFeedbackById(
+        record.feedbackId
+      );
       const apiRes = res.data;
 
       if (apiRes.status !== "Success" || !apiRes.data) {
         message.error(apiRes.message || "Failed to load feedback detail.");
         return;
       }
+
       setDetail(apiRes.data);
     } catch (e: any) {
       console.error(e);
-      message.error(e?.response?.data?.message || "Failed to load feedback detail.");
+      message.error(
+        e?.response?.data?.message || "Failed to load feedback detail."
+      );
     } finally {
       setDetailLoading(false);
+    }
+  };
+
+  const handleDelete = async (record: FeedbackEntity) => {
+    try {
+      const res = await feedbackSystemService.deleteFeedback(record.feedbackId);
+      const apiRes = res.data;
+
+      if (apiRes.status !== "Success") {
+        message.error(apiRes.message || "Failed to delete feedback.");
+        return;
+      }
+
+      message.success("Deleted feedback successfully.");
+
+      // ✅ update list locally
+      setAll((prev) => prev.filter((x) => x.feedbackId !== record.feedbackId));
+
+      // ✅ adjust page if needed
+      setPagination((prev) => {
+        const current = prev.current || 1;
+        const pageSize = prev.pageSize || DEFAULT_PAGE_SIZE;
+        const newTotal = Math.max(0, (prev.total || filtered.length) - 1);
+        const maxPage = Math.max(1, Math.ceil(newTotal / pageSize));
+        return {
+          ...prev,
+          current: Math.min(current, maxPage),
+          total: newTotal,
+        };
+      });
+    } catch (e: any) {
+      console.error(e);
+      message.error(e?.response?.data?.message || "Failed to delete feedback.");
     }
   };
 
@@ -144,6 +186,7 @@ export default function FeedbackList() {
             pagination={{ ...pagination, total: filtered.length }}
             onChangePage={handleTableChange}
             onView={openDetail}
+            onDelete={handleDelete}
             formatDate={(v) => (v ? dayjs(v).format("YYYY-MM-DD HH:mm") : "-")}
           />
         </div>

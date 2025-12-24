@@ -1,6 +1,6 @@
-import { Avatar, Button, Space, Table, Typography } from "antd";
+import { Avatar, Button, Space, Table, Typography, Modal, Tooltip } from "antd";
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
-import { EyeOutlined } from "@ant-design/icons";
+import { EyeOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import type { FeedbackEntity } from "../../../../types/feedback.types";
 
@@ -12,6 +12,7 @@ interface FeedbackTableProps {
   pagination: TablePaginationConfig;
   onChangePage: (pagination: TablePaginationConfig) => void;
   onView: (record: FeedbackEntity) => void;
+  onDelete: (record: FeedbackEntity) => void;
   formatDate: (value: string) => string;
 }
 
@@ -21,6 +22,7 @@ export default function FeedbackTable({
   pagination,
   onChangePage,
   onView,
+  onDelete,
 }: FeedbackTableProps) {
   const columns: ColumnsType<FeedbackEntity> = [
     {
@@ -86,15 +88,40 @@ export default function FeedbackTable({
     {
       title: "Actions",
       key: "actions",
-      width: 90,
+      width: 120,
       align: "center",
       render: (_, record) => (
-        <Button
-          shape="circle"
-          size="small"
-          icon={<EyeOutlined />}
-          onClick={() => onView(record)}
-        />
+        <Space size={8}>
+          <Tooltip title="View detail">
+            <Button
+              shape="circle"
+              size="small"
+              icon={<EyeOutlined />}
+              onClick={() => onView(record)}
+            />
+          </Tooltip>
+
+          <Tooltip title="Delete">
+            <Button
+              danger
+              shape="circle"
+              size="small"
+              icon={<DeleteOutlined />}
+              onClick={() => {
+                Modal.confirm({
+                  title: "Delete feedback",
+                  content: `Delete feedback from "${
+                    record.userFullName || record.userName
+                  }"?`,
+                  okText: "Delete",
+                  okType: "danger",
+                  cancelText: "Cancel",
+                  onOk: async () => onDelete(record),
+                });
+              }}
+            />
+          </Tooltip>
+        </Space>
       ),
     },
   ];

@@ -3,13 +3,13 @@ import { Divider, Row, Col, Alert, Tabs, message } from "antd";
 
 import {
   systemReportExportService,
-  type ReportSection,
   type ReportExportFormat,
 } from "../../../services/systemReportExportService";
 import { systemReportService } from "../../../services/systemReportService";
 
 import { ReportPage } from "./components";
 import ReportTableCard from "./components/ReportTableCard";
+import ReportExportDropdown from "./components/ReportExportDropdown";
 
 import type {
   SystemExecutiveSummary,
@@ -20,6 +20,9 @@ import type {
   SystemAiParsingReport,
   SystemAiScoringReport,
   SystemSubscriptionsReport,
+  SystemAiHealthReport,
+  SystemClientEngagementReport,
+  SystemSaasMetricsReport,
 } from "../../../types/systemReport.types";
 
 import ExecutiveSummary from "./ExecutiveSummary/ExecutiveSummary";
@@ -31,14 +34,34 @@ import AiParsing from "./AI/Parsing/AiParsing";
 import AiScoring from "./AI/Scoring/AiScoring";
 import SubscriptionsReport from "./Subscriptions/SubscriptionsReport";
 
+// ✅ NEW: Insights+
+import { AiHealth, ClientEngagement, SaasMetrics } from "./InsightsPlus";
+
 /* ================= TYPES ================= */
 
-type ReportTabKey = "overview" | "companies" | "jobs" | "ai" | "subscriptions";
+type ReportTabKey =
+  | "overview"
+  | "insightsPlus"
+  | "companies"
+  | "jobs"
+  | "ai"
+  | "subscriptions";
 
 type ReportState<T> = {
   loading: boolean;
   data?: T;
   error?: string;
+};
+
+/* ================= HELPERS ================= */
+
+const downloadBlob = (blob: Blob, filename?: string) => {
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || "";
+  a.click();
+  window.URL.revokeObjectURL(url);
 };
 
 /* ================= COMPONENT ================= */
@@ -47,10 +70,8 @@ export default function ReportsOverview() {
   const [activeTab, setActiveTab] = React.useState<ReportTabKey>("overview");
   const [loadingAll, setLoadingAll] = React.useState(false);
 
-  /** exporting per section */
-  const [exportingMap, setExportingMap] = React.useState<
-    Partial<Record<ReportSection, boolean>>
-  >({});
+  /** exporting global (FULL report) */
+  const [exporting, setExporting] = React.useState(false);
 
   /* ===== DATA STATES ===== */
   const [exec, setExec] = React.useState<ReportState<SystemExecutiveSummary>>({
@@ -86,35 +107,43 @@ export default function ReportsOverview() {
   >({
     loading: true,
   });
-  const [subs, setSubs] = React.useState<
-    ReportState<SystemSubscriptionsReport>
+  const [subs, setSubs] = React.useState<ReportState<SystemSubscriptionsReport>>(
+    {
+      loading: true,
+    }
+  );
+
+  // ✅ NEW: Insights+
+  const [aiHealth, setAiHealth] = React.useState<ReportState<SystemAiHealthReport>>({
+    loading: true,
+  });
+  const [engagement, setEngagement] = React.useState<
+    ReportState<SystemClientEngagementReport>
   >({
     loading: true,
   });
+  const [saas, setSaas] = React.useState<ReportState<SystemSaasMetricsReport>>({
+    loading: true,
+  });
 
-  /* ================= EXPORT ================= */
+  /* ================= EXPORT (FULL REPORT) ================= */
 
-  const exportSection = React.useCallback(
-    async (section: ReportSection, format: ReportExportFormat) => {
+  const exportFullReport = React.useCallback(
+    async (format: ReportExportFormat) => {
       try {
-        setExportingMap((m) => ({ ...m, [section]: true }));
+        setExporting(true);
 
-        const blob = await systemReportExportService.exportReport(
-          section,
+        const { blob, filename } = await systemReportExportService.exportReport(
           format
         );
 
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = "";
-        a.click();
-        window.URL.revokeObjectURL(url);
+        downloadBlob(blob, filename);
+        message.success("Export started");
       } catch (err: any) {
         console.error(err);
         message.error(err?.message || "Export failed");
       } finally {
-        setExportingMap((m) => ({ ...m, [section]: false }));
+        setExporting(false);
       }
     },
     []
@@ -137,6 +166,11 @@ export default function ReportsOverview() {
     setAiScoring({ loading: true });
     setSubs({ loading: true });
 
+    // ✅ NEW: reset Insights+
+    setAiHealth({ loading: true });
+    setEngagement({ loading: true });
+    setSaas({ loading: true });
+
     const tasks = await Promise.allSettled([
       systemReportService.getExecutiveSummary(),
       systemReportService.getCompanyOverview(),
@@ -146,6 +180,11 @@ export default function ReportsOverview() {
       systemReportService.getAiParsingQuality(),
       systemReportService.getAiScoringDistribution(),
       systemReportService.getSubscriptionRevenue(),
+
+      // ✅ NEW
+      systemReportService.getAiHealth(),
+      systemReportService.getClientEngagement(),
+      systemReportService.getSaasMetrics(),
     ]);
 
     const [
@@ -157,6 +196,9 @@ export default function ReportsOverview() {
       aiParsingRes,
       aiScoringRes,
       subsRes,
+      aiHealthRes,
+      engagementRes,
+      saasRes,
     ] = tasks;
 
     setExec(
@@ -207,6 +249,23 @@ export default function ReportsOverview() {
         : { loading: false, error: pickErr(subsRes.reason) }
     );
 
+    // ✅ NEW: set Insights+ states
+    setAiHealth(
+      aiHealthRes.status === "fulfilled"
+        ? { loading: false, data: aiHealthRes.value }
+        : { loading: false, error: pickErr(aiHealthRes.reason) }
+    );
+    setEngagement(
+      engagementRes.status === "fulfilled"
+        ? { loading: false, data: engagementRes.value }
+        : { loading: false, error: pickErr(engagementRes.reason) }
+    );
+    setSaas(
+      saasRes.status === "fulfilled"
+        ? { loading: false, data: saasRes.value }
+        : { loading: false, error: pickErr(saasRes.reason) }
+    );
+
     setLoadingAll(false);
   }, []);
 
@@ -222,34 +281,45 @@ export default function ReportsOverview() {
     jobsEff.error ||
     aiParsing.error ||
     aiScoring.error ||
-    subs.error;
+    subs.error ||
+    aiHealth.error ||
+    engagement.error ||
+    saas.error;
 
   /* ================= UI ================= */
 
   return (
     <ReportPage>
-      {/* ===== STICKY TABS ===== */}
+      {/* ===== STICKY TABS + GLOBAL EXPORT ===== */}
       <div className="report-tabs-sticky">
-        <Tabs
-          activeKey={activeTab}
-          onChange={(k) => setActiveTab(k as ReportTabKey)}
-          animated
-          items={[
-            { key: "overview", label: "Overview", disabled: loadingAll },
-            {
-              key: "companies",
-              label: "Company Insights",
-              disabled: loadingAll,
-            },
-            { key: "jobs", label: "Job Performance", disabled: loadingAll },
-            { key: "ai", label: "AI Performance", disabled: loadingAll },
-            {
-              key: "subscriptions",
-              label: "Revenue & Plans",
-              disabled: loadingAll,
-            },
-          ]}
-        />
+        <Row gutter={[12, 12]} align="middle" justify="space-between">
+          <Col flex="auto">
+            <Tabs
+              activeKey={activeTab}
+              onChange={(k) => setActiveTab(k as ReportTabKey)}
+              animated
+              items={[
+                { key: "overview", label: "Overview", disabled: loadingAll },
+                // ✅ NEW: Insights+ (đặt sau Overview)
+                { key: "insightsPlus", label: "Insights+", disabled: loadingAll },
+
+                { key: "companies", label: "Company Insights", disabled: loadingAll },
+                { key: "jobs", label: "Job Performance", disabled: loadingAll },
+                { key: "ai", label: "AI Performance", disabled: loadingAll },
+                { key: "subscriptions", label: "Revenue & Plans", disabled: loadingAll },
+              ]}
+            />
+          </Col>
+
+          <Col>
+            <ReportExportDropdown
+              exporting={exporting}
+              onExport={exportFullReport}
+              size="middle"
+              label="Export Full Report"
+            />
+          </Col>
+        </Row>
       </div>
 
       <Divider />
@@ -267,39 +337,44 @@ export default function ReportsOverview() {
       {/* ===== CONTENT ===== */}
       <div key={activeTab} className="report-tab-content">
         {activeTab === "overview" && (
-          <ReportTableCard
-            title="Executive Summary"
-            section="executive-summary"
-            loading={exec.loading}
-            exporting={exportingMap["executive-summary"]}
-            onExport={exportSection}
-          >
+          <ReportTableCard title="Executive Summary" loading={exec.loading}>
             <ExecutiveSummary {...exec} />
           </ReportTableCard>
+        )}
+
+        {/* ✅ NEW: Insights+ tab content */}
+        {activeTab === "insightsPlus" && (
+          <Row gutter={[16, 16]}>
+            <Col xs={24} lg={12}>
+              <ReportTableCard title="AI Health" loading={aiHealth.loading}>
+                <AiHealth {...aiHealth} />
+              </ReportTableCard>
+            </Col>
+
+            <Col xs={24} lg={12}>
+              <ReportTableCard title="Client Engagement" loading={engagement.loading}>
+                <ClientEngagement {...engagement} />
+              </ReportTableCard>
+            </Col>
+
+            <Col xs={24}>
+              <ReportTableCard title="SaaS Metrics" loading={saas.loading}>
+                <SaasMetrics {...saas} />
+              </ReportTableCard>
+            </Col>
+          </Row>
         )}
 
         {activeTab === "companies" && (
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <ReportTableCard
-                title="Company Overview"
-                section="companies-overview"
-                loading={companiesOverview.loading}
-                exporting={exportingMap["companies-overview"]}
-                onExport={exportSection}
-              >
+              <ReportTableCard title="Company Overview" loading={companiesOverview.loading}>
                 <CompaniesOverview {...companiesOverview} />
               </ReportTableCard>
             </Col>
 
             <Col xs={24} lg={12}>
-              <ReportTableCard
-                title="Company Usage"
-                section="companies-usage"
-                loading={companiesUsage.loading}
-                exporting={exportingMap["companies-usage"]}
-                onExport={exportSection}
-              >
+              <ReportTableCard title="Company Usage" loading={companiesUsage.loading}>
                 <CompaniesUsage {...companiesUsage} />
               </ReportTableCard>
             </Col>
@@ -309,25 +384,13 @@ export default function ReportsOverview() {
         {activeTab === "jobs" && (
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <ReportTableCard
-                title="Job Statistics"
-                section="jobs-statistics"
-                loading={jobsStats.loading}
-                exporting={exportingMap["jobs-statistics"]}
-                onExport={exportSection}
-              >
+              <ReportTableCard title="Job Statistics" loading={jobsStats.loading}>
                 <JobsStatistics {...jobsStats} />
               </ReportTableCard>
             </Col>
 
             <Col xs={24} lg={12}>
-              <ReportTableCard
-                title="Job Effectiveness"
-                section="jobs-effectiveness"
-                loading={jobsEff.loading}
-                exporting={exportingMap["jobs-effectiveness"]}
-                onExport={exportSection}
-              >
+              <ReportTableCard title="Job Effectiveness" loading={jobsEff.loading}>
                 <JobsEffectiveness {...jobsEff} />
               </ReportTableCard>
             </Col>
@@ -337,25 +400,13 @@ export default function ReportsOverview() {
         {activeTab === "ai" && (
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <ReportTableCard
-                title="Parsing Quality"
-                section="ai-parsing"
-                loading={aiParsing.loading}
-                exporting={exportingMap["ai-parsing"]}
-                onExport={exportSection}
-              >
+              <ReportTableCard title="Parsing Quality" loading={aiParsing.loading}>
                 <AiParsing {...aiParsing} />
               </ReportTableCard>
             </Col>
 
             <Col xs={24} lg={12}>
-              <ReportTableCard
-                title="Scoring Distribution"
-                section="ai-scoring"
-                loading={aiScoring.loading}
-                exporting={exportingMap["ai-scoring"]}
-                onExport={exportSection}
-              >
+              <ReportTableCard title="Scoring Distribution" loading={aiScoring.loading}>
                 <AiScoring {...aiScoring} />
               </ReportTableCard>
             </Col>
@@ -363,13 +414,7 @@ export default function ReportsOverview() {
         )}
 
         {activeTab === "subscriptions" && (
-          <ReportTableCard
-            title="Revenue & Plans"
-            section="subscriptions"
-            loading={subs.loading}
-            exporting={exportingMap["subscriptions"]}
-            onExport={exportSection}
-          >
+          <ReportTableCard title="Revenue & Plans" loading={subs.loading}>
             <SubscriptionsReport {...subs} />
           </ReportTableCard>
         )}

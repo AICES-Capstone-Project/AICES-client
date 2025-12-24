@@ -20,7 +20,6 @@ type Props = {
 
 const PlanCard: React.FC<Props> = ({
 	plan,
-	featured = false,
 	isCurrentPlan = false,
 }) => {
 	const [loadingCheckout, setLoadingCheckout] = useState(false);
@@ -28,7 +27,6 @@ const PlanCard: React.FC<Props> = ({
 	// Determine card styling based on plan type
 	const isFree = plan.title?.toLowerCase() === "free";
 	const isPro = plan.title?.toLowerCase() === "pro";
-	const isEnterprise = plan.title?.toLowerCase() === "enterprise";
 
 	return (
 		<div

@@ -7,10 +7,7 @@ import React, {
 } from "react";
 import { Card, Tag, Button, message, Input, Tooltip, Dropdown } from "antd";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import {
-	ArrowLeftOutlined,
-	SearchOutlined,
-} from "@ant-design/icons";
+import { ArrowLeftOutlined, SearchOutlined } from "@ant-design/icons";
 import resumeService from "../../../services/resumeService";
 import { APP_ROUTES } from "../../../services/config";
 import { Swords } from "lucide-react";
@@ -35,9 +32,13 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 	const location = useLocation();
 	const jobId = propJobId ?? params.jobId;
 	// campaignId: prefer route param, fall back to query param for compatibility
-	const campaignIdFromParams = params.campaignId ? Number(params.campaignId) : undefined;
+	const campaignIdFromParams = params.campaignId
+		? Number(params.campaignId)
+		: undefined;
 	const search = new URLSearchParams(location.search);
-	const campaignIdFromQuery = search.get("campaignId") ? Number(search.get("campaignId")) : undefined;
+	const campaignIdFromQuery = search.get("campaignId")
+		? Number(search.get("campaignId"))
+		: undefined;
 	const campaignId = campaignIdFromParams ?? campaignIdFromQuery;
 	const navigate = useNavigate();
 	const [loading, setLoading] = useState(false);
@@ -55,9 +56,14 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 	const [pageSize, setPageSize] = useState(10);
 	const [totalCount, setTotalCount] = useState(0);
 	const [jobTitle, setJobTitle] = useState<string>("");
-	const [targetQuantity, setTargetQuantity] = useState<number | undefined>(undefined);
+	const [targetQuantity, setTargetQuantity] = useState<number | undefined>(
+		undefined
+	);
 	const [searchText, setSearchText] = useState<string>("");
-	const [scoreFilter, setScoreFilter] = useState<{ min: number | null; max: number | null }>({
+	const [scoreFilter, setScoreFilter] = useState<{
+		min: number | null;
+		max: number | null;
+	}>({
 		min: null,
 		max: null,
 	});
@@ -82,7 +88,9 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				jobData = resp;
 			}
 			setJobTitle(jobData?.title ?? "");
-			setTargetQuantity(jobData?.targetQuantity ?? jobData?.target ?? undefined);
+			setTargetQuantity(
+				jobData?.targetQuantity ?? jobData?.target ?? undefined
+			);
 		} catch (e) {
 			console.error("Failed to load job info:", e);
 		}
@@ -90,9 +98,14 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 
 	const loadResumes = useCallback(async () => {
 		if (!jobId) return;
-		console.log('🔄 Loading resumes with params:', {
-			jobId, campaignId, currentPage, pageSize, searchText,
-			minScore: scoreFilter.min, maxScore: scoreFilter.max
+		console.log("🔄 Loading resumes with params:", {
+			jobId,
+			campaignId,
+			currentPage,
+			pageSize,
+			searchText,
+			minScore: scoreFilter.min,
+			maxScore: scoreFilter.max,
 		});
 		setLoading(true);
 		try {
@@ -115,10 +128,14 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				params.maxScore = scoreFilter.max;
 			}
 
-			console.log('📤 API request params:', params);
+			console.log("📤 API request params:", params);
 
 			const resp = campaignId
-				? await resumeService.getByJob(Number(campaignId), Number(jobId), params)
+				? await resumeService.getByJob(
+						Number(campaignId),
+						Number(jobId),
+						params
+				  )
 				: await resumeService.getByJob(Number(jobId), params);
 
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
@@ -153,12 +170,13 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					applicationStatus: r.applicationStatus || undefined,
 					applicationErrorType: r.applicationErrorType || undefined,
 					// Backward compatibility for legacy status field
-					status: r.status || r.applicationStatus || r.resumeStatus || "Processing",
+					status:
+						r.status || r.applicationStatus || r.resumeStatus || "Processing",
 					// preserve raw scores from backend
 					totalScore: (r.totalScore ?? null) as number | null,
 					adjustedScore: (r.adjustedScore ?? null) as number | null,
 					// totalResumeScore is the value used for sorting/display when totalScore missing
-					totalResumeScore: (r.totalScore ?? r.adjustedScore ?? null) ?? null,
+					totalResumeScore: r.totalScore ?? r.adjustedScore ?? null ?? null,
 					email: r.email,
 					phoneNumber: r.phone || r.phoneNumber,
 					fileUrl: r.fileUrl,
@@ -168,10 +186,30 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					note: r.note,
 				}));
 
-				// Server handles sorting and filtering, so use data as-is
-				setResumes(mapped);
-				setTotalCount(total);
-				resumesRef.current = mapped; // Update ref
+				// If caller requested only scored resumes via query param, filter here
+				const qp = new URLSearchParams(location.search);
+				const onlyScored =
+					qp.get("onlyScored") === "1" || qp.get("onlyScored") === "true";
+
+				let filteredMapped = mapped;
+				if (onlyScored) {
+					filteredMapped = mapped.filter(
+						(m) => m.totalResumeScore != null && m.totalResumeScore > 0
+					);
+				}
+
+				const sortedList = filteredMapped.slice().sort((a, b) => {
+					const aS = a.totalResumeScore;
+					const bS = b.totalResumeScore;
+					if (aS == null && bS == null) return a.resumeId - b.resumeId;
+					if (aS == null) return 1;
+					if (bS == null) return -1;
+					if (bS !== aS) return bS - aS;
+					return a.resumeId - b.resumeId;
+				});
+
+				setResumes(sortedList);
+				resumesRef.current = sortedList; // Update ref
 			} else {
 				message.error(resp?.message || "Unable to load resumes");
 			}
@@ -185,11 +223,14 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 
 	// Reload data when filters change (with debounce for search)
 	useEffect(() => {
-		const timeoutId = setTimeout(() => {
-			if (jobId) {
-				setCurrentPage(1); // Reset to page 1 when filters change
-			}
-		}, searchText ? 500 : 0); // 500ms debounce for search, immediate for other filters
+		const timeoutId = setTimeout(
+			() => {
+				if (jobId) {
+					setCurrentPage(1); // Reset to page 1 when filters change
+				}
+			},
+			searchText ? 500 : 0
+		); // 500ms debounce for search, immediate for other filters
 
 		return () => clearTimeout(timeoutId);
 	}, [searchText, scoreFilter, jobId]);
@@ -213,54 +254,55 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 		resumesRef.current = resumes;
 	}, [resumes]);
 
+	// Commented out the polling logic to disable it temporarily
 	// Polling fallback: Check for status changes every 5 seconds if there are Pending resumes
-	useEffect(() => {
-		if (!jobId) return;
+	// useEffect(() => {
+	// 	if (!jobId) return;
 
-		console.log("⏰ Setting up polling for pending resumes...");
-		let pollCount = 0;
-		const maxPolls = 60; // Stop after 5 minutes (60 * 5 seconds)
+	// 	console.log("⏰ Setting up polling for pending resumes...");
+	// 	let pollCount = 0;
+	// 	const maxPolls = 60; // Stop after 5 minutes (60 * 5 seconds)
 
-		const pollInterval = setInterval(() => {
-			// Check if there are any Pending resumes before polling (use ref for latest value)
-			const currentResumes = resumesRef.current;
-			const hasPendingResumes = currentResumes.some(
-				(r) => {
-					// Check both legacy status and new status fields
-					const applicationStatus = r.applicationStatus?.toLowerCase();
-					const resumeStatus = r.resumeStatus?.toLowerCase();
-					const legacyStatus = r.status?.toLowerCase();
+	// 	const pollInterval = setInterval(() => {
+	// 		// Check if there are any Pending resumes before polling (use ref for latest value)
+	// 		const currentResumes = resumesRef.current;
+	// 		const hasPendingResumes = currentResumes.some(
+	// 			(r) => {
+	// 				// Check both legacy status and new status fields
+	// 				const applicationStatus = r.applicationStatus?.toLowerCase();
+	// 				const resumeStatus = r.resumeStatus?.toLowerCase();
+	// 				const legacyStatus = r.status?.toLowerCase();
 
-					return applicationStatus === "pending" ||
-						resumeStatus === "pending" ||
-						legacyStatus === "pending";
-				}
-			);
+	// 				return applicationStatus === "pending" ||
+	// 					   resumeStatus === "pending" ||
+	// 					   legacyStatus === "pending";
+	// 			}
+	// 		);
 
-			if (!hasPendingResumes) {
-				console.log("✅ No pending resumes, stopping polling");
-				clearInterval(pollInterval);
-				return;
-			}
+	// 		if (!hasPendingResumes) {
+	// 			console.log("✅ No pending resumes, stopping polling");
+	// 			clearInterval(pollInterval);
+	// 			return;
+	// 		}
 
-			pollCount++;
-			if (pollCount > maxPolls) {
-				console.log("⏱️ Max polling time reached, stopping");
-				clearInterval(pollInterval);
-				return;
-			}
+	// 		pollCount++;
+	// 		if (pollCount > maxPolls) {
+	// 			console.log("⏱️ Max polling time reached, stopping");
+	// 			clearInterval(pollInterval);
+	// 			return;
+	// 		}
 
-			console.log(
-				`🔄 Polling (${pollCount}/${maxPolls}): Checking for status updates...`
-			);
-			loadResumes();
-		}, 5000); // Poll every 5 seconds
+	// 		console.log(
+	// 			`🔄 Polling (${pollCount}/${maxPolls}): Checking for status updates...`
+	// 		);
+	// 		loadResumes();
+	// 	}, 5000); // Poll every 5 seconds
 
-		return () => {
-			console.log("🛑 Stopping polling");
-			clearInterval(pollInterval);
-		};
-	}, [jobId, loadResumes]); // Only depend on jobId and loadResumes, not resumes
+	// 	return () => {
+	// 		console.log("🛑 Stopping polling");
+	// 		clearInterval(pollInterval);
+	// 	};
+	// }, [jobId, loadResumes]); // Only depend on jobId and loadResumes, not resumes
 
 	// SignalR handlers for real-time updates
 	const handleResumeUpdated = useCallback(
@@ -297,9 +339,14 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 			// to get full updated data (scores, details, etc.)
 			if (
 				eventType === "status_changed" &&
-				(status === "Completed" || status === "Failed" || status === "Invalid" ||
-					status === "Reviewed" || status === "Shortlisted" || status === "Interview" ||
-					status === "Rejected" || status === "Hired")
+				(status === "Completed" ||
+					status === "Failed" ||
+					status === "Invalid" ||
+					status === "Reviewed" ||
+					status === "Shortlisted" ||
+					status === "Interview" ||
+					status === "Rejected" ||
+					status === "Hired")
 			) {
 				console.log(
 					`🔄 Status changed to ${status} for resume ${resumeId}, reloading resume list...`
@@ -358,7 +405,8 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 						...updated[existingIndex],
 						// Map status to appropriate fields based on event data
 						status: status || updated[existingIndex].status,
-						applicationStatus: status || updated[existingIndex].applicationStatus,
+						applicationStatus:
+							status || updated[existingIndex].applicationStatus,
 						fullName: fullName || updated[existingIndex].fullName,
 						totalResumeScore:
 							totalResumeScore != null
@@ -436,7 +484,11 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				resumeId,
 			});
 			const resp = campaignId
-				? await resumeService.getById(Number(campaignId), Number(jobId), resumeId)
+				? await resumeService.getById(
+						Number(campaignId),
+						Number(jobId),
+						resumeId
+				  )
 				: await resumeService.getById(Number(jobId), resumeId);
 			console.debug("[ResumeList] resumeService.getById response", resp);
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
@@ -485,14 +537,17 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					note: (data as any).note ?? (latestScore as any)?.note ?? null,
 					totalResumeScore:
 						latestScore?.totalResumeScore ??
-						((data as any).totalScore ?? (data as any).adjustedScore ?? null),
+						(data as any).totalScore ??
+						(data as any).adjustedScore ??
+						null,
 					email: data.email,
 					phoneNumber: data.phoneNumber,
 					fileUrl: data.fileUrl,
-					aiExplanation: latestScore?.aiExplanation ?? (data as any).aiExplanation,
+					// prefer per-score explanation when present, otherwise top-level aiExplanation
+					aiExplanation:
+						latestScore?.aiExplanation ?? (data as any).aiExplanation,
 					errorMessage: (data as any).errorMessage ?? null,
 					scoreDetails: latestScore?.scoreDetails ?? (data as any).scoreDetails,
-
 				};
 
 				console.debug("[ResumeList] Mapped resume detail:", mappedResume);
@@ -513,7 +568,8 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 		try {
 			// Resolve applicationId when available; backend delete expects applicationId
 			const found = resumes.find((r) => r.resumeId === resumeId);
-			const idToDelete = (found && (found.applicationId ?? found.resumeId)) || resumeId;
+			const idToDelete =
+				(found && (found.applicationId ?? found.resumeId)) || resumeId;
 			const resp = await resumeService.delete(idToDelete as number);
 			if (String(resp?.status || "").toLowerCase() === "success") {
 				toastSuccess("Delete completed", `Resume deleted`);
@@ -530,18 +586,26 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 
 	const handleUploadBatch = async (files: File[]) => {
 		if (!jobId || !campaignId) {
-			message.error('Missing job ID or campaign ID');
+			message.error("Missing job ID or campaign ID");
 			return false;
 		}
 		setUploading(true);
 		try {
-			console.debug('[ResumeList] calling resumeService.uploadBatch with files:', files.map(f => f.name));
-			const resp = await resumeService.uploadBatch(Number(campaignId), Number(jobId), files);
-			console.debug('[ResumeList] uploadBatch response', resp);
+			console.debug(
+				"[ResumeList] calling resumeService.uploadBatch with files:",
+				files.map((f) => f.name)
+			);
+			const resp = await resumeService.uploadBatch(
+				Number(campaignId),
+				Number(jobId),
+				files
+			);
+			console.debug("[ResumeList] uploadBatch response", resp);
 
 			// Handle batch upload response - check both status and successCount
-			const isSuccess = String(resp?.status || "").toLowerCase() === "success" ||
-				((resp?.data as any)?.successCount > 0);
+			const isSuccess =
+				String(resp?.status || "").toLowerCase() === "success" ||
+				(resp?.data as any)?.successCount > 0;
 
 			if (isSuccess) {
 				const successCount = (resp?.data as any)?.successCount || files.length;
@@ -618,9 +682,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 								icon={<ArrowLeftOutlined />}
 								onClick={() => navigate(-1)}
 							/>
-							<span className="font-semibold">
-								{jobTitle}
-							</span>
+							<span className="font-semibold">{jobTitle}</span>
 						</div>
 
 						<div className="flex gap-2 items-center">
@@ -632,10 +694,17 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 									const cid = campaignId ?? "0";
 									const jid = jobId ?? "0";
 									try {
-										navigate(`/company/ai-screening/${cid}/${jid}/resumes/compare`);
+										navigate(
+											`/company/ai-screening/${cid}/${jid}/resumes/compare`
+										);
 									} catch (e) {
 										// fallback to APP_ROUTES template
-										navigate(APP_ROUTES.COMPANY_AI_SCREENING_RESUMES_COMPARE.replace(":campaignId", String(cid)).replace(":jobId", String(jid)));
+										navigate(
+											APP_ROUTES.COMPANY_AI_SCREENING_RESUMES_COMPARE.replace(
+												":campaignId",
+												String(cid)
+											).replace(":jobId", String(jid))
+										);
 									}
 								}}
 							>
@@ -645,23 +714,21 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 								menu={{
 									items: [
 										{
-											key: 'single',
-											label: 'Upload Single CV',
+											key: "single",
+											label: "Upload Single CV",
 											onClick: () => setUploadDrawerOpen(true),
 										},
 										{
-											key: 'batch',
-											label: 'Upload Multiple CVs',
+											key: "batch",
+											label: "Upload Multiple CVs",
 											onClick: () => setUploadBatchDrawerOpen(true),
 										},
 									],
 								}}
-								trigger={['click']}
+								trigger={["click"]}
 								placement="bottomRight"
 							>
-								<Button className="company-btn--filled">
-									Upload CV
-								</Button>
+								<Button className="company-btn--filled">Upload CV</Button>
 							</Dropdown>
 						</div>
 					</div>
@@ -672,7 +739,10 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					borderRadius: 12,
 				}}
 			>
-				<div className="flex gap-3 items-center justify-center" style={{ marginBottom: 12 }}>
+				<div
+					className="flex gap-3 items-center justify-center"
+					style={{ marginBottom: 12 }}
+				>
 					<Input
 						placeholder="Search by name, email, or phone"
 						prefix={<SearchOutlined />}
@@ -685,18 +755,24 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 						scoreFilter={scoreFilter}
 						onFilterChange={setScoreFilter}
 					/>
-					{targetQuantity && (() => {
-						const qualifiedCount = sortedResumes.filter(
-							r => r.totalResumeScore != null && r.totalResumeScore >= 50
-						).length;
-						return qualifiedCount < targetQuantity ? (
-							<Tooltip title={`Not enough qualified candidates. Need ${targetQuantity}, only ${qualifiedCount} with score ≥ 50`}>
-								<Tag color="var(--color-primary)" style={{ fontSize: 14, padding: "4px 12px" }}>
-									Insufficient candidates ({qualifiedCount}/{targetQuantity})
-								</Tag>
-							</Tooltip>
-						) : null;
-					})()}
+					{targetQuantity &&
+						(() => {
+							const qualifiedCount = sortedResumes.filter(
+								(r) => r.totalResumeScore != null && r.totalResumeScore >= 50
+							).length;
+							return qualifiedCount < targetQuantity ? (
+								<Tooltip
+									title={`Not enough qualified candidates. Need ${targetQuantity}, only ${qualifiedCount} with score ≥ 50`}
+								>
+									<Tag
+										color="var(--color-primary)"
+										style={{ fontSize: 14, padding: "4px 12px" }}
+									>
+										Insufficient candidates ({qualifiedCount}/{targetQuantity})
+									</Tag>
+								</Tooltip>
+							) : null;
+						})()}
 				</div>
 				<ResumeTable
 					ref={tableRef}
@@ -707,8 +783,13 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					pageSize={pageSize}
 					totalCount={totalCount}
 					onPageChange={(page, size) => {
-						console.log('🔄 Page change triggered:', { page, size, currentPage, pageSize });
-						
+						console.log("🔄 Page change triggered:", {
+							page,
+							size,
+							currentPage,
+							pageSize,
+						});
+
 						if (size !== pageSize) {
 							// Page size changed, reset to page 1
 							setPageSize(size);

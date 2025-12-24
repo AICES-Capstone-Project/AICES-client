@@ -134,7 +134,14 @@ const CompanySubscription: React.FC = () => {
 			{loading ? (
 				<div style={{ textAlign: "center", padding: "60px 0" }}>Loading...</div>
 			) : currentSubscription ? (
-				<div style={{ display: "flex", gap: 16, alignItems: "flex-start", flexWrap: "wrap" }}>
+				<div
+					style={{
+						display: "flex",
+						gap: 16,
+						alignItems: "flex-start",
+						flexWrap: "wrap",
+					}}
+				>
 					<div style={{ flex: "0 0 420px", minWidth: 300 }}>
 						<SubscriptionStatsCard
 							subscriptionName={currentSubscription.subscriptionName}

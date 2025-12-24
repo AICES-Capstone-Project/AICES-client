@@ -27,11 +27,13 @@ interface CurrentSubscription {
 	subscriptionName: string;
 	description: string;
 	price: number;
-	duration: string;
+	duration: string | null;
 	resumeLimit: number;
 	hoursLimit: number;
-	startDate: string;
-	endDate: string;
+	compareLimit: number;
+	compareHoursLimit: number;
+	startDate: string | null;
+	endDate: string | null;
 	subscriptionStatus: string;
 }
 

@@ -9,6 +9,8 @@ export interface ApiPlan {
 	duration: string; // "Monthly", "Yearly", "Daily"
 	resumeLimit: number;
 	hoursLimit: number;
+	compareLimit: number;
+	compareHoursLimit: number;
 	createdAt: string;
 }
 

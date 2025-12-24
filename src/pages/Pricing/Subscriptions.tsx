@@ -50,9 +50,10 @@ function mapApiPlanToPlanType(apiPlan: any): PlanType {
 		description: apiPlan.description,
 		features: [
 			`${apiPlan.resumeLimit} Resume Limit / ${apiPlan.hoursLimit} Hours`,
+			`${apiPlan.compareLimit} Compare Limit / ${apiPlan.compareHoursLimit} Compare Hours`,
 			`Export reports (PDF, Excel)`,
-			`Retry failed CV screening`,
-			`Advanced CV filtering & search`,
+			`Batch screening`,
+			`Advanced filtering & search`,
 		],
 		subscriptionId: apiPlan.subscriptionId,
 		buttonType: "primary" as PlanType["buttonType"],
@@ -85,27 +86,29 @@ const PricingPage: React.FC = () => {
 	// Map plans and filter based on current subscription
 	const mappedPlans: PlanType[] = plans.map(mapApiPlanToPlanType);
 	const filteredPlans: PlanType[] = mappedPlans.filter((plan) => {
-		// If user has a non-free subscription, hide both current plan and Free plan
+		// If user has a non-Free subscription (Pro, Enterprise, etc.), hide Free plan
 		if (
 			currentSubscriptionName &&
 			currentSubscriptionName.toLowerCase() !== "free"
 		) {
-			return (
-				plan.title !== currentSubscriptionName &&
-				plan.title.toLowerCase() !== "free"
-			);
+			// Hide Free plan, but show current plan and other plans
+			return plan.title.toLowerCase() !== "free";
 		}
-		// Otherwise show all plans
+		// If user has Free subscription or no subscription, show all plans
 		return true;
 	});
 
 	return (
-		<div className="bg-white text-slate-800 min-h-screen pt-20 pb-24 px-6 md:px-24">
+		<div className="bg-gradient-to-br from-slate-50 via-white to-gray-50 text-slate-800 min-h-screen pt-20 pb-24 px-6 md:px-24">
 			<PricingHeader />
 			{loading ? (
-				<div className="text-center py-12">Loading plans...</div>
+				<div className="text-center py-12 text-slate-600 text-lg">
+					Loading plans...
+				</div>
 			) : error ? (
-				<div className="text-center py-12 text-red-600">{error}</div>
+				<div className="text-center py-12 text-red-600 font-medium">
+					{error}
+				</div>
 			) : (
 				<PlansGrid
 					plans={filteredPlans}

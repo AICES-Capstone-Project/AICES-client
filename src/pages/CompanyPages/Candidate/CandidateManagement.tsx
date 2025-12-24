@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Card, Input, Table, Button, Tooltip, Space, Modal, message, Tag } from "antd";
+import { Card, Input, Table, Button, Tooltip, Space, Modal, message } from "antd";
 import { EyeOutlined, SearchOutlined, DeleteOutlined } from "@ant-design/icons";
 
 import { useNavigate } from "react-router-dom";
@@ -136,14 +136,11 @@ const CandidateManagement = () => {
             align: "center",
             width: "40%",
             ellipsis: true,
-            // server-side sorted A-Z; render name with optional 'New' tag
-            render: (v: string, record: any) => {
-                const created = record?.createdAt ? new Date(record.createdAt) : null;
-                const isNew = created ? (Date.now() - created.getTime()) <= 7 * 24 * 60 * 60 * 1000 : false;
+            // server-side sorted A-Z; render name
+            render: (v: string) => {
                 return (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
                         <span>{v || "-"}</span>
-                        {isNew && <Tag color="blue">New</Tag>}
                     </div>
                 );
             }

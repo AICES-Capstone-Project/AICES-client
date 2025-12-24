@@ -2,7 +2,6 @@ import { get, post, patch, remove } from "./api";
 import { API_ENDPOINTS } from "./config";
 
 export const campaignService = {
-  // Get all campaigns for company with pagination
   getCampaigns: async (page?: number, size?: number, search?: string, status?: string) => {
     try {
       const queryParams = new URLSearchParams();
@@ -21,7 +20,6 @@ export const campaignService = {
     }
   },
 
-  // Get campaign by ID
   getCampaignById: async (campaignId: number) => {
     try {
       return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_GET_BY_ID(campaignId));
@@ -30,7 +28,6 @@ export const campaignService = {
     }
   },
 
-  // Create new campaign
   createCampaign: async (data: {
     title: string;
     description?: string;
@@ -50,7 +47,6 @@ export const campaignService = {
     }
   },
 
-  // Update campaign status
   updateCampaignStatus: async (
     campaignId: number,
     status: string
@@ -65,7 +61,6 @@ export const campaignService = {
     }
   },
 
-  // Update campaign (partial)
   updateCampaign: async (campaignId: number, data: any) => {
     try {
       return await patch<any, typeof data>(
@@ -77,7 +72,6 @@ export const campaignService = {
     }
   },
 
-  // Patch campaign (full/partial update) with normalized response
   patchCampaign: async (
     campaignId: number,
     data: {
@@ -100,7 +94,6 @@ export const campaignService = {
     }
   },
 
-  // Delete campaign
   deleteCampaign: async (campaignId: number) => {
     try {
       return await remove<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_DELETE(campaignId));
@@ -109,25 +102,27 @@ export const campaignService = {
     }
   },
 
-  // Add jobs to campaign. Accepts either an array of jobIds (number[])
-  // or an array of job objects [{ jobId, targetQuantity }].
   addJobsToCampaign: async (campaignId: number, jobsOrIds: any[]) => {
     try {
       const isPrimitive = (arr: any[]) => arr.length > 0 && (typeof arr[0] === 'number' || typeof arr[0] === 'string');
       const body = isPrimitive(jobsOrIds)
         ? { jobIds: jobsOrIds.map((v: any) => Number(v)).filter((n: number) => !isNaN(n)) }
         : { jobs: (jobsOrIds || []).map((j: any) => ({ jobId: Number(j.jobId), targetQuantity: Number(j.targetQuantity) || 1 })) };
-      return await post<any, typeof body>(
+      const resp = await post<any, typeof body>(
         API_ENDPOINTS.CAMPAIGN.COMPANY_ADD_JOBS(campaignId),
         body
       );
+      // Normalize empty or 204 responses into a success-shaped object
+      if (resp === undefined || resp === null) {
+        return { status: 'Success', message: 'Jobs added', data: null } as any;
+      }
+      return resp;
     } catch (error) {
       console.error("Failed to add jobs to campaign:", error);
       throw error;
     }
   },
 
-  // Get jobs that belong to a campaign
   getCampaignJobs: async (campaignId: number) => {
     try {
       return await get<any>(API_ENDPOINTS.CAMPAIGN.COMPANY_ADD_JOBS(campaignId));
@@ -136,7 +131,6 @@ export const campaignService = {
     }
   },
 
-  // Remove jobs from campaign
   removeJobsFromCampaign: async (campaignId: number, jobIds: number[]) => {
     try {
       return await remove<any>(

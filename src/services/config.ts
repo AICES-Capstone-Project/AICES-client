@@ -223,6 +223,9 @@ export const API_ENDPOINTS = {
   FEEDBACK: {
     SYSTEM_GET_ALL: "/system/feedbacks",
     SYSTEM_GET_BY_ID: (feedbackId: number) => `/system/feedbacks/${feedbackId}`,
+    // Client endpoints
+    CREATE: "/feedbacks",
+    ME: "/feedbacks/me",
   },
 
   // Job endpoints
@@ -616,6 +619,8 @@ export const APP_ROUTES = {
     "/company/ai-screening/:campaignId/:jobId/resumes",
   COMPANY_AI_SCREENING_RESUMES_COMPARE:
     "/company/ai-screening/:campaignId/:jobId/resumes/compare",
+  // Company feedback page for users to view/submit feedback
+  COMPANY_FEEDBACK: "/company/feedbacks",
   COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
   COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
   COMPANY_PAYMENT_HISTORY: "/company/payment-history",

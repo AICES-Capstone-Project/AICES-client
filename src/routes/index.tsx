@@ -105,6 +105,7 @@ const CompareResumes = lazy(
 const CompanySubscription = lazy(
   () => import("../pages/CompanyPages/CompanySubsriptions/CompanySubscription")
 );
+const CompanyFeedbackPage = lazy(() => import("../pages/CompanyPages/Feedback/FeedbackPage"));
 const PaymentHistory = lazy(
   () =>
     import(
@@ -329,6 +330,10 @@ export const router = createBrowserRouter([
       {
         path: APP_ROUTES.COMPANY_SUBSCRIPTIONS,
         element: <CompanySubscription />,
+      },
+      {
+        path: APP_ROUTES.COMPANY_FEEDBACK,
+        element: <CompanyFeedbackPage />,
       },
       {
         path: APP_ROUTES.COMPANY_PAYMENT_HISTORY,

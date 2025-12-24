@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Button, Spin, Modal, Tooltip, Space, Select, Form, InputNumber, message, Dropdown, Input } from 'antd';
+import { Card, Button, Spin, Modal, Drawer, Tooltip, Space, Select, Form, InputNumber, message, Dropdown, Input } from 'antd';
 import CampaignInfoCard from './CampaignInfoCard';
 import CampaignJobsTable from './CampaignJobsTable';
 import { APP_ROUTES } from '../../../../services/config';
@@ -30,7 +30,10 @@ const CampaignDetail: React.FC = () => {
     const [confirmJobInput, setConfirmJobInput] = useState('');
     const [deletingJobLoading, setDeletingJobLoading] = useState(false);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const PAGE_SIZE = 5;
+    const PAGE_SIZE = 10;
+    const [tableHeight, setTableHeight] = useState<number>(
+        typeof window !== 'undefined' ? Math.max(300, window.innerHeight - 420) : 600
+    );
     const [apiError, setApiError] = useState<string | null>(null);
     const fieldKeyMap = useRef<Map<any, string>>(new Map());
     const fieldKeyCounter = useRef<number>(0);
@@ -152,6 +155,15 @@ const CampaignDetail: React.FC = () => {
         loadCampaign();
     }, [id]);
 
+    useEffect(() => {
+        const handleResize = () => {
+            if (typeof window === 'undefined') return;
+            setTableHeight(Math.max(300, window.innerHeight - 420));
+        };
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
     const formatDateTime = (s?: string) => {
         if (!s) return "";
         try {
@@ -225,36 +237,70 @@ const CampaignDetail: React.FC = () => {
     };
 
     const handleAddJobs = async () => {
-        if (!campaign) return;
-        try {
-            setApiError(null);
-            const values = await addForm.validateFields();
-            const entries = Array.isArray(values.jobs) ? values.jobs : [];
-            const jobsPayload = entries
-                .map((j: any) => ({ jobId: Number(j.jobId), targetQuantity: Number(j.targetQuantity) }))
-                .filter((it: any) => Number.isFinite(it.jobId) && Number.isFinite(it.targetQuantity) && Number(it.targetQuantity) >= 1);
-            if (!jobsPayload.length) return;
-            const resp = await campaignService.addJobsToCampaign(campaign.campaignId, jobsPayload);
-            const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
-            if (ok) {
-                setApiError(null);
-                await loadCampaign();
-                setAddJobModalOpen(false);
-            } else {
-                const msg = resp?.message || (resp?.data && resp.data.message) || 'Add jobs failed';
-                console.error('Add jobs failed', resp);
-                setApiError(msg);
-                message.error(msg);
-            }
-        } catch (err) {
-            const msg = (err as any)?.message || 'Add jobs error';
-            console.error('Add jobs error', err);
-            setApiError(msg);
-            message.error(msg);
-        }
-    };
+    if (!campaign) return;
 
-    // Remove a job from the current campaign
+    try {
+        setApiError(null);
+
+        const values = await addForm.validateFields();
+        const entries = Array.isArray(values.jobs) ? values.jobs : [];
+
+        const jobsPayload = entries
+            .map((j: any) => ({
+                jobId: Number(j.jobId),
+                targetQuantity: Number(j.targetQuantity),
+            }))
+            .filter(
+                (it: any) =>
+                    Number.isFinite(it.jobId) &&
+                    Number.isFinite(it.targetQuantity) &&
+                    it.targetQuantity >= 1
+            );
+
+        if (!jobsPayload.length) return;
+
+        const resp = await campaignService.addJobsToCampaign(
+            campaign.campaignId,
+            jobsPayload
+        );
+
+        console.log('RAW addJobsToCampaign resp:', resp);
+
+        /**
+         * Normalize response safely
+         * Support:
+         * - { status, message, data }
+         * - { data: { status, message, data } }
+         * - 204 No Content
+         */
+        const status =
+            resp?.status ??
+            resp?.data?.status ??
+            'Success';
+
+        const backendMessage =
+            resp?.message ??
+            resp?.data?.message ??
+            'Successfully added job(s) to campaign';
+
+        if (status === 'Success') {
+            message.success(backendMessage);
+            setAddJobModalOpen(false);
+            await loadCampaign();
+        } else {
+            throw new Error(backendMessage || 'Add jobs failed');
+        }
+    } catch (err) {
+        const msg =
+            (err as any)?.message ||
+            'Add jobs error';
+
+        console.error('Add jobs error:', err);
+        setApiError(msg);
+        message.error(msg);
+    }
+};
+
     const onDelete = async (job: any) => {
         if (!campaign) return;
         try {
@@ -265,7 +311,6 @@ const CampaignDetail: React.FC = () => {
                 return;
             }
 
-            // call service to remove job(s) from campaign. API expects an array of jobIds (number[]).
             const resp = await campaignService.removeJobsFromCampaign(campaign.campaignId, [jobId]);
             const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
             if (ok) {
@@ -293,9 +338,6 @@ const CampaignDetail: React.FC = () => {
         }
         ,
         { title: 'Job Title', align: 'center',width: "40%", dataIndex: 'title', key: 'title' },
-        { title: 'Target', dataIndex: 'target', key: 'target', width: "7%", align: 'center' },
-        { title: 'Hired', dataIndex: 'filled', key: 'filled', width: "7%", align: 'center' },
-        { title: 'Remaining', key: 'remaining', width: "7%", align: 'center', render: (_: any, r: any) => Math.max(0, (r.target || 0) - (r.filled || 0)) },
         {
             title: 'Tracking', key: 'tracking', width: "10%", align: 'center', render: (_: any, r: any) => (
                 <Tooltip title="View Tracking">
@@ -303,6 +345,9 @@ const CampaignDetail: React.FC = () => {
                 </Tooltip>
             )
         },
+        { title: 'Target', dataIndex: 'target', key: 'target', width: "7%", align: 'center' },
+        { title: 'Hired', dataIndex: 'filled', key: 'filled', width: "7%", align: 'center' },
+        { title: 'Remaining', key: 'remaining', width: "9%", align: 'center', render: (_: any, r: any) => Math.max(0, (r.target || 0) - (r.filled || 0)) },
         {
             title: 'Resumes', key: 'resumes', width: "10%", align: 'center', render: (_: any, r: any) => (
                 <Tooltip title="List resumes">
@@ -445,6 +490,7 @@ const CampaignDetail: React.FC = () => {
                 current={currentPage}
                 pageSize={PAGE_SIZE}
                 total={totalJobs}
+                tableHeight={tableHeight}
                 onChange={(page: number) => setCurrentPage(page)}
             />
             <JobViewDrawer
@@ -452,16 +498,12 @@ const CampaignDetail: React.FC = () => {
                 onClose={() => { setJobViewOpen(false); setJobToView(null); }}
                 job={jobToView}
             />
-            <Modal
-                open={addJobModalOpen}
+            <Drawer
                 title="Add jobs to campaign"
-                onCancel={() => setAddJobModalOpen(false)}
-                footer={
-                    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between' }}>
-                        <Button className="company-btn" onClick={() => setAddJobModalOpen(false)}>Cancel</Button>
-                        <Button className="company-btn--filled" onClick={handleAddJobs} loading={jobLoading}>Add Jobs</Button>
-                    </div>
-                }
+                open={addJobModalOpen}
+                onClose={() => setAddJobModalOpen(false)}
+                placement="right"
+                width={560}
             >
                 <div style={{ marginBottom: 8 }}>Select jobs to add to this campaign and specify target quantity for each:</div>
                 <Form form={addForm} layout="vertical">
@@ -519,7 +561,12 @@ const CampaignDetail: React.FC = () => {
                         }}
                     </Form.List>
                 </Form>
-            </Modal>
+
+                <div style={{ position: 'absolute', left: 0, bottom: 0, width: '100%', padding: 16, borderTop: '1px solid rgba(0,0,0,0.06)', background: '#fff', display: 'flex', justifyContent: 'space-between' }}>
+                    <Button className="company-btn" onClick={() => setAddJobModalOpen(false)}>Cancel</Button>
+                    <Button className="company-btn--filled" onClick={handleAddJobs} loading={jobLoading}>Add Jobs</Button>
+                </div>
+            </Drawer>
 
             <Modal
                 title="Delete job from campaign"

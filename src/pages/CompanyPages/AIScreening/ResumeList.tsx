@@ -751,7 +751,6 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 			<UploadBatchDrawer
 				open={uploadBatchDrawerOpen}
 				onClose={() => setUploadBatchDrawerOpen(false)}
-				jobTitle={jobTitle}
 				onUpload={handleUploadBatch}
 				uploading={uploading}
 			/>

@@ -141,24 +141,23 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
 				const raw = resp.data as any;
 				let resumeList: any[] = [];
-				let total = 0;
 
 				// Handle API response structure: data.resumes and data.totalCount
 				if (raw.resumes && Array.isArray(raw.resumes)) {
 					resumeList = raw.resumes;
-					total = raw.totalCount || 0;
+					setTotalCount(raw.totalCount || 0);
 				} else if (raw.items && Array.isArray(raw.items)) {
 					resumeList = raw.items;
-					total = raw.totalCount || raw.total || resumeList.length;
+					setTotalCount(raw.totalCount || raw.total || resumeList.length);
 				} else if (Array.isArray(raw.data)) {
 					resumeList = raw.data;
-					total = raw.totalCount || raw.total || resumeList.length;
+					setTotalCount(raw.totalCount || raw.total || resumeList.length);
 				} else if (Array.isArray(raw)) {
 					resumeList = raw;
-					total = resumeList.length;
+					setTotalCount(resumeList.length);
 				} else {
 					resumeList = [];
-					total = 0;
+					setTotalCount(0);
 				}
 
 				const mapped: UIResume[] = resumeList.map((r: any) => ({

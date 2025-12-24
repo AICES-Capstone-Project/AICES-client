@@ -18,10 +18,7 @@ type Props = {
 	isCurrentPlan?: boolean;
 };
 
-const PlanCard: React.FC<Props> = ({
-	plan,
-	isCurrentPlan = false,
-}) => {
+const PlanCard: React.FC<Props> = ({ plan, isCurrentPlan = false }) => {
 	const [loadingCheckout, setLoadingCheckout] = useState(false);
 
 	// Determine card styling based on plan type

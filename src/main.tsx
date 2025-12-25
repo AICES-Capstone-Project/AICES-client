@@ -18,24 +18,27 @@ import i18n from "./i18n";
 import { router } from "./routes/index.tsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { store } from "./stores/store.ts";
+import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary.tsx";
 
 createRoot(document.getElementById("root")!).render(
 	<StrictMode>
-		<Provider store={store}>
-			<Suspense
-				fallback={
-					<Loading
-						fullScreen
-						size="lg"
-						variant="primary"
-						text={i18n.t("app.loading")}
-					/>
-				}
-			>
-				<GoogleOAuthProvider clientId={import.meta.env.VITE_AUTH_GOOGLE_ID}>
-					<RouterProvider router={router} />
-				</GoogleOAuthProvider>
-			</Suspense>
-		</Provider>
+		<ErrorBoundary>
+			<Provider store={store}>
+				<Suspense
+					fallback={
+						<Loading
+							fullScreen
+							size="lg"
+							variant="primary"
+							text={i18n.t("app.loading")}
+						/>
+					}
+				>
+					<GoogleOAuthProvider clientId={import.meta.env.VITE_AUTH_GOOGLE_ID}>
+						<RouterProvider router={router} />
+					</GoogleOAuthProvider>
+				</Suspense>
+			</Provider>
+		</ErrorBoundary>
 	</StrictMode>
 );

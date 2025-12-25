@@ -82,6 +82,14 @@ export const getNotificationIcon = (type: string) => {
 			icon: <MailFilled style={{ color: "white" }} />,
 			color: "#6C5CE7",
 		},
+		SystemCompany: {
+			icon: <TeamOutlined style={{ color: "white" }} />,
+			color: "#00baaeff",
+		},
+		SystemSubscription: {
+			icon: <CrownFilled style={{ color: "white" }} />,
+			color: "#F59E0B",
+		},
 	};
 
 	return (
@@ -106,6 +114,8 @@ export const getNotificationRoute = (type: string): string | null => {
 		Campaign: APP_ROUTES.COMPANY_CAMPAIN,
 		Member: APP_ROUTES.COMPANY_STAFFS,
 		Company: APP_ROUTES.COMPANY_MY_APARTMENTS,
+		SystemCompany: APP_ROUTES.SYSTEM_COMPANY,
+		SystemSubscription: APP_ROUTES.SYSTEM_SUBSCRIPTIONS_COMPANIES,
 	};
 
 	return routeMap[type] || null;

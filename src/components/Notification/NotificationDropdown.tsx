@@ -314,29 +314,6 @@ const NotificationDropdown: React.FC<NotificationDropdownProps> = ({
 					))
 				)}
 			</div>
-			{/* Footer: view all notifications */}
-			<div className="border-t px-3 py-2">
-				<Button
-					type="link"
-					block
-					onClick={() => {
-						setOpen(false);
-						try {
-							navigate(APP_ROUTES.COMPANY_NOTIFICATION);
-						} catch (e) {
-							// fallback: navigate to hard-coded path
-							// eslint-disable-next-line no-console
-							console.warn(
-								"Failed to navigate via APP_ROUTES, falling back",
-								e
-							);
-							navigate("/company/notification");
-						}
-					}}
-				>
-					{t("notification.viewAll", "View all notifications")}
-				</Button>
-			</div>
 		</div>
 	);
 

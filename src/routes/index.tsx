@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { lazy } from "react";
+import { lazyWithRetry } from "../utils/lazyWithRetry";
 import ProtectedRoute from "./ProtectedRoute";
 import UserProfileTest from "../pages/UserProfileTest";
 import { APP_ROUTES, ROLES } from "../services/config";
@@ -11,104 +11,104 @@ import CompanyDetail from "../pages/SystemPages/Company/components/CompanyDetail
 import JobDetail from "../pages/SystemPages/Company/JobDetail";
 import ResumeDetail from "../pages/SystemPages/Company/ResumeDetail";
 
-const ErrorPage = lazy(() => import("../pages/ErrorPage"));
-const NotFoundPage = lazy(() => import("../pages/NotFoundPage"));
+const ErrorPage = lazyWithRetry(() => import("../pages/ErrorPage"));
+const NotFoundPage = lazyWithRetry(() => import("../pages/NotFoundPage"));
 
 /* ============== Layouts ==============*/
-const MainLayout = lazy(() => import("../components/Layout/MainLayout"));
-const SystemAdminLayout = lazy(
+const MainLayout = lazyWithRetry(() => import("../components/Layout/MainLayout"));
+const SystemAdminLayout = lazyWithRetry(
   () => import("../components/Layout/SystemAdminLayout")
 );
-const SystemManagerLayout = lazy(
+const SystemManagerLayout = lazyWithRetry(
   () => import("../components/Layout/SystemManagerLayout")
 );
-const SystemStaffLayout = lazy(
+const SystemStaffLayout = lazyWithRetry(
   () => import("../components/Layout/SystemStaffLayout")
 );
-const CompanyLayout = lazy(() => import("../components/Layout/CompanyLayout"));
-const ProfileLayout = lazy(() => import("../components/Layout/ProfileLayout"));
+const CompanyLayout = lazyWithRetry(() => import("../components/Layout/CompanyLayout"));
+const ProfileLayout = lazyWithRetry(() => import("../components/Layout/ProfileLayout"));
 
 /* ============== General Pages ==============*/
-const Home = lazy(() => import("../pages/Homepage/Homepage"));
+const Home = lazyWithRetry(() => import("../pages/Homepage/Homepage"));
 
 /* ============== Legal & Trust Pages ==============*/
-const TermsOfService = lazy(
+const TermsOfService = lazyWithRetry(
   () => import("../pages/Legal/TermsOfService/TermsOfService")
 );
-const PrivacyPolicy = lazy(
+const PrivacyPolicy = lazyWithRetry(
   () => import("../pages/Legal/PrivacyPolicy/PrivacyPolicy")
 );
-const SecurityPrivacy = lazy(
+const SecurityPrivacy = lazyWithRetry(
   () => import("../pages/Legal/SecurityPrivacy/SecurityPrivacy")
 );
 /* ============== Product Pages ==============*/
-const HowItWorks = lazy(() => import("../pages/Product/HowItWorks/HowItWorks"));
-const NoAts = lazy(() => import("../pages/Product/NoAts/NoAts"));
+const HowItWorks = lazyWithRetry(() => import("../pages/Product/HowItWorks/HowItWorks"));
+const NoAts = lazyWithRetry(() => import("../pages/Product/NoAts/NoAts"));
 
 /* ============== Resources Pages ==============*/
-const Blog = lazy(() => import("../pages/Resources/Blog/Blog.tsx"));
+const Blog = lazyWithRetry(() => import("../pages/Resources/Blog/Blog.tsx"));
 
-const HelpCenter = lazy(
+const HelpCenter = lazyWithRetry(
   () => import("../pages/Resources/HelpCenter/HelpCenter")
 );
-const ContactUs = lazy(() => import("../pages/Resources/ContactUs/ContactUs"));
+const ContactUs = lazyWithRetry(() => import("../pages/Resources/ContactUs/ContactUs"));
 
-const Subscriptions = lazy(() => import("../pages/Pricing/Subscriptions"));
-const Login = lazy(() => import("../pages/Login/Login"));
-const VerifyEmailPage = lazy(() => import("../pages/SignUp/VerifyEmailPage"));
-const SignUp = lazy(() => import("../pages/SignUp/Signup"));
-const ForgetPassword = lazy(
+const Subscriptions = lazyWithRetry(() => import("../pages/Pricing/Subscriptions"));
+const Login = lazyWithRetry(() => import("../pages/Login/Login"));
+const VerifyEmailPage = lazyWithRetry(() => import("../pages/SignUp/VerifyEmailPage"));
+const SignUp = lazyWithRetry(() => import("../pages/SignUp/Signup"));
+const ForgetPassword = lazyWithRetry(
   () => import("../pages/Login/partials/ForgetPassword/ForgetPass")
 );
-const ResetPassword = lazy(
+const ResetPassword = lazyWithRetry(
   () => import("../pages/Login/partials/ResetPassword/ResetPassword")
 );
-const ProfileDetail = lazy(() => import("../pages/Profile/ProfileDetail"));
+const ProfileDetail = lazyWithRetry(() => import("../pages/Profile/ProfileDetail"));
 
 /* ============== Company Pages ==============*/
-const CompanyDashboard = lazy(
+const CompanyDashboard = lazyWithRetry(
   () => import("../pages/CompanyPages/Dashboard/Dashboard")
 );
-const CompanyStaffs = lazy(
+const CompanyStaffs = lazyWithRetry(
   () => import("../pages/CompanyPages/StaffManagement/StaffManagement")
 );
-const JobManagement = lazy(
+const JobManagement = lazyWithRetry(
   () => import("../pages/CompanyPages/JobManagement/JobManagement")
 );
-const SubmissionPending = lazy(
+const SubmissionPending = lazyWithRetry(
   () => import("../pages/CompanyPages/MyApartment/SubmissionPending")
 );
-const Campain = lazy(
+const Campain = lazyWithRetry(
   () => import("../pages/CompanyPages/Campain/CampaignManagement.tsx")
 );
-const CampaignDetail = lazy(
+const CampaignDetail = lazyWithRetry(
   () => import("../pages/CompanyPages/Campain/component/CampaignDetail")
 );
-const HiringTracking = lazy(
+const HiringTracking = lazyWithRetry(
   () => import("../pages/CompanyPages/HiringTracking/HiringTracking")
 );
-const ResumeList = lazy(
+const ResumeList = lazyWithRetry(
   () => import("../pages/CompanyPages/AIScreening/ResumeList")
 );
-const Notification = lazy(
+const Notification = lazyWithRetry(
   () => import("../pages/CompanyPages/Notification/NotificationManager")
 );
-const CandidateManagement = lazy(
+const CandidateManagement = lazyWithRetry(
   () => import("../pages/CompanyPages/Candidate/CandidateManagement")
 );
-const CandidateDetail = lazy(
+const CandidateDetail = lazyWithRetry(
   () => import("../pages/CompanyPages/Candidate/components/CandidateDetail")
 );
-const CompareResumes = lazy(
+const CompareResumes = lazyWithRetry(
   () => import("../pages/CompanyPages/CompareResume/CompareResumes")
 );
-const CompanySubscription = lazy(
+const CompanySubscription = lazyWithRetry(
   () => import("../pages/CompanyPages/CompanySubsriptions/CompanySubscription")
 );
-const CompanyFeedbackPage = lazy(
+const CompanyFeedbackPage = lazyWithRetry(
   () => import("../pages/CompanyPages/Feedback/FeedbackPage")
 );
-const PaymentHistory = lazy(
+const PaymentHistory = lazyWithRetry(
   () =>
     import(
       "../pages/CompanyPages/CompanySubsriptions/components/PaymentHistory"
@@ -116,50 +116,50 @@ const PaymentHistory = lazy(
 );
 
 /* ============== System Pages ==============*/
-const SystemDashboard = lazy(() => import("../pages/SystemPages/Dashboard"));
-const SystemAccounts = lazy(() => import("../pages/SystemPages/Accounts"));
+const SystemDashboard = lazyWithRetry(() => import("../pages/SystemPages/Dashboard"));
+const SystemAccounts = lazyWithRetry(() => import("../pages/SystemPages/Accounts"));
 //Subscription Pages
-const PlansPage = lazy(
+const PlansPage = lazyWithRetry(
   () => import("../pages/SystemPages/Subscriptions/PlansPage")
 );
-const SubscribedCompaniesPage = lazy(
+const SubscribedCompaniesPage = lazyWithRetry(
   () => import("../pages/SystemPages/Subscriptions/SubscribedCompaniesPage")
 );
 //Taxonomy Pages
-const CategoryList = lazy(
+const CategoryList = lazyWithRetry(
   () => import("../pages/SystemPages/Taxonomy/CategoryList")
 );
 
-const SkillList = lazy(() => import("../pages/SystemPages/Taxonomy/SkillList"));
+const SkillList = lazyWithRetry(() => import("../pages/SystemPages/Taxonomy/SkillList"));
 
-const SpecializationList = lazy(
+const SpecializationList = lazyWithRetry(
   () => import("../pages/SystemPages/Taxonomy/SpecializationList")
 );
 
-const RecruitmentTypeList = lazy(
+const RecruitmentTypeList = lazyWithRetry(
   () => import("../pages/SystemPages/Taxonomy/RecruitmentTypeList")
 );
-const LanguageList = lazy(
+const LanguageList = lazyWithRetry(
   () => import("../pages/SystemPages/Taxonomy/LanguageList")
 );
 
-const LevelList = lazy(() => import("../pages/SystemPages/Taxonomy/LevelList"));
+const LevelList = lazyWithRetry(() => import("../pages/SystemPages/Taxonomy/LevelList"));
 
 //Content
-const BannerList = lazy(
+const BannerList = lazyWithRetry(
   () => import("../pages/SystemPages/Content/Banners/BannerList")
 );
-const BlogList = lazy(
+const BlogList = lazyWithRetry(
   () => import("../pages/SystemPages/Content/Blogs/BlogList")
 );
-const BlogDetail = lazy(() => import("../pages/Resources/Blog/BlogDetail.tsx"));
+const BlogDetail = lazyWithRetry(() => import("../pages/Resources/Blog/BlogDetail.tsx"));
 
 //Feedback
-const FeedbackList = lazy(
+const FeedbackList = lazyWithRetry(
   () => import("../pages/SystemPages/Feedback/FeedbackList")
 );
 
-const PaymentSuccess = lazy(
+const PaymentSuccess = lazyWithRetry(
   () =>
     import(
       "../pages/CompanyPages/CompanySubsriptions/components/PaymentSuccess"
@@ -167,7 +167,7 @@ const PaymentSuccess = lazy(
 );
 
 // ===== Reports System Pages =====
-const ReportsOverview = lazy(
+const ReportsOverview = lazyWithRetry(
   () => import("../pages/SystemPages/Reports/ReportsOverview")
 );
 

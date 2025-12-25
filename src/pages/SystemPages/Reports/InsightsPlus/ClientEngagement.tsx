@@ -45,20 +45,28 @@ export default function ClientEngagement({
     {
       key: "avgJobs",
       label: "Avg Jobs / Company / Month",
-      value: <Text strong>{fmtNumber(data?.usageFrequency?.averageJobsPerCompanyPerMonth)}</Text>,
+      value: (
+        <Text strong>
+          {fmtNumber(data?.usageFrequency?.averageJobsPerCompanyPerMonth)}
+        </Text>
+      ),
     },
     {
       key: "avgCampaigns",
       label: "Avg Campaigns / Company / Month",
-      value: <Text strong>{fmtNumber(data?.usageFrequency?.averageCampaignsPerCompanyPerMonth)}</Text>,
+      value: (
+        <Text strong>
+          {fmtNumber(data?.usageFrequency?.averageCampaignsPerCompanyPerMonth)}
+        </Text>
+      ),
     },
   ];
 
   const trust = data?.aiTrustLevel?.trustPercentage;
   const hi = data?.aiTrustLevel?.highScoreCandidatesCount ?? 0;
   const hired = data?.aiTrustLevel?.highScoreCandidatesHiredCount ?? 0;
-  const conversion = hi > 0 ? (hired / hi) * 100 : undefined;
 
+  // Swagger-driven: do NOT derive extra KPIs not provided by BE
   const trustData: RowItem[] = [
     {
       key: "trustPct",
@@ -74,11 +82,6 @@ export default function ClientEngagement({
       key: "hiHired",
       label: "High-score Hired",
       value: <Tag color="green">{fmtNumber(hired)}</Tag>,
-    },
-    {
-      key: "conversion",
-      label: "High-score Hire Conversion",
-      value: conversion == null ? "--" : <Tag color="gold">{fmtPercent(conversion, 2)}</Tag>,
     },
   ];
 

@@ -1,5 +1,5 @@
 // src/pages/SystemPages/Reports/AI/Parsing/AiParsing.tsx
-
+import React from "react";
 import { Card, Typography, Table, Alert, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { SystemAiParsingReport } from "../../../../../types/systemReport.types";
@@ -19,11 +19,11 @@ type RowItem = {
   value: React.ReactNode;
 };
 
-export default function AiParsing({
-  loading,
-  data,
-  error,
-}: AiParsingProps) {
+// Swagger-driven: rates are ratios (0..1) -> convert to percent
+const ratioToPercent = (v?: number) =>
+  typeof v === "number" ? v * 100 : undefined;
+
+export default function AiParsing({ loading, data, error }: AiParsingProps) {
   if (error) {
     return (
       <Alert
@@ -38,12 +38,7 @@ export default function AiParsing({
 
   const columns: ColumnsType<RowItem> = [
     { title: "Metric", dataIndex: "label", key: "label" },
-    {
-      title: "Value",
-      dataIndex: "value",
-      key: "value",
-      align: "right",
-    },
+    { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
   const overviewData: RowItem[] = [
@@ -51,7 +46,7 @@ export default function AiParsing({
       key: "successRate",
       label: "Success Rate",
       value: (
-        <Tag color="green">{fmtPercent(data?.successRate)}</Tag>
+        <Tag color="green">{fmtPercent(ratioToPercent(data?.successRate))}</Tag>
       ),
     },
     {
@@ -67,11 +62,7 @@ export default function AiParsing({
     {
       key: "failed",
       label: "Failed Parsing",
-      value: (
-        <Tag color="red">
-          {fmtNumber(data?.failedParsing)}
-        </Tag>
-      ),
+      value: <Tag color="red">{fmtNumber(data?.failedParsing)}</Tag>,
     },
     {
       key: "avgTime",
@@ -116,7 +107,7 @@ export default function AiParsing({
             key: "percentage",
             width: 120,
             align: "right",
-            render: (v: number) => fmtPercent(v),
+            render: (v: number) => fmtPercent(ratioToPercent(v)),
           },
         ]}
       />

@@ -1,9 +1,9 @@
 // src/pages/SystemPages/Reports/Subscriptions/SubscriptionsReport.tsx
-
+import React from "react";
 import { Card, Typography, Table, Alert, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { SystemSubscriptionsReport } from "../../../../types/systemReport.types";
-import { fmtMoney, fmtNumber, fmtPercent } from "../components/formatters";
+import { fmtMoney, fmtNumber } from "../components/formatters";
 
 const { Text } = Typography;
 
@@ -38,12 +38,7 @@ export default function SubscriptionsReport({
 
   const columns: ColumnsType<RowItem> = [
     { title: "Metric", dataIndex: "label", key: "label" },
-    {
-      title: "Value",
-      dataIndex: "value",
-      key: "value",
-      align: "right",
-    },
+    { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
   const summaryData: RowItem[] = [
@@ -55,23 +50,12 @@ export default function SubscriptionsReport({
     {
       key: "paid",
       label: "Paid Companies",
-      value: (
-        <Tag color="green">{fmtNumber(data?.paidCompanies)}</Tag>
-      ),
+      value: <Tag color="green">{fmtNumber(data?.paidCompanies)}</Tag>,
     },
     {
       key: "monthlyRevenue",
       label: "Monthly Revenue",
-      value: (
-        <Text strong>{fmtMoney(data?.monthlyRevenue)}</Text>
-      ),
-    },
-    {
-      key: "renewalRate",
-      label: "Renewal Rate",
-      value: (
-        <Tag color="blue">{fmtPercent(data?.renewalRate)}</Tag>
-      ),
+      value: <Text strong>{fmtMoney(data?.monthlyRevenue)}</Text>,
     },
     {
       key: "popularPlan",

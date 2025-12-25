@@ -1,5 +1,5 @@
 // src/pages/SystemPages/Reports/AI/Scoring/AiScoring.tsx
-
+import React from "react";
 import { Card, Typography, Table, Alert, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { SystemAiScoringReport } from "../../../../../types/systemReport.types";
@@ -19,11 +19,11 @@ type RowItem = {
   value: React.ReactNode;
 };
 
-export default function AiScoring({
-  loading,
-  data,
-  error,
-}: AiScoringProps) {
+// Swagger-driven: rates are ratios (0..1) -> convert to percent
+const ratioToPercent = (v?: number) =>
+  typeof v === "number" ? v * 100 : undefined;
+
+export default function AiScoring({ loading, data, error }: AiScoringProps) {
   if (error) {
     return (
       <Alert
@@ -38,12 +38,7 @@ export default function AiScoring({
 
   const columns: ColumnsType<RowItem> = [
     { title: "Metric", dataIndex: "label", key: "label" },
-    {
-      title: "Value",
-      dataIndex: "value",
-      key: "value",
-      align: "right",
-    },
+    { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
   const overviewData: RowItem[] = [
@@ -51,7 +46,7 @@ export default function AiScoring({
       key: "successRate",
       label: "Success Rate",
       value: (
-        <Tag color="green">{fmtPercent(data?.successRate)}</Tag>
+        <Tag color="green">{fmtPercent(ratioToPercent(data?.successRate))}</Tag>
       ),
     },
     {
@@ -82,7 +77,7 @@ export default function AiScoring({
       label: "High Score",
       value: (
         <Tag color="green">
-          {fmtPercent(data?.scoreDistribution?.high)}
+          {fmtPercent(ratioToPercent(data?.scoreDistribution?.high))}
         </Tag>
       ),
     },
@@ -91,7 +86,7 @@ export default function AiScoring({
       label: "Medium Score",
       value: (
         <Tag color="gold">
-          {fmtPercent(data?.scoreDistribution?.medium)}
+          {fmtPercent(ratioToPercent(data?.scoreDistribution?.medium))}
         </Tag>
       ),
     },
@@ -100,7 +95,7 @@ export default function AiScoring({
       label: "Low Score",
       value: (
         <Tag color="red">
-          {fmtPercent(data?.scoreDistribution?.low)}
+          {fmtPercent(ratioToPercent(data?.scoreDistribution?.low))}
         </Tag>
       ),
     },

@@ -1,5 +1,5 @@
 // src/pages/SystemPages/Reports/Companies/Usage/CompaniesUsage.tsx
-
+import React from "react";
 import { Card, Typography, Table, Alert, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { SystemCompaniesUsageReport } from "../../../../../types/systemReport.types";
@@ -19,6 +19,10 @@ type RowItem = {
   value: React.ReactNode;
 };
 
+// Swagger-driven: kpis are ratios (0..1) -> convert to percent
+const ratioToPercent = (v?: number) =>
+  typeof v === "number" ? v * 100 : undefined;
+
 export default function CompaniesUsage({
   loading,
   data,
@@ -37,18 +41,8 @@ export default function CompaniesUsage({
   }
 
   const columns: ColumnsType<RowItem> = [
-    {
-      title: "Metric",
-      dataIndex: "label",
-      key: "label",
-      width: "60%",
-    },
-    {
-      title: "Value",
-      dataIndex: "value",
-      key: "value",
-      align: "right",
-    },
+    { title: "Metric", dataIndex: "label", key: "label", width: "60%" },
+    { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
   const usageData: RowItem[] = [
@@ -58,18 +52,14 @@ export default function CompaniesUsage({
       value: fmtNumber(data?.registeredOnly),
     },
     {
-      key: "active",
-      label: "Active Companies",
-      value: (
-        <Tag color="blue">{fmtNumber(data?.activeCompanies)}</Tag>
-      ),
+      key: "engaged",
+      label: "Engaged Companies",
+      value: <Tag color="blue">{fmtNumber(data?.engagedCompanies)}</Tag>,
     },
     {
       key: "frequent",
       label: "Frequent Companies",
-      value: (
-        <Tag color="cyan">{fmtNumber(data?.frequentCompanies)}</Tag>
-      ),
+      value: <Tag color="cyan">{fmtNumber(data?.frequentCompanies)}</Tag>,
     },
   ];
 
@@ -79,7 +69,7 @@ export default function CompaniesUsage({
       label: "Active Rate",
       value: (
         <Tag color="blue">
-          {fmtPercent(data?.kpis?.activeRate)}
+          {fmtPercent(ratioToPercent(data?.kpis?.activeRate))}
         </Tag>
       ),
     },
@@ -88,7 +78,7 @@ export default function CompaniesUsage({
       label: "AI Usage Rate",
       value: (
         <Tag color="purple">
-          {fmtPercent(data?.kpis?.aiUsageRate)}
+          {fmtPercent(ratioToPercent(data?.kpis?.aiUsageRate))}
         </Tag>
       ),
     },
@@ -97,7 +87,7 @@ export default function CompaniesUsage({
       label: "Returning Rate",
       value: (
         <Tag color="cyan">
-          {fmtPercent(data?.kpis?.returningRate)}
+          {fmtPercent(ratioToPercent(data?.kpis?.returningRate))}
         </Tag>
       ),
     },

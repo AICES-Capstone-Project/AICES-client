@@ -3,11 +3,9 @@
 // ===== Executive Summary =====
 export interface SystemExecutiveSummary {
   totalCompanies: number;
-  activeCompanies: number;
   totalJobs: number;
   aiProcessedResumes: number;
   totalRevenue: number;
-  companyRetentionRate: number;
 }
 
 // ===== Companies Overview =====
@@ -41,7 +39,7 @@ export interface CompanyUsageKpis {
 
 export interface SystemCompaniesUsageReport {
   registeredOnly: number;
-  activeCompanies: number;
+  engagedCompanies: number;
   frequentCompanies: number;
   kpis: CompanyUsageKpis;
 }
@@ -132,7 +130,6 @@ export interface SystemSubscriptionsReport {
   freeCompanies: number;
   paidCompanies: number;
   monthlyRevenue: number;
-  renewalRate: number;
   popularPlan: string;
   breakdown: SubscriptionRevenueBreakdown;
 }

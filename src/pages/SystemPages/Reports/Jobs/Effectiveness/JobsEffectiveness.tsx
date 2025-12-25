@@ -1,5 +1,5 @@
 // src/pages/SystemPages/Reports/Jobs/Effectiveness/JobsEffectiveness.tsx
-
+import React from "react";
 import { Card, Typography, Table, Alert, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import type { SystemJobsEffectivenessReport } from "../../../../../types/systemReport.types";
@@ -18,6 +18,10 @@ type RowItem = {
   label: string;
   value: React.ReactNode;
 };
+
+// Swagger-driven: rates are ratios (0..1) -> convert to percent
+const ratioToPercent = (v?: number) =>
+  typeof v === "number" ? v * 100 : undefined;
 
 export default function JobsEffectiveness({
   loading,
@@ -38,34 +42,29 @@ export default function JobsEffectiveness({
 
   const columns: ColumnsType<RowItem> = [
     { title: "Metric", dataIndex: "label", key: "label" },
-    {
-      title: "Value",
-      dataIndex: "value",
-      key: "value",
-      align: "right",
-    },
+    { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
   const tableData: RowItem[] = [
     {
       key: "avgResumes",
       label: "Average Resumes per Job",
-      value: (
-        <Text strong>{fmtNumber(data?.averageResumesPerJob)}</Text>
-      ),
+      value: <Text strong>{fmtNumber(data?.averageResumesPerJob)}</Text>,
     },
     {
       key: "qualifiedRate",
       label: "Qualified Rate",
       value: (
-        <Tag color="blue">{fmtPercent(data?.qualifiedRate)}</Tag>
+        <Tag color="blue">{fmtPercent(ratioToPercent(data?.qualifiedRate))}</Tag>
       ),
     },
     {
       key: "successRate",
       label: "Success Hiring Rate",
       value: (
-        <Tag color="green">{fmtPercent(data?.successHiringRate)}</Tag>
+        <Tag color="green">
+          {fmtPercent(ratioToPercent(data?.successHiringRate))}
+        </Tag>
       ),
     },
   ];

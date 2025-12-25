@@ -107,14 +107,16 @@ export default function ReportsOverview() {
   >({
     loading: true,
   });
-  const [subs, setSubs] = React.useState<ReportState<SystemSubscriptionsReport>>(
-    {
-      loading: true,
-    }
-  );
+  const [subs, setSubs] = React.useState<
+    ReportState<SystemSubscriptionsReport>
+  >({
+    loading: true,
+  });
 
   // ✅ NEW: Insights+
-  const [aiHealth, setAiHealth] = React.useState<ReportState<SystemAiHealthReport>>({
+  const [aiHealth, setAiHealth] = React.useState<
+    ReportState<SystemAiHealthReport>
+  >({
     loading: true,
   });
   const [engagement, setEngagement] = React.useState<
@@ -249,6 +251,7 @@ export default function ReportsOverview() {
         : { loading: false, error: pickErr(subsRes.reason) }
     );
 
+
     // ✅ NEW: set Insights+ states
     setAiHealth(
       aiHealthRes.status === "fulfilled"
@@ -301,12 +304,24 @@ export default function ReportsOverview() {
               items={[
                 { key: "overview", label: "Overview", disabled: loadingAll },
                 // ✅ NEW: Insights+ (đặt sau Overview)
-                { key: "insightsPlus", label: "Insights+", disabled: loadingAll },
+                {
+                  key: "insightsPlus",
+                  label: "Insights+",
+                  disabled: loadingAll,
+                },
 
-                { key: "companies", label: "Company Insights", disabled: loadingAll },
+                {
+                  key: "companies",
+                  label: "Company Insights",
+                  disabled: loadingAll,
+                },
                 { key: "jobs", label: "Job Performance", disabled: loadingAll },
                 { key: "ai", label: "AI Performance", disabled: loadingAll },
-                { key: "subscriptions", label: "Revenue & Plans", disabled: loadingAll },
+                {
+                  key: "subscriptions",
+                  label: "Revenue & Plans",
+                  disabled: loadingAll,
+                },
               ]}
             />
           </Col>
@@ -352,7 +367,10 @@ export default function ReportsOverview() {
             </Col>
 
             <Col xs={24} lg={12}>
-              <ReportTableCard title="Client Engagement" loading={engagement.loading}>
+              <ReportTableCard
+                title="Client Engagement"
+                loading={engagement.loading}
+              >
                 <ClientEngagement {...engagement} />
               </ReportTableCard>
             </Col>
@@ -368,13 +386,19 @@ export default function ReportsOverview() {
         {activeTab === "companies" && (
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <ReportTableCard title="Company Overview" loading={companiesOverview.loading}>
+              <ReportTableCard
+                title="Company Overview"
+                loading={companiesOverview.loading}
+              >
                 <CompaniesOverview {...companiesOverview} />
               </ReportTableCard>
             </Col>
 
             <Col xs={24} lg={12}>
-              <ReportTableCard title="Company Usage" loading={companiesUsage.loading}>
+              <ReportTableCard
+                title="Company Usage"
+                loading={companiesUsage.loading}
+              >
                 <CompaniesUsage {...companiesUsage} />
               </ReportTableCard>
             </Col>
@@ -384,13 +408,19 @@ export default function ReportsOverview() {
         {activeTab === "jobs" && (
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <ReportTableCard title="Job Statistics" loading={jobsStats.loading}>
+              <ReportTableCard
+                title="Job Statistics"
+                loading={jobsStats.loading}
+              >
                 <JobsStatistics {...jobsStats} />
               </ReportTableCard>
             </Col>
 
             <Col xs={24} lg={12}>
-              <ReportTableCard title="Job Effectiveness" loading={jobsEff.loading}>
+              <ReportTableCard
+                title="Job Effectiveness"
+                loading={jobsEff.loading}
+              >
                 <JobsEffectiveness {...jobsEff} />
               </ReportTableCard>
             </Col>
@@ -400,13 +430,19 @@ export default function ReportsOverview() {
         {activeTab === "ai" && (
           <Row gutter={[16, 16]}>
             <Col xs={24} lg={12}>
-              <ReportTableCard title="Parsing Quality" loading={aiParsing.loading}>
+              <ReportTableCard
+                title="Parsing Quality"
+                loading={aiParsing.loading}
+              >
                 <AiParsing {...aiParsing} />
               </ReportTableCard>
             </Col>
 
             <Col xs={24} lg={12}>
-              <ReportTableCard title="Scoring Distribution" loading={aiScoring.loading}>
+              <ReportTableCard
+                title="Scoring Distribution"
+                loading={aiScoring.loading}
+              >
                 <AiScoring {...aiScoring} />
               </ReportTableCard>
             </Col>

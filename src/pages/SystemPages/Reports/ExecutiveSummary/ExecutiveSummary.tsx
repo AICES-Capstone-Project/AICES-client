@@ -1,7 +1,7 @@
 
 import { Alert, Typography } from "antd";
 import type { SystemExecutiveSummary } from "../../../../types/systemReport.types";
-import { fmtMoney, fmtNumber, fmtPercentAuto } from "../components/formatters";
+import { fmtMoney, fmtNumber} from "../components/formatters";
 import { ReportKpiRow, ReportKpiCard } from "../components";
 
 const { Text} = Typography;
@@ -39,13 +39,6 @@ export default function ExecutiveSummary({
           hint={<Text type="secondary">Revenue generated</Text>}
         />
 
-        <ReportKpiCard
-          loading={loading}
-          label="Active Companies"
-          value={fmtNumber(data?.activeCompanies)}
-          tone="success"
-          hint={<Text type="secondary">Currently active</Text>}
-        />
 
         <ReportKpiCard
           loading={loading}
@@ -71,13 +64,6 @@ export default function ExecutiveSummary({
           hint={<Text type="secondary">Processed by AI</Text>}
         />
 
-        <ReportKpiCard
-          loading={loading}
-          label="Retention Rate"
-          value={fmtPercentAuto(data?.companyRetentionRate, 0)}
-          tone="success"
-          hint={<Text type="secondary">Customer retention</Text>}
-        />
       </ReportKpiRow>
       {/* Responsive: stack on small screens */}
       <style>

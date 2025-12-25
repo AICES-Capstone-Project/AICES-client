@@ -18,7 +18,6 @@ import { notificationService } from "../../services/notificationService";
 import { invitationService } from "../../services/invitationService";
 import { useNotificationSignalR } from "../../hooks/useNotificationSignalR";
 import type { Notification } from "../../types/notification.types";
-import { APP_ROUTES } from "../../services/config";
 
 import {
 	getNotificationIcon,

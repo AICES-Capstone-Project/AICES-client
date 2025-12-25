@@ -2,6 +2,7 @@ import { Drawer, Form, Input, Button, Space, Select, Slider } from "antd";
 import { PlusCircleOutlined, MinusCircleOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { systemService } from "../../../../services/systemService";
+import { categoryService } from "../../../../services/categoryService";
 import { languageService } from "../../../../services/languageService";
 import { levelService } from "../../../../services/levelService";
 import type { CompanyJob } from "../../../../services/jobService";
@@ -48,7 +49,8 @@ const JobEditDrawer = ({
 			try {
 				const [catsResp, skillsResp, empResp, langsResp, levelsResp] =
 					await Promise.all([
-						systemService.getCategories(),
+						// follow create drawer: request a page with a large pageSize so UI shows full list
+						categoryService.getAll({ page: 1, pageSize: 100 }),
 						systemService.getSkills(),
 						systemService.getEmploymentTypes(),
 						languageService.getPublicLanguages(),
@@ -112,8 +114,8 @@ const JobEditDrawer = ({
 			return;
 		}
 		setLoadingSpecs(true);
-		try {
-			const resp = await systemService.getSpecializations(categoryId);
+			try {
+			const resp = await categoryService.getSpecializations(categoryId);
 			setSpecializations(resp?.data || []);
 		} catch {
 			setSpecializations([]);
@@ -486,28 +488,54 @@ const JobEditDrawer = ({
 					};
 
 					// Ensure employmentTypeIds and skillIds are numeric IDs expected by API.
-					const normalizeToId = (val: any, list: any[], idKey: string) => {
+					const normalizeToId = (val: any, list: any[]) => {
 						if (val === null || val === undefined) return val;
+						// If already a number, return it
+						if (typeof val === 'number') return val;
+						// If it's an object, try common id keys first
+						if (typeof val === 'object') {
+							const obj = val as any;
+							const keys = ['skillId', 'employTypeId', 'id', 'value'];
+							for (const k of keys) {
+								if (obj[k] !== undefined && obj[k] !== null && obj[k] !== '') {
+									const n = Number(obj[k]);
+									if (!isNaN(n)) return n;
+								}
+							}
+							if (obj.name) {
+								const foundByName = list.find((it: any) => String(it.name).toLowerCase() === String(obj.name).toLowerCase());
+								if (foundByName) return foundByName.skillId ?? foundByName.id ?? foundByName.value ?? foundByName.employTypeId ?? obj;
+							}
+							return val;
+						}
+
+						// If it's a string, try numeric parse
 						const n = Number(val);
 						if (!isNaN(n)) return n;
-						const found = list.find(
-							(it: any) =>
-								String(it[idKey]) === String(val) ||
-								String(it.name).toLowerCase() === String(val).toLowerCase()
-						);
-						return found ? found[idKey] : val;
+
+						// Try to find by matching any id-like key or by name
+						const found = list.find((it: any) => {
+							try {
+								const keys = ['skillId', 'employTypeId', 'id', 'value'];
+								for (const k of keys) {
+									if (it && it[k] !== undefined && String(it[k]) === String(val)) return true;
+								}
+								if (it && it.name && String(it.name).toLowerCase() === String(val).toLowerCase()) return true;
+								return false;
+							} catch {
+								return false;
+							}
+						});
+						if (!found) return val;
+						return found.skillId ?? found.employTypeId ?? found.id ?? found.value ?? val;
 					};
 
 					if (Array.isArray(payload.employmentTypeIds)) {
-						payload.employmentTypeIds = payload.employmentTypeIds.map(
-							(v: any) => normalizeToId(v, employmentTypes, "employTypeId")
-						);
+						payload.employmentTypeIds = payload.employmentTypeIds.map((v: any) => normalizeToId(v, employmentTypes));
 					}
 
 					if (Array.isArray(payload.skillIds)) {
-						payload.skillIds = payload.skillIds.map((v: any) =>
-							normalizeToId(v, skills, "skillId")
-						);
+						payload.skillIds = payload.skillIds.map((v: any) => normalizeToId(v, skills));
 					}
 
 					// If any ids remain non-numeric, abort and show error to user

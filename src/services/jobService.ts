@@ -20,6 +20,7 @@ export interface CompanyJob {
   languages?: any[];
   languageIds?: any[];
   fullName?: string;
+  isInCampaign?: boolean;
 }
 
 export interface JobsResponse {

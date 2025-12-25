@@ -47,7 +47,9 @@ const Dashboard: React.FC = () => {
     totalPublicCampaigns: 0,
     comparisonCreditsRemaining: 0,
     resumeTimeRemaining: '',
-    comparisonTimeRemaining: ''
+    comparisonTimeRemaining: '',
+    maxResumeCredits: 0,
+    maxComparisonCredits: 0
   });
   const [funnel, setFunnel] = useState<Array<{ stage: string; value: number; conversionRate?: number }>>([]);
   const [funnelLoading, setFunnelLoading] = useState(false);
@@ -203,15 +205,18 @@ const Dashboard: React.FC = () => {
         ]);
 
         if (summary) {
+          const summaryData = summary?.data ?? summary;
           setStats({
-            totalMembers: summary.totalMembers ?? 0,
-            activeJobs: summary.activeJobs ?? 0,
-            aiProcessed: summary.aiProcessed ?? 0,
-            resumeCreditsRemaining: summary.resumeCreditsRemaining ?? 0,
-            totalPublicCampaigns: summary.totalPublicCampaigns ?? 0,
-            comparisonCreditsRemaining: summary.comparisonCreditsRemaining ?? 0,
-            resumeTimeRemaining: summary.resumeTimeRemaining ?? '',
-            comparisonTimeRemaining: summary.comparisonTimeRemaining ?? '',
+            totalMembers: summaryData.totalMembers ?? 0,
+            activeJobs: summaryData.activeJobs ?? 0,
+            aiProcessed: summaryData.aiProcessed ?? 0,
+            resumeCreditsRemaining: summaryData.resumeCreditsRemaining ?? 0,
+            totalPublicCampaigns: summaryData.totalPublicCampaigns ?? 0,
+            comparisonCreditsRemaining: summaryData.comparisonCreditsRemaining ?? 0,
+            resumeTimeRemaining: summaryData.resumeTimeRemaining ?? '',
+            comparisonTimeRemaining: summaryData.comparisonTimeRemaining ?? '',
+            maxResumeCredits: summaryData.maxResumeCredits ?? 0,
+            maxComparisonCredits: summaryData.maxComparisonCredits ?? 0,
           });
         }
 
@@ -223,8 +228,9 @@ const Dashboard: React.FC = () => {
             if (Array.isArray(apiStages) && apiStages.length > 0) {
               setFunnel(apiStages.map((s: any) => ({ stage: s.name ?? s.stage ?? 'Unknown', value: Number(s.count ?? 0), conversionRate: Number(s.conversionRate ?? 0) })) as any);
             } else {
-              const totalCandidates = summary?.totalCandidates ?? 0;
-              const cvHired = summary?.cvHired ?? 0;
+              const summaryData = summary?.data ?? summary;
+              const totalCandidates = summaryData?.totalCandidates ?? 0;
+              const cvHired = summaryData?.cvHired ?? 0;
               setFunnel([
                 { stage: "Total Members", value: totalCandidates, conversionRate: 100 },
                 { stage: "Active Jobs", value: Math.round(totalCandidates * 0.6), conversionRate: Math.round(60 * 100) / 100 },

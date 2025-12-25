@@ -40,7 +40,12 @@ const CompanyEditModal: React.FC<Props> = ({ open, onClose, company, onUpdated }
       const fd = new FormData();
       if (values.description !== undefined) fd.append("description", values.description);
       if (values.address !== undefined) fd.append("address", values.address);
-      if (values.websiteUrl !== undefined) fd.append("websiteUrl", values.websiteUrl);
+      if (values.websiteUrl !== undefined) {
+        // Backend create endpoint uses `website` while many read models use `websiteUrl`.
+        // Send both keys to be safe, preferring the server's expected `website` field.
+        fd.append("website", values.websiteUrl);
+        fd.append("websiteUrl", values.websiteUrl);
+      }
       if (uploadFile) fd.append("logoFile", uploadFile);
 
       setSaving(true);

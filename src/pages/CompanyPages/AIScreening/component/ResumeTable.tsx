@@ -1,7 +1,8 @@
 import React from "react";
 import { Table, Tag, Button, Space, Tooltip, Modal, Input, message } from "antd";
 import { Flame, Pencil } from "lucide-react";
-import { EyeOutlined, DeleteOutlined } from "@ant-design/icons";
+import { EyeOutlined, DeleteOutlined} from "@ant-design/icons";
+import { Zap, Copy, BadgeDollarSign } from "lucide-react";
 import type { ColumnsType } from "antd/es/table";
 import type { ResumeLocal } from "../../../../types/resume.types";
 import resumeService from "../../../../services/resumeService";
@@ -107,6 +108,44 @@ const ResumeTable = React.forwardRef<ResumeTableHandle, ResumeTableProps>((props
 						<strong>{text || "Unknown"}</strong>
 					</Space>
 				);
+			},
+		},
+		{
+			title: "Mode",
+			dataIndex: "processingMode",
+			key: "processingMode",
+			width: "8%",
+			align: "center" as const,
+			render: (_: string, record: Resume) => {
+				const mode = String((record as any).processingMode || "").toLowerCase();
+				if (mode === "score") {
+					return (
+						<Tooltip title="In-system resume — consumes credit">
+							<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+								<Zap style={{ color: '#f5222d', fontSize: 16, strokeWidth: 2 }} />
+							</div>
+						</Tooltip>
+					);
+				}
+				if (mode === "parse") {
+					return (
+						<Tooltip title="New parsed resume — will consume credit">
+							<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+								<BadgeDollarSign style={{ color: '#faad14', fontSize: 16, strokeWidth: 2 }} />
+							</div>
+						</Tooltip>
+					);
+				}
+				if (mode === "clone") {
+					return (
+						<Tooltip title="Resume exists in job — no credit">
+							<div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+								<Copy style={{ color: '#52c41a', fontSize: 16, strokeWidth: 2 }} />
+							</div>
+						</Tooltip>
+					);
+				}
+				return <span>—</span>;
 			},
 		},
 		{

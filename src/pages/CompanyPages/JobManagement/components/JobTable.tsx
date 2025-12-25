@@ -127,46 +127,69 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       width: "10%",
       fixed: "right",
       align: "center",
-      render: (_, record) => (
-        <Space size="small">
-          <Tooltip title="View Details">
-            <Button
-              type="text"
-              icon={<EyeOutlined />}
-              size="small"
-              onClick={() => onView(record)}
-            />
-          </Tooltip>
+      render: (_, record) => {
+        const isInCampaign = record.isInCampaign === true;
 
-          {/* Recruiter cannot edit/delete */}
-          {!isRecruiter && (
-            <>
-              <Tooltip title="Edit Job">
-                <Button
-                  type="text"
-                  icon={<EditOutlined />}
-                  size="small"
-                  onClick={() => onEdit(record)}
-                />
-              </Tooltip>
+        return (
+          <Space size="small">
+            {/* VIEW – luôn được phép */}
+            <Tooltip title="View Details">
+              <Button
+                type="text"
+                icon={<EyeOutlined />}
+                size="small"
+                onClick={() => onView(record)}
+              />
+            </Tooltip>
 
-              <Tooltip title="Remove Job">
-                <Button
-                  type="text"
-                  icon={<DeleteOutlined />}
-                  size="small"
-                  danger
-                  onClick={() => {
-                    setSelectedJob(record);
-                    setJobTitle(record.title);
-                    setDeleteModalOpen(true);
-                  }}
-                />
-              </Tooltip>
-            </>
-          )}
-        </Space>
-      ),
+            {/* MANAGER – Edit/Delete */}
+            {!isRecruiter && (
+              <>
+                <Tooltip
+                  title={
+                    isInCampaign
+                      ? "Job is in campaign, cannot edit"
+                      : "Edit Job"
+                  }
+                >
+                  <Button
+                    type="text"
+                    icon={<EditOutlined />}
+                    size="small"
+                    disabled={isInCampaign}
+                    onClick={() => {
+                      if (isInCampaign) return;
+                      onEdit(record);
+                    }}
+                  />
+                </Tooltip>
+
+                <Tooltip
+                  title={
+                    isInCampaign
+                      ? "Job is in campaign, cannot delete"
+                      : "Remove Job"
+                  }
+                >
+                  <Button
+                    type="text"
+                    icon={<DeleteOutlined />}
+                    size="small"
+                    danger
+                    disabled={isInCampaign}
+                    onClick={() => {
+                      if (isInCampaign) return;
+                      setSelectedJob(record);
+                      setJobTitle(record.title);
+                      setDeleteModalOpen(true);
+                    }}
+                  />
+                </Tooltip>
+              </>
+            )}
+          </Space>
+        );
+      },
     },
   ];
 
@@ -192,7 +215,6 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
         }
       />
 
-      {/* Delete Modal */}
       <Modal
         open={deleteModalOpen}
         onCancel={() => {
@@ -208,7 +230,7 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
             }}
           >
             <Button
-            className="company-btn"
+              className="company-btn"
               onClick={() => {
                 setDeleteModalOpen(false);
                 setConfirmInput("");

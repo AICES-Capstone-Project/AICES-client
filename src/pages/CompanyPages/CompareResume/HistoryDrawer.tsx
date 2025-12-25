@@ -17,15 +17,31 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
 
   const drawerTitleText = selectedItem
-    ? (selectedItem.name ?? selectedItem.title ?? selectedItem.comparisonName ?? `#${selectedItem.id ?? selectedItem.comparisonId}`)
+    ? (selectedItem.name ??
+      selectedItem.title ??
+      selectedItem.comparisonName ??
+      `#${selectedItem.id ?? selectedItem.comparisonId}`)
     : 'Comparison History';
 
+
   const drawerTitle = selectedItem ? (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+      }}
+    >
+      <Button
+        className="company-btn"
+        icon={<LeftOutlined />}
+        onClick={() => setSelectedItem(null)}
+        aria-label="Back"
+      />
       <div style={{ fontWeight: 700 }}>{drawerTitleText}</div>
-      <Button className="company-btn" icon={<LeftOutlined />} onClick={() => setSelectedItem(null)} aria-label="Back" />
     </div>
   ) : drawerTitleText;
+
 
   const handleClick = async (item: any) => {
     const id = item.id ?? item.comparisonId;
@@ -52,128 +68,132 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
     }
   };
 
-  const renderComparisonTable = (data: any) => {
-    let resultObj: any = undefined;
-    if (!data) return <div style={{ padding: 20, textAlign: 'center' }}>No data.</div>;
+  const renderComparisonTable = (rawData: any) => {
+    if (!rawData) return <div style={{ padding: 20, textAlign: 'center' }}>No data</div>;
 
-    if (data.resultJson !== undefined) {
-      resultObj = data.resultJson;
-    } else if (data.resultData !== undefined) {
-      resultObj = data.resultData;
-    } else if (data.data && (data.data.resultJson || data.data.resultData)) {
-      resultObj = data.data.resultJson ?? data.data.resultData;
-    } else if (Array.isArray(data.candidates)) {
-      resultObj = { candidates: data.candidates };
-    } else {
-      resultObj = data;
+    const result =
+      rawData.resultData ??
+      rawData.resultJson ??
+      rawData.data?.resultData ??
+      rawData.data?.resultJson ??
+      rawData;
+
+    const candidates = result?.candidates || [];
+
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+      return (
+        <pre style={{ whiteSpace: 'pre-wrap' }}>
+          {JSON.stringify(result, null, 2)}
+        </pre>
+      );
     }
 
-    if (typeof resultObj === 'string') {
-      try {
-        resultObj = JSON.parse(resultObj);
-      } catch (e) {
-        return <pre>{resultObj}</pre>;
-      }
-    }
+    const EXCLUDED_KEYS = ['candidateName', 'recommendation'];
 
-    const candidates = resultObj?.candidates || [];
+    const criteriaKeys: string[] = Array.from(
+      new Set(
+        candidates.flatMap((c: any) =>
+          Object.keys(c.analysis || {}).filter((k) => !EXCLUDED_KEYS.includes(k))
+        )
+      )
+    );
 
-    if (candidates.length === 0) {
-      return <div style={{ padding: 20, textAlign: 'center' }}>No candidate data found.</div>;
-    }
+    const PRIORITY_KEYS = ['jobFit', 'overallSummary'];
+    criteriaKeys.sort((a, b) => {
+      if (PRIORITY_KEYS.includes(a)) return -1;
+      if (PRIORITY_KEYS.includes(b)) return 1;
+      return a.localeCompare(b);
+    });
 
-    // Layout: criteria column 10%, candidate columns share remaining 90%
-    const candidateCount = candidates.length;
-    const criteriaWidth = '10%';
-    const candidateWidth = candidateCount === 2 ? '45%' : `${Math.max(20, Math.floor(90 / candidateCount))}%`;
-
-    // helper to read analysis fields with several possible key names
-    const getAnalysisValue = (analysis: any, variants: string[]) => {
-      if (!analysis) return '';
-      for (const k of variants) {
-        if (analysis[k] !== undefined && analysis[k] !== null) return analysis[k];
-      }
-      return '';
-    };
-
-    const fieldDefs = [
-      { key: 'jobFit', label: 'Job Fit', variants: ['jobFit', 'Job Fit', 'job_fit'] },
-      { key: 'techStack', label: 'Technical Stack', variants: ['Technical Stack Match', 'Technical Stack', 'techStack', 'technical_stack'] },
-      { key: 'culture', label: 'Culture & Logistics', variants: ['Culture & Logistics Fit', 'Culture & Logistics', 'culture'] },
-      { key: 'softSkills', label: 'Soft Skills', variants: ['Methodology & Soft Skills', 'Soft Skills', 'softSkills'] },
-      { key: 'metrics', label: 'Exp & Metrics', variants: ['Experience & Performance Metrics', 'Experience & Metrics', 'metrics'] },
-      { key: 'overall', label: 'Overall Summary', variants: ['overallSummary', 'overall', 'Overall Summary'] },
-    ];
+    const humanize = (key: string) =>
+      key
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/_/g, ' ')
+        .replace(/^./, (c) => c.toUpperCase());
 
     const columns = [
       {
-        title: <strong>Criteria</strong>,
+        title: 'Criteria',
         dataIndex: 'criteria',
         key: 'criteria',
-        width: criteriaWidth,
-        render: (text: string) => <strong>{text}</strong>,
+        width: '10%',
+        align: 'center' as const,
+        render: (v: any) => <div style={{ textAlign: 'center' }}><strong>{v}</strong></div>,
       },
       ...candidates.map((c: any, index: number) => {
-        const analysis = c.analysis ?? c.analysisData ?? c;
-        const candidateName = getAnalysisValue(analysis, ['candidateName', 'candidate_name']) || c.candidateName || `Candidate ${index + 1}`;
-        const rank = getAnalysisValue(analysis, ['recommendation'])?.rank ?? getAnalysisValue(analysis, ['recommendation', 'rank']) ?? (analysis?.recommendation?.rank ?? 'N/A');
-        const rankText = rank === undefined || rank === null ? 'N/A' : rank;
-
-        // choose a color to highlight rank: 1=green, 2=geekblue, 3=orange, >3=red, else default
-        const rankNum = Number(rankText);
-        const rankColor = Number.isFinite(rankNum)
-          ? (rankNum === 1 ? 'green' : rankNum === 2 ? 'geekblue' : rankNum === 3 ? 'orange' : 'red')
-          : 'default';
-
+        const analysis = c.analysis || {};
+        const name = analysis.candidateName || `Candidate ${index + 1}`;
+        const rank = analysis?.recommendation?.rank;
         return {
           title: (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <strong>{candidateName}</strong>
-              {rankNum === 1 && <CrownOutlined style={{ color: '#fa1414ff', fontSize: 20 }} />}
-              <Tag color={rankColor}>{`Rank ${rankText}`}</Tag>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, minHeight: 48, textAlign: 'center' }}>
+              {rank === 1 && <CrownOutlined style={{ color: '#fa1414', fontSize: 18 }} />}
+              <span style={{ fontWeight: 600 }}>{name}</span>
+              {rank && <Tag color={rank === 1 ? 'green' : 'blue'} style={{ marginLeft: 8 }}>Rank {rank}</Tag>}
             </div>
           ),
-          dataIndex: `candidate_${index}`,
-          key: `candidate_${index}`,
-          width: candidateWidth,
-          render: (_: any, record: any) => {
-            const field = record.key;
-            const def = fieldDefs.find(f => f.key === field);
-            const val = def ? getAnalysisValue(analysis, def.variants) : '';
-            return (
-              <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                {val}
-              </div>
-            );
-          }
+          dataIndex: `c_${index}`,
+          key: `c_${index}`,
+          align: 'center' as const,
+          render: (v: any) => (
+            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', textAlign: 'center' }}>{v ?? '—'}</div>
+          ),
         };
-      })
+      }),
     ];
 
-    const dataSource = fieldDefs.map(f => ({ key: f.key, criteria: f.label }));
+    const hasReason = candidates.some((c: any) => !!c.analysis?.recommendation?.reason);
+
+    const dataSource: any[] = [];
+
+    if (hasReason) {
+      const reasonRow: any = { key: '__reason', criteria: 'Analysis' };
+      candidates.forEach((c: any, index: number) => {
+        const reason = c.analysis?.recommendation?.reason;
+        reasonRow[`c_${index}`] = reason ? (
+          <div style={{ background: 'linear-gradient(129deg, #4d7c0f 0%, #065f46 50%, #052e16 100%)', color: '#ffffff', padding: '8px', borderRadius: 8, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 13, textAlign: 'center' }}>{reason}</div>
+          </div>
+        ) : '—';
+      });
+      dataSource.push(reasonRow);
+    }
+
+    criteriaKeys.forEach((key) => {
+      const row: any = { key, criteria: humanize(key) };
+      candidates.forEach((c: any, index: number) => {
+        row[`c_${index}`] = c.analysis?.[key];
+      });
+      dataSource.push(row);
+    });
 
     return (
-      <div style={{ width: '100%', overflowX: 'hidden' }}>
-        <Table
-          columns={columns}
-          dataSource={dataSource}
-          pagination={false}
-          bordered
-          size="middle"
-          style={{ width: '100%' }}
-        />
-      </div>
+      <Table bordered pagination={false} columns={columns} dataSource={dataSource} size="middle" style={{ width: '100%' }} />
     );
   };
 
   return (
-    <Drawer title={drawerTitle} width={1200} onClose={() => { setSelectedItem(null); onClose(); }} open={open} destroyOnClose>
+    <Drawer title={drawerTitle} width={1200} onClose={() => { setSelectedItem(null); onClose(); }} open={open}
+      extra={
+        selectedItem ? (
+          <div style={{ display: 'inline-flex' }}>
+            <Button
+              className="company-btn"
+              icon={<LeftOutlined />}
+              onClick={() => setSelectedItem(null)}
+            >
+              Back
+            </Button>
+          </div>
+        ) : null
+      }
+    >
       {loading ? (
         <div style={{ textAlign: 'center', marginTop: 50 }}><Spin size="large" /></div>
       ) : selectedItem ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {/* Header Info */}
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa', padding: '10px', borderRadius: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f9fa', padding: '7px', borderRadius: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <Title level={4} style={{ margin: 0 }}>Candidate Comparison Analysis</Title>
             </div>
@@ -191,7 +211,6 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
 
           {/* Comparison Table Section */}
           <div>
-
             {renderComparisonTable(selectedItem)}
           </div>
 
@@ -226,7 +245,7 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
                 <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     <div>
-                     <strong>{typeof no === 'number' ? `${no}` : `No.`} {item.comparisonName ? `. ${item.comparisonName}` : ''}</strong>
+                      <strong>{typeof no === 'number' ? `${no}` : `No.`} {item.comparisonName ? `. ${item.comparisonName}` : ''}</strong>
                     </div>
                     <div style={{ color: '#9aa0a6', fontSize: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
                       <ClockCircleOutlined />

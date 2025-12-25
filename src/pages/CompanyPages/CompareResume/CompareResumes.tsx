@@ -228,7 +228,7 @@ const CompareResumes: React.FC = () => {
 
     const columns: ColumnsType<Resume> = [
         {
-            title: "No", width: "10%",
+            title: "No", width: "7%",
             align: "center" as const,
             render: (_: any, __: any, index: number) => index + 1
         },
@@ -240,7 +240,7 @@ const CompareResumes: React.FC = () => {
         },
         {
             title: "Score",
-            width: "15%",
+            width: "12%",
             dataIndex: "totalResumeScore",
             align: "center" as const,
             render: (_: number | null, record) => {
@@ -256,7 +256,7 @@ const CompareResumes: React.FC = () => {
         },
         {
             title: "Adjusted",
-            width: "15%",
+            width: "12%",
             dataIndex: "adjustedScore",
             align: "center" as const,
             render: (adjustedScore: number | null) => {
@@ -298,145 +298,166 @@ const CompareResumes: React.FC = () => {
         },
     ];
 
-    const renderComparisonTable = (data: any) => {
-        let resultObj: any = undefined;
-        if (!data) return <div style={{ padding: 20, textAlign: 'center' }}>No data.</div>;
+    const renderComparisonTable = (rawData: any) => {
+    if (!rawData) {
+        return <div style={{ padding: 20, textAlign: 'center' }}>No data</div>;
+    }
 
-        if (data.resultJson !== undefined) {
-            resultObj = data.resultJson;
-        } else if (data.resultData !== undefined) {
-            resultObj = data.resultData;
-        } else if (data.data && (data.data.resultJson || data.data.resultData)) {
-            resultObj = data.data.resultJson ?? data.data.resultData;
-        } else if (Array.isArray(data.candidates)) {
-            resultObj = { candidates: data.candidates };
-        } else {
-            resultObj = data;
-        }
+    /** =====================
+     * Normalize response
+     * ===================== */
+    const result =
+        rawData.resultData ??
+        rawData.resultJson ??
+        rawData.data?.resultData ??
+        rawData.data?.resultJson ??
+        rawData;
 
-        if (typeof resultObj === 'string') {
-            try {
-                resultObj = JSON.parse(resultObj);
-            } catch (e) {
-                return <pre>{resultObj}</pre>;
-            }
-        }
+    const candidates = result?.candidates || [];
 
-        const candidates = resultObj?.candidates || [];
+    if (!Array.isArray(candidates) || candidates.length === 0) {
+        return (
+            <pre style={{ whiteSpace: 'pre-wrap' }}>
+                {JSON.stringify(result, null, 2)}
+            </pre>
+        );
+    }
 
-        if (candidates.length === 0) {
-            // Try fallback: use jobFit/recommendation/etc if present
-            if (resultObj && (resultObj.jobFit || resultObj.recommendation || resultObj.technicalStackMatch)) {
-                return (
-                    <div>
-                        {resultObj.jobFit && (
-                            <div style={{ marginBottom: 12 }}>
-                                <strong>Job Fit:</strong>
-                                <div>{typeof resultObj.jobFit === 'string' ? resultObj.jobFit : JSON.stringify(resultObj.jobFit, null, 2)}</div>
-                            </div>
+    /** =====================
+     * Collect criteria keys dynamically
+     * ===================== */
+    const EXCLUDED_KEYS = ['candidateName', 'recommendation'];
+
+    const criteriaKeys: string[] = Array.from(
+        new Set(
+            candidates.flatMap((c: any) =>
+                Object.keys(c.analysis || {}).filter(
+                    (k) => !EXCLUDED_KEYS.includes(k)
+                )
+            )
+        )
+    );
+
+    /** Optional: ưu tiên hiển thị */
+    const PRIORITY_KEYS = ['jobFit', 'overallSummary'];
+    criteriaKeys.sort((a, b) => {
+        if (PRIORITY_KEYS.includes(a)) return -1;
+        if (PRIORITY_KEYS.includes(b)) return 1;
+        return a.localeCompare(b);
+    });
+
+    /** =====================
+     * Helpers
+     * ===================== */
+    const humanize = (key: string) =>
+        key
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/_/g, ' ')
+            .replace(/^./, (c) => c.toUpperCase());
+
+    /** =====================
+     * Build columns
+     * ===================== */
+    const columns: ColumnsType<any> = [
+        {
+            title: 'Criteria',
+            dataIndex: 'criteria',
+            key: 'criteria',
+            width: '12%',
+            align: 'center' as const,
+            render: (v) => <div style={{ textAlign: 'center' }}><strong>{v}</strong></div>,
+        },
+        ...candidates.map((c: any, index: number) => {
+            const analysis = c.analysis || {};
+            const name =
+                analysis.candidateName || `Candidate ${index + 1}`;
+            const rank = analysis?.recommendation?.rank;
+
+            return {
+                title: (
+                    <div
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 6,
+                            flexWrap: 'wrap',
+                            textAlign: 'center'
+                        }}
+                    >
+                        {rank === 1 && (
+                            <CrownOutlined
+                                style={{ color: '#fa1414', fontSize: 18 }}
+                            />
                         )}
-                        {resultObj.recommendation && (
-                            <div style={{ marginBottom: 12 }}>
-                                <strong>Recommendation:</strong>
-                                <div>{resultObj.recommendation}</div>
-                            </div>
-                        )}
-                        {resultObj.technicalStackMatch && (
-                            <div style={{ marginBottom: 12 }}>
-                                <strong>Technical Stack Match:</strong>
-                                <div>{typeof resultObj.technicalStackMatch === 'string' ? resultObj.technicalStackMatch : JSON.stringify(resultObj.technicalStackMatch, null, 2)}</div>
-                            </div>
-                        )}
-                        {!resultObj.jobFit && !resultObj.recommendation && !resultObj.technicalStackMatch && (
-                            <pre style={{ whiteSpace: 'pre-wrap', background: '#f5f5f5', padding: 12, borderRadius: 6 }}>{JSON.stringify(resultObj, null, 2)}</pre>
+                        <span style={{ fontWeight: 600 }}>{name}</span>
+                        {rank && (
+                            <Tag color={rank === 1 ? 'green' : 'blue'}>
+                                Rank {rank}
+                            </Tag>
                         )}
                     </div>
-                );
-            }
-            return <pre>{JSON.stringify(resultObj, null, 2)}</pre>;
-        }
+                ),
+                dataIndex: `c_${index}`,
+                key: `c_${index}`,
+                align: 'center' as const,
+                render: (v: any) => (
+                    <div
+                        style={{
+                            whiteSpace: 'pre-wrap',
+                            wordBreak: 'break-word',
+                            textAlign: 'center'
+                        }}
+                    >
+                        {v ?? '—'}
+                    </div>
+                ),
+            };
+        }),
+    ];
 
-        // helper to read analysis fields with several possible key names
-        const getAnalysisValue = (analysis: any, variants: string[]) => {
-            if (!analysis) return '';
-            for (const k of variants) {
-                if (analysis[k] !== undefined && analysis[k] !== null) return analysis[k];
-            }
-            return '';
+    const hasReason = candidates.some((c: any) => !!c.analysis?.recommendation?.reason);
+
+    const dataSource: any[] = [];
+
+    if (hasReason) {
+        const reasonRow: any = { key: '__reason', criteria: 'Analysis' };
+        candidates.forEach((c: any, index: number) => {
+            const reason = c.analysis?.recommendation?.reason;
+            reasonRow[`c_${index}`] = reason ? (
+                <div style={{ background: 'linear-gradient(129deg, #4d7c0f 0%, #065f46 50%, #052e16 100%)', color: '#ffffff', padding: '8px', borderRadius: 8, lineHeight: 1.6 }}>
+                    <div style={{ fontSize: 13, textAlign: 'center' }}>{reason}</div>
+                </div>
+            ) : '—';
+        });
+        dataSource.push(reasonRow);
+    }
+
+    criteriaKeys.forEach((key) => {
+        const row: any = {
+            key,
+            criteria: humanize(key),
         };
 
-        const fieldDefs = [
-            { key: 'jobFit', label: 'Job Fit', variants: ['jobFit', 'Job Fit', 'job_fit'] },
-            { key: 'techStack', label: 'Technical Stack', variants: ['Technical Stack Match', 'Technical Stack', 'techStack', 'technical_stack'] },
-            { key: 'culture', label: 'Culture & Logistics', variants: ['Culture & Logistics Fit', 'Culture & Logistics', 'culture'] },
-            { key: 'softSkills', label: 'Soft Skills', variants: ['Methodology & Soft Skills', 'Soft Skills', 'softSkills'] },
-            { key: 'metrics', label: 'Exp & Metrics', variants: ['Experience & Performance Metrics', 'Experience & Metrics', 'metrics'] },
-            { key: 'overall', label: 'Overall Summary', variants: ['overallSummary', 'overall', 'Overall Summary'] },
-        ];
+        candidates.forEach((c: any, index: number) => {
+            row[`c_${index}`] = c.analysis?.[key];
+        });
 
-        // Layout: criteria column 10%, candidate columns share remaining 90%
-        const candidateCount = candidates.length;
-        const criteriaWidth = '10%';
-        const candidateWidth = candidateCount === 2 ? '45%' : `${Math.max(20, Math.floor(90 / candidateCount))}%`;
+        dataSource.push(row);
+    });
 
-        const columns = [
-            {
-                title: 'Criteria',
-                dataIndex: 'criteria',
-                key: 'criteria',
-                width: criteriaWidth,
-                render: (text: string) => <strong>{text}</strong>,
-            },
-            ...candidates.map((c: any, index: number) => {
-                const analysis = c.analysis ?? c.analysisData ?? c;
-                const candidateName = getAnalysisValue(analysis, ['candidateName', 'candidate_name']) || c.candidateName || `Candidate ${index + 1}`;
-                const rank = getAnalysisValue(analysis, ['recommendation'])?.rank ?? getAnalysisValue(analysis, ['recommendation', 'rank']) ?? (analysis?.recommendation?.rank ?? 'N/A');
-                const rankText = rank === undefined || rank === null ? 'N/A' : rank;
-                const rankNum = Number(rankText);
-                const rankColor = Number.isFinite(rankNum)
-                    ? (rankNum === 1 ? 'green' : rankNum === 2 ? 'geekblue' : rankNum === 3 ? 'orange' : 'red')
-                    : 'default';
+    return (
+        <Table
+            bordered
+            pagination={false}
+            columns={columns}
+            dataSource={dataSource}
+            size="middle"
+            style={{ width: '100%' }}
+        />
+    );
+};
 
-                return {
-                    title: (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                            {rankNum === 1 && <CrownOutlined style={{ color: '#fa1414ff', fontSize: 20 }} />}
-                            <span style={{ fontWeight: 700 }}>{candidateName}</span>
-                            <Tag color={rankColor}>{`Rank ${rankText}`}</Tag>
-                        </div>
-                    ),
-                    dataIndex: `candidate_${index}`,
-                    key: `candidate_${index}`,
-                    width: candidateWidth,
-                    render: (_: any, record: any) => {
-                        const field = record.key;
-                        const def = fieldDefs.find(f => f.key === field);
-                        const val = def ? getAnalysisValue(analysis, def.variants) : '';
-                        return (
-                            <div style={{ whiteSpace: 'normal', wordBreak: 'break-word' }}>
-                                {val}
-                            </div>
-                        );
-                    }
-                };
-            })
-        ];
-
-        const dataSource = fieldDefs.map(f => ({ key: f.key, criteria: f.label }));
-
-        return (
-            <div style={{ width: '100%', overflowX: 'hidden' }}>
-                <Table
-                    columns={columns}
-                    dataSource={dataSource}
-                    pagination={false}
-                    bordered
-                    size="middle"
-                    style={{ width: '100%' }}
-                />
-            </div>
-        );
-    };
 
     return (
         <>
@@ -492,10 +513,11 @@ const CompareResumes: React.FC = () => {
                             loading={loading}
                             dataSource={resumes}
                             columns={columns}
-                            pagination={{ pageSize: 4 }}
+                            pagination={{ pageSize: 10, showTotal: (total) => `Total ${total} resumes` }}
+                            scroll={{ y: '40vh' }}
                             rowSelection={selectionEnabled ? {
                                 selectedRowKeys: selectedKeys,
-                                columnWidth: '2%',
+                                columnWidth: '5%',
                                 onChange: (keys) => {
                                     if ((keys || []).length > 5) {
                                         message.error('You may select up to 5 resumes only');
@@ -518,7 +540,7 @@ const CompareResumes: React.FC = () => {
 
                         {/* Comparison result */}
                         {comparisonResult && (
-                            <Card title={`Comparison Result: ${comparisonName ? ` ${comparisonName}` : ''}`} style={{ marginTop: 12 }}>
+                            <Card title={`Comparison Result: ${comparisonName ? ` ${comparisonName}` : ''}`} headStyle={{ textAlign: 'center' }} style={{ marginTop: 12 }}>
                                 {renderComparisonTable(comparisonResult)}
                             </Card>
                         )}

@@ -86,4 +86,6 @@ export type ResumeLocal = Partial<Resume> & {
   scoreDetails?: ScoreDetail[];
   aiScores?: AiScore[] | undefined;
   note?: string | null;
+  // Processing mode: 'Score' | 'Parse' | 'Clone' etc.
+  processingMode?: string | null;
 };

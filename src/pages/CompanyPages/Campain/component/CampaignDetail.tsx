@@ -312,13 +312,18 @@ const CampaignDetail: React.FC = () => {
             }
 
             const resp = await campaignService.removeJobsFromCampaign(campaign.campaignId, [jobId]);
+            // Normalize backend message
+            const backendMessage =
+                resp?.message ?? (resp as any)?.data?.message ?? 'Delete failed';
             const ok = !!resp && ((resp as any).status === 'Success' || (resp as any).data != null);
             if (ok) {
-                message.success('Job removed from campaign');
+                message.success(backendMessage);
                 await loadCampaign();
             } else {
                 console.error('Remove job failed', resp);
-                message.error('Delete failed');
+                // Show API-provided message when available
+                message.error(backendMessage);
+                setApiError(backendMessage);
             }
         } catch (err) {
             console.error('Delete job error', err);

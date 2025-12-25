@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import dayjs from 'dayjs';
 import { Table, Button, Tooltip, Space, Progress, Tag, message, Switch, Modal, Input } from 'antd';
 import { EyeOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -12,7 +13,7 @@ type Props = {
   tableHeight?: number;
   currentPage: number;
   pageSize: number;
-  total?: number; // Add total prop for proper pagination
+  total?: number; 
   onPageChange: (page: number, size?: number) => void;
   onView: (record: any) => void;
   onEdit: (record: any) => void;
@@ -27,7 +28,7 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
   const [deletingRecord, setDeletingRecord] = useState<any | null>(null);
   const [confirmInput, setConfirmInput] = useState('');
   const [deletingLoadingLocal, setDeletingLoadingLocal] = useState(false);
-  const { user } = useAppSelector((s) => s.auth);
+  const user = useAppSelector((s: any) => s.auth?.user);
   const isHrRecruiter = (user?.roleName || '').toLowerCase() === (ROLES.Hr_Recruiter || '').toLowerCase();
   const columns: ColumnsType<any> = [
     {
@@ -46,18 +47,36 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
       ellipsis: true,
       render: (v: string) => v || '-',
     },
-    { title: 'Start Date', dataIndex: 'startDate', key: 'startDate', align: 'center', width: 120, render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
-    { title: 'End Date', dataIndex: 'endDate', key: 'endDate', align: 'center', width: 120, ellipsis: true, render: (v: string) => v ? new Date(v).toLocaleDateString() : '-' },
     {
-      title: 'Jobs',
+      title: 'Start Date', dataIndex: 'startDate', key: 'startDate', align: 'center', width: 120, render: (v: any) => {
+        if (!v) return '-';
+        const d = dayjs(v);
+        return d.isValid() ? d.format('DD/MM/YYYY') : '-';
+      }
+    },
+    {
+      title: 'End Date', dataIndex: 'endDate', key: 'endDate', align: 'center', width: 120, ellipsis: true, render: (v: any) => {
+        if (!v) return '-';
+        const d = dayjs(v);
+        return d.isValid() ? d.format('DD/MM/YYYY') : '-';
+      }
+    },
+    {
+      title: 'Total Jobs',
       align: 'center',
-      key: 'jobs',
+      key: 'totalJobs',
       width: 100,
       render: (_: any, record: any) => {
-        const jobsArr = record?.jobs;
-        if (Array.isArray(jobsArr)) return jobsArr.length;
-        const jobIds = record?.jobIds || [];
-        return Array.isArray(jobIds) ? jobIds.length : 0;
+        const apiTotal = record?.totalJobs ?? record?.total_jobs ?? record?.total_jobs_count ?? record?.jobsCount ?? record?.jobs_count;
+        if (apiTotal !== undefined && apiTotal !== null) return Number(apiTotal) || 0;
+
+        const jobsArr = Array.isArray(record?.jobs) ? record.jobs : [];
+        if (jobsArr.length) return jobsArr.length;
+
+        const jobIds = Array.isArray(record?.jobIds) ? record.jobIds : Array.isArray(record?.job_ids) ? record.job_ids : [];
+        if (jobIds.length) return jobIds.length;
+
+        return 0;
       },
     },
     {
@@ -219,20 +238,24 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
             <Button type="text" icon={<EyeOutlined />} size="small" onClick={() => onView(record)} />
           </Tooltip>
           <Tooltip title="Edit campaign">
-            <Button type="text" icon={<EditOutlined />} size="small" onClick={() => onEdit(record)} />
+            {!isHrRecruiter && (
+              <Button type="text" icon={<EditOutlined />} size="small" onClick={() => onEdit(record)} />
+            )}
           </Tooltip>
           <Tooltip title="Delete campaign">
-            <Button
-              type="text"
-              icon={<DeleteOutlined />}
-              size="small"
-              danger
-              onClick={() => {
-                setDeletingRecord(record);
-                setConfirmInput('');
-                setConfirmModalOpen(true);
-              }}
-            />
+            {!isHrRecruiter && (
+              <Button
+                type="text"
+                icon={<DeleteOutlined />}
+                size="small"
+                danger
+                onClick={() => {
+                  setDeletingRecord(record);
+                  setConfirmInput('');
+                  setConfirmModalOpen(true);
+                }}
+              />
+            )}
           </Tooltip>
         </Space>
       ),
@@ -253,7 +276,7 @@ const CampaignTable: React.FC<Props> = ({ data, loading, tableHeight, currentPag
           showTotal: (total) => `Total ${total} campaigns`,
           onChange: onPageChange,
         }}
-                style={{ width: "100%" }}
+        style={{ width: "100%" }}
         tableLayout="fixed"
         className="job-table"
         scroll={{ y: tableHeight }}

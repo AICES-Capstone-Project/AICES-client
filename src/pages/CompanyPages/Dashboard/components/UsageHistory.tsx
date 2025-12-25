@@ -1,5 +1,8 @@
 import React from "react";
 import { Card, Col, Select, Spin } from "antd";
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 import {
   ResponsiveContainer,
   Tooltip,
@@ -42,7 +45,6 @@ const UsageHistory: React.FC<UsageHistoryProps> = ({
             style={{ width: 120 }}
             size="small"
             options={[
-              { label: 'Hour', value: 'hour' },
               { label: '1 Day', value: '1d' },
               { label: '7 Days', value: '7d' },
               { label: '28 Days', value: '28d' },
@@ -88,11 +90,43 @@ const UsageHistory: React.FC<UsageHistoryProps> = ({
 
             <div style={{ height: 280 }}>
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={usageHistory.labels?.map((label: string, index: number) => ({
-                  date: label,
-                  resumeUploads: usageHistory.resumeUploads?.[index] || 0,
-                  aiComparisons: usageHistory.aiComparisons?.[index] || 0
-                })) || []} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <LineChart data={
+                  (() => {
+                    dayjs.extend(utc);
+                    dayjs.extend(timezone);
+                    const tz = 'Asia/Ho_Chi_Minh';
+
+                    const parseLabel = (label: any) => {
+                      if (label == null) return '';
+                      // number (ms or s)
+                      if (typeof label === 'number') {
+                        const asMs = label.toString().length === 10 ? label * 1000 : label;
+                        const d = dayjs(asMs);
+                        if (d.isValid()) return d.tz(tz).format('DD/MM/YYYY');
+                      }
+                      // numeric string
+                      if (/^\d+$/.test(String(label))) {
+                        const num = Number(label);
+                        const asMs = String(label).length === 10 ? num * 1000 : num;
+                        const d = dayjs(asMs);
+                        if (d.isValid()) return d.tz(tz).format('DD/MM/YYYY');
+                      }
+                      // try parse as UTC then convert
+                      const dUtc = dayjs.utc(String(label));
+                      if (dUtc.isValid()) return dUtc.tz(tz).format('DD/MM/YYYY');
+                      const d = dayjs(String(label));
+                      if (d.isValid()) return d.tz(tz).format('DD/MM/YYYY');
+                      // fallback to original label string
+                      return String(label);
+                    };
+
+                    return usageHistory.labels?.map((label: any, index: number) => ({
+                      date: parseLabel(label),
+                      resumeUploads: usageHistory.resumeUploads?.[index] || 0,
+                      aiComparisons: usageHistory.aiComparisons?.[index] || 0
+                    })) || [];
+                  })()
+                } margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#e1e5e9" />
                   <XAxis
                     dataKey="date"

@@ -33,20 +33,18 @@ const StatsCards: React.FC<StatsCardsProps> = ({
     // Helper function to format reset time
     const formatResetTime = (timeString: string) => {
         if (!timeString) return "--:--";
-        
+
         try {
             const resetTime = new Date(timeString);
             const now = new Date();
-            
-            // Check if it's today
             const isToday = resetTime.toDateString() === now.toDateString();
-            
+
             const hours = resetTime.getHours();
             const minutes = resetTime.getMinutes();
             const ampm = hours >= 12 ? 'PM' : 'AM';
             const displayHours = hours % 12 || 12;
             const timeStr = `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-            
+
             if (isToday) {
                 return `Today ${timeStr}`;
             } else {
@@ -164,14 +162,14 @@ const StatsCards: React.FC<StatsCardsProps> = ({
                                     </div>
                                 </div>
 
-                                <div style={{
+                                {/* <div style={{
                                     fontSize: 11,
                                     color: '#666',
                                     marginBottom: 8,
                                     textAlign: 'center'
                                 }}>
                                     Hourly Usage Limit: 100
-                                </div>
+                                </div> */}
 
                                 <div style={{
                                     display: 'flex',
@@ -237,14 +235,14 @@ const StatsCards: React.FC<StatsCardsProps> = ({
                                     </div>
                                 </div>
 
-                                <div style={{
+                                {/* <div style={{
                                     fontSize: 11,
                                     color: '#666',
                                     marginBottom: 8,
                                     textAlign: 'center'
                                 }}>
                                     Hourly Usage Limit: 100
-                                </div>
+                                </div> */}
 
                                 <div style={{
                                     display: 'flex',

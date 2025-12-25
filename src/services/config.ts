@@ -1,653 +1,658 @@
 // API Configuration
 export const API_CONFIG = {
-  BASE_URL: import.meta.env.VITE_PUBLIC_API_URL || "http://localhost:7220/api",
+	BASE_URL: import.meta.env.VITE_PUBLIC_API_URL || "http://localhost:7220/api",
 } as const;
 
 // Storage Keys
 export const STORAGE_KEYS = {
-  ACCESS_TOKEN: "access_token",
-  REFRESH_TOKEN: "refresh_token",
-  USER_DATA: "user_data",
+	ACCESS_TOKEN: "access_token",
+	REFRESH_TOKEN: "refresh_token",
+	USER_DATA: "user_data",
 } as const;
 
 // API Endpoints
 export const API_ENDPOINTS = {
-  // Auth endpoints
-  AUTH: {
-    SIGN_UP: "/auth/register",
-    LOGIN: "/auth/login",
-    GOOGLE_LOGIN: "/auth/google",
-    GITHUB_LOGIN: "/auth/github",
-    VERIFY_EMAIL: (token: string) => `/auth/verify-email?token=${token}`,
-    ME: "/auth/me",
-    REFRESH: "/auth/refresh",
-    LOGOUT: "/auth/logout",
-    REQUEST_PASSWORD_RESET: "/auth/request-password-reset",
-    RESET_PASSWORD: "/auth/reset-password",
-    CHANGE_PASSWORD: "/auth/change-password",
-  },
-
-  // Profile endpoints
-  PROFILE: {
-    UPDATE: "/auth/profile",
-  },
-
-  // User endpoints
-  USER: {
-    //------------------------------- SYSTEM -----------------------------------------
-    GET_ALL: "/system/users",
-    GET_BY_ID: (userId: number) => `/system/users/${userId}`,
-    CREATE: "/system/users",
-    UPDATE: (userId: number) => `/system/users/${userId}`,
-    DELETE: (userId: number) => `/system/users/${userId}`,
-    UPDATE_STATUS: (userId: number) => `/system/users/${userId}/status`,
-  },
-
-  // Company endpoints
-  COMPANY: {
-    //------------------------------- PUBLIC -----------------------------------------
-    // role nào cũng xem dược
-    PUBLIC_GET: "/public/companies",
-    PUBLIC_GET_BY_ID: (companyId: number) => `/public/companies/${companyId}`,
-
-    //------------------------------- COMPANY -----------------------------------------
-    // HR xem company profile
-    COMPANY_GET_PROFILE: "/companies/profile",
-
-    // HR cập nhật company profile
-    COMPANY_UPDATE_PROFILE: "/companies/profile",
-
-    // HR_Recruiter tạo company
-    COMPANY_CREATE: "/companies",
-
-    // HR_Recruiter cập nhật lại company sau khi bị từ chối
-    COMPANY_UPDATE: "/companies",
-
-    // HR_Recruiter hủy company sau khi tạo
-    COMPANY_CANCEL: "/companies/cancel",
-
-    //------------------------------- SYSTEM -----------------------------------------
-    // System xem company list và detail
-    SYSTEM_GET: "/system/companies",
-    SYSTEM_GET_BY_ID: (id: number) => `/system/companies/${id}`,
-
-    // System tạo, cập nhật, xóa
-    SYSTEM_CREATE: "/system/companies",
-    SYSTEM_UPDATE: (companyId: number) => `/system/companies/${companyId}`,
-    SYSTEM_DELETE: (companyId: number) => `/system/companies/${companyId}`,
-
-    // System duyệt hoặc từ chối company
-    SYSTEM_STATUS: (companyId: number) =>
-      `/system/companies/${companyId}/status`,
-  },
-
-  // Employment Type endpoints
-  EMPLOYMENT_TYPE: {
-    //------------------------------- PUBLIC -----------------------------------------
-    PUBLIC_GET: "/public/employment-types",
-    PUBLIC_GET_BY_ID: (employmentTypeId: number) =>
-      `/public/employment-types/${employmentTypeId}`,
-
-    //------------------------------- SYSTEM -----------------------------------------
-
-    SYSTEM_GET: "/public/employment-types",
-    SYSTEM_GET_BY_ID: (employmentTypeId: number) =>
-      `/public/employment-types/${employmentTypeId}`,
-    SYSTEM_CREATE: "/system/employment-types",
-    SYSTEM_UPDATE: (employmentTypeId: number) =>
-      `/system/employment-types/${employmentTypeId}`,
-    SYSTEM_DELETE: (employmentTypeId: number) =>
-      `/system/employment-types/${employmentTypeId}`,
-  },
-
-  // Category endpoints
-  CATEGORY: {
-    //------------------------------- PUBLIC -----------------------------------------
-    PUBLIC_GET: "/public/categories",
-    PUBLIC_GET_BY_ID: (categoryId: number) =>
-      `/public/categories/${categoryId}`,
-    PUBLIC_GET_SPECIALIZATIONS: (categoryId: number) =>
-      `/public/categories/${categoryId}/specializations`,
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET: "/public/categories",
-    SYSTEM_GET_BY_ID: (id: number) => `/public/categories/${id}`,
-    SYSTEM_CREATE: "/system/categories",
-    SYSTEM_UPDATE: (categoryId: number) => `/system/categories/${categoryId}`,
-    SYSTEM_DELETE: (categoryId: number) => `/system/categories/${categoryId}`,
-  },
-
-  CANDIDATE: {
-    //------------------------------- SYSTEM -----------------------------------------
-    COMPANY_GET_ALL: "/candidates",
-    COMPANY_GET_BY_ID: (candidateId: number) =>
-      `/candidates/${candidateId}/resumes`,
-    COMPANY_DELETE: (candidateId: number) => `/candidates/${candidateId}`,
-
-    SYSTEM_UPDATE: (blogId: number) => `/companies/blogs/${blogId}`,
-    SYSTEM_DELETE: (blogId: number) => `/companies/blogs/${blogId}`,
-
-    PUBLIC_GET_ALL: "/companies/blogs",
-    PUBLIC_GET_BY_ID: (id: number) => `/companies/blogs/${id}`,
-  },
-
-  // Specialization endpoints
-  SPECIALIZATION: {
-    //------------------------------- PUBLIC -----------------------------------------
-    PUBLIC_GET: "/public/specializations",
-    PUBLIC_GET_BY_ID: (specializationId: number) =>
-      `/public/specializations/${specializationId}`,
-
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET: "/public/specializations",
-    SYSTEM_GET_BY_ID: (specializationId: number) =>
-      `/public/specializations/${specializationId}`,
-    SYSTEM_CREATE: "/system/specializations",
-    SYSTEM_UPDATE: (specializationId: number) =>
-      `/system/specializations/${specializationId}`,
-    SYSTEM_DELETE: (specializationId: number) =>
-      `/system/specializations/${specializationId}`,
-  },
-
-  // Skill endpoints
-  SKILL: {
-    //------------------------------- PUBLIC -----------------------------------------
-    PUBLIC_GET: "/public/skills",
-    PUBLIC_GET_BY_ID: (skillId: number) => `/public/skills/${skillId}`,
-
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET: "/public/skills",
-    SYSTEM_GET_BY_ID: (skillId: number) => `/public/skills/${skillId}`,
-    SYSTEM_CREATE: "/system/skills",
-    SYSTEM_UPDATE: (skillId: number) => `/system/skills/${skillId}`,
-    SYSTEM_DELETE: (skillId: number) => `/system/skills/${skillId}`,
-  },
-
-  // Language endpoints
-  LANGUAGE: {
-    //------------------------------- PUBLIC -----------------------------------------
-    PUBLIC_GET: "/public/languages",
-    PUBLIC_GET_BY_ID: (languageId: number) => `/public/languages/${languageId}`,
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET: "/public/languages",
-    SYSTEM_GET_BY_ID: (languageId: number) => `/public/languages/${languageId}`,
-    SYSTEM_CREATE: "/system/languages",
-    SYSTEM_UPDATE: (languageId: number) => `/system/languages/${languageId}`,
-    SYSTEM_DELETE: (languageId: number) => `/system/languages/${languageId}`,
-  },
-
-  // Level endpoints
-  LEVEL: {
-    //------------------------------- PUBLIC -----------------------------------------
-    PUBLIC_GET: "/public/levels",
-    PUBLIC_GET_BY_ID: (levelId: number) => `/public/levels/${levelId}`,
-
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET: "/public/levels",
-    SYSTEM_GET_BY_ID: (levelId: number) => `/public/levels/${levelId}`,
-    SYSTEM_CREATE: "/system/levels",
-    SYSTEM_UPDATE: (levelId: number) => `/system/levels/${levelId}`,
-    SYSTEM_DELETE: (levelId: number) => `/system/levels/${levelId}`,
-  },
-
-  // Banner Config endpoints
-  BANNER_CONFIG: {
-    //------------------------------- PUBLIC -----------------------------------------
-    PUBLIC_GET: "/public/banner-configs",
-    PUBLIC_GET_BY_ID: (bannerConfigId: number) =>
-      `/public/banner-configs/${bannerConfigId}`,
-
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET: "/system/banner-configs",
-    SYSTEM_GET_BY_ID: (bannerConfigId: number) =>
-      `/system/banner-configs/${bannerConfigId}`,
-    SYSTEM_CREATE: "/system/banner-configs",
-    SYSTEM_UPDATE: (bannerConfigId: number) =>
-      `/system/banner-configs/${bannerConfigId}`,
-    SYSTEM_DELETE: (bannerConfigId: number) =>
-      `/system/banner-configs/${bannerConfigId}`,
-  },
-
-  // Blog endpoints
-  BLOG: {
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET_ALL: "/system/blogs/me",
-    SYSTEM_CREATE: "/system/blogs",
-    SYSTEM_UPDATE: (blogId: number) => `/system/blogs/${blogId}`,
-    SYSTEM_DELETE: (blogId: number) => `/system/blogs/${blogId}`,
-
-    PUBLIC_GET_ALL: "/public/blogs",
-    PUBLIC_GET_BY_ID: (id: number) => `/public/blogs/${id}`,
-  },
-
-  // Feedback endpoints
-  FEEDBACK: {
-    SYSTEM_GET_ALL: "/system/feedbacks",
-    SYSTEM_GET_BY_ID: (feedbackId: number) => `/system/feedbacks/${feedbackId}`,
-    SYSTEM_DELETE: (feedbackId: number) => `/system/feedbacks/${feedbackId}`,
-  },
-
-  // Job endpoints
-  JOB: {
-    //------------------------------- SYSTEM -----------------------------------------
-    // System xem job trong 1 công ty
-    SYSTEM_GET: (companyId: number) => `/system/company/${companyId}/jobs`,
-    SYSTEM_GET_BY_ID: (companyId: number, jobId: number) =>
-      `/system/company/${companyId}/jobs/${jobId}`,
-
-    //------------------------------- COMPANY -----------------------------------------
-    // Company xem các job đã đăng trong company
-    COMPANY_PUBLISHED: "/jobs/published",
-    COMPANY_PUBLISHED_BY_ID: (jobId: number) => `/jobs/published/${jobId}`,
-
-    // HR_Manager xem các job đang chờ duyệt trong company
-    COMPANY_PENDING: "/jobs/pending",
-    COMPANY_PENDING_BY_ID: (jobId: number) => `/jobs/pending/${jobId}`,
-
-    // Company xem các job của mình đã đăng
-    COMPANY_ME: "/jobs/me",
-
-    // Company tạo, cập nhật, xóa job
-    COMPANY_CREATE: "/jobs",
-    COMPANY_UPDATE: (jobId: number) => `/jobs/${jobId}`,
-    COMPANY_DELETE: (jobId: number) => `/jobs/${jobId}`,
-
-    // HR_Manager cập nhật trạng thái job (duyệt / từ chối)
-    COMPANY_UPDATE_STATUS: (jobId: number) => `/jobs/${jobId}/status`,
-  },
-
-  // Subscription endpoints
-  SUBSCRIPTION: {
-    //------------------------------- PUBLIC -----------------------------------------
-    PUBLIC_GET: "/public/subscriptions",
-    PUBLIC_GET_BY_ID: (subscriptionId: number) =>
-      `/public/subscriptions/${subscriptionId}`,
-
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET: "/system/subscriptions",
-    SYSTEM_GET_BY_ID: (subscriptionId: number) =>
-      `/system/subscriptions/${subscriptionId}`,
-    SYSTEM_CREATE: "/system/subscriptions",
-    SYSTEM_UPDATE: (subscriptionId: number) =>
-      `/system/subscriptions/${subscriptionId}`,
-    SYSTEM_DELETE: (subscriptionId: number) =>
-      `/system/subscriptions/${subscriptionId}`,
-
-    //------------------------------- COMPANY -----------------------------------------
-    COMPANY_CURRENT: "/subscriptions/current-subscription",
-    COMPANY_CANCEL: "/subscriptions/subscription/cancel",
-  },
-
-  // Company User endpoints
-  COMPANY_USER: {
-    //------------------------------- SYSTEM -----------------------------------------
-    // System xem danh sách thành viên của company
-    SYSTEM_GET_MEMBERS: (companyId: number) =>
-      `/system/companies/${companyId}/members`,
-
-    //------------------------------- COMPANY -----------------------------------------
-    // Company lấy danh sách thành viên của mình
-    COMPANY_GET_MEMBERS: "/companies/members",
-
-    // HR_Recruiter gửi lời mời tham gia company
-    COMPANY_SEND_JOIN_REQUEST: (companyId: number) =>
-      `/companies/${companyId}/join`,
-
-    // HR_Manager gửi lời mời qua email
-    COMPANY_SEND_INVITATION: `/companies/invitations`,
-
-    // HR_Manager xem danh sách lời mời của công ty
-    COMPANY_GET_INVITATIONS: "/companies/invitations",
-
-    // HR_Manager xem các yêu cầu tham gia company
-    COMPANY_GET_PENDING_JOIN_REQUESTS: "/companies/join-requests",
-
-    // HR_Manager cập nhật trạng thái yêu cầu tham gia company (chấp nhận / từ chối)
-    COMPANY_UPDATE_JOIN_REQUEST_STATUS: (comUserId: number) =>
-      `/companies/join-requests/${comUserId}/status`,
-
-    // HR_Recruiter hủy yêu cầu tham gia company đã gửi
-    COMPANY_CANCEL_JOIN_REQUEST: "/companies/join-request/cancel",
-
-    // HR_Manager xóa account Recruiter ra khỏi công ty
-    COMPANY_DELETE_MEMBER: (comUserId: number) =>
-      `/companies/members/${comUserId}`,
-  },
-
-  // Company Subscription endpoints
-  COMPANY_SUBSCRIPTION: {
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET: "/system/company-subscriptions",
-    SYSTEM_GET_BY_ID: (companySubscriptionId: number) =>
-      `/system/company-subscriptions/${companySubscriptionId}`,
-    SYSTEM_CREATE: "/system/company-subscriptions",
-    SYSTEM_UPDATE: (companySubscriptionId: number) =>
-      `/system/company-subscriptions/${companySubscriptionId}`,
-    SYSTEM_DELETE: (companySubscriptionId: number) =>
-      `/system/company-subscriptions/${companySubscriptionId}`,
-
-    //------------------------------- COMPANY -----------------------------------------
-    // Company hủy gói subscription hiện tại
-    COMPANY_CANCEL: "/company-subscriptions/cancel",
-
-    // Company xem gói subscription hiện tại
-    COMPANY_CURRENT: "/company-subscriptions/current-subscription",
-  },
-
-  PAYMENT: {
-    //------------------------------- COMPANY -----------------------------------------
-    // HR_Manager tạo thanh toán cho company
-    COMPANY_CHECKOUT: "/payments/checkout",
-
-    // HR_Manager xem lịch sử thanh toán của company
-    COMPANY_GET: "/payments",
-    COMPANY_GET_BY_ID: (paymentId: number) => `/payments/${paymentId}`,
-
-    // Get Stripe session by sessionId
-    COMPANY_GET_SESSION: (sessionId: string) =>
-      `/payments/stripe/session?sessionId=${sessionId}`,
-  },
-
-  RESUME: {
-    //------------------------------- COMPANY -----------------------------------------
-    // Upload resume to a job
-    COMPANY_UPLOAD: "/resumes/upload",
-    // Upload multiple resumes to a job
-    COMPANY_UPLOAD_BATCH: "/resumes/upload-batch",
-
-    // Get resumes for a job
-    COMPANY_GET: (campaignId: number, jobId: number) =>
-      `/campaigns/${campaignId}/jobs/${jobId}/resumes`,
-    COMPANY_GET_BY_ID: (
-      campaignId: number,
-      jobId: number,
-      applicationId: number
-    ) => `/campaigns/${campaignId}/jobs/${jobId}/resumes/${applicationId}`,
-
-    // Gửi lại resume để AI phân tích lại
-    COMPANY_RETRY: (resumeId: number) => `/resumes/${resumeId}/retry`,
-
-    COMPANY_RESEND: (jobId: number, resumeId: number) =>
-      `/jobs/${jobId}/resumes/${resumeId}/resend`,
-
-    // Delete a resume
-    COMPANY_DELETE: (applicationId: number) => `/resumes/${applicationId}`,
-    // Adjusted score for a resume application
-    ADJUSTED_SCORE: (applicationId: number) =>
-      `/resume-applications/${applicationId}/adjusted-score`,
-    // Update application status (PATCH body: { status: string, note?: string })
-    UPDATE_STATUS: (applicationId: number) =>
-      `/resume-applications/${applicationId}/status`,
-    // Applications associated with a candidate's resume
-    APPLICATIONS_BY_RESUME: (resumeId: number) =>
-      `/candidates/resumes/${resumeId}/applications`,
-    APPLICATION_BY_ID: (resumeId: number, applicationId: number) =>
-      `/candidates/resumes/${resumeId}/applications/${applicationId}`,
-    // Resume comparison endpoints
-    COMPARE: `/resumes/compare`,
-    COMPARISON_RESULT_AI: `/resumes/result/ai/comparison`,
-    GET_COMPARISON_BY_ID: (comparisonId: number) =>
-      `/resumes/comparisons/${comparisonId}`,
-    GET_COMPARISONS_BY_JOB_CAMPAIGN: (jobId: number, campaignId: number) =>
-      `/resumes/comparisons/job/${jobId}/campaign/${campaignId}`,
-  },
-
-  CAMPAIGN: {
-    //------------------------------- COMPANY -----------------------------------------
-
-    COMPANY_GET: "/campaigns",
-    COMPANY_GET_BY_ID: (campaignId: number) => `/campaigns/${campaignId}`,
-
-    COMPANY_POST: `/campaigns`,
-
-    COMPANY_UPDATE: (campaignId: number) => `/campaigns/${campaignId}`,
-
-    COMPANY_UPDATE_STATUS: (campaignId: number) =>
-      `/campaigns/${campaignId}/status`,
-
-    COMPANY_DELETE: (campaignId: number) => `/campaigns/${campaignId}`,
-
-    // Manage jobs in a campaign
-    COMPANY_ADD_JOBS: (campaignId: number) => `/campaigns/${campaignId}/jobs`,
-
-    COMPANY_REMOVE_JOBS: (campaignId: number) =>
-      `/campaigns/${campaignId}/jobs`,
-
-    COMPANY_PENDING: "/campaigns/pending",
-    COMPANY_PENDING_BY_ID: (campaignId: number) =>
-      `/campaigns/${campaignId}/pending`,
-  },
-
-  // =============================== SYSTEM DASHBOARD ===============================
-  SYSTEM_DASHBOARD: {
-    OVERVIEW: "/system/dashboard/overview",
-    COMPANIES: "/system/dashboard/companies",
-    COMPANY_SUBSCRIPTIONS: "/system/dashboard/company-subscriptions",
-    TOP_COMPANIES: "/system/dashboard/top-companies",
-    REVENUE: "/system/dashboard/revenue",
-    USERS: "/system/dashboard/users",
-    JOBS: "/system/dashboard/jobs",
-    RESUMES: "/system/dashboard/resumes",
-    SUBSCRIPTION_PLANS: "/system/dashboard/subscription-plans",
-    RESUME_EFFECTIVENESS: "/system/dashboard/resume-effectiveness",
-  },
-
-  // =============================== SYSTEM REPORTS ===============================
-  SYSTEM_REPORTS: {
-    EXECUTIVE_SUMMARY: "/system/reports/executive-summary",
-
-    COMPANIES_OVERVIEW: "/system/reports/companies/overview",
-    COMPANIES_USAGE: "/system/reports/companies/usage",
-
-    JOBS_STATISTICS: "/system/reports/jobs/statistics",
-    JOBS_EFFECTIVENESS: "/system/reports/jobs/effectiveness",
-
-    AI_PARSING: "/system/reports/ai/parsing",
-    AI_SCORING: "/system/reports/ai/scoring",
-
-    SUBSCRIPTIONS: "/system/reports/subscriptions",
-
-    // ===== NEW SECTIONS =====
-    AI_HEALTH: "/system/reports/ai/health",
-    CLIENT_ENGAGEMENT: "/system/reports/client-engagement",
-    SAAS_METRICS: "/system/reports/saas-metrics",
-
-    // ===== EXPORT (ONE FILE) =====
-    EXPORT_EXCEL: "/system/reports/excel",
-    EXPORT_PDF: "/system/reports/pdf",
-  },
-
-  // =============================== COMPANY DASHBOARD ===============================
-
-  COMPANY_DASHBOARD: {
-    TOP_CATE_SPEC: "/dashboard/top-category-spec",
-    SUMMARY: "/dashboard/summary",
-    PIPELINE_FUNNEL: "/dashboard/pipeline/funnel",
-    TOP_RATE_RESUME: "/dashboard/top-rated-candidates",
-    SUBSCRIPTION_USAGE_HISTORY: "/dashboard/subscription/usage-history",
-    STATS_OVERVIEW: "/dashboard/stats/overview",
-  },
-
-  COMPANY_REPORT: {
-    JOBS_EXCEL: (campaignId: number, jobId: number) =>
-      `/reports/campaigns/${campaignId}/job/${jobId}/excel`,
-    JOBS_PDF: (campaignId: number, jobId: number) =>
-      `/reports/campaigns/${campaignId}/job/${jobId}/pdf`,
-  },
-
-  ROLE: {
-    //------------------------------- SYSTEM -----------------------------------------
-    SYSTEM_GET: "/system/roles",
-    SYSTEM_GET_BY_ID: (roleId: number) => `/system/roles/${roleId}`,
-  },
-
-  NOTIFICATION: {
-    //------------------------------- AUTH -----------------------------------------
-    AUTH_GET: "/notifications/me",
-    AUTH_MARK_AS_READ: (notificationId: number) =>
-      `/notifications/mark-as-read/${notificationId}`,
-    AUTH_MARK_ALL_AS_READ: "/notifications/mark-all-as-read",
-  },
-
-  INVITATION: {
-    //------------------------------- COMPANY (HR_Manager) -----------------------------------------
-    // HR_Manager gửi lời mời qua email
-    COMPANY_SEND: "/companies/invitations",
-
-    // HR_Manager xem danh sách lời mời của công ty
-    COMPANY_GET: "/companies/invitations",
-
-    // HR_Manager hủy lời mời
-    COMPANY_CANCEL: (invitationId: number) => `/invitations/${invitationId}`,
-
-    //------------------------------- HR_Recruiter -----------------------------------------
-    // HR_Recruiter chấp nhận lời mời
-    ACCEPT: (invitationId: number) => `/invitations/${invitationId}/accept`,
-
-    // HR_Recruiter từ chối lời mời
-    DECLINE: (invitationId: number) => `/invitations/${invitationId}/decline`,
-  },
+	// Auth endpoints
+	AUTH: {
+		SIGN_UP: "/auth/register",
+		LOGIN: "/auth/login",
+		GOOGLE_LOGIN: "/auth/google",
+		GITHUB_LOGIN: "/auth/github",
+		VERIFY_EMAIL: (token: string) => `/auth/verify-email?token=${token}`,
+		ME: "/auth/me",
+		REFRESH: "/auth/refresh",
+		LOGOUT: "/auth/logout",
+		REQUEST_PASSWORD_RESET: "/auth/request-password-reset",
+		RESET_PASSWORD: "/auth/reset-password",
+		CHANGE_PASSWORD: "/auth/change-password",
+	},
+
+	// Profile endpoints
+	PROFILE: {
+		UPDATE: "/auth/profile",
+	},
+
+	// User endpoints
+	USER: {
+		//------------------------------- SYSTEM -----------------------------------------
+		GET_ALL: "/system/users",
+		GET_BY_ID: (userId: number) => `/system/users/${userId}`,
+		CREATE: "/system/users",
+		UPDATE: (userId: number) => `/system/users/${userId}`,
+		DELETE: (userId: number) => `/system/users/${userId}`,
+		UPDATE_STATUS: (userId: number) => `/system/users/${userId}/status`,
+	},
+
+	// Company endpoints
+	COMPANY: {
+		//------------------------------- PUBLIC -----------------------------------------
+		// role nào cũng xem dược
+		PUBLIC_GET: "/public/companies",
+		PUBLIC_GET_BY_ID: (companyId: number) => `/public/companies/${companyId}`,
+
+		//------------------------------- COMPANY -----------------------------------------
+		// HR xem company profile
+		COMPANY_GET_PROFILE: "/companies/profile",
+
+		// HR cập nhật company profile
+		COMPANY_UPDATE_PROFILE: "/companies/profile",
+
+		// HR_Recruiter tạo company
+		COMPANY_CREATE: "/companies",
+
+		// HR_Recruiter cập nhật lại company sau khi bị từ chối
+		COMPANY_UPDATE: "/companies",
+
+		// HR_Recruiter hủy company sau khi tạo
+		COMPANY_CANCEL: "/companies/cancel",
+
+		//------------------------------- SYSTEM -----------------------------------------
+		// System xem company list và detail
+		SYSTEM_GET: "/system/companies",
+		SYSTEM_GET_BY_ID: (id: number) => `/system/companies/${id}`,
+
+		// System tạo, cập nhật, xóa
+		SYSTEM_CREATE: "/system/companies",
+		SYSTEM_UPDATE: (companyId: number) => `/system/companies/${companyId}`,
+		SYSTEM_DELETE: (companyId: number) => `/system/companies/${companyId}`,
+
+		// System duyệt hoặc từ chối company
+		SYSTEM_STATUS: (companyId: number) =>
+			`/system/companies/${companyId}/status`,
+	},
+
+	// Employment Type endpoints
+	EMPLOYMENT_TYPE: {
+		//------------------------------- PUBLIC -----------------------------------------
+		PUBLIC_GET: "/public/employment-types",
+		PUBLIC_GET_BY_ID: (employmentTypeId: number) =>
+			`/public/employment-types/${employmentTypeId}`,
+
+		//------------------------------- SYSTEM -----------------------------------------
+
+		SYSTEM_GET: "/public/employment-types",
+		SYSTEM_GET_BY_ID: (employmentTypeId: number) =>
+			`/public/employment-types/${employmentTypeId}`,
+		SYSTEM_CREATE: "/system/employment-types",
+		SYSTEM_UPDATE: (employmentTypeId: number) =>
+			`/system/employment-types/${employmentTypeId}`,
+		SYSTEM_DELETE: (employmentTypeId: number) =>
+			`/system/employment-types/${employmentTypeId}`,
+	},
+
+	// Category endpoints
+	CATEGORY: {
+		//------------------------------- PUBLIC -----------------------------------------
+		PUBLIC_GET: "/public/categories",
+		PUBLIC_GET_BY_ID: (categoryId: number) =>
+			`/public/categories/${categoryId}`,
+		PUBLIC_GET_SPECIALIZATIONS: (categoryId: number) =>
+			`/public/categories/${categoryId}/specializations`,
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET: "/public/categories",
+		SYSTEM_GET_BY_ID: (id: number) => `/public/categories/${id}`,
+		SYSTEM_CREATE: "/system/categories",
+		SYSTEM_UPDATE: (categoryId: number) => `/system/categories/${categoryId}`,
+		SYSTEM_DELETE: (categoryId: number) => `/system/categories/${categoryId}`,
+	},
+
+	CANDIDATE: {
+		//------------------------------- SYSTEM -----------------------------------------
+		COMPANY_GET_ALL: "/candidates",
+		COMPANY_GET_BY_ID: (candidateId: number) =>
+			`/candidates/${candidateId}/resumes`,
+		COMPANY_DELETE: (candidateId: number) => `/candidates/${candidateId}`,
+
+		SYSTEM_UPDATE: (blogId: number) => `/companies/blogs/${blogId}`,
+		SYSTEM_DELETE: (blogId: number) => `/companies/blogs/${blogId}`,
+
+		PUBLIC_GET_ALL: "/companies/blogs",
+		PUBLIC_GET_BY_ID: (id: number) => `/companies/blogs/${id}`,
+	},
+
+	// Specialization endpoints
+	SPECIALIZATION: {
+		//------------------------------- PUBLIC -----------------------------------------
+		PUBLIC_GET: "/public/specializations",
+		PUBLIC_GET_BY_ID: (specializationId: number) =>
+			`/public/specializations/${specializationId}`,
+
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET: "/public/specializations",
+		SYSTEM_GET_BY_ID: (specializationId: number) =>
+			`/public/specializations/${specializationId}`,
+		SYSTEM_CREATE: "/system/specializations",
+		SYSTEM_UPDATE: (specializationId: number) =>
+			`/system/specializations/${specializationId}`,
+		SYSTEM_DELETE: (specializationId: number) =>
+			`/system/specializations/${specializationId}`,
+	},
+
+	// Skill endpoints
+	SKILL: {
+		//------------------------------- PUBLIC -----------------------------------------
+		PUBLIC_GET: "/public/skills",
+		PUBLIC_GET_BY_ID: (skillId: number) => `/public/skills/${skillId}`,
+
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET: "/public/skills",
+		SYSTEM_GET_BY_ID: (skillId: number) => `/public/skills/${skillId}`,
+		SYSTEM_CREATE: "/system/skills",
+		SYSTEM_UPDATE: (skillId: number) => `/system/skills/${skillId}`,
+		SYSTEM_DELETE: (skillId: number) => `/system/skills/${skillId}`,
+	},
+
+	// Language endpoints
+	LANGUAGE: {
+		//------------------------------- PUBLIC -----------------------------------------
+		PUBLIC_GET: "/public/languages",
+		PUBLIC_GET_BY_ID: (languageId: number) => `/public/languages/${languageId}`,
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET: "/public/languages",
+		SYSTEM_GET_BY_ID: (languageId: number) => `/public/languages/${languageId}`,
+		SYSTEM_CREATE: "/system/languages",
+		SYSTEM_UPDATE: (languageId: number) => `/system/languages/${languageId}`,
+		SYSTEM_DELETE: (languageId: number) => `/system/languages/${languageId}`,
+	},
+
+	// Level endpoints
+	LEVEL: {
+		//------------------------------- PUBLIC -----------------------------------------
+		PUBLIC_GET: "/public/levels",
+		PUBLIC_GET_BY_ID: (levelId: number) => `/public/levels/${levelId}`,
+
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET: "/public/levels",
+		SYSTEM_GET_BY_ID: (levelId: number) => `/public/levels/${levelId}`,
+		SYSTEM_CREATE: "/system/levels",
+		SYSTEM_UPDATE: (levelId: number) => `/system/levels/${levelId}`,
+		SYSTEM_DELETE: (levelId: number) => `/system/levels/${levelId}`,
+	},
+
+	// Banner Config endpoints
+	BANNER_CONFIG: {
+		//------------------------------- PUBLIC -----------------------------------------
+		PUBLIC_GET: "/public/banner-configs",
+		PUBLIC_GET_BY_ID: (bannerConfigId: number) =>
+			`/public/banner-configs/${bannerConfigId}`,
+
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET: "/system/banner-configs",
+		SYSTEM_GET_BY_ID: (bannerConfigId: number) =>
+			`/system/banner-configs/${bannerConfigId}`,
+		SYSTEM_CREATE: "/system/banner-configs",
+		SYSTEM_UPDATE: (bannerConfigId: number) =>
+			`/system/banner-configs/${bannerConfigId}`,
+		SYSTEM_DELETE: (bannerConfigId: number) =>
+			`/system/banner-configs/${bannerConfigId}`,
+	},
+
+	// Blog endpoints
+	BLOG: {
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET_ALL: "/system/blogs/me",
+		SYSTEM_CREATE: "/system/blogs",
+		SYSTEM_UPDATE: (blogId: number) => `/system/blogs/${blogId}`,
+		SYSTEM_DELETE: (blogId: number) => `/system/blogs/${blogId}`,
+
+		PUBLIC_GET_ALL: "/public/blogs",
+		PUBLIC_GET_BY_ID: (id: number) => `/public/blogs/${id}`,
+	},
+
+	// Feedback endpoints
+	FEEDBACK: {
+		SYSTEM_GET_ALL: "/system/feedbacks",
+		SYSTEM_GET_BY_ID: (feedbackId: number) => `/system/feedbacks/${feedbackId}`,
+		// Client endpoints
+		CREATE: "/feedbacks",
+		ME: "/feedbacks/me",
+		SYSTEM_DELETE: (feedbackId: number) => `/system/feedbacks/${feedbackId}`,
+	},
+
+	// Job endpoints
+	JOB: {
+		//------------------------------- SYSTEM -----------------------------------------
+		// System xem job trong 1 công ty
+		SYSTEM_GET: (companyId: number) => `/system/company/${companyId}/jobs`,
+		SYSTEM_GET_BY_ID: (companyId: number, jobId: number) =>
+			`/system/company/${companyId}/jobs/${jobId}`,
+
+		//------------------------------- COMPANY -----------------------------------------
+		// Company xem các job đã đăng trong company
+		COMPANY_PUBLISHED: "/jobs/published",
+		COMPANY_PUBLISHED_BY_ID: (jobId: number) => `/jobs/published/${jobId}`,
+
+		// HR_Manager xem các job đang chờ duyệt trong company
+		COMPANY_PENDING: "/jobs/pending",
+		COMPANY_PENDING_BY_ID: (jobId: number) => `/jobs/pending/${jobId}`,
+
+		// Company xem các job của mình đã đăng
+		COMPANY_ME: "/jobs/me",
+
+		// Company tạo, cập nhật, xóa job
+		COMPANY_CREATE: "/jobs",
+		COMPANY_UPDATE: (jobId: number) => `/jobs/${jobId}`,
+		COMPANY_DELETE: (jobId: number) => `/jobs/${jobId}`,
+
+		// HR_Manager cập nhật trạng thái job (duyệt / từ chối)
+		COMPANY_UPDATE_STATUS: (jobId: number) => `/jobs/${jobId}/status`,
+	},
+
+	// Subscription endpoints
+	SUBSCRIPTION: {
+		//------------------------------- PUBLIC -----------------------------------------
+		PUBLIC_GET: "/public/subscriptions",
+		PUBLIC_GET_BY_ID: (subscriptionId: number) =>
+			`/public/subscriptions/${subscriptionId}`,
+
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET: "/system/subscriptions",
+		SYSTEM_GET_BY_ID: (subscriptionId: number) =>
+			`/system/subscriptions/${subscriptionId}`,
+		SYSTEM_CREATE: "/system/subscriptions",
+		SYSTEM_UPDATE: (subscriptionId: number) =>
+			`/system/subscriptions/${subscriptionId}`,
+		SYSTEM_DELETE: (subscriptionId: number) =>
+			`/system/subscriptions/${subscriptionId}`,
+
+		//------------------------------- COMPANY -----------------------------------------
+		COMPANY_CURRENT: "/subscriptions/current-subscription",
+		COMPANY_CANCEL: "/subscriptions/subscription/cancel",
+	},
+
+	// Company User endpoints
+	COMPANY_USER: {
+		//------------------------------- SYSTEM -----------------------------------------
+		// System xem danh sách thành viên của company
+		SYSTEM_GET_MEMBERS: (companyId: number) =>
+			`/system/companies/${companyId}/members`,
+
+		//------------------------------- COMPANY -----------------------------------------
+		// Company lấy danh sách thành viên của mình
+		COMPANY_GET_MEMBERS: "/companies/members",
+
+		// HR_Recruiter gửi lời mời tham gia company
+		COMPANY_SEND_JOIN_REQUEST: (companyId: number) =>
+			`/companies/${companyId}/join`,
+
+		// HR_Manager gửi lời mời qua email
+		COMPANY_SEND_INVITATION: `/companies/invitations`,
+
+		// HR_Manager xem danh sách lời mời của công ty
+		COMPANY_GET_INVITATIONS: "/companies/invitations",
+
+		// HR_Manager xem các yêu cầu tham gia company
+		COMPANY_GET_PENDING_JOIN_REQUESTS: "/companies/join-requests",
+
+		// HR_Manager cập nhật trạng thái yêu cầu tham gia company (chấp nhận / từ chối)
+		COMPANY_UPDATE_JOIN_REQUEST_STATUS: (comUserId: number) =>
+			`/companies/join-requests/${comUserId}/status`,
+
+		// HR_Recruiter hủy yêu cầu tham gia company đã gửi
+		COMPANY_CANCEL_JOIN_REQUEST: "/companies/join-request/cancel",
+
+		// HR_Manager xóa account Recruiter ra khỏi công ty
+		COMPANY_DELETE_MEMBER: (comUserId: number) =>
+			`/companies/members/${comUserId}`,
+	},
+
+	// Company Subscription endpoints
+	COMPANY_SUBSCRIPTION: {
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET: "/system/company-subscriptions",
+		SYSTEM_GET_BY_ID: (companySubscriptionId: number) =>
+			`/system/company-subscriptions/${companySubscriptionId}`,
+		SYSTEM_CREATE: "/system/company-subscriptions",
+		SYSTEM_UPDATE: (companySubscriptionId: number) =>
+			`/system/company-subscriptions/${companySubscriptionId}`,
+		SYSTEM_DELETE: (companySubscriptionId: number) =>
+			`/system/company-subscriptions/${companySubscriptionId}`,
+
+		//------------------------------- COMPANY -----------------------------------------
+		// Company hủy gói subscription hiện tại
+		COMPANY_CANCEL: "/company-subscriptions/cancel",
+
+		// Company xem gói subscription hiện tại
+		COMPANY_CURRENT: "/company-subscriptions/current-subscription",
+	},
+
+	PAYMENT: {
+		//------------------------------- COMPANY -----------------------------------------
+		// HR_Manager tạo thanh toán cho company
+		COMPANY_CHECKOUT: "/payments/checkout",
+
+		// HR_Manager xem lịch sử thanh toán của company
+		COMPANY_GET: "/payments",
+		COMPANY_GET_BY_ID: (paymentId: number) => `/payments/${paymentId}`,
+
+		// Get Stripe session by sessionId
+		COMPANY_GET_SESSION: (sessionId: string) =>
+			`/payments/stripe/session?sessionId=${sessionId}`,
+	},
+
+	RESUME: {
+		//------------------------------- COMPANY -----------------------------------------
+		// Upload resume to a job
+		COMPANY_UPLOAD: "/resumes/upload",
+		// Upload multiple resumes to a job
+		COMPANY_UPLOAD_BATCH: "/resumes/upload-batch",
+
+		// Get resumes for a job
+		COMPANY_GET: (campaignId: number, jobId: number) =>
+			`/campaigns/${campaignId}/jobs/${jobId}/resumes`,
+		COMPANY_GET_BY_ID: (
+			campaignId: number,
+			jobId: number,
+			applicationId: number
+		) => `/campaigns/${campaignId}/jobs/${jobId}/resumes/${applicationId}`,
+
+		// Gửi lại resume để AI phân tích lại
+		COMPANY_RETRY: (resumeId: number) => `/resumes/${resumeId}/retry`,
+
+		COMPANY_RESEND: (jobId: number, resumeId: number) =>
+			`/jobs/${jobId}/resumes/${resumeId}/resend`,
+
+		// Delete a resume
+		COMPANY_DELETE: (applicationId: number) => `/resumes/${applicationId}`,
+		// Adjusted score for a resume application
+		ADJUSTED_SCORE: (applicationId: number) =>
+			`/resume-applications/${applicationId}/adjusted-score`,
+		// Update application status (PATCH body: { status: string, note?: string })
+		UPDATE_STATUS: (applicationId: number) =>
+			`/resume-applications/${applicationId}/status`,
+		// Applications associated with a candidate's resume
+		APPLICATIONS_BY_RESUME: (resumeId: number) =>
+			`/candidates/resumes/${resumeId}/applications`,
+		APPLICATION_BY_ID: (resumeId: number, applicationId: number) =>
+			`/candidates/resumes/${resumeId}/applications/${applicationId}`,
+		// Resume comparison endpoints
+		COMPARE: `/resumes/compare`,
+		COMPARISON_RESULT_AI: `/resumes/result/ai/comparison`,
+		GET_COMPARISON_BY_ID: (comparisonId: number) =>
+			`/resumes/comparisons/${comparisonId}`,
+		GET_COMPARISONS_BY_JOB_CAMPAIGN: (jobId: number, campaignId: number) =>
+			`/resumes/comparisons/job/${jobId}/campaign/${campaignId}`,
+	},
+
+	CAMPAIGN: {
+		//------------------------------- COMPANY -----------------------------------------
+
+		COMPANY_GET: "/campaigns",
+		COMPANY_GET_BY_ID: (campaignId: number) => `/campaigns/${campaignId}`,
+
+		COMPANY_POST: `/campaigns`,
+
+		COMPANY_UPDATE: (campaignId: number) => `/campaigns/${campaignId}`,
+
+		COMPANY_UPDATE_STATUS: (campaignId: number) =>
+			`/campaigns/${campaignId}/status`,
+
+		COMPANY_DELETE: (campaignId: number) => `/campaigns/${campaignId}`,
+
+		// Manage jobs in a campaign
+		COMPANY_ADD_JOBS: (campaignId: number) => `/campaigns/${campaignId}/jobs`,
+
+		COMPANY_REMOVE_JOBS: (campaignId: number) =>
+			`/campaigns/${campaignId}/jobs`,
+
+		COMPANY_PENDING: "/campaigns/pending",
+		COMPANY_PENDING_BY_ID: (campaignId: number) =>
+			`/campaigns/${campaignId}/pending`,
+	},
+
+	// =============================== SYSTEM DASHBOARD ===============================
+	SYSTEM_DASHBOARD: {
+		OVERVIEW: "/system/dashboard/overview",
+		COMPANIES: "/system/dashboard/companies",
+		COMPANY_SUBSCRIPTIONS: "/system/dashboard/company-subscriptions",
+		TOP_COMPANIES: "/system/dashboard/top-companies",
+		REVENUE: "/system/dashboard/revenue",
+		USERS: "/system/dashboard/users",
+		JOBS: "/system/dashboard/jobs",
+		RESUMES: "/system/dashboard/resumes",
+		SUBSCRIPTION_PLANS: "/system/dashboard/subscription-plans",
+		RESUME_EFFECTIVENESS: "/system/dashboard/resume-effectiveness",
+	},
+
+	// =============================== SYSTEM REPORTS ===============================
+	SYSTEM_REPORTS: {
+		EXECUTIVE_SUMMARY: "/system/reports/executive-summary",
+
+		COMPANIES_OVERVIEW: "/system/reports/companies/overview",
+		COMPANIES_USAGE: "/system/reports/companies/usage",
+
+		JOBS_STATISTICS: "/system/reports/jobs/statistics",
+		JOBS_EFFECTIVENESS: "/system/reports/jobs/effectiveness",
+
+		AI_PARSING: "/system/reports/ai/parsing",
+		AI_SCORING: "/system/reports/ai/scoring",
+
+		SUBSCRIPTIONS: "/system/reports/subscriptions",
+
+		// ===== NEW SECTIONS =====
+		AI_HEALTH: "/system/reports/ai/health",
+		CLIENT_ENGAGEMENT: "/system/reports/client-engagement",
+		SAAS_METRICS: "/system/reports/saas-metrics",
+
+		// ===== EXPORT (ONE FILE) =====
+		EXPORT_EXCEL: "/system/reports/excel",
+		EXPORT_PDF: "/system/reports/pdf",
+	},
+
+	// =============================== COMPANY DASHBOARD ===============================
+
+	COMPANY_DASHBOARD: {
+		TOP_CATE_SPEC: "/dashboard/top-category-spec",
+		SUMMARY: "/dashboard/summary",
+		PIPELINE_FUNNEL: "/dashboard/pipeline/funnel",
+		TOP_RATE_RESUME: "/dashboard/top-rated-candidates",
+		SUBSCRIPTION_USAGE_HISTORY: "/dashboard/subscription/usage-history",
+		STATS_OVERVIEW: "/dashboard/stats/overview",
+	},
+
+	COMPANY_REPORT: {
+		JOBS_EXCEL: (campaignId: number, jobId: number) =>
+			`/reports/campaigns/${campaignId}/job/${jobId}/excel`,
+		JOBS_PDF: (campaignId: number, jobId: number) =>
+			`/reports/campaigns/${campaignId}/job/${jobId}/pdf`,
+	},
+
+	ROLE: {
+		//------------------------------- SYSTEM -----------------------------------------
+		SYSTEM_GET: "/system/roles",
+		SYSTEM_GET_BY_ID: (roleId: number) => `/system/roles/${roleId}`,
+	},
+
+	NOTIFICATION: {
+		//------------------------------- AUTH -----------------------------------------
+		AUTH_GET: "/notifications/me",
+		AUTH_MARK_AS_READ: (notificationId: number) =>
+			`/notifications/mark-as-read/${notificationId}`,
+		AUTH_MARK_ALL_AS_READ: "/notifications/mark-all-as-read",
+	},
+
+	INVITATION: {
+		//------------------------------- COMPANY (HR_Manager) -----------------------------------------
+		// HR_Manager gửi lời mời qua email
+		COMPANY_SEND: "/companies/invitations",
+
+		// HR_Manager xem danh sách lời mời của công ty
+		COMPANY_GET: "/companies/invitations",
+
+		// HR_Manager hủy lời mời
+		COMPANY_CANCEL: (invitationId: number) => `/invitations/${invitationId}`,
+
+		//------------------------------- HR_Recruiter -----------------------------------------
+		// HR_Recruiter chấp nhận lời mời
+		ACCEPT: (invitationId: number) => `/invitations/${invitationId}/accept`,
+
+		// HR_Recruiter từ chối lời mời
+		DECLINE: (invitationId: number) => `/invitations/${invitationId}/decline`,
+	},
 } as const;
 
 // App Routes Configuration
 export const APP_ROUTES = {
-  // Public routes
-  HOME: "/",
-  TEST: "/test",
-  NOTFOUND: "*",
+	// Public routes
+	HOME: "/",
+	TEST: "/test",
+	NOTFOUND: "*",
 
-  /* ===== Legal & Trust ===== */
-  LEGAL_TERMS: "/legal/terms",
-  LEGAL_PRIVACY: "/legal/privacy",
-  LEGAL_SECURITY: "/legal/security",
-  /* ===== Product ===== */
-  PRODUCT_HOW_IT_WORKS: "/product/how-it-works",
-  PRODUCT_NO_ATS: "/product/no-ats",
+	/* ===== Legal & Trust ===== */
+	LEGAL_TERMS: "/legal/terms",
+	LEGAL_PRIVACY: "/legal/privacy",
+	LEGAL_SECURITY: "/legal/security",
+	/* ===== Product ===== */
+	PRODUCT_HOW_IT_WORKS: "/product/how-it-works",
+	PRODUCT_NO_ATS: "/product/no-ats",
 
-  /* ===== Resources ===== */
-  RESOURCES_BLOG: "/resources/blog",
-  RESOURCES_HELP_CENTER: "/resources/help-center",
-  RESOURCES_CONTACT_US: "/resources/contact-us",
+	/* ===== Resources ===== */
+	RESOURCES_BLOG: "/resources/blog",
+	RESOURCES_HELP_CENTER: "/resources/help-center",
+	RESOURCES_CONTACT_US: "/resources/contact-us",
 
-  // Auth routes
-  LOGIN: "/login",
-  SIGN_UP: "/sign-up",
-  VERIFY_EMAIL: "/verify-email",
-  FORGOT_PASSWORD: "/forgot-password",
-  RESET_PASSWORD: "/reset-password",
-  AUTH_CALLBACK: "/auth/callback",
+	// Auth routes
+	LOGIN: "/login",
+	SIGN_UP: "/sign-up",
+	VERIFY_EMAIL: "/verify-email",
+	FORGOT_PASSWORD: "/forgot-password",
+	RESET_PASSWORD: "/reset-password",
+	AUTH_CALLBACK: "/auth/callback",
 
-  // General routes
-  SUBSCRIPTIONS: "/subscriptions",
+	// General routes
+	SUBSCRIPTIONS: "/subscriptions",
 
-  // Profile routes
-  PROFILE: "/profile",
-  PROFILE_ACCOUNT_DETAIL: "/profile/account-detail",
-  PROFILE_NOTIFICATION: "/profile/notification",
-  PROFILE_SECURITY: "/profile/security",
+	// Profile routes
+	PROFILE: "/profile",
+	PROFILE_ACCOUNT_DETAIL: "/profile/account-detail",
+	PROFILE_NOTIFICATION: "/profile/notification",
+	PROFILE_SECURITY: "/profile/security",
 
-  // System base routes per role
-  SYSTEM_ADMIN: "/system",
-  SYSTEM_MANAGER: "/system_manager",
-  SYSTEM_STAFF: "/system_staff",
+	// System base routes per role
+	SYSTEM_ADMIN: "/system",
+	SYSTEM_MANAGER: "/system_manager",
+	SYSTEM_STAFF: "/system_staff",
 
-  // Optional: dashboard riêng cho Manager / Staff cho đẹp
-  SYSTEM_MANAGER_DASHBOARD: "/system_manager/dashboard",
-  SYSTEM_STAFF_DASHBOARD: "/system_staff/dashboard",
+	// Optional: dashboard riêng cho Manager / Staff cho đẹp
+	SYSTEM_MANAGER_DASHBOARD: "/system_manager/dashboard",
+	SYSTEM_STAFF_DASHBOARD: "/system_staff/dashboard",
 
-  // System routes
-  SYSTEM: "/system",
-  SYSTEM_DASHBOARD: "/system/dashboard",
-  SYSTEM_USERS: "/system/users",
-  SYSTEM_RECRUITMENT_APPROVAL: "/system/recruitment-approval",
-  SYSTEM_JOBS: "/system/jobs",
+	// System routes
+	SYSTEM: "/system",
+	SYSTEM_DASHBOARD: "/system/dashboard",
+	SYSTEM_USERS: "/system/users",
+	SYSTEM_RECRUITMENT_APPROVAL: "/system/recruitment-approval",
+	SYSTEM_JOBS: "/system/jobs",
 
-  // === Newly added System routes ===
-  SYSTEM_COMPANY: "/system/company",
+	// === Newly added System routes ===
+	SYSTEM_COMPANY: "/system/company",
 
-  // Reports
-  SYSTEM_REPORTS: "/system/reports",
+	// Reports
+	SYSTEM_REPORTS: "/system/reports",
 
-  // Notifications
-  SYSTEM_NOTIFICATION_TEMPLATES: "/system/notifications/templates",
-  SYSTEM_EMAIL_TEMPLATES: "/system/notifications/email",
+	// Notifications
+	SYSTEM_NOTIFICATION_TEMPLATES: "/system/notifications/templates",
+	SYSTEM_EMAIL_TEMPLATES: "/system/notifications/email",
 
-  // Settings
-  SYSTEM_ROLES: "/system/settings/roles",
-  SYSTEM_AI_ENDPOINTS: "/system/settings/ai-endpoints",
-  SYSTEM_FEATURE_FLAGS: "/system/settings/feature-flags",
-  SYSTEM_EMAIL_CONFIG: "/system/settings/email",
-  SYSTEM_API_KEYS: "/system/settings/api-keys",
+	// Settings
+	SYSTEM_ROLES: "/system/settings/roles",
+	SYSTEM_AI_ENDPOINTS: "/system/settings/ai-endpoints",
+	SYSTEM_FEATURE_FLAGS: "/system/settings/feature-flags",
+	SYSTEM_EMAIL_CONFIG: "/system/settings/email",
+	SYSTEM_API_KEYS: "/system/settings/api-keys",
 
-  // Subscriptions
-  SYSTEM_SUBSCRIPTIONS: "/system/subscriptions",
-  SYSTEM_SUBSCRIPTIONS_COMPANIES: "/system/subscriptions/companies",
-  SYSTEM_SUBSCRIPTION_DETAIL: "/system/subscriptions/:id",
+	// Subscriptions
+	SYSTEM_SUBSCRIPTIONS: "/system/subscriptions",
+	SYSTEM_SUBSCRIPTIONS_COMPANIES: "/system/subscriptions/companies",
+	SYSTEM_SUBSCRIPTION_DETAIL: "/system/subscriptions/:id",
 
-  // Payments
-  SYSTEM_PAYMENTS: "/system/payments",
-  SYSTEM_PAYMENT_DETAIL: "/system/payments/:paymentId",
+	// Payments
+	SYSTEM_PAYMENTS: "/system/payments",
+	SYSTEM_PAYMENT_DETAIL: "/system/payments/:paymentId",
 
-  // Taxonomy
-  SYSTEM_TAXONOMY_LANGUAGE: "/system/taxonomy/languages",
-  SYSTEM_TAXONOMY_LEVEL: "/system/taxonomy/levels",
-  SYSTEM_TAXONOMY_CATEGORY: "/system/taxonomy/categories",
-  SYSTEM_TAXONOMY_SKILL: "/system/taxonomy/skills",
-  SYSTEM_TAXONOMY_SPECIALIZATION: "/system/taxonomy/specializations",
-  SYSTEM_TAXONOMY_RECRUITMENT_TYPE: "/system/taxonomy/recruitment-types",
+	// Taxonomy
+	SYSTEM_TAXONOMY_LANGUAGE: "/system/taxonomy/languages",
+	SYSTEM_TAXONOMY_LEVEL: "/system/taxonomy/levels",
+	SYSTEM_TAXONOMY_CATEGORY: "/system/taxonomy/categories",
+	SYSTEM_TAXONOMY_SKILL: "/system/taxonomy/skills",
+	SYSTEM_TAXONOMY_SPECIALIZATION: "/system/taxonomy/specializations",
+	SYSTEM_TAXONOMY_RECRUITMENT_TYPE: "/system/taxonomy/recruitment-types",
 
-  // Content
-  SYSTEM_CONTENT_BANNERS: "/system/content/banners",
-  SYSTEM_BANNER_DETAIL: "/system/banners/:bannerId",
-  SYSTEM_BLOGS: "/system/content/blogs",
-  SYSTEM_BLOG_DETAIL: "/system/content/blogs/:blogId",
-  SYSTEM_TAGS: "/system/tags",
+	// Content
+	SYSTEM_CONTENT_BANNERS: "/system/content/banners",
+	SYSTEM_BANNER_DETAIL: "/system/banners/:bannerId",
+	SYSTEM_BLOGS: "/system/content/blogs",
+	SYSTEM_BLOG_DETAIL: "/system/content/blogs/:blogId",
+	SYSTEM_TAGS: "/system/tags",
 
-  //Feedbacks
-  SYSTEM_FEEDBACKS: "/system/feedbacks",
-  SYSTEM_FEEDBACK_DETAIL: "/system/feedbacks/:feedbackId",
+	//Feedbacks
+	SYSTEM_FEEDBACKS: "/system/feedbacks",
+	SYSTEM_FEEDBACK_DETAIL: "/system/feedbacks/:feedbackId",
 
-  // Optional detail routes (for future expansion)
-  SYSTEM_COMPANY_DETAIL: "/system/company/:companyId",
-  SYSTEM_COMPANY_JOB_DETAIL: "/system/company/:companyId/jobs/:jobId",
-  SYSTEM_COMPANY_RESUME_DETAIL:
-    "/system/company/:companyId/jobs/:jobId/resumes/:resumeId",
+	// Optional detail routes (for future expansion)
+	SYSTEM_COMPANY_DETAIL: "/system/company/:companyId",
+	SYSTEM_COMPANY_JOB_DETAIL: "/system/company/:companyId/jobs/:jobId",
+	SYSTEM_COMPANY_RESUME_DETAIL:
+		"/system/company/:companyId/jobs/:jobId/resumes/:resumeId",
 
-  // Company routes
-  COMPANY: "/company",
-  COMPANY_DASHBOARD: "/company/dashboard",
-  COMPANY_STAFFS: "/company/staffs",
-  COMPANY_JOBS: "/company/jobs",
-  COMPANY_SETTINGS: "/company/settings",
-  COMPANY_MY_APARTMENTS: "/company/my-apartments",
-  COMPANY_PENDING_APPROVAL: "/company/pending-approval",
-  COMPANY_CAMPAIN: "/company/campaign",
-  COMPANY_CAMPAIN_DETAIL: "/company/campaign/:campaignId",
-  // Hiring tracking (standalone page)
-  HIRING_TRACKING: "/company/campaign/:campaignId/:jobId/hiring-tracking",
-  COMPANY_NOTIFICATION: "/company/notification",
-  COMPANY_AI_SCREENING: "/company/ai-screening",
-  COMPANY_AI_SCREENING_RESUMES:
-    "/company/ai-screening/:campaignId/:jobId/resumes",
-  COMPANY_AI_SCREENING_RESUMES_COMPARE:
-    "/company/ai-screening/:campaignId/:jobId/resumes/compare",
-  COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
-  COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
-  COMPANY_PAYMENT_HISTORY: "/company/payment-history",
-  COMPANY_CANDIDATE: "/company/candidate",
-  COMPANY_CANDIDATE_DETAIL: "/company/candidate/:candidateId",
+	// Company routes
+	COMPANY: "/company",
+	COMPANY_DASHBOARD: "/company/dashboard",
+	COMPANY_STAFFS: "/company/staffs",
+	COMPANY_JOBS: "/company/jobs",
+	COMPANY_SETTINGS: "/company/settings",
+	COMPANY_MY_APARTMENTS: "/company/my-apartments",
+	COMPANY_PENDING_APPROVAL: "/company/pending-approval",
+	COMPANY_CAMPAIN: "/company/campaign",
+	COMPANY_CAMPAIN_DETAIL: "/company/campaign/:campaignId",
+	// Hiring tracking (standalone page)
+	HIRING_TRACKING: "/company/campaign/:campaignId/:jobId/hiring-tracking",
+	COMPANY_NOTIFICATION: "/company/notification",
+	COMPANY_AI_SCREENING: "/company/ai-screening",
+	COMPANY_AI_SCREENING_RESUMES:
+		"/company/ai-screening/:campaignId/:jobId/resumes",
+	COMPANY_AI_SCREENING_RESUMES_COMPARE:
+		"/company/ai-screening/:campaignId/:jobId/resumes/compare",
+	// Company feedback page for users to view/submit feedback
+	COMPANY_FEEDBACK: "/company/feedbacks",
+	COMPANY_SUBSCRIPTIONS: "/company/subscriptions",
+	COMPANY_MY_SUBSCRIPTIONS: "/company/my-subscription",
+	COMPANY_PAYMENT_HISTORY: "/company/payment-history",
+	COMPANY_CANDIDATE: "/company/candidate",
+	COMPANY_CANDIDATE_DETAIL: "/company/candidate/:candidateId",
 } as const;
 
 export const ROLES = {
-  System_Admin: "system_admin",
-  System_Manager: "system_manager",
-  System_Staff: "system_staff",
-  Hr_Manager: "hr_manager",
-  Hr_Recruiter: "hr_recruiter",
+	System_Admin: "system_admin",
+	System_Manager: "system_manager",
+	System_Staff: "system_staff",
+	Hr_Manager: "hr_manager",
+	Hr_Recruiter: "hr_recruiter",
 } as const;
 
 export default {
-  API_CONFIG,
-  STORAGE_KEYS,
-  API_ENDPOINTS,
-  APP_ROUTES,
+	API_CONFIG,
+	STORAGE_KEYS,
+	API_ENDPOINTS,
+	APP_ROUTES,
 };

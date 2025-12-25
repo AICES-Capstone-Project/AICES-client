@@ -49,6 +49,10 @@ const CampaignManagement = () => {
         return () => window.removeEventListener("resize", calculate);
     }, []);
 
+    const handleBack = () => {
+        setPendingDetail(null);
+    };
+
     // Load campaigns from API
     const loadCampaigns = async (page = currentPage, size = pageSize, search = searchText, status = statusFilter) => {
         setLoading(true);
@@ -57,7 +61,7 @@ const CampaignManagement = () => {
             if (response.status === "Success" && response.data) {
                 let campaignList = response.data.campaigns || response.data;
                 campaignList = Array.isArray(campaignList) ? campaignList : [];
-                
+
                 // Extract total count from API response structure
                 const total = response.data.totalCount || campaignList.length;
                 setTotalCount(total);
@@ -132,7 +136,7 @@ const CampaignManagement = () => {
         loadCampaigns();
         loadPendingCampaigns();
     }, []);
-    
+
     // Reload campaigns when filters change
     useEffect(() => {
         if (currentPage === 1) {
@@ -141,7 +145,7 @@ const CampaignManagement = () => {
             setCurrentPage(1);
         }
     }, [searchText, statusFilter]);
-    
+
     // Reload campaigns when page changes
     useEffect(() => {
         loadCampaigns(currentPage, pageSize, searchText, statusFilter);
@@ -320,6 +324,7 @@ const CampaignManagement = () => {
                 pendingCampaigns={pendingCampaigns}
                 loading={pendingLoading}
                 pendingDetail={pendingDetail}
+                onBack={handleBack}
                 pendingDetailLoading={pendingDetailLoading}
                 pendingActionLoading={pendingActionLoading}
                 onView={handleViewPending}

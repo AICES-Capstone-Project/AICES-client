@@ -1,5 +1,5 @@
-import React from 'react';
-import { Drawer, List, Button, Spin, Divider, Tag } from 'antd';
+import React, { useState } from 'react';
+import { Drawer, List, Button, Spin, Divider, Tag, Modal } from 'antd';
 import { ArrowRightOutlined, CloseOutlined, CheckOutlined, EyeOutlined } from '@ant-design/icons';
 
 type Props = {
@@ -13,6 +13,7 @@ type Props = {
   onView: (campaignId: number) => void;
   onApprove: () => void;
   onReject: () => void;
+  onBack: () => void;
 };
 
 const PendingCampaignsDrawer: React.FC<Props> = ({
@@ -26,7 +27,25 @@ const PendingCampaignsDrawer: React.FC<Props> = ({
   onView,
   onApprove,
   onReject,
+  onBack,
 }) => {
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [confirmAction, setConfirmAction] = useState<'approve' | 'reject' | null>(null);
+
+  const handleConfirmOk = () => {
+    if (confirmAction === 'approve') {
+      onApprove();
+    } else if (confirmAction === 'reject') {
+      onReject();
+    }
+    setConfirmVisible(false);
+    setConfirmAction(null);
+  };
+
+  const handleConfirmCancel = () => {
+    setConfirmVisible(false);
+    setConfirmAction(null);
+  };
   return (
     <Drawer
       title={
@@ -37,7 +56,7 @@ const PendingCampaignsDrawer: React.FC<Props> = ({
               <Tag color={pendingDetail.status === 'Pending' ? 'orange' : pendingDetail.status === 'Published' ? 'green' : 'default'}>{pendingDetail.status || '-'}</Tag>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Button type="text" icon={<ArrowRightOutlined />} onClick={() => onView?.(0)} />
+              <Button type="text" icon={<ArrowRightOutlined />} onClick={onBack} />
             </div>
           </div>
         ) : (
@@ -106,9 +125,45 @@ const PendingCampaignsDrawer: React.FC<Props> = ({
               )}
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 12 }}>
-              <Button danger icon={<CloseOutlined />} onClick={onReject} loading={pendingActionLoading}>Reject</Button>
-              <Button className="company-btn--filled" icon={<CheckOutlined />} onClick={onApprove} loading={pendingActionLoading}>Approve</Button>
+              <Button
+                danger
+                icon={<CloseOutlined />}
+                loading={pendingActionLoading}
+                onClick={() => {
+                  setConfirmAction('reject');
+                  setConfirmVisible(true);
+                }}
+              >
+                Reject
+              </Button>
+              <Button
+                className="company-btn--filled"
+                icon={<CheckOutlined />}
+                loading={pendingActionLoading}
+                onClick={() => {
+                  setConfirmAction('approve');
+                  setConfirmVisible(true);
+                }}
+              >
+                Approve
+              </Button>
             </div>
+            <Modal
+              open={confirmVisible}
+              title={
+                <div style={{ textAlign: 'center', width: '100%', fontWeight: 600, marginBottom: 8 }}>
+                    {confirmAction === 'approve' ? 'Are you sure you want to approve this campaign?' : 'Are you sure you want to reject this campaign?'}
+                </div>
+              }
+              onCancel={handleConfirmCancel}
+              centered
+              footer={
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+                  <Button danger onClick={handleConfirmCancel}>No</Button>
+                  <Button className="company-btn" type="primary" onClick={handleConfirmOk} loading={pendingActionLoading}>Yes</Button>
+                </div>
+              }
+            />
           </div>
         )
       ) : (

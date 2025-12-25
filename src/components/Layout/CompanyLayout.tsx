@@ -6,6 +6,8 @@ import {
     Dropdown,
     Typography,
     Badge,
+    Button,
+    Tooltip,
 } from "antd";
 import type { MenuProps } from "antd";
 import {
@@ -21,6 +23,7 @@ import {
     UserCog,
     Rocket,
     Bell,
+    MessageCircle,
 } from "lucide-react";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import logo from "../../assets/logo/logo_long.png";
@@ -39,12 +42,14 @@ export default function CompanyLayout() {
     const [collapsed, setCollapsed] = useState(false);
     const [subscriptionName, setSubscriptionName] = useState("");
     const [notifCount, setNotifCount] = useState(0);
+    // modal open state is derived from the route
+    // feedback modal/drawer logic removed from this layout; handled in feedback page
 
     const location = useLocation();
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
 
-    const user = useAppSelector((s) => s.auth.user);
+    const user = useAppSelector((s: any) => s.auth?.user);
     const userRole = user?.roleName ?? null;
     const hasCompany = Boolean(user?.companyName);
 
@@ -115,6 +120,13 @@ export default function CompanyLayout() {
             .catch(() => { });
     }, [hasCompany]);
 
+    
+
+    const showUpgrade = (subscriptionName || '').trim() === '' || (subscriptionName || '').toLowerCase().includes('free');
+
+
+    // feedback history loading moved to dedicated Feedback page
+
     const displayBadge =
         notifCount > 0 ? (notifCount > 99 ? "99+" : notifCount) : undefined;
 
@@ -173,6 +185,14 @@ export default function CompanyLayout() {
     ];
 
     const userMenuItems: MenuProps["items"] = [
+        {
+            key: 'feedback',
+                icon: <MessageCircle size={18} style={iconStyle} />,
+                label: 'Feedback',
+                onClick: () => {
+                    navigate(APP_ROUTES.COMPANY_FEEDBACK);
+                },
+        },
         ...(userRole?.toLowerCase() === ROLES.Hr_Manager?.toLowerCase() && hasCompany
             ? [
                 {
@@ -237,6 +257,11 @@ export default function CompanyLayout() {
                             maxWidth: collapsed ? 40 : "70%",
                             objectFit: "contain",
                             transition: "opacity 0.2s",
+                            cursor: 'pointer'
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(APP_ROUTES.HOME);
                         }}
                     />
                     <div
@@ -331,35 +356,74 @@ export default function CompanyLayout() {
                     }}
                 >
 
-                    <Dropdown menu={{ items: userMenuItems }} trigger={["click"]}>
-                        <div
-                            style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: 8,
-                                cursor: "pointer",
-                                padding: 6,
-                                borderRadius: 8,
-                            }}
-                        >
-                            <Avatar
-                                src={user?.avatarUrl || defaultAvatar}
-                                icon={<UserCog />}
-                                size={collapsed ? 40 : 28}
-                            />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                        <Dropdown menu={{ items: userMenuItems }} trigger={["click"]}>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 8,
+                                    cursor: "pointer",
+                                    padding: 6,
+                                    borderRadius: 8,
+                                }}
+                            >
+                                <Avatar
+                                    src={user?.avatarUrl || defaultAvatar}
+                                    icon={<UserCog />}
+                                    size={collapsed ? 40 : 35}
+                                />
 
-                            {!collapsed && (
-                                <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                                    <Text strong ellipsis>
-                                        {user?.fullName || user?.email}
-                                    </Text>
-                                    <Text type="secondary" style={{ fontSize: 12 }}>
-                                        {subscriptionName || "Upgrade"}
-                                    </Text>
-                                </div>
-                            )}
-                        </div>
-                    </Dropdown>
+                                {!collapsed && (
+                                    <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+                                        <Text
+                                            strong
+                                            title={user?.fullName || user?.email}
+                                            style={{
+                                                display: 'block',
+                                                maxWidth: 80,
+                                                whiteSpace: 'nowrap',
+                                                overflow: 'hidden',
+                                                textOverflow: 'ellipsis',
+                                                fontSize: 12,
+                                            }}
+                                        >
+                                            {user?.fullName || user?.email}
+                                        </Text>
+                                        <Tooltip title="This is your current subscription plan">
+                                            <Text
+                                                type="secondary"
+                                                style={{
+                                                    fontSize: 11,
+                                                    maxWidth: 110,
+                                                    whiteSpace: 'nowrap',
+                                                    overflow: 'hidden',
+                                                    textOverflow: 'ellipsis',
+                                                }}
+                                            >
+                                                {subscriptionName || "Upgrade"}
+                                            </Text>
+                                        </Tooltip>
+                                    </div>
+                                )}
+                            </div>
+                        </Dropdown>
+
+                        {!collapsed && showUpgrade && (
+                            <Button
+                                className="company-btn"
+                                size="small"
+                                type="primary"
+                                style={{ padding: '2px', fontSize: 9, height: 20, lineHeight: '18px' }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(APP_ROUTES.SUBSCRIPTIONS);
+                                }}
+                            >
+                                Upgrade
+                            </Button>
+                        )}
+                    </div>
                 </div>
 
             </Sider>

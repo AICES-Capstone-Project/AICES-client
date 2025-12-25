@@ -9,16 +9,22 @@ interface Props {
   current: number;
   pageSize: number;
   total: number;
+  tableHeight?: number | undefined;
   onChange: (page: number) => void;
 }
 
-const CampaignJobsTable: React.FC<Props> = ({ dataSource, columns, rowKey = 'jobId', current, pageSize, total, onChange }) => {
+const CampaignJobsTable: React.FC<Props> = ({ dataSource, columns, current, pageSize, total, tableHeight, onChange }) => {
   return (
     <Table
       dataSource={dataSource}
       columns={columns}
-      rowKey={rowKey}
+      rowKey="jobId"
       size="middle"
+      style={{ width: "100%" }}
+      scroll={tableHeight ? { y: tableHeight } : undefined}
+      tableLayout="fixed"
+      className="job-table"
+      rowClassName={(_, index) => (index % 2 === 0 ? 'table-row-light' : 'table-row-dark')}
       pagination={{
         current,
         pageSize,

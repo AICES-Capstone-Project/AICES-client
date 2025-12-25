@@ -13,7 +13,7 @@ import {
   PartitionOutlined,
   RiseOutlined,
   TagsOutlined,
-  MessageOutlined,
+  // MessageOutlined,
 } from "@ant-design/icons";
 
 import type { SystemRoleConfig } from "./systemRole.config";
@@ -130,37 +130,28 @@ export const buildSystemMenuItems = (cfg: SystemRoleConfig): ItemType[] => {
       icon: <AppstoreOutlined />,
       label: "Content",
       children: [
-        ...(cfg.showBanners
-          ? ([
-              {
-                key: join(bp, "content/banners"),
-                label: <Link to={join(bp, "content/banners")}>Banners</Link>,
-              },
-            ] as ItemType[])
-          : []),
         {
           key: join(bp, "content/blogs"),
           label: <Link to={join(bp, "content/blogs")}>Blogs</Link>,
         },
+
+        ...(cfg.showFeedbacks
+          ? ([
+              {
+                key: join(bp, "feedbacks"),
+                label: <Link to={join(bp, "feedbacks")}>Feedbacks</Link>,
+              },
+            ] as ItemType[])
+          : []),
       ],
     },
+
     // Reports (all 3 roles) - single page
     {
       key: join(bp, "reports"),
       icon: <BarChartOutlined />,
       label: <Link to={join(bp, "reports")}>Reports</Link>,
     },
-
-    // Feedbacks (all 3 roles)
-    ...(cfg.showFeedbacks
-      ? ([
-          {
-            key: join(bp, "feedbacks"),
-            icon: <MessageOutlined />,
-            label: <Link to={join(bp, "feedbacks")}>Feedbacks</Link>,
-          },
-        ] as ItemType[])
-      : []),
   ];
 
   return items;

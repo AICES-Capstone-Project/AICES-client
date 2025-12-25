@@ -105,7 +105,9 @@ const CompareResumes = lazy(
 const CompanySubscription = lazy(
   () => import("../pages/CompanyPages/CompanySubsriptions/CompanySubscription")
 );
-const CompanyFeedbackPage = lazy(() => import("../pages/CompanyPages/Feedback/FeedbackPage"));
+const CompanyFeedbackPage = lazy(
+  () => import("../pages/CompanyPages/Feedback/FeedbackPage")
+);
 const PaymentHistory = lazy(
   () =>
     import(
@@ -150,6 +152,7 @@ const BannerList = lazy(
 const BlogList = lazy(
   () => import("../pages/SystemPages/Content/Blogs/BlogList")
 );
+const BlogDetail = lazy(() => import("../pages/Resources/Blog/BlogDetail.tsx"));
 
 //Feedback
 const FeedbackList = lazy(
@@ -167,7 +170,6 @@ const PaymentSuccess = lazy(
 const ReportsOverview = lazy(
   () => import("../pages/SystemPages/Reports/ReportsOverview")
 );
-
 
 // ===== System children routes dùng chung cho Admin / Manager / Staff =====
 const systemChildren = [
@@ -244,6 +246,7 @@ export const router = createBrowserRouter([
 
       /* ===== Resources ===== */
       { path: APP_ROUTES.RESOURCES_BLOG, element: <Blog /> },
+      { path: `${APP_ROUTES.RESOURCES_BLOG}/:id`, element: <BlogDetail /> },
       { path: APP_ROUTES.RESOURCES_HELP_CENTER, element: <HelpCenter /> },
       { path: APP_ROUTES.RESOURCES_CONTACT_US, element: <ContactUs /> },
 

@@ -1,5 +1,6 @@
 /* src/pages/Resources/Blog/Blog.css */
 
+/* Accent title giống Resources */
 .resources-title-accent {
   background: linear-gradient(90deg, #0f2027, #28623a);
   -webkit-background-clip: text;
@@ -7,7 +8,521 @@
   -webkit-text-fill-color: transparent;
 }
 
-/* Optional: slight spacing polish for blog */
-.resources-section-title {
-  margin-bottom: 10px !important;
+/* ===== BLOG LIST PAGE ===== */
+.aices-blog-page {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+/* Toolbar */
+.aices-blog-toolbar {
+  width: 100%;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.aices-blog-toolbar-left {
+  flex: 1;
+  min-width: 240px;
+}
+
+.aices-blog-toolbar-right {
+  width: 190px;
+  flex: 0 0 auto;
+}
+
+.aices-blog-search .ant-input {
+  height: 40px;
+  border-radius: 12px;
+}
+
+.aices-blog-sort .ant-select-selector {
+  height: 40px !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Grid */
+.aices-blog-grid-wrap {
+  width: 100%;
+}
+
+.aices-blog-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  align-items: stretch;
+}
+
+.aices-blog-grid-loading {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 14px 0 22px;
+}
+
+/* Card */
+.aices-blog-card {
+  width: 100%;
+  border: 1px solid rgba(40, 98, 58, 0.22);
+  border-radius: 20px;
+  overflow: hidden;
+
+  /* ✅ đổi nền thành trắng */
+  background: #ffffff;
+
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.aices-blog-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(40, 98, 58, 0.35);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.24);
+}
+
+.aices-blog-card-thumb {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+
+  /* ✅ trắng nhẹ (giữ nguyên layout) */
+  background: radial-gradient(circle at top left, rgba(40, 98, 58, 0.18), #ffffff 70%);
+}
+
+.aices-blog-card-thumb img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.aices-blog-card-thumb-fallback {
+  width: 100%;
+  height: 100%;
+  opacity: 0.35;
+  background: linear-gradient(
+    135deg,
+    rgba(40, 98, 58, 0.35),
+    rgba(255, 255, 255, 1)
+  );
+}
+
+.aices-blog-card-body {
+  padding: 14px 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aices-blog-card-meta {
+  font-size: 12px;
+
+  /* ✅ chữ xanh */
+  color: rgba(10, 92, 54, 0.75);
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  opacity: 0.55;
+}
+
+.aices-blog-card-title {
+  font-size: 15px;
+  font-weight: 750;
+  line-height: 1.3;
+
+  /* ✅ chữ xanh đậm */
+  color: #0a5c36;
+
+  /* ✅ clamp title để tránh title dài phá layout */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.aices-blog-card-excerpt {
+  font-size: 12.5px;
+  line-height: 1.55;
+
+  /* ✅ chữ xanh vừa */
+  color: rgba(10, 92, 54, 0.78);
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 58px;
+}
+
+.aices-blog-card-cta {
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 650;
+
+  /* ✅ CTA xanh AICES */
+  color: #28623a;
+}
+
+.aices-blog-card-cta-arrow {
+  transform: translateY(-0.5px);
+}
+
+/* Pager */
+.aices-blog-pager {
+  margin-top: 18px;
+  display: flex;
+  justify-content: center;
+}
+
+/* Empty */
+.aices-blog-empty {
+  width: 100%;
+  padding: 28px 0;
+}
+
+.aices-blog-empty-card {
+  border: 1px solid rgba(40, 98, 58, 0.22);
+  border-radius: 18px;
+
+  /* ✅ nền trắng */
+  background: #ffffff;
+
+  padding: 18px 18px;
+}
+
+.aices-blog-empty-title {
+  font-size: 16px;
+  font-weight: 750;
+
+  /* ✅ xanh đậm */
+  color: #0a5c36;
+
+  margin-bottom: 6px;
+}
+
+.aices-blog-empty-desc {
+  font-size: 13px;
+
+  /* ✅ xanh vừa */
+  color: rgba(10, 92, 54, 0.78);
+
+  margin-bottom: 12px;
+}
+
+/* Buttons */
+.aices-blog-btn {
+  border: none;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-weight: 650;
+}
+
+.aices-blog-btn--primary {
+  background: linear-gradient(135deg, #1f5132, #7ce9a2);
+  color: #03120a;
+}
+
+.aices-blog-btn--ghost {
+  background: rgba(40, 98, 58, 0.12);
+
+  /* ✅ chữ xanh */
+  color: #0a5c36;
+
+  border: 1px solid rgba(40, 98, 58, 0.28);
+}
+
+.aices-blog-btn--ghost:hover {
+  border-color: rgba(40, 98, 58, 0.35);
+}
+
+/* ===== BLOG DETAIL ===== */
+.aices-blog-detail {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 0 8px;
+}
+
+.aices-blog-detail-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+  align-items: start;
+}
+
+.aices-blog-detail-main {
+  min-width: 0;
+}
+
+.aices-blog-detail-side {
+  position: sticky;
+  top: 18px;
+}
+
+.aices-blog-detail-header {
+  border: 1px solid rgba(40, 98, 58, 0.22);
+  border-radius: 20px;
+
+  /* ✅ nền trắng */
+  background: #ffffff;
+
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  padding: 16px 16px 14px;
+  margin-bottom: 14px;
+}
+
+.aices-blog-detail-topbar {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.aices-blog-detail-title {
+  margin: 0 0 10px;
+  font-size: 26px;
+  line-height: 1.2;
+
+  /* ✅ xanh đậm */
+  color: #0a5c36;
+}
+
+.aices-blog-detail-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+
+  /* ✅ xanh meta */
+  color: rgba(10, 92, 54, 0.7);
+
+  font-size: 12.5px;
+  margin-bottom: 12px;
+}
+
+.aices-blog-detail-cover {
+  border-radius: 16px;
+  overflow: hidden;
+  height: 320px;
+
+  /* ✅ nền trắng nhẹ */
+  background: radial-gradient(circle at top left, rgba(40, 98, 58, 0.18), #ffffff 70%);
+}
+
+.aices-blog-detail-cover img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* Content body */
+.aices-blog-detail-body {
+  border: 1px solid rgba(40, 98, 58, 0.22);
+  border-radius: 20px;
+
+  /* ✅ nền trắng */
+  background: #ffffff;
+
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.14);
+  padding: 18px 18px;
+
+  /* ✅ chữ xanh */
+  color: rgba(10, 92, 54, 0.9);
+}
+
+.aices-blog-detail-body p {
+  line-height: 1.75;
+
+  /* ✅ chữ xanh */
+  color: rgba(10, 92, 54, 0.88);
+}
+
+.aices-blog-detail-body h2,
+.aices-blog-detail-body h3 {
+  margin-top: 18px;
+  margin-bottom: 10px;
+  line-height: 1.25;
+
+  /* ✅ xanh đậm */
+  color: #0a5c36;
+}
+
+.aices-blog-detail-body img {
+  max-width: 100%;
+  border-radius: 14px;
+  display: block;
+  margin: 12px 0;
+}
+
+/* Sidebar */
+.aices-blog-detail-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.aices-blog-detail-side-card {
+  border: 1px solid rgba(40, 98, 58, 0.22);
+  border-radius: 20px;
+
+  /* ✅ nền trắng */
+  background: #ffffff;
+
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.14);
+  padding: 14px 14px;
+}
+
+.aices-blog-detail-side-title {
+  font-size: 14px;
+  font-weight: 750;
+  margin-bottom: 10px;
+
+  /* ✅ xanh đậm */
+  color: #0a5c36;
+}
+
+.aices-blog-detail-side-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.aices-blog-detail-side-item {
+  border: 1px solid rgba(40, 98, 58, 0.18);
+
+  /* ✅ nền trắng */
+  background: #ffffff;
+
+  border-radius: 14px;
+  padding: 10px 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.aices-blog-detail-side-item:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.aices-blog-detail-side-item-title {
+  font-size: 13px;
+  font-weight: 700;
+
+  /* ✅ xanh đậm */
+  color: #0a5c36;
+
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.aices-blog-detail-side-item-meta {
+  font-size: 12px;
+
+  /* ✅ xanh meta */
+  color: rgba(10, 92, 54, 0.7);
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.aices-blog-detail-side-cta .aices-blog-detail-side-desc {
+  font-size: 12.5px;
+
+  /* ✅ xanh vừa */
+  color: rgba(10, 92, 54, 0.78);
+
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+
+/* Not found */
+.aices-blog-detail--notfound {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 24px 0;
+}
+
+.aices-blog-detail-notfound-card {
+  border: 1px solid rgba(40, 98, 58, 0.22);
+  border-radius: 20px;
+
+  /* ✅ nền trắng */
+  background: #ffffff;
+
+  padding: 18px 18px;
+}
+
+.aices-blog-detail-notfound-title {
+  font-size: 16px;
+  font-weight: 750;
+
+  /* ✅ xanh đậm */
+  color: #0a5c36;
+
+  margin-bottom: 6px;
+}
+
+.aices-blog-detail-notfound-desc {
+  font-size: 13px;
+
+  /* ✅ xanh vừa */
+  color: rgba(10, 92, 54, 0.78);
+
+  margin-bottom: 12px;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .aices-blog-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .aices-blog-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .aices-blog-detail-side {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .aices-blog-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .aices-blog-toolbar-right {
+    width: 100%;
+  }
+
+  .aices-blog-grid {
+    grid-template-columns: 1fr;
+  }
 }

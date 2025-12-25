@@ -27,6 +27,15 @@ interface BlogCardListProps {
   onEdit: (blog: Blog) => void;
   onDelete: (id: number) => void;
 }
+const stripHtml = (html?: string) => {
+  if (!html) return "";
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<\/?[^>]+(>|$)/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+};
 
 export default function BlogCardList({
   loading,
@@ -112,7 +121,7 @@ export default function BlogCardList({
                       className="aices-blog-card-snippet"
                       ellipsis={{ rows: 2 }}
                     >
-                      {blog.content || "—"}
+                      {stripHtml(blog.content) || "—"}
                     </Paragraph>
 
                     <Space size={6} wrap className="aices-blog-card-meta">

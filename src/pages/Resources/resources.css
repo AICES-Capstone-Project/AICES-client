@@ -1,9 +1,8 @@
-/* src/pages/Resources/resources.css */
-
 .resources-page {
   background: #ffffff;
 }
 
+/* ===== HERO ===== */
 .resources-hero {
   padding: 56px 0 18px;
   background: radial-gradient(
@@ -54,6 +53,7 @@
   font-weight: 600;
 }
 
+/* ===== BODY ===== */
 .resources-body {
   padding: 22px 0 72px;
 }
@@ -69,6 +69,12 @@
   align-items: start;
 }
 
+/* 🔥 KEY FIX: khi KHÔNG có sidebar */
+.resources-grid.no-sidebar {
+  grid-template-columns: 1fr;
+}
+
+/* ===== SIDEBAR ===== */
 .resources-sidebar {
   position: sticky;
   top: 88px;
@@ -121,6 +127,7 @@
   color: #0f2027;
 }
 
+/* ===== CONTENT ===== */
 .resources-content .resources-card {
   background: #ffffff;
   border-radius: 18px;
@@ -154,6 +161,7 @@
   line-height: 1.8;
 }
 
+/* ===== FOOTER ===== */
 .resources-footer {
   margin-top: 22px;
   padding-top: 18px;
@@ -171,10 +179,12 @@
   font-size: 13px;
 }
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 992px) {
   .resources-grid {
     grid-template-columns: 1fr;
   }
+
   .resources-sidebar {
     position: static;
   }

@@ -3,6 +3,7 @@
 import { Modal, Form, Input, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
+import BlogRichTextEditor from "./BlogRichTextEditor";
 
 export interface BlogFormValues {
   title: string;
@@ -21,8 +22,6 @@ interface BlogModalProps {
   onCancel: () => void;
 }
 
-const { TextArea } = Input;
-
 export default function BlogModal({
   open,
   mode,
@@ -39,11 +38,8 @@ export default function BlogModal({
   useEffect(() => {
     if (!open) return;
 
-    if (initialValues) {
-      form.setFieldsValue(initialValues);
-    } else {
-      form.resetFields();
-    }
+    if (initialValues) form.setFieldsValue(initialValues);
+    else form.setFieldsValue({ title: "", content: "<p></p>" } as any);
 
     // reset / set thumbnail preview
     if (mode === "edit" && initialThumbnailUrl) {
@@ -83,7 +79,11 @@ export default function BlogModal({
     >
       <div className="system-modal-section-title">Blog information</div>
 
-      <Form<BlogFormValues> form={form} layout="vertical" onFinish={handleFinish}>
+      <Form<BlogFormValues>
+        form={form}
+        layout="vertical"
+        onFinish={handleFinish}
+      >
         {/* TITLE */}
         <Form.Item
           label="Title"
@@ -150,12 +150,14 @@ export default function BlogModal({
           name="content"
           rules={[{ required: true, message: "Please enter content" }]}
         >
-          <TextArea
-            rows={8}
-            placeholder="Write your blog content here..."
-            showCount
-            maxLength={5000}
-          />
+          <Form.Item noStyle shouldUpdate={(p, c) => p.content !== c.content}>
+            {() => (
+              <BlogRichTextEditor
+                value={form.getFieldValue("content")}
+                onChange={(nextHtml) => form.setFieldValue("content", nextHtml)}
+              />
+            )}
+          </Form.Item>
         </Form.Item>
       </Form>
     </Modal>

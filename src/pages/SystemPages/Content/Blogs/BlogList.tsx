@@ -186,6 +186,7 @@ export default function BlogList() {
             ? { title: currentBlog.title, content: currentBlog.content }
             : undefined
         }
+        initialThumbnailUrl={currentBlog?.thumbnailUrl ?? null} // ✅ thêm
         initialThumbnailName={
           currentBlog?.thumbnailUrl
             ? currentBlog.thumbnailUrl.split("/").pop() ?? "Existing thumbnail"

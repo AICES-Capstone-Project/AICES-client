@@ -1,6 +1,5 @@
 // src/types/blog.types.ts
 
-
 export interface Blog {
   blogId: number;
   userId: number;
@@ -10,39 +9,60 @@ export interface Blog {
   content: string;
   thumbnailUrl: string | null;
   createdAt: string;
-  // Nếu backend sau này thêm field khác (updatedAt, status, ...) thì bổ sung thêm ở đây
 }
 
+/** ✅ GIỮ NGUYÊN để không đụng code System cũ */
 export interface BlogListData {
   blogs: Blog[];
-  total: number;
+  total: number; // system đang xài total
   page: number;
   pageSize: number;
   totalPages: number;
 }
 
-// GET /api/system/blogs/me
-export interface GetMyBlogsResponse /* extends ApiResponse<BlogListData> */ {
+/** ✅ Public list BE trả totalCount */
+export interface PublicBlogListData {
+  blogs: Blog[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+/** ===== SYSTEM WRAPPERS ===== */
+export interface GetMyBlogsResponse {
   status: string;
   message: string;
   data: BlogListData;
 }
 
-// POST /api/system/blogs
-export interface CreateBlogResponse /* extends ApiResponse<Blog> */ {
+export interface CreateBlogResponse {
   status: string;
   message: string;
   data: Blog;
 }
 
-// Body khi tạo mới
+/** ===== PUBLIC WRAPPERS (Swagger) ===== */
+export interface GetPublicBlogsResponse {
+  status: string;
+  message: string;
+  data: PublicBlogListData;
+}
+
+export interface GetPublicBlogByIdResponse {
+  status: string;
+  message: string;
+  data: Blog;
+}
+
+// Body khi tạo mới (nếu cần dùng JSON body; hiện bạn dùng multipart nên có thể bỏ)
 export interface CreateBlogRequest {
   title: string;
   content: string;
   thumbnailUrl?: string | null;
 }
 
-// Body khi update
+// Body khi update (multipart bạn đang dùng, type này vẫn ok để dành)
 export interface UpdateBlogRequest {
   title?: string;
   content?: string;

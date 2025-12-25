@@ -12,6 +12,15 @@ import PlanFormModal from "./components/plans/PlanFormModal";
 import type { SubscriptionPlanFormValues } from "./components/plans/PlanFormModal";
 import PlansToolbar from "./components/plans/PlansToolbar";
 
+const pickBeMessage = (e: any, fallback: string) =>
+  e?.response?.data?.message ||
+  e?.response?.data?.error ||
+  e?.message ||
+  fallback;
+
+const isSuccess = (status: any) =>
+  String(status || "").toLowerCase() === "success";
+
 export default function PlansPage() {
   const [loading, setLoading] = useState(false);
   // ================= PERMISSION =================
@@ -42,8 +51,9 @@ export default function PlansPage() {
       setLoading(true);
       const data = await subscriptionService.getAll();
       setPlans(data); // ✅ không filter ở đây nữa
-    } catch {
-      message.error("Failed to load subscription plans");
+    } catch (err: any) {
+      message.error(pickBeMessage(err, "Failed to load subscription plans"));
+
       setPlans([]);
     } finally {
       setLoading(false);
@@ -116,12 +126,19 @@ export default function PlansPage() {
 
     try {
       setLoading(true);
-      await subscriptionService.delete(deleteTarget.subscriptionId);
-      message.success("Deleted successfully");
+
+      const res = await subscriptionService.delete(deleteTarget.subscriptionId);
+
+      if (!isSuccess(res?.status)) {
+        message.error(res?.message || "Failed to delete subscription plan");
+        return;
+      }
+
+      message.success(res?.message || "Deleted successfully");
       handleCancelDelete();
       fetchPlans();
-    } catch {
-      message.error("Failed to delete subscription plan");
+    } catch (err: any) {
+      message.error(pickBeMessage(err, "Failed to delete subscription plan"));
     } finally {
       setLoading(false);
     }
@@ -140,32 +157,48 @@ export default function PlansPage() {
         duration: values.duration,
         resumeLimit: values.resumeLimit,
         hoursLimit: values.hoursLimit,
-
-        compareLimit: values.compareLimit, // ✅ ADD
-        compareHoursLimit: values.compareHoursLimit, // ✅ ADD
-
+        compareLimit: values.compareLimit,
+        compareHoursLimit: values.compareHoursLimit,
         stripePriceId: values.stripePriceId,
       };
 
       if (editingPlan) {
-        await subscriptionService.update(editingPlan.subscriptionId, payload);
-        message.success("Updated successfully");
+        const res = await subscriptionService.update(
+          editingPlan.subscriptionId,
+          payload
+        );
+
+        if (!isSuccess(res?.status)) {
+          message.error(res?.message || "Failed to save");
+          return;
+        }
+
+        message.success(res?.message || "Updated successfully");
       } else {
-        await subscriptionService.create(payload);
-        message.success("Created successfully");
+        const res = await subscriptionService.create(payload);
+
+        if (!isSuccess(res?.status)) {
+          message.error(res?.message || "Failed to save");
+          return;
+        }
+
+        message.success(res?.message || "Created successfully");
       }
 
       setModalVisible(false);
       setEditingPlan(null);
       fetchPlans();
     } catch (err: any) {
+      // ✅ form validation fail -> để Form tự show lỗi, không toast
       if (err?.errorFields) return;
-      message.error("Failed to save");
+
+      // ✅ API fail -> show đúng message BE
+      message.error(pickBeMessage(err, "Failed to save"));
     } finally {
       setLoading(false);
     }
   };
-
+  
   const isDeleteDisabled = deleteText.trim().toLowerCase() !== "delete";
 
   return (

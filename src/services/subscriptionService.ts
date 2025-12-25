@@ -39,15 +39,25 @@ export const subscriptionService = {
     const res = await api.get<ApiResponse<SubscriptionListData>>(
       API_ENDPOINTS.SUBSCRIPTION.PUBLIC_GET
     );
+
+    // ✅ nếu BE trả body status Error (dù 200) -> ném lỗi để page show message
+    if (String(res.data?.status || "").toLowerCase() !== "success") {
+      throw { response: { data: res.data } };
+    }
+
     const subscriptions = res.data?.data?.subscriptions;
     return Array.isArray(subscriptions) ? subscriptions : [];
   },
 
-  // ================== PUBLIC (company xem để chọn) ==================
   async getPublic(): Promise<SubscriptionPlan[]> {
     const res = await api.get<ApiResponse<SubscriptionListData>>(
       API_ENDPOINTS.SUBSCRIPTION.PUBLIC_GET
     );
+
+    if (String(res.data?.status || "").toLowerCase() !== "success") {
+      throw { response: { data: res.data } };
+    }
+
     const list = res.data?.data?.subscriptions;
     return Array.isArray(list) ? list : [];
   },
@@ -61,29 +71,31 @@ export const subscriptionService = {
   },
 
   // ================== SYSTEM CRUD PLAN ==================
-  async create(payload: UpsertSubscriptionPlanRequest): Promise<null> {
+  async create(
+    payload: UpsertSubscriptionPlanRequest
+  ): Promise<ApiResponse<null>> {
     const res = await api.post<ApiResponse<null>>(
       API_ENDPOINTS.SUBSCRIPTION.SYSTEM_CREATE,
       payload
     );
-    return res.data.data ?? null;
+    return res.data; // ✅ giữ status + message
   },
 
   async update(
     id: number,
     payload: UpsertSubscriptionPlanRequest
-  ): Promise<null> {
+  ): Promise<ApiResponse<null>> {
     const res = await api.patch<ApiResponse<null>>(
       API_ENDPOINTS.SUBSCRIPTION.SYSTEM_UPDATE(id),
       payload
     );
-    return res.data.data ?? null;
+    return res.data; // ✅ giữ status + message
   },
 
-  async delete(id: number) {
+  async delete(id: number): Promise<ApiResponse<null>> {
     const res = await api.delete<ApiResponse<null>>(
       API_ENDPOINTS.SUBSCRIPTION.SYSTEM_DELETE(id)
     );
-    return res.data.data;
+    return res.data; // ✅ giữ status + message
   },
 };

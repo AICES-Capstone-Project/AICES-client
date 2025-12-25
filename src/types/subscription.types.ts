@@ -1,15 +1,22 @@
 // src/types/subscription.types.ts
 
-export interface SubscriptionListData {
-  subscriptions: SubscriptionPlan[];
-}
 // ========== Subscription Plans ==========
+
+export type SubscriptionDuration =
+  | "Unlimited"
+  | "Daily"
+  | "Weekly"
+  | "Monthly"
+  | "Yearly"
+  // fallback để không break nếu BE có thêm value mới
+  | (string & {});
+
 export interface SubscriptionPlan {
   subscriptionId: number;
   name: string;
   description?: string | null;
-  price: number;
-  duration: string;
+  price: number; // cents
+  duration: SubscriptionDuration;
 
   resumeLimit: number;
   hoursLimit: number;
@@ -18,11 +25,10 @@ export interface SubscriptionPlan {
   compareHoursLimit: number;
 
   stripePriceId?: string;
-
   createdAt?: string;
-  // optional fields sometimes returned by public API
 }
 
+// ✅ Swagger list response includes paging fields (giữ bản này, xoá bản duplicate ở trên)
 export interface SubscriptionListData {
   subscriptions: SubscriptionPlan[];
   totalPages: number;

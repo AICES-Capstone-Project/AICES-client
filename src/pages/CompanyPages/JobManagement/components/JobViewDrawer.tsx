@@ -49,7 +49,7 @@ const JobViewDrawer = ({ open, onClose, job, onApprove, isPending }: Props) => {
       width={720}
       onClose={onClose}
       open={open}
-      bodyStyle={{ overflowX: 'hidden' }}
+      styles={{ body: { overflowX: 'hidden' } }}
       footer={
         isPending && onApprove ? (
           <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>

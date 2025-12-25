@@ -251,46 +251,101 @@ const HiringTracking: React.FC = () => {
         const items = baseItems.map((k) => ({ key: k, label: k, disabled: !allowed.has(k) }));
 
         const handleMenuClick = async ({ key }: { key: string }) => {
-          // For Hired, ensure job data is loaded before opening modal
+          // For Hired, ensure job data is loaded before opening modal and warn if hiring exceeds target
           try {
-            if (key === 'Hired' && campaignId && jobId && (jobTarget == null && jobHiredCount == null)) {
-              // load job data synchronously
-              try {
-                const campResp = await campaignService.getCampaignById(campaignId);
-                const campPayload = campResp && (campResp as any).data ? (campResp as any).data : campResp;
-                const jobsArr = Array.isArray(campPayload?.jobs) ? campPayload.jobs : Array.isArray(campPayload?.jobIds) ? campPayload.jobIds : [];
-                const entry = (jobsArr || []).find((j: any) => Number(j?.jobId ?? j) === Number(jobId));
-                let target: number | null = null;
-                if (entry) {
-                  const t = Number(entry?.targetQuantity ?? entry?.target ?? entry?.targetQty ?? null);
-                  if (Number.isFinite(t)) target = t;
+            let target: number | null = jobTarget;
+            let hired: number | null = jobHiredCount;
+
+            if (key === 'Hired' && campaignId && jobId) {
+              // load job/campaign info if we don't have it yet
+              if ((target == null) || (hired == null)) {
+                try {
+                  const campResp = await campaignService.getCampaignById(campaignId);
+                  const campPayload = campResp && (campResp as any).data ? (campResp as any).data : campResp;
+                  const jobsArr = Array.isArray(campPayload?.jobs) ? campPayload.jobs : Array.isArray(campPayload?.jobIds) ? campPayload.jobIds : [];
+                  const entry = (jobsArr || []).find((j: any) => Number(j?.jobId ?? j) === Number(jobId));
+                  if (entry) {
+                    const t = Number(entry?.targetQuantity ?? entry?.target ?? entry?.targetQty ?? null);
+                    if (Number.isFinite(t)) target = t;
+                  }
+                } catch (err) {
+                  // ignore
                 }
+
                 if (target == null) {
-                  const jobResp = await jobService.getJobById(jobId);
-                  const jobPayload = jobResp && (jobResp as any).data ? (jobResp as any).data : jobResp;
-                  target = extractTargetFromJobPayload(jobPayload);
+                  try {
+                    const jobResp = await jobService.getJobById(jobId);
+                    const jobPayload = jobResp && (jobResp as any).data ? (jobResp as any).data : jobResp;
+                    target = extractTargetFromJobPayload(jobPayload);
+                  } catch (err) {
+                    // ignore
+                  }
                 }
-                const listResp = await hiringTrackingService.getByJob(campaignId, jobId, { page: 1, pageSize: 1000 });
-                const payload = listResp && (listResp as any).data ? (listResp as any).data : listResp;
-                const list = hiringTrackingService._normalizeList(payload);
-                const hired = (list || []).filter((r: any) => {
-                  const statusKey = String(r?.applicationStatus ?? r?.status ?? r?.stage ?? '')
-                    .trim()
-                    .toLowerCase()
-                    .replace(/[\s_-]+/g, '');
-                  return statusKey === 'hired';
-                }).length;
-                setJobTarget(target);
-                setJobHiredCount(hired);
-              } catch (err) {
-                console.error('handleMenuClick: failed to load job data', err);
+
+                try {
+                  const listResp = await hiringTrackingService.getByJob(campaignId, jobId, { page: 1, pageSize: 1000 });
+                  const payload = listResp && (listResp as any).data ? (listResp as any).data : listResp;
+                  const list = hiringTrackingService._normalizeList(payload);
+                  const hiredCount = (list || []).filter((r: any) => {
+                    const statusKey = String(r?.applicationStatus ?? r?.status ?? r?.stage ?? '')
+                      .trim()
+                      .toLowerCase()
+                      .replace(/[\s_-]+/g, '');
+                    return statusKey === 'hired';
+                  }).length;
+                  hired = hiredCount;
+                } catch (err) {
+                  // ignore
+                }
+
+                // persist fetched values for UI
+                if (target != null) setJobTarget(target);
+                if (hired != null) setJobHiredCount(hired);
+              }
+
+              // if target is known and hiring one more would exceed target, require explicit increase
+              const wouldExceed = (typeof hired === 'number' && typeof target === 'number') ? (hired + 1 > target) : false;
+              if (wouldExceed) {
+                Modal.confirm({
+                  title: 'You are exceeding the hiring target',
+                  content: (
+                    <div>
+                      <p>Target: <strong>{target}</strong>, Hired: <strong>{hired}</strong>.</p>
+                      <p>If you want to hire this candidate, confirm to increase the target by 1. After confirming, you will be asked to enter a note before the status is updated.</p>
+                    </div>
+                  ),
+                  okText: 'Increase and continue',
+                  cancelText: 'Cancel',
+                  async onOk() {
+                    try {
+                      // attempt to increment target in campaign via patchCampaign
+                      const newTarget = (Number(target) || 0) + 1;
+                      try {
+                        await campaignService.patchCampaign(campaignId, { jobs: [{ jobId: Number(jobId), targetQuantity: newTarget }] });
+                        setJobTarget(newTarget);
+                      } catch (patchErr) {
+                        console.error('Failed to increase campaign target', patchErr);
+                        message.error('Could not automatically increase target. Please try again.');
+                        return;
+                      }
+
+                      // open the note modal to collect note and confirm status change
+                      setActionModalPayload({ appId, newStatus: key, rowKey: appId });
+                      setActionModalNote("");
+                      setActionModalOpen(true);
+                    } catch (err) {
+                      console.error('Modal onOk error', err);
+                    }
+                  }
+                });
+                return; // do not open the normal note modal yet
               }
             }
           } catch (err) {
             console.error('handleMenuClick error', err);
           }
 
-          // open modal to collect note & confirm
+          // default: open modal to collect note & confirm
           setActionModalPayload({ appId, newStatus: key, rowKey: appId });
           setActionModalNote("");
           setActionModalOpen(true);

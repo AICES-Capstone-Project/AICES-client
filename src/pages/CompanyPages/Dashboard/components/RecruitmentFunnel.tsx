@@ -115,40 +115,46 @@ const RecruitmentFunnel: React.FC<RecruitmentFunnelProps> = ({
           </Space>
         </div>
 
-        <div style={{ height: 240, background: '#fafafa', borderRadius: 8, padding: 8 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart layout="vertical" data={funnel} margin={{ left: 20, right: 20, top: 10, bottom: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e1e5e9" />
-              <XAxis type="number" stroke="#666" domain={[0, 100]} />
-              <YAxis dataKey="stage" type="category" width={100} stroke="#666" />
-              <Tooltip
-                formatter={(value: any, name: any, props: any) => {
-                  if (name === 'conversionRate') {
-                    const count = props.payload.value;
-                    return [`${Number(value).toFixed(1)}% (${count} candidates)`, 'Conversion Rate'];
-                  }
-                  return [value, name];
-                }}
-                contentStyle={{
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  border: '1px solid #e1e5e9',
-                  borderRadius: 8,
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                }}
-              />
-              <Bar
-                dataKey="conversionRate"
-                fill="url(#colorGradient)"
-                radius={[0, 4, 4, 0]}
-              />
-              <defs>
-                <linearGradient id="colorGradient" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="5%" stopColor={DASHBOARD_COLORS.PRIMARY_MEDIUM} stopOpacity={0.8} />
-                  <stop offset="95%" stopColor={DASHBOARD_COLORS.PRIMARY} stopOpacity={1} />
-                </linearGradient>
-              </defs>
-            </BarChart>
-          </ResponsiveContainer>
+        <div style={{ background: '#fafafa', borderRadius: 8, padding: 8 }}>
+          {!funnelLoading && funnel.length > 0 && (
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart
+                layout="vertical"
+                data={funnel}
+                margin={{ left: 20, right: 20, top: 10, bottom: 10 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e1e5e9" />
+                <XAxis type="number" stroke="#666" domain={[0, 100]} />
+                <YAxis dataKey="stage" type="category" width={100} stroke="#666" />
+                <Tooltip
+                  formatter={(value: any, name: any, props: any) => {
+                    if (name === 'conversionRate') {
+                      const count = props.payload.value;
+                      return [`${Number(value).toFixed(1)}% (${count} candidates)`, 'Conversion Rate'];
+                    }
+                    return [value, name];
+                  }}
+                  contentStyle={{
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    border: '1px solid #e1e5e9',
+                    borderRadius: 8,
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                  }}
+                />
+                <Bar
+                  dataKey="conversionRate"
+                  fill="url(#colorGradient)"
+                  radius={[0, 4, 4, 0]}
+                />
+                <defs>
+                  <linearGradient id="colorGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="5%" stopColor={DASHBOARD_COLORS.PRIMARY_MEDIUM} stopOpacity={0.8} />
+                    <stop offset="95%" stopColor={DASHBOARD_COLORS.PRIMARY} stopOpacity={1} />
+                  </linearGradient>
+                </defs>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
 
         {!funnelLoading && funnel && funnel.length > 0 && (

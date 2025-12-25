@@ -12,6 +12,8 @@ export interface DashboardSummary {
   comparisonCreditsRemaining: number;
   resumeTimeRemaining: string;
   comparisonTimeRemaining: string;
+  maxResumeCredits?: number;
+  maxComparisonCredits?: number;
 }
 
 export interface TopCategory {
@@ -46,7 +48,6 @@ const dashboardService = {
   async getSummary() {
     try {
       const resp = await get(API_ENDPOINTS.COMPANY_DASHBOARD.SUMMARY);
-      console.log('Summary API response:', resp);
       
       // Handle API response format: { status: "Success", message: "...", data: {...} }
       if (resp && resp.status === 'Success' && resp.data) {
@@ -62,6 +63,8 @@ const dashboardService = {
           comparisonCreditsRemaining: apiData.comparisonCreditsRemaining || 0,
           resumeTimeRemaining: apiData.resumeTimeRemaining || '',
           comparisonTimeRemaining: apiData.comparisonTimeRemaining || '',
+          maxResumeCredits: apiData.maxResumeCredits ?? apiData.resumeLimit ?? 0,
+          maxComparisonCredits: apiData.maxComparisonCredits ?? apiData.aiComparisonLimit ?? 0,
         };
       } else if (resp && resp.data) {
         return resp.data;
@@ -80,6 +83,8 @@ const dashboardService = {
         comparisonCreditsRemaining: 100,
         resumeTimeRemaining: '2025-12-23T07:00:00Z',
         comparisonTimeRemaining: '2025-12-23T07:00:00Z',
+        maxResumeCredits: 100,
+        maxComparisonCredits: 100,
       };
     }
   },
@@ -137,7 +142,6 @@ const dashboardService = {
       const res = await api.get(API_ENDPOINTS.COMPANY_DASHBOARD.SUBSCRIPTION_USAGE_HISTORY, { 
         params: { range } 
       });
-      console.log('Raw API response:', res);
       // Extract data from ApiResponse structure: { status, message, data }
       if (res && res.data && res.data.status === 'Success') {
         return res.data.data; // Return the nested data object
@@ -163,7 +167,6 @@ const dashboardService = {
   async getStatsOverview() {
     try {
       const res = await api.get(API_ENDPOINTS.COMPANY_DASHBOARD.STATS_OVERVIEW);
-      console.log('Stats overview API response:', res);
       // Extract data from ApiResponse structure: { status, message, data }
       if (res && res.data && res.data.status === 'Success') {
         return res.data.data; // Return the nested data object

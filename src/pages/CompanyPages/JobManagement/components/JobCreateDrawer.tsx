@@ -426,7 +426,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
 					</Form.Item>
 				</div>
 
-				<Form.Item name="criteria" label="Criteria Assessment">
+				<Form.Item label="Criteria Assessment">
 					<div style={{ marginBottom: 8, color: "#666", fontSize: 13 }}>
 						Define importance for each criteria. The system will auto-calculate
 						weights (%).
@@ -532,7 +532,7 @@ const JobCreateDrawer = ({ open, onClose, onSubmit, saving }: Props) => {
 														max={10}
 														step={0.1}
 														marks={{ 0.1: "0.1", 5: "Med", 10: "High" }}
-														tipFormatter={(v) => `${(v as number).toFixed(1)}`}
+														tooltip={{ formatter: (v) => `${(v as number).toFixed(1)}` }}
 													/>
 												</Form.Item>
 

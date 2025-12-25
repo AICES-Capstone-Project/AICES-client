@@ -1,4 +1,4 @@
-import { Form, Input } from "antd";
+import { Form, Input, DatePicker } from "antd";
 import dayjs from "dayjs";
 
 export default function PersonalFields() {
@@ -76,42 +76,38 @@ export default function PersonalFields() {
           labelCol={{ span: 24 }}
           wrapperCol={{ span: 24 }}
           hasFeedback
-          normalize={(val: string) => {
-            if (!val) return val;
-            const parsed = dayjs(val, [
-              'DD/MM/YYYY',
-              'D/M/YYYY',
-              'DD-MM-YYYY',
-              'DD MMM YYYY',
-              'DD/MMM/YYYY',
-              'DD-MMM-YYYY',
-            ], true);
-            if (parsed.isValid()) return parsed.format('DD/MM/YYYY');
-            return val;
-          }}
-          rules={[
-            { required: true, message: "Please enter your birthday" },
-            {
-              validator: (_, value: string) => {
-                if (!value) return Promise.resolve();
-                const parsed = dayjs(value, [
-                  'DD/MM/YYYY',
-                  'DD/MMM/YYYY',
-                  'D/M/YYYY',
-                  'DD-MM-YYYY',
-                  'DD MMM YYYY',
-                  'DD-MMM-YYYY',
-                ], true);
-                if (!parsed.isValid()) return Promise.reject(new Error("Please enter date in DD/MM/YYYY format"));
-                if (parsed.isAfter(dayjs(), 'day')) return Promise.reject(new Error("Birthday cannot be in the future"));
-                const age = dayjs().diff(parsed, 'year');
-                if (age < 18) return Promise.reject(new Error("You must be at least 18 years old"));
-                return Promise.resolve();
+            getValueProps={(value: any) => ({ value: value ? dayjs(value, 'DD/MM/YYYY') : undefined })}
+            normalize={(val: any) => {
+              if (!val) return val;
+              try {
+                return dayjs(val).format('DD/MM/YYYY');
+              } catch {
+                return val;
+              }
+            }}
+            rules={[
+              { required: true, message: "Please enter your birthday" },
+              {
+                validator: (_, value: any) => {
+                  if (!value) return Promise.resolve();
+                  const parsed = dayjs(value, [
+                    'DD/MM/YYYY',
+                    'DD/MMM/YYYY',
+                    'D/M/YYYY',
+                    'DD-MM-YYYY',
+                    'DD MMM YYYY',
+                    'DD-MMM-YYYY',
+                  ], true);
+                  if (!parsed.isValid()) return Promise.reject(new Error("Please enter date in DD/MM/YYYY format"));
+                  if (parsed.isAfter(dayjs(), 'day')) return Promise.reject(new Error("Birthday cannot be in the future"));
+                  const age = dayjs().diff(parsed, 'year');
+                  if (age < 18) return Promise.reject(new Error("You must be at least 18 years old"));
+                  return Promise.resolve();
+                },
               },
-            },
-          ]}
-        >
-          <Input size="large" placeholder="DD/MM/YYYY" maxLength={10} />
+            ]}
+          >
+            <DatePicker size="large" format="DD/MM/YYYY" style={{ width: '100%' }} placeholder="DD/MM/YYYY" disabledDate={(current) => current && current > dayjs().endOf('day')} popupClassName="birthday-picker-popup" />
         </Form.Item>
       </div>
 

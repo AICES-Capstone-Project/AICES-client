@@ -69,6 +69,9 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 	});
 	const resumesRef = useRef<UIResume[]>([]);
 
+	// Filter states
+	// const [applicationStatusFilter, setApplicationStatusFilter] = useState<string | undefined>(undefined);
+
 	// Server handles filtering and sorting, so just use resumes directly
 	const sortedResumes = useMemo(() => resumes, [resumes]);
 
@@ -131,12 +134,8 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 			console.log("📤 API request params:", params);
 
 			const resp = campaignId
-				? await resumeService.getByJob(
-						Number(campaignId),
-						Number(jobId),
-						params
-				  )
-				: await resumeService.getByJob(Number(jobId), params);
+				? await resumeService.fetchResumes(Number(jobId), Number(campaignId), params as any)
+				: await resumeService.fetchResumes(Number(jobId), params as any);
 
 			if (String(resp?.status || "").toLowerCase() === "success" && resp.data) {
 				const raw = resp.data as any;
@@ -175,7 +174,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					totalScore: (r.totalScore ?? null) as number | null,
 					adjustedScore: (r.adjustedScore ?? null) as number | null,
 					// totalResumeScore is the value used for sorting/display when totalScore missing
-					totalResumeScore: r.totalScore ?? r.adjustedScore ?? null ?? null,
+					totalResumeScore: r.totalScore ?? r.adjustedScore ?? null,
 					email: r.email,
 					phoneNumber: r.phone || r.phoneNumber,
 					fileUrl: r.fileUrl,
@@ -183,6 +182,7 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					scoreDetails: r.scoreDetails,
 					errorMessage: r.errorMessage,
 					note: r.note,
+					processingMode: r.processingMode || undefined,
 				}));
 
 				// If caller requested only scored resumes via query param, filter here
@@ -750,6 +750,27 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 						allowClear
 						style={{ width: 280 }}
 					/>
+					{/* <Select
+						placeholder="Application status"
+						allowClear
+						style={{ width: 180 }}
+						onChange={(val) => {
+							setApplicationStatusFilter(val as string | undefined);
+							setCurrentPage(1);
+						}}
+						options={[
+							{ label: "Pending", value: "Pending" },
+							{ label: "Completed", value: "Completed" },
+							{ label: "Failed", value: "Failed" },
+							{ label: "Invalid", value: "Invalid" },
+							{ label: "Reviewed", value: "Reviewed" },
+							{ label: "Shortlisted", value: "Shortlisted" },
+							{ label: "Interview", value: "Interview" },
+							{ label: "Rejected", value: "Rejected" },
+							{ label: "Hired", value: "Hired" },
+						]}
+					/> */}
+					
 					<ScoreFilter
 						scoreFilter={scoreFilter}
 						onFilterChange={setScoreFilter}

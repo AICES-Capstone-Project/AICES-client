@@ -94,7 +94,20 @@ export const resumeService = {
       params = campaignIdOrParams as { page?: number; pageSize?: number } | undefined;
     }
 
-    const q = params ? `?page=${params.page ?? 1}&pageSize=${params.pageSize ?? 10}` : "";
+    // params may include extended filters: search, minScore, maxScore, applicationStatus, sortBy, processingMode
+    const p = (params || {}) as Record<string, any>;
+    const qp = new URLSearchParams();
+    qp.append("page", String(p.page ?? 1));
+    qp.append("pageSize", String(p.pageSize ?? 10));
+
+    if (p.search) qp.append("search", String(p.search));
+    if (p.minScore !== undefined && p.minScore !== null) qp.append("minScore", String(p.minScore));
+    if (p.maxScore !== undefined && p.maxScore !== null) qp.append("maxScore", String(p.maxScore));
+    if (p.applicationStatus) qp.append("applicationStatus", String(p.applicationStatus));
+    if (p.sortBy) qp.append("sortBy", String(p.sortBy));
+    if (p.processingMode) qp.append("processingMode", String(p.processingMode));
+
+    const q = qp.toString() ? `?${qp.toString()}` : "";
 
     if (campaignId != null) {
       return await get<Paginated<Resume>>(`${API_ENDPOINTS.RESUME.COMPANY_GET(campaignId, actualJobId)}${q}`);

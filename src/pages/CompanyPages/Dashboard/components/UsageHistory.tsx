@@ -88,8 +88,8 @@ const UsageHistory: React.FC<UsageHistoryProps> = ({
               </div>
             </div>
 
-            <div style={{ height: 280 }}>
-              <ResponsiveContainer width="100%" height="100%">
+            {!usageLoading && usageHistory && usageHistory.labels?.length > 0 && (
+              <ResponsiveContainer width="100%" height={260}>
                 <LineChart data={
                   (() => {
                     dayjs.extend(utc);
@@ -162,7 +162,7 @@ const UsageHistory: React.FC<UsageHistoryProps> = ({
                   />
                 </LineChart>
               </ResponsiveContainer>
-            </div>
+            )}
           </div>
         ) : (
           <div style={{ textAlign: 'center', padding: 40, color: '#999' }}>
@@ -170,7 +170,7 @@ const UsageHistory: React.FC<UsageHistoryProps> = ({
           </div>
         )}
       </Card>
-    </Col>
+    </Col >
   );
 };
 

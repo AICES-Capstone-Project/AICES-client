@@ -12,6 +12,8 @@ interface StatsData {
     comparisonCreditsRemaining: number;
     resumeTimeRemaining: string;
     comparisonTimeRemaining: string;
+    maxResumeCredits: number;
+    maxComparisonCredits: number;
 }
 
 interface StatsCardsProps {
@@ -135,12 +137,11 @@ const StatsCards: React.FC<StatsCardsProps> = ({
 
                                 <div style={{ marginBottom: 16 }}>
                                     <Progress
-                                        percent={Math.min((stats.resumeCreditsRemaining / 100) * 100, 100)}
-                                        strokeColor={stats.resumeCreditsRemaining > 100 ? DASHBOARD_COLORS.ERROR : DASHBOARD_COLORS.PRIMARY}
+                                        percent={Math.min((stats.resumeCreditsRemaining / (stats.maxResumeCredits || 1)) * 100, 100)}
+                                        strokeColor={stats.resumeCreditsRemaining > stats.maxResumeCredits ? DASHBOARD_COLORS.ERROR : DASHBOARD_COLORS.PRIMARY}
                                         trailColor="#f0f0f0"
                                         size="small"
                                         showInfo={false}
-                                        strokeWidth={8}
                                     />
                                     <div style={{
                                         display: 'flex',
@@ -154,22 +155,22 @@ const StatsCards: React.FC<StatsCardsProps> = ({
                                         <div style={{
                                             fontSize: 16,
                                             fontWeight: 700,
-                                            color: stats.resumeCreditsRemaining > 100 ? DASHBOARD_COLORS.ERROR : DASHBOARD_COLORS.PRIMARY
+                                            color: stats.resumeCreditsRemaining > stats.maxResumeCredits ? DASHBOARD_COLORS.ERROR : DASHBOARD_COLORS.PRIMARY
                                         }}>
                                             {stats.resumeCreditsRemaining}
                                         </div>
-                                        <span>100+</span>
+                                        <span>{stats.maxResumeCredits}+</span>
                                     </div>
                                 </div>
 
-                                {/* <div style={{
+                                <div style={{
                                     fontSize: 11,
                                     color: '#666',
                                     marginBottom: 8,
                                     textAlign: 'center'
                                 }}>
-                                    Hourly Usage Limit: 100
-                                </div> */}
+                                    Hourly Usage Limit: {stats.maxResumeCredits}
+                                </div>
 
                                 <div style={{
                                     display: 'flex',
@@ -208,12 +209,11 @@ const StatsCards: React.FC<StatsCardsProps> = ({
 
                                 <div style={{ marginBottom: 16 }}>
                                     <Progress
-                                        percent={Math.min((stats.comparisonCreditsRemaining / 100) * 100, 100)}
-                                        strokeColor={stats.comparisonCreditsRemaining > 100 ? DASHBOARD_COLORS.ERROR : DASHBOARD_COLORS.ACCENT}
+                                        percent={Math.min((stats.comparisonCreditsRemaining / (stats.maxComparisonCredits || 1)) * 100, 100)}
+                                        strokeColor={stats.comparisonCreditsRemaining > stats.maxComparisonCredits ? DASHBOARD_COLORS.ERROR : DASHBOARD_COLORS.ACCENT}
                                         trailColor="#f0f0f0"
                                         size="small"
                                         showInfo={false}
-                                        strokeWidth={8}
                                     />
                                     <div style={{
                                         display: 'flex',
@@ -227,22 +227,22 @@ const StatsCards: React.FC<StatsCardsProps> = ({
                                         <div style={{
                                             fontSize: 16,
                                             fontWeight: 700,
-                                            color: stats.comparisonCreditsRemaining > 100 ? DASHBOARD_COLORS.ERROR : DASHBOARD_COLORS.ACCENT
+                                            color: stats.comparisonCreditsRemaining > stats.maxComparisonCredits ? DASHBOARD_COLORS.ERROR : DASHBOARD_COLORS.ACCENT
                                         }}>
                                             {stats.comparisonCreditsRemaining}
                                         </div>
-                                        <span>100+</span>
+                                        <span>{stats.maxComparisonCredits}+</span>
                                     </div>
                                 </div>
 
-                                {/* <div style={{
+                                <div style={{
                                     fontSize: 11,
                                     color: '#666',
                                     marginBottom: 8,
                                     textAlign: 'center'
                                 }}>
-                                    Hourly Usage Limit: 100
-                                </div> */}
+                                    Hourly Usage Limit: {stats.maxComparisonCredits}
+                                </div>
 
                                 <div style={{
                                     display: 'flex',

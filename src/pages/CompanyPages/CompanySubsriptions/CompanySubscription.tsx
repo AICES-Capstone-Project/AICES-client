@@ -32,6 +32,8 @@ const CompanySubscription: React.FC = () => {
 						resumeLimit: data.resumeLimit,
 						price: data.price,
 						hoursLimit: data.hoursLimit,
+						compareLimit: data.compareLimit,
+						compareHoursLimit: data.compareHoursLimit,
 						duration: data.duration,
 					});
 				} else {
@@ -69,10 +71,12 @@ const CompanySubscription: React.FC = () => {
 						description: data.description,
 						startDate: data.startDate,
 						endDate: data.endDate,
-						status: data.subscriptionStatus,
-						resumeLimit: data.resumeLimit,
-						price: data.price,
-						hoursLimit: data.hoursLimit,
+							status: data.subscriptionStatus,
+							resumeLimit: data.resumeLimit,
+							price: data.price,
+							hoursLimit: data.hoursLimit,
+							compareLimit: data.compareLimit,
+							compareHoursLimit: data.compareHoursLimit,
 						duration: data.duration,
 					});
 				} else {
@@ -134,25 +138,20 @@ const CompanySubscription: React.FC = () => {
 			{loading ? (
 				<div style={{ textAlign: "center", padding: "60px 0" }}>Loading...</div>
 			) : currentSubscription ? (
-				<div
-					style={{
-						display: "flex",
-						gap: 16,
-						alignItems: "flex-start",
-						flexWrap: "wrap",
-					}}
-				>
-					<div style={{ flex: "0 0 420px", minWidth: 300 }}>
+				<div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+					<div style={{ width: 'min(400px, 100%)' }}>
 						<SubscriptionStatsCard
 							subscriptionName={currentSubscription.subscriptionName}
 							resumeLimit={currentSubscription.resumeLimit}
 							hoursLimit={currentSubscription.hoursLimit}
+							compareLimit={currentSubscription.compareLimit}
+							compareHoursLimit={currentSubscription.compareHoursLimit}
 							description={currentSubscription.description}
 						/>
 					</div>
 
-					{currentSubscription.subscriptionName?.toLowerCase() !== "free" && (
-						<div style={{ flex: "1 1 560px", minWidth: 320 }}>
+					{currentSubscription.subscriptionName?.toLowerCase() !== 'free' && (
+						<div style={{ width: 'min(920px, 100%)' }}>
 							<SubscriptionDetailsSection
 								startDate={currentSubscription.startDate}
 								endDate={currentSubscription.endDate}

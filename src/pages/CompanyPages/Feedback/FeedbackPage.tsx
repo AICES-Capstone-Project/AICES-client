@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from "react";
-import { List, Rate, Button, message, Input, Card, Avatar, Row, Col, Typography, Pagination } from "antd";
+import { useNavigate } from "react-router-dom";
+import { List, Rate, Button, message, Input, Card, Avatar, Row, Col, Typography, Pagination, Space } from "antd";
 import defaultAvatar from "../../../assets/images/Avatar_Default.jpg";
 import feedbackService from "../../../services/feedbackService";
 import * as signalR from "@microsoft/signalr";
 import { API_CONFIG, STORAGE_KEYS } from "../../../services/config";
 
 export default function FeedbackPage() {
+  const navigate = useNavigate();
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [rating, setRating] = useState<number | undefined>(undefined);
@@ -114,22 +116,35 @@ export default function FeedbackPage() {
   };
 
   return (
-    <div style={{ padding: 24, background: "#f5f7fb", height: "100vh", overflow: "hidden" }}>
+    <Card
+      bordered={false}
+      style={{ maxWidth: 1200, margin: "12px auto", borderRadius: 12, height: "calc(100% - 25px)" }}
+      title={
+        <div style={{ display: "flex", alignItems: "center", width: "100%", justifyContent: "space-between", gap: 16 }}>
+          <div style={{ flex: "0 0 auto" }}>
+            <span className="font-semibold">Feedback</span>
+          </div>
+
+          <div style={{ flex: "0 0 auto" }}>
+            <Space>
+              <Button className="company-btn" onClick={() => navigate("/company/feedback-history")}>
+                Feedback History
+              </Button>
+            </Space>
+          </div>
+        </div>
+      }
+    >
       <div style={{ width: "calc(100% - 25px)", margin: "0 auto" }}>
         <Row gutter={20}>
-          <Col xs={24} lg={12}>
-            <Card
-              style={{ borderRadius: 12, boxShadow: "0 6px 18px rgba(15,23,42,0.06)", maxHeight: "calc(100vh - 160px)", overflow: "hidden" }}
-              bodyStyle={{ padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}
-            >
+          <Col xs={24} lg={items && items.length > 0 ? 12 : 24}>
+            <div style={{  maxHeight: "calc(100vh - 160px)", overflow: "hidden", padding: 20, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", margin: "15px 0" }}>
                 <Typography.Title level={4} style={{ margin: 0 }}>Send Feedback</Typography.Title>
                 <Rate value={rating} onChange={(v) => setRating(v)} style={{ fontSize: 24 }} />
               </div>
-
+      
               <div style={{ flex: 1, minHeight: "35vh", overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
-
-
                 <Input.TextArea
                   value={comment}
                   onChange={(e) => setComment(e.target.value.slice(0, 400))}
@@ -149,11 +164,12 @@ export default function FeedbackPage() {
                   Submit
                 </Button>
               </div>
-            </Card>
+            </div>
           </Col>
 
-          <Col xs={24} lg={12}>
-            <Card style={{ display: 'flex', flexDirection: 'column', borderRadius: 12, boxShadow: "0 6px 18px rgba(15,23,42,0.06)", maxHeight: "calc(100vh - 25px)" }} bodyStyle={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+          {items && items.length > 0 && (
+            <Col xs={24} lg={12}>
+              <div style={{ display: 'flex', flexDirection: 'column', borderRadius: 12, boxShadow: "0 6px 18px rgba(15,23,42,0.06)", maxHeight: "calc(100vh - 25px)", padding: 20 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
                 <Typography.Title level={4} style={{ margin: 0 }}>Recent Feedback</Typography.Title>
               </div>
@@ -191,10 +207,11 @@ export default function FeedbackPage() {
                   showSizeChanger={false}
                 />
               </div>
-            </Card>
-          </Col>
+            </div>
+            </Col>
+          )}
         </Row>
       </div>
-    </div>
+    </Card>
   );
 }

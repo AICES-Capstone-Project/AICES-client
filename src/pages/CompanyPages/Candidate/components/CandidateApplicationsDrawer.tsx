@@ -23,6 +23,7 @@ export default function CandidateApplicationsDrawer({ open, onClose, resumeId, r
     setDetailLoading(true);
     try {
       const resp = await candidateService.getApplicationById(resumeId, applicationId);
+      console.debug('[CandidateApplicationsDrawer] getApplicationById response:', resp);
       setDetail(resp?.data ?? null);
     } catch (err) {
       setDetail(null);
@@ -52,9 +53,20 @@ export default function CandidateApplicationsDrawer({ open, onClose, resumeId, r
             <div style={{ textAlign: 'center', padding: 20 }}><Spin /></div>
           ) : detail ? (
             <div>
-              <Typography.Title level={5}>{detail.jobTitle ?? detail.campaignTitle}</Typography.Title>
+              <Typography.Title level={5}>
+                <span style={{ display: 'inline-block', maxWidth: 760, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {detail.jobTitle ?? detail.campaignTitle}
+                </span>
+              </Typography.Title>
               <Typography.Text strong>Status: </Typography.Text>
-              <Tag color="blue">{detail.status ?? detail.applicationStatus}</Tag>
+              {(() => {
+                const displayStatus = (detail.status ?? detail.applicationStatus ?? '-').toString();
+                const s = displayStatus.toLowerCase();
+                if (['reviewed', 'approved', 'completed'].includes(s)) return <Tag color="green">{displayStatus}</Tag>;
+                if (['rejected', 'notapplied', 'failed', 'invalid'].includes(s)) return <Tag color="red">{displayStatus}</Tag>;
+                if (['pending', 'submitted', 'processing'].includes(s)) return <Tag color="orange">{displayStatus}</Tag>;
+                return <Tag>{displayStatus}</Tag>;
+              })()}
               <Divider />
               <Typography.Paragraph>
                 <strong>AI Explanation</strong>
@@ -114,7 +126,9 @@ export default function CandidateApplicationsDrawer({ open, onClose, resumeId, r
             campaignTitle: a.campaignTitle ?? a.campaign?.title ?? '-',
             companyName: a.companyName ?? a.company?.name ?? '-',
             createdAt: a.createdAt ?? a.created_at,
-            status: a.status ?? '-',
+            // keep applicationStatus separately; status may be missing on list endpoints
+            applicationStatus: a.applicationStatus ?? a.status ?? null,
+            status: a.status ?? null,
             totalScore: a.totalScore ?? a.score ?? null,
             matchSkills: a.matchSkills ?? a.match_skills ?? '',
             missingSkills: a.missingSkills ?? a.missing_skills ?? '',
@@ -125,7 +139,9 @@ export default function CandidateApplicationsDrawer({ open, onClose, resumeId, r
           className="candidate-app-table"
           columns={[
             { title: 'No', dataIndex: 'no', key: 'no', width: "5%", align: 'center' as const },
-            { title: 'Job', dataIndex: 'jobTitle', key: 'jobTitle', width: "32%", align: 'center' as const, render: (v: any) => (<span style={{ fontWeight: 700, color: 'var(--color-primary-medium)' }}>{v}</span>) },
+            { title: 'Job', dataIndex: 'jobTitle', key: 'jobTitle', width: "32%", align: 'center' as const, render: (v: any) => (
+              <span style={{ fontWeight: 700, color: 'var(--color-primary-medium)', maxWidth: 240, display: 'inline-block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v}</span>
+            ) },
             { title: 'Campaign', dataIndex: 'campaignTitle', key: 'campaignTitle', align: 'center' as const, width: "32%", render: (v: any) => (<span style={{ maxWidth: 220, display: 'inline-block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v}</span>) },
             { title: 'Applied At', dataIndex: 'createdAt', key: 'createdAt', width: "15%", align: 'center' as const, render: (d: any) => d ? new Date(d).toLocaleString() : '-' },
             { title: 'Score', dataIndex: 'totalScore', key: 'totalScore', width: "8%", align: 'center' as const, render: (val: any) => {
@@ -139,12 +155,13 @@ export default function CandidateApplicationsDrawer({ open, onClose, resumeId, r
                 }
                 return (<div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}><strong style={{ color }}>{isNaN(n) ? String(val) : String(n)}</strong></div>);
               } },
-            { title: 'Status', dataIndex: 'status', key: 'status', width: "7%", align: 'center' as const, render: (s: any) => {
-                const st = (s || '').toString().toLowerCase();
-                if (st === 'reviewed' || st === 'approved') return <Tag color="green">{s}</Tag>;
-                if (st === 'rejected' || st === 'notapplied') return <Tag color="red">{s}</Tag>;
-                if (st === 'pending' || st === 'submitted') return <Tag color="orange">{s}</Tag>;
-                return <Tag>{s}</Tag>;
+            { title: 'Status', dataIndex: 'status', key: 'status', width: "7%", align: 'center' as const, render: (s: any, record: any) => {
+                const display = (s ?? record.applicationStatus ?? '-').toString();
+                const st = (display || '').toLowerCase();
+                if (['reviewed', 'approved', 'completed'].includes(st)) return <Tag color="green">{display}</Tag>;
+                if (['rejected', 'notapplied', 'failed', 'invalid'].includes(st)) return <Tag color="red">{display}</Tag>;
+                if (['pending', 'submitted', 'processing'].includes(st)) return <Tag color="orange">{display}</Tag>;
+                return <Tag>{display}</Tag>;
               } },
             { title: 'View', dataIndex: 'view', key: 'view', width: "6%", align: 'center' as const, render: (_: any, record: any) => (
               <Button type="text" icon={<EyeOutlined />} onClick={() => handleViewDetail(record.applicationId)} />

@@ -114,11 +114,11 @@ const Form: React.FC = () => {
 						<p className="text-red-500 text-xs !mb-1">{passwordError}</p>
 					)}
 				</div>
-				<div className="flex items-center justify-between w-full text-sm">
-					<label className="flex items-center gap-2">
+				<div className="flex items-center justify-end w-full text-sm">
+					{/* <label className="flex items-center gap-2">
 						<input type="checkbox" className="w-4 h-4" />
 						<span className="text-gray-600">Remember me</span>
-					</label>
+					</label> */}
 					<span
 						className="cursor-pointer text-green-600 hover:underline"
 						onClick={() => navigate(APP_ROUTES.FORGOT_PASSWORD)}

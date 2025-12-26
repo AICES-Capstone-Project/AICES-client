@@ -75,15 +75,6 @@ const ResumeDetailDrawer: React.FC<Props> = ({ open, loading, selectedResume, on
               <Alert type="warning" showIcon message={selectedResume.errorMessage} />
             )}
 
-          {selectedResume.applicationErrorType && selectedResume.errorMessage && (
-            <Alert 
-              type="error" 
-              showIcon 
-              message={`Application Error: ${selectedResume.applicationErrorType}`}
-              description={selectedResume.errorMessage}
-            />
-          )}
-
           {!isJobTitleMismatch && isCompleted && (
             <Card
               size="small"

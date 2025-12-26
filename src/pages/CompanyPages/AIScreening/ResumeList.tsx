@@ -524,6 +524,9 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 					resumeId: data.resumeId,
 					applicationId: (data as any).applicationId,
 					applicationStatus: (data as any).applicationStatus ?? data.status,
+					// preserve both resume-level and application-level status fields
+					resumeStatus: (data as any).resumeStatus ?? null,
+					applicationErrorType: (data as any).applicationErrorType ?? null,
 					fullName: data.fullName,
 					status: data.status,
 					queueJobId: (data as any).queueJobId,

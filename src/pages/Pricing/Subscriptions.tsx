@@ -54,7 +54,6 @@ function mapApiPlanToPlanType(apiPlan: any): PlanType {
 			`${apiPlan.compareLimit} Compare Limit / ${apiPlan.compareHoursLimit} Compare Hours`,
 			`Export reports (PDF, Excel)`,
 			`Batch screening`,
-			`Advanced filtering & search`,
 		],
 		subscriptionId: apiPlan.subscriptionId,
 		buttonType: "primary" as PlanType["buttonType"],

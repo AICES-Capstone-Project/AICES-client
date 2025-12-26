@@ -70,17 +70,19 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       key: "title",
       width: "40%",
       align: "center",
-      ellipsis: { showTitle: true },
+      ellipsis: { showTitle: false },
       render: (title) => (
-        <div
-          style={{
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-          }}
-        >
-          {title}
-        </div>
+        <Tooltip title={title || "-"}>
+          <div
+            style={{
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            {title || "-"}
+          </div>
+        </Tooltip>
       ),
     },
     {
@@ -89,7 +91,25 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       key: "categoryName",
       width: "15%",
       align: "center",
-      render: (cat) => <Tag color={tagColorFor(cat)}>{cat || "-"}</Tag>,
+      render: (cat) => (
+        <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+          <Tooltip title={cat || "-"}>
+            <Tag
+              color={tagColorFor(cat)}
+              style={{
+                display: "inline-block",
+                maxWidth: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+                verticalAlign: "middle",
+              }}
+            >
+              {cat || "-"}
+            </Tag>
+          </Tooltip>
+        </div>
+      ),
     },
     {
       title: "Specialization",
@@ -100,7 +120,25 @@ const JobTable = ({ jobs, loading, onView, onEdit, onDelete }: Props) => {
       render: (spec, record) => {
         const category = (record as CompanyJob).categoryName;
         const color = category ? tagColorFor(category) : tagColorFor(spec);
-        return <Tag color={color}>{spec || "-"}</Tag>;
+        return (
+          <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
+            <Tooltip title={spec || "-"}>
+              <Tag
+                color={color}
+                style={{
+                  display: "inline-block",
+                  maxWidth: "100%",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  verticalAlign: "middle",
+                }}
+              >
+                {spec || "-"}
+              </Tag>
+            </Tooltip>
+          </div>
+        );
       },
     },
     {

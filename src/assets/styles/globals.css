@@ -1146,11 +1146,11 @@ button {
 
 /* ===== Scoped DatePicker popup styles for birthday picker (moved from component) ===== */
 .birthday-picker-popup .ant-picker-panel {
-	max-height: 35vh !important;
+	max-height: 40vh !important;
 	overflow: auto !important;
 }
 .birthday-picker-popup .ant-picker-body {
-	max-height: 26vh !important;
+	max-height: 30vh !important;
 	overflow: auto !important;
 }
 .birthday-picker-popup .ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner,

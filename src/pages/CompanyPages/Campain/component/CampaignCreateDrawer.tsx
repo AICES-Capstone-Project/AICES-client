@@ -148,15 +148,28 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
             { max: 100, message: 'Title must be at most 100 characters' },
           ]}
         >
-          <Input maxLength={100} placeholder="Enter campaign title (max 100 chars)" />
+          <Input maxLength={100} showCount placeholder="Enter campaign title (max 100 chars)" />
         </Form.Item>
-        <Form.Item name="description" label="Description" rules={[{ max: 1000, message: 'Description must be at most 1000 characters' }]}>
+        <Form.Item
+          name="description"
+          label="Description"
+          rules={[
+            { required: true, message: 'Please input description' },
+            { max: 1000, message: 'Description must be at most 1000 characters' },
+          ]}
+        >
           <Input.TextArea rows={4} maxLength={1000} showCount placeholder="Enter campaign description (max 1000 chars)" />
         </Form.Item>
-        <Form.Item name="startDate" label="Start Date">
+        <Form.Item
+          name="startDate"
+          label="Start Date"
+          rules={[{ required: true, message: 'Please select start date' }]}
+        >
           <DatePicker
-            showTime
             size="small"
+            format="DD/MM/YYYY"
+            placeholder="DD/MM/YYYY"
+            popupClassName="birthday-picker-popup"
             style={{ width: '100%' }}
             disabledDate={(current) => !!current && current.startOf('day').isBefore(dayjs().startOf('day'))}
           />
@@ -164,19 +177,24 @@ const CampaignCreateDrawer: React.FC<Props> = ({ open, onClose, onCreated, initi
         <Form.Item
           name="endDate"
           label="End Date"
-          rules={[{
-            validator: (_: any, value: any) => {
-              const start = form.getFieldValue('startDate');
-              if (start && value && start.isAfter && start.isAfter(value)) {
-                return Promise.reject(new Error('End date must be after start date'));
+          rules={[
+            { required: true, message: 'Please select end date' },
+            {
+              validator: (_: any, value: any) => {
+                const start = form.getFieldValue('startDate');
+                if (start && value && start.isAfter && start.isAfter(value)) {
+                  return Promise.reject(new Error('End date must be after start date'));
+                }
+                return Promise.resolve();
               }
-              return Promise.resolve();
             }
-          }]}
+          ]}
         >
           <DatePicker
-            showTime
             size="small"
+            format="DD/MM/YYYY"
+            placeholder="DD/MM/YYYY"
+            popupClassName="birthday-picker-popup"
             style={{ width: '100%' }}
             disabledDate={(current) => !!current && current.startOf('day').isBefore(dayjs().startOf('day'))}
           />

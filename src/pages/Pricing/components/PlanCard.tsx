@@ -42,15 +42,15 @@ const PlanCard: React.FC<Props> = ({
 		>
 			{/* Most Popular Badge - Only for Pro plan */}
 			{isPro && (
-				<div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
+				<div className="absolute -top-2 left-1/2 transform -translate-x-1/2 z-10">
 					<span
-						className="text-white px-4 py-1.5 rounded-full text-xs font-semibold shadow-lg"
+						className="text-white !px-2 !py-0.5 rounded-full text-xs font-semibold shadow-lg"
 						style={{
 							background:
 								"linear-gradient(to right, var(--color-primary-medium), var(--color-primary))",
 						}}
 					>
-						⭐ Most Popular
+						⭐ Recommended
 					</span>
 				</div>
 			)}

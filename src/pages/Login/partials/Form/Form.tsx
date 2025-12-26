@@ -10,7 +10,7 @@ import SocialAuthForm from "../../../../components/Forms/SocialAuthForm";
 import { useAppDispatch } from "../../../../hooks/redux";
 import { fetchUser } from "../../../../stores/slices/authSlice";
 import { getRoleBasedRoute } from "../../../../routes/navigation";
-import { APP_ROUTES } from "../../../../services/config";
+import { APP_ROUTES, STORAGE_KEYS } from "../../../../services/config";
 import { loginSchema } from "../../../../utils/validations/auth.validation";
 
 const Form: React.FC = () => {
@@ -43,6 +43,9 @@ const Form: React.FC = () => {
 		try {
 			setLoading(true);
 
+			// Clear any existing token before login to prevent "logged in another device" error
+			localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+
 			const res = await authService.login({ email, password });
 
 			console.log(res);
@@ -55,10 +58,7 @@ const Form: React.FC = () => {
 					navigate(redirectRoute);
 				} else navigate(APP_ROUTES.HOME);
 			} else {
-				toastError(
-					`Login failed `,
-					res.message || "Failed to login"
-				);
+				toastError(`Login failed `, res.message || "Failed to login");
 			}
 		} catch (err) {
 			toastError(

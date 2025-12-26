@@ -5,7 +5,7 @@ import { authService } from "../../../services/authService";
 import { fetchUser } from "../../../stores/slices/authSlice";
 import { getRoleBasedRoute } from "../../../routes/navigation";
 import { toastError, toastSuccess } from "../../../components/UI/Toast";
-import { APP_ROUTES } from "../../../services/config";
+import { APP_ROUTES, STORAGE_KEYS } from "../../../services/config";
 import { Spin } from "antd";
 
 const GitHubCallback = () => {
@@ -42,6 +42,9 @@ const GitHubCallback = () => {
 
 			console.log("🔙 [GitHub] Callback received with code:", code);
 			console.log("🔄 [GitHub] Processing authentication...");
+
+			// Clear any existing token before login to prevent "logged in another device" error
+			localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
 
 			try {
 				const res = await authService.githubLogin(code);

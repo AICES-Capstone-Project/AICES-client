@@ -6,6 +6,7 @@ import PricingCTA from "./components/PricingCTA";
 import type { PlanType, FAQItem } from "../../types/subscription.types";
 import { usePricingPlans } from "./usePricingPlans";
 import { companySubscriptionService } from "../../services/companySubscriptionService";
+import { useAppSelector } from "../../hooks/redux";
 
 const faqs: FAQItem[] = [
 	{
@@ -63,6 +64,8 @@ function mapApiPlanToPlanType(apiPlan: any): PlanType {
 
 const PricingPage: React.FC = () => {
 	const { plans, loading, error } = usePricingPlans();
+	const { user } = useAppSelector((state) => state.auth);
+	const isLoggedIn = !!user;
 	const [currentSubscriptionName, setCurrentSubscriptionName] = useState<
 		string | null
 	>(null);
@@ -113,6 +116,7 @@ const PricingPage: React.FC = () => {
 				<PlansGrid
 					plans={filteredPlans}
 					currentSubscriptionName={currentSubscriptionName}
+					isLoggedIn={isLoggedIn}
 				/>
 			)}
 			<FAQSection faqs={faqs} />

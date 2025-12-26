@@ -8,7 +8,9 @@ import {
 import { paymentService } from "../../../services/paymentService";
 import { Modal } from "antd";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import type { PlanType } from "../../../types/subscription.types";
+import { APP_ROUTES } from "../../../services/config";
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -16,10 +18,16 @@ type Props = {
 	plan: PlanType;
 	featured?: boolean;
 	isCurrentPlan?: boolean;
+	isLoggedIn?: boolean;
 };
 
-const PlanCard: React.FC<Props> = ({ plan, isCurrentPlan = false }) => {
+const PlanCard: React.FC<Props> = ({
+	plan,
+	isCurrentPlan = false,
+	isLoggedIn = false,
+}) => {
 	const [loadingCheckout, setLoadingCheckout] = useState(false);
+	const navigate = useNavigate();
 
 	// Determine card styling based on plan type
 	const isFree = plan.title?.toLowerCase() === "free";
@@ -159,6 +167,12 @@ const PlanCard: React.FC<Props> = ({ plan, isCurrentPlan = false }) => {
 							}}
 							loading={loadingCheckout}
 							onClick={async () => {
+								// If user is not logged in and plan is Free, redirect to login
+								if (!isLoggedIn && isFree) {
+									navigate(APP_ROUTES.LOGIN);
+									return;
+								}
+
 								if (!plan.subscriptionId) {
 									Modal.error({
 										title: "Missing plan",
@@ -216,7 +230,7 @@ const PlanCard: React.FC<Props> = ({ plan, isCurrentPlan = false }) => {
 								}
 							}}
 						>
-							{`Upgrade ${plan.title}`}
+							{!isLoggedIn && isFree ? "Get Free" : `Upgrade ${plan.title}`}
 						</Button>
 					)}
 

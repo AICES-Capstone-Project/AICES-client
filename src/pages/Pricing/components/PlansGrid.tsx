@@ -8,9 +8,10 @@ import type { PlanType } from "../../../types/subscription.types";
 type Props = {
   plans: PlanType[];
   currentSubscriptionName?: string | null;
+  isLoggedIn?: boolean;
 };
 
-const PlansGrid: React.FC<Props> = ({ plans, currentSubscriptionName }) => {
+const PlansGrid: React.FC<Props> = ({ plans, currentSubscriptionName, isLoggedIn = false }) => {
   const carouselRef = useRef<CarouselRef>(null);
   const featuredIndex = Math.floor(plans.length / 2);
 
@@ -85,6 +86,7 @@ const PlansGrid: React.FC<Props> = ({ plans, currentSubscriptionName }) => {
                 plan={plan} 
                 featured={idx === featuredIndex} 
                 isCurrentPlan={currentSubscriptionName ? plan.title.toLowerCase() === currentSubscriptionName.toLowerCase() : false}
+                isLoggedIn={isLoggedIn}
               />
             </div>
           </div>

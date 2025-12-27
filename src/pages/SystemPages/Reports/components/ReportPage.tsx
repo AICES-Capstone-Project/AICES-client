@@ -12,9 +12,12 @@ export default function ReportPage({ children }: ReportPageProps) {
       className="aices-card"
       style={{
         borderRadius: 16,
+        boxShadow: "none",
       }}
-      bodyStyle={{
-        padding: 20,
+      styles={{
+        body: {
+          padding: 20,
+        },
       }}
     >
       {children}

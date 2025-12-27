@@ -1,11 +1,34 @@
+import React from "react";
 import { Typography } from "antd";
+import {
+  EnvironmentOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  MessageOutlined,
+  GlobalOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
 
+const SECTION_ICON_MAP: Record<string, React.ReactNode> = {
+  office: <EnvironmentOutlined />,
+  email: <MailOutlined />,
+  hotline: <PhoneOutlined />,
+  departments: <MessageOutlined />,
+  follow: <GlobalOutlined />,
+  maps: <EnvironmentOutlined />,
+  about: <InfoCircleOutlined />,
+};
+
 export default function ResourcesSection({ section }: { section: any }) {
+  const id = String(section?.id ?? "");
+  const icon = SECTION_ICON_MAP[id];
+
   return (
     <section id={section.id} className="resources-section">
       <Title level={3} className="resources-section-title">
+        {icon ? <span className="resources-section-icon">{icon}</span> : null}
         {section.title}
       </Title>
 

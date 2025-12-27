@@ -1,6 +1,8 @@
 // src/pages/SystemPages/Reports/AI/Scoring/AiScoring.tsx
 import React from "react";
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../../components/ReportTableCard";
+
 import type { ColumnsType } from "antd/es/table";
 import type { SystemAiScoringReport } from "../../../../../types/systemReport.types";
 import { fmtNumber, fmtPercent, fmtMs } from "../../components/formatters";
@@ -102,7 +104,7 @@ export default function AiScoring({ loading, data, error }: AiScoringProps) {
   ];
 
   return (
-    <Card title="Scoring Distribution" loading={loading} className="aices-card">
+    <ReportTableCard title="Scoring Distribution" hideTitle loading={loading}>
       <Text strong>Overview</Text>
       <Table
         size="small"
@@ -124,6 +126,6 @@ export default function AiScoring({ loading, data, error }: AiScoringProps) {
         dataSource={distributionData}
         rowKey="key"
       />
-    </Card>
+    </ReportTableCard>
   );
 }

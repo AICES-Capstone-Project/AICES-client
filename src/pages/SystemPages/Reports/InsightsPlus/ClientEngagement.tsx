@@ -1,6 +1,8 @@
 // src/pages/SystemPages/Reports/InsightsPlus/ClientEngagement.tsx
 import React from "react";
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../components/ReportTableCard";
+
 import type { ColumnsType } from "antd/es/table";
 import type { SystemClientEngagementReport } from "../../../../types/systemReport.types";
 import { fmtNumber, fmtPercent } from "../components/formatters";
@@ -86,7 +88,7 @@ export default function ClientEngagement({
   ];
 
   return (
-    <Card title="Client Engagement" loading={loading} className="aices-card">
+    <ReportTableCard title="Client Engagement" hideTitle loading={loading}>
       <Text strong>Usage Frequency</Text>
       <Table
         size="small"
@@ -108,6 +110,6 @@ export default function ClientEngagement({
         dataSource={trustData}
         rowKey="key"
       />
-    </Card>
+    </ReportTableCard>
   );
 }

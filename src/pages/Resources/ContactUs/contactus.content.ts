@@ -13,7 +13,7 @@ export const contactUsSections = [
 
   {
     id: "office",
-    title: "📍 Our Office",
+    title: "Our Office",
     content: [
       "FPT University Ho Chi Minh City",
       "Lot E2a-7, D1 Street, High-Tech Park, Long Thanh My Ward,",
@@ -23,50 +23,50 @@ export const contactUsSections = [
 
   {
     id: "email",
-    title: "📧 Email Support",
+    title: "Email Support",
     content: [
       "For general inquiries, technical support, or privacy concerns:",
       "Email: aicesse074@gmail.com",
-      "(We typically respond within 24 business hours)",
+      "(We typically respond within 24 business hours.)",
     ],
   },
 
   {
     id: "hotline",
-    title: "📞 Hotline",
+    title: "Hotline",
     content: [
       "Customer Service: (+84) 123 456 789",
-      "(Available Monday - Friday, 8:30 AM - 5:30 PM ICT)",
+      "(Available Monday to Friday, 8:30 AM – 5:30 PM ICT.)",
     ],
   },
 
   {
     id: "departments",
-    title: "💬 Get in Touch",
+    title: "Get in Touch",
     content: [
       "Please select the department that best fits your needs:",
       "• Technical Support: Issues with CV parsing, AI scoring, or account access.",
-      "• Billing & Subscriptions: Inquiries regarding Stripe payments, invoices, or upgrading your plan.",
-      "• Partnership & Sales: For large organizations looking for custom enterprise solutions.",
-      "• Data Privacy: Requests regarding your personal data or GDPR compliance.",
+      "• Billing & Subscriptions: Inquiries regarding Stripe payments, invoices, or plan upgrades.",
+      "• Partnership & Sales: Requests from organizations seeking enterprise or custom solutions.",
+      "• Data Privacy: Requests related to personal data, privacy, or GDPR compliance.",
     ],
   },
 
   {
     id: "follow",
-    title: "🚀 Follow Our Project",
+    title: "Follow Our Project",
     content: [
       "Stay updated with the latest AI recruitment trends and AICES feature releases:",
-      "GitHub: Project GFA25SE53 - AICES",
-      "LinkedIn: AICES - AI-Powered Recruitment System",
+      "GitHub: Project GFA25SE53 – AICES",
+      "LinkedIn: AICES – AI-Powered Recruitment System",
     ],
   },
 
   {
     id: "maps",
-    title: "🗺️ Find Us on Maps",
+    title: "Find Us on Maps",
     content: [
-      "You can embed a Google Map here (optional) so users can quickly locate our office.",
+      "A Google Maps embed can be added here to help users quickly locate our office.",
     ],
   },
 

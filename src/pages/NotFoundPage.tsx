@@ -40,14 +40,73 @@ export default function NotFoundPage() {
         #a404-id2_1 { stroke-dasharray:735px; stroke-dashoffset:-735px; animation: draw2 2.5s ease-in-out .5s forwards, flicker2 4s linear 4.5s infinite; }
         #a404-id1_1 { stroke-dasharray:940px; stroke-dashoffset:-940px; animation: draw1 2.5s ease-in-out 1s forwards, flicker1 4s linear 5s infinite; }
 
-        @keyframes draw1 {0%{stroke-dashoffset:-940px}100%{stroke-dashoffset:0}}
-        @keyframes draw2 {0%{stroke-dashoffset:-735px}100%{stroke-dashoffset:0}}
-        @keyframes draw3 {0%{stroke-dashoffset:-940px}100%{stroke-dashoffset:0}}
+       
         @keyframes hue {0%{filter:hue-rotate(0deg)}50%{filter:hue-rotate(-60deg)}100%{filter:hue-rotate(0deg)}}
+:root {
+  --neon: #00ff7b;
+  --bg0: #001a00;
+  --bg1: #000d00;
+  --shadow-dim: rgba(0,255,123,.25);
+}
 
-        @keyframes flicker1{0%,4%,6%,14%,100%{stroke:var(--neon)}1%,3%,7%,13%{stroke:transparent}}
-        @keyframes flicker2{0%,50%,62%,100%{stroke:var(--neon)}51%,61%{stroke:transparent}}
-        @keyframes flicker3{0%,11%,40%,46%,100%{stroke:var(--neon)}1%,10%,41%,45%{stroke:transparent}}
+.aices-404__bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, var(--bg0) 0%, var(--bg1) 100%);
+}
+
+/* SVG giữ nguyên vị trí */
+.aices-404__svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 600px;
+  max-width: 92vw;
+  height: auto;
+  filter: drop-shadow(0 0 14px rgba(0,255,123,.35));
+}
+
+/* ===== 404 STATIC ===== */
+.a404-s1 {
+  stroke: var(--neon);
+  stroke-width: 3px;
+  fill: transparent;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#a404-glow);
+}
+
+/* override toàn bộ animation cũ */
+#a404-id1_1,
+#a404-id2_1,
+#a404-id3_1 {
+  stroke-dasharray: none !important;
+  stroke-dashoffset: 0 !important;
+  animation: none !important;
+}
+
+/* text + button giữ nguyên như cũ */
+.neon-text {
+  background: linear-gradient(90deg, #00ff7b, #00ffaa, #00ff7b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 6px var(--shadow-dim);
+}
+
+.btn-neon {
+  background: linear-gradient(90deg, #00ff7b, #00ffaa);
+  color: #001a00 !important;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 0 12px rgba(0,255,123,0.5);
+}
+.btn-neon:hover {
+  background: linear-gradient(90deg, #00ffaa, #00ff7b);
+  box-shadow: 0 0 18px rgba(0,255,123,0.8);
+}
+
+        
 
         .neon-text {
           background: linear-gradient(90deg, #00ff7b, #00ffaa, #00ff7b);
@@ -69,6 +128,35 @@ export default function NotFoundPage() {
           background: linear-gradient(90deg, #00ffaa, #00ff7b);
           box-shadow: 0 0 18px rgba(0,255,123,0.8);
         }
+          /* =========================
+   404 STATIC – ONE GREEN ONLY
+   ========================= */
+
+/* tắt mọi animation cũ */
+#a404-id1_1,
+#a404-id2_1,
+#a404-id3_1 {
+  animation: none !important;
+  stroke-dasharray: none !important;
+  stroke-dashoffset: 0 !important;
+}
+
+/* 404 chỉ 1 màu xanh lá */
+.a404-s1 {
+  stroke: #00ff7b !important;
+  stroke-width: 3px;
+  fill: transparent;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: url(#a404-glow);
+}
+
+/* KHÔNG hue-rotate */
+.aices-404__svg {
+  animation: none !important;
+  filter: drop-shadow(0 0 12px rgba(0,255,123,.35));
+}
+
       `}</style>
 
       <div className="aices-404__bg" />

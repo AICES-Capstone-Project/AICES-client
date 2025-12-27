@@ -1,6 +1,8 @@
 // src/pages/SystemPages/Reports/Companies/Usage/CompaniesUsage.tsx
 import React from "react";
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../../components/ReportTableCard";
+
 import type { ColumnsType } from "antd/es/table";
 import type { SystemCompaniesUsageReport } from "../../../../../types/systemReport.types";
 import { fmtNumber, fmtPercent } from "../../components/formatters";
@@ -94,7 +96,7 @@ export default function CompaniesUsage({
   ];
 
   return (
-    <Card title="Usage" loading={loading} className="aices-card">
+    <ReportTableCard title="Usage" hideTitle loading={loading}>
       <Text strong>Company Usage Overview</Text>
       <Table
         size="small"
@@ -116,6 +118,6 @@ export default function CompaniesUsage({
         pagination={false}
         rowKey="key"
       />
-    </Card>
+    </ReportTableCard>
   );
 }

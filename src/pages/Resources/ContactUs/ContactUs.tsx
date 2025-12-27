@@ -1,5 +1,3 @@
-// src/pages/Resources/ContactUs/ContactUs.tsx
-
 import "../resources.css";
 import "./ContactUs.css";
 

@@ -173,3 +173,7 @@
     position: static;
   }
 }
+/* ✅ When sidebar is hidden (ProductLayout hideSidebar), make grid 1 column */
+.product-grid[data-has-sidebar="0"] {
+  grid-template-columns: 1fr;
+}

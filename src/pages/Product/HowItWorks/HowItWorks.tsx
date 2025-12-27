@@ -2,10 +2,22 @@ import "../product.css";
 import "./HowItWorks.css";
 
 import ProductLayout from "../components/ProductLayout";
-import { howItWorksSections, HOW_IT_WORKS_LAST_UPDATED } from "./howitworks.content";
+import {
+  howItWorksSections,
+  HOW_IT_WORKS_LAST_UPDATED,
+} from "./howitworks.content";
 import HowItWorksSection from "../components/HowItWorksSection";
 
-import stepImg from "../../../assets/homepage/step.jpg";
+// ✅ How It Works images
+import step1Img from "../../../assets/images/how-it-works/huhu.png";
+import step2Img from "../../../assets/images/how-it-works/hehe.png";
+import step3Img from "../../../assets/images/how-it-works/haha.png";
+
+const STEP_MEDIA_MAP: Record<string, string> = {
+  "step-1": step1Img,
+  "step-2": step2Img,
+  "step-3": step3Img,
+};
 
 export default function HowItWorks() {
   const getStepLabel = (id: string) => {
@@ -17,6 +29,8 @@ export default function HowItWorks() {
 
   return (
     <ProductLayout
+      pageClassName="howitworks-page"
+      hideSidebar
       title={
         <>
           How <span className="product-title-accent">It Works</span>
@@ -31,7 +45,7 @@ export default function HowItWorks() {
           key={section.id}
           section={section}
           stepLabel={getStepLabel(section.id)}
-          mediaSrc={stepImg} // dùng tạm step.jpg, bạn thay ảnh sau
+          mediaSrc={STEP_MEDIA_MAP[section.id]}
         />
       )}
     />

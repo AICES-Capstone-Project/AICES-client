@@ -1,6 +1,8 @@
 // src/pages/SystemPages/Reports/Jobs/Effectiveness/JobsEffectiveness.tsx
 import React from "react";
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../../components/ReportTableCard";
+
 import type { ColumnsType } from "antd/es/table";
 import type { SystemJobsEffectivenessReport } from "../../../../../types/systemReport.types";
 import { fmtNumber, fmtPercent } from "../../components/formatters";
@@ -55,7 +57,9 @@ export default function JobsEffectiveness({
       key: "qualifiedRate",
       label: "Qualified Rate",
       value: (
-        <Tag color="blue">{fmtPercent(ratioToPercent(data?.qualifiedRate))}</Tag>
+        <Tag color="blue">
+          {fmtPercent(ratioToPercent(data?.qualifiedRate))}
+        </Tag>
       ),
     },
     {
@@ -70,7 +74,7 @@ export default function JobsEffectiveness({
   ];
 
   return (
-    <Card title="Effectiveness" loading={loading} className="aices-card">
+    <ReportTableCard title="Effectiveness" hideTitle loading={loading}>
       <Table
         size="small"
         pagination={false}
@@ -78,6 +82,6 @@ export default function JobsEffectiveness({
         dataSource={tableData}
         rowKey="key"
       />
-    </Card>
+    </ReportTableCard>
   );
 }

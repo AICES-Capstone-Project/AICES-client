@@ -1,6 +1,7 @@
 // src/pages/SystemPages/Reports/InsightsPlus/AiHealth.tsx
 import React from "react";
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../components/ReportTableCard";
 import type { ColumnsType } from "antd/es/table";
 import type { SystemAiHealthReport } from "../../../../types/systemReport.types";
 import { fmtNumber, fmtPercent, fmtSeconds } from "../components/formatters";
@@ -51,12 +52,14 @@ export default function AiHealth({ loading, data, error }: AiHealthProps) {
     {
       key: "avgTime",
       label: "Average Processing Time",
-      value: <Text strong>{fmtSeconds(data?.averageProcessingTimeSeconds)}</Text>,
+      value: (
+        <Text strong>{fmtSeconds(data?.averageProcessingTimeSeconds)}</Text>
+      ),
     },
   ];
 
   return (
-    <Card title="AI Health" loading={loading} className="aices-card">
+    <ReportTableCard title="AI Health" hideTitle loading={loading}>
       <Text strong>Health Overview</Text>
       <Table
         size="small"
@@ -96,6 +99,6 @@ export default function AiHealth({ loading, data, error }: AiHealthProps) {
           },
         ]}
       />
-    </Card>
+    </ReportTableCard>
   );
 }

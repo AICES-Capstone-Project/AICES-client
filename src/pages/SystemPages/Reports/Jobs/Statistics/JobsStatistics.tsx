@@ -1,6 +1,8 @@
 // src/pages/SystemPages/Reports/Jobs/Statistics/JobsStatistics.tsx
 
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../../components/ReportTableCard";
+
 import type { ColumnsType } from "antd/es/table";
 import type { SystemJobsStatisticsReport } from "../../../../../types/systemReport.types";
 import { fmtNumber } from "../../components/formatters";
@@ -55,9 +57,7 @@ export default function JobsStatistics({
     {
       key: "active",
       label: "Active Jobs",
-      value: (
-        <Tag color="green">{fmtNumber(data?.activeJobs)}</Tag>
-      ),
+      value: <Tag color="green">{fmtNumber(data?.activeJobs)}</Tag>,
     },
     {
       key: "new",
@@ -76,33 +76,23 @@ export default function JobsStatistics({
       key: "published",
       label: "Published Jobs",
       value: (
-        <Tag color="green">
-          {fmtNumber(data?.statusBreakdown?.published)}
-        </Tag>
+        <Tag color="green">{fmtNumber(data?.statusBreakdown?.published)}</Tag>
       ),
     },
     {
       key: "draft",
       label: "Draft Jobs",
-      value: (
-        <Tag color="gold">
-          {fmtNumber(data?.statusBreakdown?.draft)}
-        </Tag>
-      ),
+      value: <Tag color="gold">{fmtNumber(data?.statusBreakdown?.draft)}</Tag>,
     },
     {
       key: "closed",
       label: "Closed Jobs",
-      value: (
-        <Tag color="red">
-          {fmtNumber(data?.statusBreakdown?.closed)}
-        </Tag>
-      ),
+      value: <Tag color="red">{fmtNumber(data?.statusBreakdown?.closed)}</Tag>,
     },
   ];
 
   return (
-    <Card title="Statistics" loading={loading} className="aices-card">
+    <ReportTableCard title="Statistics" hideTitle loading={loading}>
       <Text strong>Overview</Text>
       <Table
         size="small"
@@ -145,6 +135,6 @@ export default function JobsStatistics({
           },
         ]}
       />
-    </Card>
+    </ReportTableCard>
   );
 }

@@ -2,6 +2,21 @@ import type { ReactNode } from "react";
 import ProductSidebar from "./ProductSidebar";
 import ProductFooter from "./ProductFooter";
 
+type ProductLayoutProps = {
+  title: ReactNode;
+  subtitle?: string;
+  lastUpdated?: string;
+  sections: any[];
+  renderSection: (section: any) => ReactNode;
+  footerRight?: string;
+
+  /** ✅ Hide left sidebar (On this page) */
+  hideSidebar?: boolean;
+
+  /** ✅ Optional class to target page-specific styles */
+  pageClassName?: string;
+};
+
 export default function ProductLayout({
   title,
   subtitle,
@@ -9,16 +24,11 @@ export default function ProductLayout({
   sections,
   renderSection,
   footerRight,
-}: {
-  title: ReactNode;
-  subtitle?: string;
-  lastUpdated?: string;
-  sections: any[];
-  renderSection: (section: any) => ReactNode;
-  footerRight?: string;
-}) {
+  hideSidebar = false,
+  pageClassName,
+}: ProductLayoutProps) {
   return (
-    <div className="product-page">
+    <div className={`product-page ${pageClassName ?? ""}`}>
       <div className="product-hero">
         <div className="product-hero-inner">
           <h1 className="product-title">{title}</h1>
@@ -33,10 +43,15 @@ export default function ProductLayout({
       </div>
 
       <div className="product-body">
-        <div className="product-grid">
-          <ProductSidebar
-            sections={sections.map((s) => ({ id: s.id, title: s.title }))}
-          />
+        <div
+          className="product-grid"
+          data-has-sidebar={hideSidebar ? "0" : "1"}
+        >
+          {!hideSidebar ? (
+            <ProductSidebar
+              sections={sections.map((s) => ({ id: s.id, title: s.title }))}
+            />
+          ) : null}
 
           <div className="product-content">
             <div className="product-card">

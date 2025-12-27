@@ -1,6 +1,8 @@
 // src/pages/SystemPages/Reports/Companies/Overview/CompaniesOverview.tsx
 
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../../components/ReportTableCard";
+
 import type { ColumnsType } from "antd/es/table";
 import type { SystemCompaniesOverviewReport } from "../../../../../types/systemReport.types";
 import { fmtNumber } from "../../components/formatters";
@@ -126,10 +128,10 @@ export default function CompaniesOverview({
   ];
 
   return (
-    <Card
+    <ReportTableCard
       title="Overview"
+      hideTitle
       loading={loading}
-      className="aices-card"
       extra={
         data ? (
           <Tag color="green">{fmtNumber(data.totalCompanies)} total</Tag>
@@ -169,6 +171,6 @@ export default function CompaniesOverview({
         pagination={false}
         rowKey="key"
       />
-    </Card>
+    </ReportTableCard>
   );
 }

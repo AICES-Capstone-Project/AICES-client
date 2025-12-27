@@ -1,4 +1,3 @@
-// src/pages/SystemPages/Reports/components/ReportTableCard.tsx
 import React from "react";
 import { Card } from "antd";
 
@@ -7,6 +6,12 @@ type ReportTableCardProps = {
   loading?: boolean;
   extra?: React.ReactNode;
   children: React.ReactNode;
+
+  /** UI-only: ẩn header để tránh trùng title */
+  hideTitle?: boolean;
+
+  /** UI-only: padding body (mặc định gọn cho table) */
+  bodyPadding?: number;
 };
 
 export default function ReportTableCard({
@@ -14,15 +19,33 @@ export default function ReportTableCard({
   loading,
   extra,
   children,
+  hideTitle = false,
+  bodyPadding = 12,
 }: ReportTableCardProps) {
   return (
     <Card
-      title={title}
+      bordered={false}
       loading={loading}
-      className="aices-card"
-      style={{ borderRadius: 16 }}
-      bodyStyle={{ paddingTop: 8 }}
-      extra={extra}
+      title={hideTitle ? undefined : title}
+      extra={hideTitle ? undefined : extra}
+      style={{
+        borderRadius: 16,
+        boxShadow: "none",
+        background: "transparent",
+      }}
+      styles={{
+        header: {
+          borderBottom: "1px solid rgba(0,0,0,0.06)",
+          background: "rgba(0,0,0,0.02)",
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          marginBottom: 0,
+        },
+        body: {
+          padding: bodyPadding,
+          paddingTop: bodyPadding, // thay cho bodyStyle={{ paddingTop: 8 }}
+        },
+      }}
     >
       {children}
     </Card>

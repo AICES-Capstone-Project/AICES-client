@@ -1,6 +1,8 @@
 // src/pages/SystemPages/Reports/AI/Parsing/AiParsing.tsx
 import React from "react";
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../../components/ReportTableCard";
+
 import type { ColumnsType } from "antd/es/table";
 import type { SystemAiParsingReport } from "../../../../../types/systemReport.types";
 import { fmtNumber, fmtPercent, fmtMs } from "../../components/formatters";
@@ -71,46 +73,47 @@ export default function AiParsing({ loading, data, error }: AiParsingProps) {
     },
   ];
 
-  return (
-    <Card title="Parsing Quality" loading={loading} className="aices-card">
-      <Text strong>Overview</Text>
-      <Table
-        size="small"
-        style={{ marginTop: 8 }}
-        pagination={false}
-        columns={columns}
-        dataSource={overviewData}
-        rowKey="key"
-      />
+return (
+  <ReportTableCard title="Parsing Quality" hideTitle loading={loading}>
+    <Text strong>Overview</Text>
+    <Table
+      size="small"
+      style={{ marginTop: 8 }}
+      pagination={false}
+      columns={columns}
+      dataSource={overviewData}
+      rowKey="key"
+    />
 
-      <Text strong style={{ display: "block", marginTop: 16 }}>
-        Common Errors
-      </Text>
-      <Table
-        size="small"
-        style={{ marginTop: 8 }}
-        pagination={false}
-        rowKey={(r) => r.errorType}
-        dataSource={data?.commonErrors || []}
-        columns={[
-          { title: "Error Type", dataIndex: "errorType", key: "errorType" },
-          {
-            title: "Count",
-            dataIndex: "count",
-            key: "count",
-            width: 120,
-            align: "right",
-          },
-          {
-            title: "Rate",
-            dataIndex: "percentage",
-            key: "percentage",
-            width: 120,
-            align: "right",
-            render: (v: number) => fmtPercent(ratioToPercent(v)),
-          },
-        ]}
-      />
-    </Card>
-  );
+    <Text strong style={{ display: "block", marginTop: 16 }}>
+      Common Errors
+    </Text>
+    <Table
+      size="small"
+      style={{ marginTop: 8 }}
+      pagination={false}
+      rowKey={(r) => r.errorType}
+      dataSource={data?.commonErrors || []}
+      columns={[
+        { title: "Error Type", dataIndex: "errorType", key: "errorType" },
+        {
+          title: "Count",
+          dataIndex: "count",
+          key: "count",
+          width: 120,
+          align: "right",
+        },
+        {
+          title: "Rate",
+          dataIndex: "percentage",
+          key: "percentage",
+          width: 120,
+          align: "right",
+          render: (v: number) => fmtPercent(ratioToPercent(v)),
+        },
+      ]}
+    />
+  </ReportTableCard>
+);
+
 }

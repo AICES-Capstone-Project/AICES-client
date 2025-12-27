@@ -1,6 +1,8 @@
 // src/pages/SystemPages/Reports/Subscriptions/SubscriptionsReport.tsx
 import React from "react";
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../components/ReportTableCard";
+
 import type { ColumnsType } from "antd/es/table";
 import type { SystemSubscriptionsReport } from "../../../../types/systemReport.types";
 import { fmtMoney, fmtNumber } from "../components/formatters";
@@ -75,7 +77,7 @@ export default function SubscriptionsReport({
   ];
 
   return (
-    <Card title="Subscriptions" loading={loading} className="aices-card">
+    <ReportTableCard title="Subscriptions" hideTitle loading={loading}>
       <Text strong>Revenue Summary</Text>
       <Table
         size="small"
@@ -114,6 +116,6 @@ export default function SubscriptionsReport({
           },
         ]}
       />
-    </Card>
+    </ReportTableCard>
   );
 }

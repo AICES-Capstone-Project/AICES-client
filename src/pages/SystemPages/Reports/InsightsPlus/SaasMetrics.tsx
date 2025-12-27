@@ -1,6 +1,8 @@
 // src/pages/SystemPages/Reports/InsightsPlus/SaasMetrics.tsx
 import React from "react";
-import { Card, Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert, Tag } from "antd";
+import ReportTableCard from "../components/ReportTableCard";
+
 import type { ColumnsType } from "antd/es/table";
 import type {
   SystemSaasMetricsReport,
@@ -29,7 +31,11 @@ const riskTag = (risk?: string) => {
   return <Tag color="green">Low</Tag>;
 };
 
-export default function SaasMetrics({ loading, data, error }: SaasMetricsProps) {
+export default function SaasMetrics({
+  loading,
+  data,
+  error,
+}: SaasMetricsProps) {
   if (error) {
     return (
       <Alert
@@ -51,17 +57,27 @@ export default function SaasMetrics({ loading, data, error }: SaasMetricsProps) 
     {
       key: "screening",
       label: "Screening Usage Count",
-      value: <Text strong>{fmtNumber(data?.featureAdoption?.screeningUsageCount)}</Text>,
+      value: (
+        <Text strong>
+          {fmtNumber(data?.featureAdoption?.screeningUsageCount)}
+        </Text>
+      ),
     },
     {
       key: "tracking",
       label: "Tracking Usage Count",
-      value: <Text strong>{fmtNumber(data?.featureAdoption?.trackingUsageCount)}</Text>,
+      value: (
+        <Text strong>
+          {fmtNumber(data?.featureAdoption?.trackingUsageCount)}
+        </Text>
+      ),
     },
     {
       key: "export",
       label: "Export Usage Count",
-      value: <Text strong>{fmtNumber(data?.featureAdoption?.exportUsageCount)}</Text>,
+      value: (
+        <Text strong>{fmtNumber(data?.featureAdoption?.exportUsageCount)}</Text>
+      ),
     },
   ];
 
@@ -115,7 +131,7 @@ export default function SaasMetrics({ loading, data, error }: SaasMetricsProps) 
   ];
 
   return (
-    <Card title="SaaS Metrics" loading={loading} className="aices-card">
+    <ReportTableCard title="SaaS Metrics" hideTitle loading={loading}>
       <Text strong>Feature Adoption</Text>
       <Table
         size="small"
@@ -149,6 +165,6 @@ export default function SaasMetrics({ loading, data, error }: SaasMetricsProps) 
         columns={churnCols}
         dataSource={data?.churnRiskCompanies || []}
       />
-    </Card>
+    </ReportTableCard>
   );
 }

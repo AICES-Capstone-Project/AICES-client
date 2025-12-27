@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Reports/Companies/Overview/CompaniesOverview.tsx
 
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../../components/ReportTableCard";
 
 import type { ColumnsType } from "antd/es/table";
@@ -57,43 +57,40 @@ export default function CompaniesOverview({
     {
       key: "active",
       label: "Active Companies",
-      value: fmtNumber(data?.activeCompanies),
+      value: <Text>{fmtNumber(data?.activeCompanies)}</Text>,
     },
     {
       key: "inactive",
       label: "Inactive Companies",
-      value: fmtNumber(data?.inactiveCompanies),
+      value: <Text>{fmtNumber(data?.inactiveCompanies)}</Text>,
     },
     {
       key: "new",
       label: "New Companies This Month",
-      value: fmtNumber(data?.newCompaniesThisMonth),
+      value: <Text>{fmtNumber(data?.newCompaniesThisMonth)}</Text>,
     },
   ];
 
+  // UI-only change: remove colored Tags -> plain black Text
   const subscriptionData: RowItem[] = [
     {
       key: "sub-active",
       label: "With Active Subscription",
       value: (
-        <Tag color="green">
-          {fmtNumber(data?.subscriptionBreakdown?.withActiveSubscription)}
-        </Tag>
+        <Text>{fmtNumber(data?.subscriptionBreakdown?.withActiveSubscription)}</Text>
       ),
     },
     {
       key: "sub-expired",
       label: "With Expired Subscription",
       value: (
-        <Tag color="gold">
-          {fmtNumber(data?.subscriptionBreakdown?.withExpiredSubscription)}
-        </Tag>
+        <Text>{fmtNumber(data?.subscriptionBreakdown?.withExpiredSubscription)}</Text>
       ),
     },
     {
       key: "sub-none",
       label: "Without Subscription",
-      value: fmtNumber(data?.subscriptionBreakdown?.withoutSubscription),
+      value: <Text>{fmtNumber(data?.subscriptionBreakdown?.withoutSubscription)}</Text>,
     },
   ];
 
@@ -101,29 +98,17 @@ export default function CompaniesOverview({
     {
       key: "verified",
       label: "Verified Companies",
-      value: (
-        <Tag color="green">
-          {fmtNumber(data?.verificationBreakdown?.verified)}
-        </Tag>
-      ),
+      value: <Text>{fmtNumber(data?.verificationBreakdown?.verified)}</Text>,
     },
     {
       key: "pending",
       label: "Pending Verification",
-      value: (
-        <Tag color="gold">
-          {fmtNumber(data?.verificationBreakdown?.pending)}
-        </Tag>
-      ),
+      value: <Text>{fmtNumber(data?.verificationBreakdown?.pending)}</Text>,
     },
     {
       key: "rejected",
       label: "Rejected Companies",
-      value: (
-        <Tag color="red">
-          {fmtNumber(data?.verificationBreakdown?.rejected)}
-        </Tag>
-      ),
+      value: <Text>{fmtNumber(data?.verificationBreakdown?.rejected)}</Text>,
     },
   ];
 
@@ -132,11 +117,7 @@ export default function CompaniesOverview({
       title="Overview"
       hideTitle
       loading={loading}
-      extra={
-        data ? (
-          <Tag color="green">{fmtNumber(data.totalCompanies)} total</Tag>
-        ) : null
-      }
+      extra={data ? <Text>{fmtNumber(data.totalCompanies)} total</Text> : null}
     >
       <Text strong>Company Metrics</Text>
       <Table

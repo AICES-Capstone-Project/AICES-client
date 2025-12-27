@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Reports/Subscriptions/SubscriptionsReport.tsx
 import React from "react";
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../components/ReportTableCard";
 
 import type { ColumnsType } from "antd/es/table";
@@ -43,16 +43,17 @@ export default function SubscriptionsReport({
     { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
+  // UI-only change: remove colored Tags -> plain black Text
   const summaryData: RowItem[] = [
     {
       key: "free",
       label: "Free Companies",
-      value: fmtNumber(data?.freeCompanies),
+      value: <Text>{fmtNumber(data?.freeCompanies)}</Text>,
     },
     {
       key: "paid",
       label: "Paid Companies",
-      value: <Tag color="green">{fmtNumber(data?.paidCompanies)}</Tag>,
+      value: <Text>{fmtNumber(data?.paidCompanies)}</Text>,
     },
     {
       key: "monthlyRevenue",
@@ -62,17 +63,19 @@ export default function SubscriptionsReport({
     {
       key: "popularPlan",
       label: "Most Popular Plan",
-      value: <Tag color="green">{data?.popularPlan || "--"}</Tag>,
+      value: <Text>{data?.popularPlan || "--"}</Text>,
     },
     {
       key: "totalRevenue",
       label: "Total Revenue",
-      value: fmtMoney(data?.breakdown?.totalRevenue),
+      value: <Text>{fmtMoney(data?.breakdown?.totalRevenue)}</Text>,
     },
     {
       key: "avgRevenue",
       label: "Average Revenue per Company",
-      value: fmtMoney(data?.breakdown?.averageRevenuePerCompany),
+      value: (
+        <Text>{fmtMoney(data?.breakdown?.averageRevenuePerCompany)}</Text>
+      ),
     },
   ];
 
@@ -105,6 +108,7 @@ export default function SubscriptionsReport({
             key: "companyCount",
             width: 140,
             align: "right",
+            render: (v: number) => fmtNumber(v),
           },
           {
             title: "Revenue",

@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Reports/AI/Scoring/AiScoring.tsx
 import React from "react";
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../../components/ReportTableCard";
 
 import type { ColumnsType } from "antd/es/table";
@@ -43,33 +43,32 @@ export default function AiScoring({ loading, data, error }: AiScoringProps) {
     { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
+  // UI-only change: remove colored Tags -> plain black Text
   const overviewData: RowItem[] = [
     {
       key: "successRate",
       label: "Success Rate",
-      value: (
-        <Tag color="green">{fmtPercent(ratioToPercent(data?.successRate))}</Tag>
-      ),
+      value: <Text>{fmtPercent(ratioToPercent(data?.successRate))}</Text>,
     },
     {
       key: "avgTime",
       label: "Average Processing Time",
-      value: fmtMs(data?.averageProcessingTimeMs),
+      value: <Text>{fmtMs(data?.averageProcessingTimeMs)}</Text>,
     },
     {
       key: "totalScored",
       label: "Total Resumes Scored",
-      value: fmtNumber(data?.statistics?.totalScored),
+      value: <Text>{fmtNumber(data?.statistics?.totalScored)}</Text>,
     },
     {
       key: "avgScore",
       label: "Average Score",
-      value: fmtNumber(data?.statistics?.averageScore),
+      value: <Text>{fmtNumber(data?.statistics?.averageScore)}</Text>,
     },
     {
       key: "medianScore",
       label: "Median Score",
-      value: fmtNumber(data?.statistics?.medianScore),
+      value: <Text>{fmtNumber(data?.statistics?.medianScore)}</Text>,
     },
   ];
 
@@ -77,29 +76,19 @@ export default function AiScoring({ loading, data, error }: AiScoringProps) {
     {
       key: "high",
       label: "High Score",
-      value: (
-        <Tag color="green">
-          {fmtPercent(ratioToPercent(data?.scoreDistribution?.high))}
-        </Tag>
-      ),
+      value: <Text>{fmtPercent(ratioToPercent(data?.scoreDistribution?.high))}</Text>,
     },
     {
       key: "medium",
       label: "Medium Score",
       value: (
-        <Tag color="gold">
-          {fmtPercent(ratioToPercent(data?.scoreDistribution?.medium))}
-        </Tag>
+        <Text>{fmtPercent(ratioToPercent(data?.scoreDistribution?.medium))}</Text>
       ),
     },
     {
       key: "low",
       label: "Low Score",
-      value: (
-        <Tag color="red">
-          {fmtPercent(ratioToPercent(data?.scoreDistribution?.low))}
-        </Tag>
-      ),
+      value: <Text>{fmtPercent(ratioToPercent(data?.scoreDistribution?.low))}</Text>,
     },
   ];
 

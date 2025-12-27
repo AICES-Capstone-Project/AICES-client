@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Reports/InsightsPlus/ClientEngagement.tsx
 import React from "react";
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../components/ReportTableCard";
 
 import type { ColumnsType } from "antd/es/table";
@@ -69,21 +69,22 @@ export default function ClientEngagement({
   const hired = data?.aiTrustLevel?.highScoreCandidatesHiredCount ?? 0;
 
   // Swagger-driven: do NOT derive extra KPIs not provided by BE
+  // UI-only change: remove colored Tags -> plain black Text
   const trustData: RowItem[] = [
     {
       key: "trustPct",
       label: "AI Trust Percentage",
-      value: <Tag color="blue">{fmtPercent(trust, 2)}</Tag>,
+      value: <Text>{fmtPercent(trust, 2)}</Text>,
     },
     {
       key: "hiScore",
       label: "High-score Candidates",
-      value: fmtNumber(hi),
+      value: <Text>{fmtNumber(hi)}</Text>,
     },
     {
       key: "hiHired",
       label: "High-score Hired",
-      value: <Tag color="green">{fmtNumber(hired)}</Tag>,
+      value: <Text>{fmtNumber(hired)}</Text>,
     },
   ];
 

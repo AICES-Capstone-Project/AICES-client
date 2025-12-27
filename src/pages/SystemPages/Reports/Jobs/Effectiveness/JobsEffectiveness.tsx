@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Reports/Jobs/Effectiveness/JobsEffectiveness.tsx
 import React from "react";
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../../components/ReportTableCard";
 
 import type { ColumnsType } from "antd/es/table";
@@ -47,6 +47,7 @@ export default function JobsEffectiveness({
     { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
+  // UI-only change: remove colored Tags -> plain black Text
   const tableData: RowItem[] = [
     {
       key: "avgResumes",
@@ -56,20 +57,12 @@ export default function JobsEffectiveness({
     {
       key: "qualifiedRate",
       label: "Qualified Rate",
-      value: (
-        <Tag color="blue">
-          {fmtPercent(ratioToPercent(data?.qualifiedRate))}
-        </Tag>
-      ),
+      value: <Text>{fmtPercent(ratioToPercent(data?.qualifiedRate))}</Text>,
     },
     {
       key: "successRate",
       label: "Success Hiring Rate",
-      value: (
-        <Tag color="green">
-          {fmtPercent(ratioToPercent(data?.successHiringRate))}
-        </Tag>
-      ),
+      value: <Text>{fmtPercent(ratioToPercent(data?.successHiringRate))}</Text>,
     },
   ];
 

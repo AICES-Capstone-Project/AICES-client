@@ -30,7 +30,7 @@ export default function ExecutiveSummary({
       )}
 
       {/* FULL-WIDTH KPI GRID */}
-      <ReportKpiRow cols={{ xs: 24, sm: 12, md: 8, lg: 8 }} gutter={[16, 16]}>
+      <ReportKpiRow cols={{ xs: 24, sm: 12, md: 12, lg: 12 }} gutter={[16, 16]}>
         <ReportKpiCard
           loading={loading}
           label="Monthly Revenue"

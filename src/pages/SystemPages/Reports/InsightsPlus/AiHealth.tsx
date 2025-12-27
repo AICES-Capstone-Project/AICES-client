@@ -1,6 +1,5 @@
-// src/pages/SystemPages/Reports/InsightsPlus/AiHealth.tsx
 import React from "react";
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../components/ReportTableCard";
 import type { ColumnsType } from "antd/es/table";
 import type { SystemAiHealthReport } from "../../../../types/systemReport.types";
@@ -42,19 +41,17 @@ export default function AiHealth({ loading, data, error }: AiHealthProps) {
     {
       key: "successRate",
       label: "Success Rate",
-      value: <Tag color="green">{fmtPercent(data?.successRate, 2)}</Tag>,
+      value: <Text>{fmtPercent(data?.successRate, 2)}</Text>,
     },
     {
       key: "errorRate",
       label: "Error Rate",
-      value: <Tag color="red">{fmtPercent(data?.errorRate, 2)}</Tag>,
+      value: <Text>{fmtPercent(data?.errorRate, 2)}</Text>,
     },
     {
       key: "avgTime",
       label: "Average Processing Time",
-      value: (
-        <Text strong>{fmtSeconds(data?.averageProcessingTimeSeconds)}</Text>
-      ),
+      value: <Text strong>{fmtSeconds(data?.averageProcessingTimeSeconds)}</Text>,
     },
   ];
 
@@ -95,7 +92,7 @@ export default function AiHealth({ loading, data, error }: AiHealthProps) {
             key: "percentage",
             width: 140,
             align: "right",
-            render: (v: number) => <Tag color="gold">{fmtPercent(v, 2)}</Tag>,
+            render: (v: number) => <Text>{fmtPercent(v, 2)}</Text>,
           },
         ]}
       />

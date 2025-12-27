@@ -187,14 +187,12 @@
   background: linear-gradient(to left, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
 }
 
+/* ✅ STOP carousel animation (deploy ổn định, đứng yên) */
 .fb-track {
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 28px;
-  width: max-content;
-  animation: fb-marquee 28s linear infinite;
-  will-change: transform;
+  animation: none !important;
+  transform: translateX(0) !important;
 }
+
 
 .fb-carousel:hover .fb-track {
   animation-play-state: paused;
@@ -223,4 +221,30 @@
   }
   .fb-carousel::-webkit-scrollbar { display: none; }
   .fb-slide { flex: 0 0 88vw; }
+}
+/* ✅ Static layout (no animation) */
+.fb-static {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 24px;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+@media (max-width: 1100px) {
+  .fb-static {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .fb-static {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* fb-slide vẫn reuse */
+.fb-slide {
+  min-width: 0;
 }

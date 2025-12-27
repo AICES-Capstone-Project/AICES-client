@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Reports/Companies/Usage/CompaniesUsage.tsx
 import React from "react";
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../../components/ReportTableCard";
 
 import type { ColumnsType } from "antd/es/table";
@@ -47,21 +47,22 @@ export default function CompaniesUsage({
     { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
+  // UI-only change: remove colored Tags -> plain black Text
   const usageData: RowItem[] = [
     {
       key: "registered",
       label: "Registered Only Companies",
-      value: fmtNumber(data?.registeredOnly),
+      value: <Text>{fmtNumber(data?.registeredOnly)}</Text>,
     },
     {
       key: "engaged",
       label: "Engaged Companies",
-      value: <Tag color="blue">{fmtNumber(data?.engagedCompanies)}</Tag>,
+      value: <Text>{fmtNumber(data?.engagedCompanies)}</Text>,
     },
     {
       key: "frequent",
       label: "Frequent Companies",
-      value: <Tag color="cyan">{fmtNumber(data?.frequentCompanies)}</Tag>,
+      value: <Text>{fmtNumber(data?.frequentCompanies)}</Text>,
     },
   ];
 
@@ -69,28 +70,18 @@ export default function CompaniesUsage({
     {
       key: "activeRate",
       label: "Active Rate",
-      value: (
-        <Tag color="blue">
-          {fmtPercent(ratioToPercent(data?.kpis?.activeRate))}
-        </Tag>
-      ),
+      value: <Text>{fmtPercent(ratioToPercent(data?.kpis?.activeRate))}</Text>,
     },
     {
       key: "aiUsageRate",
       label: "AI Usage Rate",
-      value: (
-        <Tag color="purple">
-          {fmtPercent(ratioToPercent(data?.kpis?.aiUsageRate))}
-        </Tag>
-      ),
+      value: <Text>{fmtPercent(ratioToPercent(data?.kpis?.aiUsageRate))}</Text>,
     },
     {
       key: "returningRate",
       label: "Returning Rate",
       value: (
-        <Tag color="cyan">
-          {fmtPercent(ratioToPercent(data?.kpis?.returningRate))}
-        </Tag>
+        <Text>{fmtPercent(ratioToPercent(data?.kpis?.returningRate))}</Text>
       ),
     },
   ];

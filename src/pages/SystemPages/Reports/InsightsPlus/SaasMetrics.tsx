@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Reports/InsightsPlus/SaasMetrics.tsx
 import React from "react";
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../components/ReportTableCard";
 
 import type { ColumnsType } from "antd/es/table";
@@ -25,11 +25,8 @@ type RowItem = {
   value: React.ReactNode;
 };
 
-const riskTag = (risk?: string) => {
-  if (risk === "High") return <Tag color="red">High</Tag>;
-  if (risk === "Medium") return <Tag color="gold">Medium</Tag>;
-  return <Tag color="green">Low</Tag>;
-};
+// UI-only change: remove colored Tags -> plain black Text
+const riskText = (risk?: string) => <Text>{risk || "Low"}</Text>;
 
 export default function SaasMetrics({
   loading,
@@ -113,7 +110,7 @@ export default function SaasMetrics({
       key: "activityScore",
       width: 130,
       align: "right",
-      render: (v: number) => <Tag color="blue">{fmtNumber(v)}</Tag>,
+      render: (v: number) => <Text>{fmtNumber(v)}</Text>,
     },
   ];
 
@@ -126,7 +123,7 @@ export default function SaasMetrics({
       key: "riskLevel",
       width: 120,
       align: "center",
-      render: (v: string) => riskTag(v),
+      render: (v: string) => riskText(v),
     },
   ];
 

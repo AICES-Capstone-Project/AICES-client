@@ -217,7 +217,7 @@ export default function CompanyCreate() {
                       label="Address"
                       rules={[
                         { required: true, message: "Please enter the company address" },
-                        { max: 60, message: "Address must be at most 60 characters" },
+                        { max: 100, message: "Address must be at most 100 characters" },
                         {
                           validator: (_, value) => {
                             if (!value) return Promise.resolve();

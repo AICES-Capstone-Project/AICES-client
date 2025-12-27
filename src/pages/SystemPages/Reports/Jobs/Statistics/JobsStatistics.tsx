@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Reports/Jobs/Statistics/JobsStatistics.tsx
 
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../../components/ReportTableCard";
 
 import type { ColumnsType } from "antd/es/table";
@@ -48,26 +48,27 @@ export default function JobsStatistics({
     },
   ];
 
+  // UI-only change: remove colored Tags -> plain black Text
   const overviewData: RowItem[] = [
     {
       key: "total",
       label: "Total Jobs",
-      value: fmtNumber(data?.totalJobs),
+      value: <Text>{fmtNumber(data?.totalJobs)}</Text>,
     },
     {
       key: "active",
       label: "Active Jobs",
-      value: <Tag color="green">{fmtNumber(data?.activeJobs)}</Tag>,
+      value: <Text>{fmtNumber(data?.activeJobs)}</Text>,
     },
     {
       key: "new",
       label: "New Jobs This Month",
-      value: fmtNumber(data?.newJobsThisMonth),
+      value: <Text>{fmtNumber(data?.newJobsThisMonth)}</Text>,
     },
     {
       key: "avgApps",
       label: "Average Applications per Job",
-      value: fmtNumber(data?.averageApplicationsPerJob),
+      value: <Text>{fmtNumber(data?.averageApplicationsPerJob)}</Text>,
     },
   ];
 
@@ -75,19 +76,17 @@ export default function JobsStatistics({
     {
       key: "published",
       label: "Published Jobs",
-      value: (
-        <Tag color="green">{fmtNumber(data?.statusBreakdown?.published)}</Tag>
-      ),
+      value: <Text>{fmtNumber(data?.statusBreakdown?.published)}</Text>,
     },
     {
       key: "draft",
       label: "Draft Jobs",
-      value: <Tag color="gold">{fmtNumber(data?.statusBreakdown?.draft)}</Tag>,
+      value: <Text>{fmtNumber(data?.statusBreakdown?.draft)}</Text>,
     },
     {
       key: "closed",
       label: "Closed Jobs",
-      value: <Tag color="red">{fmtNumber(data?.statusBreakdown?.closed)}</Tag>,
+      value: <Text>{fmtNumber(data?.statusBreakdown?.closed)}</Text>,
     },
   ];
 
@@ -132,6 +131,7 @@ export default function JobsStatistics({
             key: "jobCount",
             width: 120,
             align: "right",
+            render: (v: number) => fmtNumber(v),
           },
         ]}
       />

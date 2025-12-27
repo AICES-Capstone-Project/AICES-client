@@ -1,6 +1,6 @@
 // src/pages/SystemPages/Reports/AI/Parsing/AiParsing.tsx
 import React from "react";
-import { Typography, Table, Alert, Tag } from "antd";
+import { Typography, Table, Alert } from "antd";
 import ReportTableCard from "../../components/ReportTableCard";
 
 import type { ColumnsType } from "antd/es/table";
@@ -43,77 +43,78 @@ export default function AiParsing({ loading, data, error }: AiParsingProps) {
     { title: "Value", dataIndex: "value", key: "value", align: "right" },
   ];
 
+  // UI-only change: remove colored Tags -> plain black Text
   const overviewData: RowItem[] = [
     {
       key: "successRate",
       label: "Success Rate",
-      value: (
-        <Tag color="green">{fmtPercent(ratioToPercent(data?.successRate))}</Tag>
-      ),
+      value: <Text>{fmtPercent(ratioToPercent(data?.successRate))}</Text>,
     },
     {
       key: "total",
       label: "Total Resumes",
-      value: fmtNumber(data?.totalResumes),
+      value: <Text>{fmtNumber(data?.totalResumes)}</Text>,
     },
     {
       key: "success",
       label: "Successfully Parsed",
-      value: fmtNumber(data?.successfulParsing),
+      value: <Text>{fmtNumber(data?.successfulParsing)}</Text>,
     },
     {
       key: "failed",
       label: "Failed Parsing",
-      value: <Tag color="red">{fmtNumber(data?.failedParsing)}</Tag>,
+      value: <Text>{fmtNumber(data?.failedParsing)}</Text>,
     },
     {
       key: "avgTime",
       label: "Average Processing Time",
-      value: fmtMs(data?.averageProcessingTimeMs),
+      value: <Text>{fmtMs(data?.averageProcessingTimeMs)}</Text>,
     },
   ];
 
-return (
-  <ReportTableCard title="Parsing Quality" hideTitle loading={loading}>
-    <Text strong>Overview</Text>
-    <Table
-      size="small"
-      style={{ marginTop: 8 }}
-      pagination={false}
-      columns={columns}
-      dataSource={overviewData}
-      rowKey="key"
-    />
+  return (
+    <ReportTableCard title="Parsing Quality" hideTitle loading={loading}>
+      <Text strong>Overview</Text>
+      <Table
+        size="small"
+        style={{ marginTop: 8 }}
+        pagination={false}
+        columns={columns}
+        dataSource={overviewData}
+        rowKey="key"
+      />
 
-    <Text strong style={{ display: "block", marginTop: 16 }}>
-      Common Errors
-    </Text>
-    <Table
-      size="small"
-      style={{ marginTop: 8 }}
-      pagination={false}
-      rowKey={(r) => r.errorType}
-      dataSource={data?.commonErrors || []}
-      columns={[
-        { title: "Error Type", dataIndex: "errorType", key: "errorType" },
-        {
-          title: "Count",
-          dataIndex: "count",
-          key: "count",
-          width: 120,
-          align: "right",
-        },
-        {
-          title: "Rate",
-          dataIndex: "percentage",
-          key: "percentage",
-          width: 120,
-          align: "right",
-          render: (v: number) => fmtPercent(ratioToPercent(v)),
-        },
-      ]}
-    />
-  </ReportTableCard>
-);
-
+      <Text strong style={{ display: "block", marginTop: 16 }}>
+        Common Errors
+      </Text>
+      <Table
+        size="small"
+        style={{ marginTop: 8 }}
+        pagination={false}
+        rowKey={(r) => r.errorType}
+        dataSource={data?.commonErrors || []}
+        columns={[
+          { title: "Error Type", dataIndex: "errorType", key: "errorType" },
+          {
+            title: "Count",
+            dataIndex: "count",
+            key: "count",
+            width: 120,
+            align: "right",
+            render: (v: number) => fmtNumber(v),
+          },
+          {
+            title: "Rate",
+            dataIndex: "percentage",
+            key: "percentage",
+            width: 120,
+            align: "right",
+            render: (v: number) => (
+              <Text>{fmtPercent(ratioToPercent(v))}</Text>
+            ),
+          },
+        ]}
+      />
+    </ReportTableCard>
+  );
 }

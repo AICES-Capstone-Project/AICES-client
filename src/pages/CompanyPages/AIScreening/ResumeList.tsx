@@ -20,6 +20,7 @@ import ResumeDetailDrawer from "./component/ResumeDetailDrawer";
 import type { ResumeLocal } from "../../../types/resume.types";
 import UploadDrawer from "./component/UploadDrawer";
 import UploadBatchDrawer from "./component/UploadBatchDrawer";
+import BatchUploadResultModal from "./component/BatchUploadResultModal";
 
 type UIResume = ResumeLocal;
 
@@ -49,6 +50,8 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 	const [uploadDrawerOpen, setUploadDrawerOpen] = useState(false);
 	const [uploadBatchDrawerOpen, setUploadBatchDrawerOpen] = useState(false);
 	const [uploading, setUploading] = useState(false);
+	const [batchResultModalOpen, setBatchResultModalOpen] = useState(false);
+	const [batchUploadResult, setBatchUploadResult] = useState<any>(null);
 	const tableRef = useRef<{ openCompare: () => void } | null>(null);
 	// removed batch-delete state
 	// removed selectedRowKeys/editMode/multi-delete related state
@@ -610,20 +613,16 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				(resp?.data as any)?.successCount > 0;
 
 			if (isSuccess) {
-				const successCount = (resp?.data as any)?.successCount || files.length;
-				const failCount = (resp?.data as any)?.failCount || 0;
-
-				if (failCount > 0) {
-					toastSuccess(
-						"Batch upload completed with warnings",
-						`Uploaded ${successCount}/${files.length} files successfully. ${failCount} files failed.`
-					);
-				} else {
-					toastSuccess(
-						"Batch upload successful",
-						`Uploaded ${successCount} files successfully!`
-					);
-				}
+				const batchData = resp?.data as any;
+				
+				// Close the upload drawer first
+				setUploadBatchDrawerOpen(false);
+				
+				// Show result modal with detailed information
+				setBatchUploadResult(batchData);
+				setBatchResultModalOpen(true);
+				
+				// Reload resumes to show newly uploaded files
 				await loadResumes();
 			} else {
 				toastError("Batch upload failed", resp?.message);
@@ -852,14 +851,23 @@ const ResumeList: React.FC<ResumeListProps> = ({ jobId: propJobId }) => {
 				uploading={uploading}
 			/>
 
-			<UploadBatchDrawer
-				open={uploadBatchDrawerOpen}
-				onClose={() => setUploadBatchDrawerOpen(false)}
-				onUpload={handleUploadBatch}
-				uploading={uploading}
-			/>
-		</>
-	);
+		<UploadBatchDrawer
+			open={uploadBatchDrawerOpen}
+			onClose={() => setUploadBatchDrawerOpen(false)}
+			onUpload={handleUploadBatch}
+			uploading={uploading}
+		/>
+
+		<BatchUploadResultModal
+			open={batchResultModalOpen}
+			onClose={() => {
+				setBatchResultModalOpen(false);
+				setBatchUploadResult(null);
+			}}
+			data={batchUploadResult}
+		/>
+	</>
+);
 };
 
 export default ResumeList;

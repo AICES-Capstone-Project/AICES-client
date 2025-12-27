@@ -8,10 +8,21 @@ export default function FeedbackCard({ item }: { item: HomeFeedbackItem }) {
       <p className="fb-quote">“{item.quote}”</p>
 
       <div className="fb-author">
-        <div className="fb-avatar">{item.avatarText}</div>
+        <div className="fb-avatar">
+          {item.avatarUrl ? (
+            <img
+              src={item.avatarUrl}
+              alt={item.authorName}
+              className="fb-avatar-img"
+            />
+          ) : (
+            item.avatarText
+          )}
+        </div>
+
         <div>
           <p className="fb-author-name">{item.authorName}</p>
-          <p className="fb-author-role">{item.authorRole}</p>
+          {/* ✅ bỏ HR Specialist */}
         </div>
       </div>
     </div>

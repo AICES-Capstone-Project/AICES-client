@@ -4,9 +4,10 @@ export type HomeFeedbackItem = {
   id: number;
   companyName: string;
   quote: string;
-  avatarText: string;
+
   authorName: string;
-  authorRole: string;
+  avatarText: string;
+  avatarUrl: string | null;
 };
 
 const FALLBACK_QUOTE =
@@ -28,8 +29,9 @@ export function mapFeedbackToHomeItem(f: FeedbackEntity): HomeFeedbackItem {
     id: f.feedbackId,
     companyName: f.companyName,
     quote: f.comment?.trim() || FALLBACK_QUOTE,
-    avatarText: initials(authorName),
+
     authorName,
-    authorRole: "HR Specialist", // BE chưa có role → giữ default cho UI
+    avatarText: initials(authorName),
+    avatarUrl: f.userAvatarUrl ?? null,
   };
 }

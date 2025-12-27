@@ -139,24 +139,32 @@ export default function AccountsTable({
           </Tooltip>
 
           {/* Lock / Unlock */}
+          {/* Lock / Unlock */}
           {record.userStatus !== "Locked" ? (
-            <Tooltip title="Lock user">
-              <Button
-                size="small"
-                shape="circle"
-                icon={<LockOutlined />}
-                onClick={() => onChangeStatus(record, "Locked")}
-              />
-            </Tooltip>
+            <Popconfirm
+              title="Lock user"
+              description={`Are you sure you want to lock ${record.email}?`}
+              okText="Lock"
+              okButtonProps={{ danger: true }}
+              cancelText="Cancel"
+              onConfirm={() => onChangeStatus(record, "Locked")}
+            >
+              <Tooltip title="Lock user">
+                <Button size="small" shape="circle" icon={<LockOutlined />} />
+              </Tooltip>
+            </Popconfirm>
           ) : (
-            <Tooltip title="Unlock user">
-              <Button
-                size="small"
-                shape="circle"
-                icon={<UnlockOutlined />}
-                onClick={() => onChangeStatus(record, "Verified")}
-              />
-            </Tooltip>
+            <Popconfirm
+              title="Unlock user"
+              description={`Are you sure you want to unlock ${record.email}?`}
+              okText="Unlock"
+              cancelText="Cancel"
+              onConfirm={() => onChangeStatus(record, "Verified")}
+            >
+              <Tooltip title="Unlock user">
+                <Button size="small" shape="circle" icon={<UnlockOutlined />} />
+              </Tooltip>
+            </Popconfirm>
           )}
 
           {/* Delete */}

@@ -1206,6 +1206,22 @@
   max-height: 60px;
   pointer-events: auto;
 }
+/* Eye icon: đậm, rõ, không nhạt */
+.accounts-table .ant-btn .anticon-eye,
+.accounts-table .ant-btn .anticon-eye svg {
+  color: #111827 !important;   /* đen đậm */
+  opacity: 1 !important;       /* bỏ opacity mặc định */
+  stroke-width: 2.2;           /* icon dày hơn */
+}
+
+/* Hover: xanh AICES, vẫn đậm */
+.accounts-table .ant-btn:hover .anticon-eye,
+.accounts-table .ant-btn:hover .anticon-eye svg {
+  color: var(--aices-green) !important;
+  opacity: 1 !important;
+  stroke-width: 2.2;
+}
+
 
 /* ẨN khi ≠ Pending */
 .company-overview-header-actions.is-hidden {

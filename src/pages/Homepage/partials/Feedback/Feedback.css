@@ -5,7 +5,6 @@
   flex-direction: column;
   align-items: center;
 
-  /* ✅ vệt xanh nền giống ValueSection */
   background:
     linear-gradient(
       180deg,
@@ -25,16 +24,11 @@
       rgba(18, 118, 37, 0.22) 25%,
       rgba(0, 111, 35, 0) 70%
     ),
-    linear-gradient(
-      180deg,
-      #f9faff 0%,
-      #ffffff 60%
-    );
+    linear-gradient(180deg, #f9faff 0%, #ffffff 60%);
 
   position: relative;
   overflow: hidden;
 }
-
 
 .fb-title {
   font-size: clamp(28px, 3.4vw, 42px);
@@ -54,49 +48,15 @@
   margin-bottom: 64px;
 }
 
-
 .fb-accent {
   background: linear-gradient(90deg, #0f2027, #28623a);
-
-  /* MUST HAVE — bản chuẩn + bản webkit */
   background-clip: text;
   -webkit-background-clip: text;
-
-  /* Fix Firefox + Safari */
   color: transparent;
   -webkit-text-fill-color: transparent;
 }
 
-
-.fb-subtitle {
-  font-size: 16px;
-  color: #777;
-  text-align: center;
-  max-width: 600px;
-  margin-bottom: 60px;
-}
-
-.fb-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 28px;
-  width: 100%;
-  max-width: 1200px;
-  padding: 0 24px;
-}
-
-@media (max-width: 1100px) {
-  .fb-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 720px) {
-  .fb-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
+/* ============ CARD ============ */
 .fb-card {
   background: rgba(255, 255, 255, 0.92);
   border-radius: 24px;
@@ -118,7 +78,6 @@
   border-color: rgba(40, 98, 58, 0.18);
 }
 
-/* quote mark premium */
 .fb-card::before {
   content: "“";
   position: absolute;
@@ -130,7 +89,6 @@
   font-weight: 800;
   pointer-events: none;
 }
-
 
 .fb-company {
   font-size: 20px;
@@ -151,7 +109,6 @@
   box-shadow: 0 0 0 4px rgba(40, 98, 58, 0.12);
 }
 
-
 .fb-quote {
   font-size: 15.5px;
   line-height: 1.75;
@@ -159,7 +116,6 @@
   flex-grow: 1;
   margin-bottom: 26px;
 }
-
 
 .fb-author {
   display: flex;
@@ -185,7 +141,6 @@
   border: 1px solid rgba(255, 255, 255, 0.55);
 }
 
-
 .fb-author-name {
   font-size: 14.5px;
   font-weight: 700;
@@ -199,14 +154,73 @@
   margin: 2px 0 0;
 }
 
+/* ===========================
+   CAROUSEL LOOP (giữ UI card)
+=========================== */
+.fb-carousel {
+  width: 100%;
+  max-width: 1200px;
+  padding: 0 24px;
+  overflow: hidden;
+  position: relative;
+}
 
-/* RESPONSIVE */
-@media (max-width: 992px) {
-  .fb-grid {
-    grid-template-columns: 1fr;
-  }
+/* fade 2 cạnh */
+.fb-carousel::before,
+.fb-carousel::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 120px;
+  z-index: 2;
+  pointer-events: none;
+}
 
-  .fb-card {
-    min-height: auto;
+.fb-carousel::before {
+  left: 0;
+  background: linear-gradient(to right, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.fb-carousel::after {
+  right: 0;
+  background: linear-gradient(to left, #ffffff 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.fb-track {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 28px;
+  width: max-content;
+  animation: fb-marquee 28s linear infinite;
+  will-change: transform;
+}
+
+.fb-carousel:hover .fb-track {
+  animation-play-state: paused;
+}
+
+.fb-slide {
+  flex: 0 0 380px; /* card width */
+}
+
+/* loop bằng cách render 2 lần list */
+@keyframes fb-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fb-track { animation: none; }
+}
+
+/* mobile: kéo tay */
+@media (max-width: 768px) {
+  .fb-track { animation: none; }
+  .fb-carousel {
+    overflow-x: auto;
+    scrollbar-width: none;
   }
+  .fb-carousel::-webkit-scrollbar { display: none; }
+  .fb-slide { flex: 0 0 88vw; }
 }

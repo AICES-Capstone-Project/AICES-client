@@ -83,7 +83,7 @@ button {
 /* Active submenu title (khi đang ở /resources/*) */
 .custom-menu.ant-menu-horizontal > .ant-menu-submenu-selected {
   background-color: color-mix(in srgb, var(--color-primary-light) 50%, transparent) !important;
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   color: var(--color-primary-dark) !important;
 }
 
@@ -299,7 +299,7 @@ button {
 	.custom-menu.ant-menu-horizontal>.ant-menu-item-selected {
 		background-color: color-mix(in srgb, var(--color-primary-light) 50%, transparent) !important;
 		color: var(--color-primary-dark) !important;
-		font-weight: 600 !important;
+		font-weight: 500 !important;
 		border-radius: 8px !important;
 	}
 
@@ -507,7 +507,7 @@ button {
 	color: var(--color-primary) !important;
 	border-bottom: 2px solid var(--color-primary) !important;
 	background: transparent !important;
-	font-weight: 600 !important;
+	font-weight: 500 !important;
 }
 
 /* Center Modal.confirm when using class `ant-confirm-centered` */

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import type { TablePaginationConfig } from "antd/es/table";
-import { Card, Tabs, Typography, Space, Button } from "antd";
+import { Card, Tabs, Space, Button } from "antd";
 import { LeftOutlined} from "@ant-design/icons";
 
 import { companyService } from "../../../../../services/companyService";
@@ -21,7 +21,6 @@ import OverviewTab from "./OverviewTab";
 import JobsTab from "./JobsTab";
 import MembersTab from "./MembersTab";
 
-const { Title } = Typography;
 const DEFAULT_PAGE_SIZE = 10;
 
 export default function CompanyDetail() {
@@ -303,10 +302,6 @@ export default function CompanyDetail() {
         >
           Back
         </Button>
-
-        <Title level={4} style={{ margin: 0 }}>
-          Company Detail
-        </Title>
       </Space>
 
       {/* TABS */}

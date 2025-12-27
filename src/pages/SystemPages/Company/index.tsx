@@ -175,8 +175,6 @@ export default function CompanyList() {
     setRejectionReason("");
   };
 
-  const handleApprove = (companyId: number) =>
-    updateCompanyStatus(companyId, "Approved");
 
   const companiesByStatus = statusFilter
     ? allCompanies.filter((c) => (c.companyStatus || "") === statusFilter)
@@ -252,11 +250,6 @@ export default function CompanyList() {
             defaultPageSize={DEFAULT_PAGE_SIZE}
             onChangePagination={handleChangeTable}
             onOpenDetail={(id) => nav(`${baseSystemPath}/company/${id}`)}
-            onApprove={handleApprove}
-            onOpenReject={(c) => {
-              setRejectingCompany(c);
-              setRejectionReason("");
-            }}
           />
         </div>
       </Card>

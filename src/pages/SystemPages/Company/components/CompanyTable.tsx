@@ -1,8 +1,7 @@
-import { Button, Space, Table, Tooltip, Popconfirm, Avatar } from "antd";
+import { Button, Space, Table, Tooltip, Avatar } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
 
 import { useAppSelector } from "../../../../hooks/redux";
-
-import { EyeOutlined, CheckOutlined, CloseOutlined } from "@ant-design/icons";
 
 import type { ColumnsType, TablePaginationConfig } from "antd/es/table";
 import type { Company } from "../../../../types/company.types";
@@ -15,8 +14,6 @@ interface CompanyTableProps {
   defaultPageSize: number;
   onChangePagination: (p: TablePaginationConfig) => void;
   onOpenDetail: (companyId: number) => void;
-  onApprove: (companyId: number) => void;
-  onOpenReject: (c: Company) => void;
 }
 
 export default function CompanyTable({
@@ -27,8 +24,6 @@ export default function CompanyTable({
   defaultPageSize,
   onChangePagination,
   onOpenDetail,
-  onApprove,
-  onOpenReject,
 }: CompanyTableProps) {
   const { user } = useAppSelector((state) => state.auth);
   const normalizedRole = (user?.roleName || "")
@@ -84,7 +79,6 @@ export default function CompanyTable({
       render: (status: string | undefined) => {
         if (!status) return "—";
 
-        
         const cls =
           status === "Approved"
             ? "company-status company-status-approved"
@@ -95,8 +89,6 @@ export default function CompanyTable({
             : "company-status company-status-canceled";
 
         const displayText = status;
-
-
 
         return <span className={cls}>{displayText}</span>;
       },
@@ -118,88 +110,20 @@ export default function CompanyTable({
 
     {
       title: "Actions",
-      width: 180,
+      width: 100,
       align: "center",
       render: (_: any, record) => {
-        const status = (record.companyStatus || "").toString();
-
-        // Pending   -> Approved / Rejected
-        // Approved  -> (no extra action)
-        // Rejected  -> terminal
-        // Canceled  -> terminal
-
-        const isTerminal = status === "Rejected" || status === "Canceled";
-
-        const canApprove = status === "Pending" && !isTerminal;
-        const canReject = status === "Pending" && !isTerminal;
-
-        const disabledApprove = !canApprove;
-        const disabledReject = !canReject;
-
-        // ⭐ System Staff: CHỈ ĐƯỢC XEM
-        if (isStaff) {
-          return (
-            <Space size="small">
-              <Tooltip title="View company detail">
-                <Button
-                  size="small"
-                  shape="circle"
-                  icon={<EyeOutlined />}
-                  onClick={() => onOpenDetail(record.companyId)}
-                />
-              </Tooltip>
-            </Space>
-          );
-        }
-
-        // ⭐ Admin + Manager: ACTIONS (no suspend)
+        // Giữ logic nghiệp vụ: System Staff chỉ được xem
+        // Nhưng thực tế bây giờ tất cả role cũng chỉ có "View"
         return (
           <Space size="small">
-            {/* View */}
             <Tooltip title="View company detail">
               <Button
                 size="small"
                 shape="circle"
-                className="action-btn enabled"
                 icon={<EyeOutlined />}
+                className={!isStaff ? "action-btn enabled" : undefined}
                 onClick={() => onOpenDetail(record.companyId)}
-              />
-            </Tooltip>
-
-            {/* Approve */}
-            <Popconfirm
-              title={`Approve company "${record.name}"?`}
-              okText="Yes"
-              cancelText="No"
-              onConfirm={() => onApprove(record.companyId)}
-              disabled={disabledApprove}
-            >
-              <Tooltip title="Approve company">
-                <Button
-                  size="small"
-                  shape="circle"
-                  disabled={disabledApprove}
-                  className={
-                    disabledApprove
-                      ? "action-btn disabled"
-                      : "action-btn enabled"
-                  }
-                  icon={<CheckOutlined />}
-                />
-              </Tooltip>
-            </Popconfirm>
-
-            {/* Reject */}
-            <Tooltip title="Reject company">
-              <Button
-                size="small"
-                shape="circle"
-                disabled={disabledReject}
-                className={
-                  disabledReject ? "action-btn disabled" : "action-btn enabled"
-                }
-                icon={<CloseOutlined />}
-                onClick={() => onOpenReject(record)}
               />
             </Tooltip>
           </Space>

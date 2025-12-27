@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card, Tabs, Typography, Space, Button } from "antd";
+
 import type { TablePaginationConfig } from "antd/es/table";
-import { LeftOutlined } from "@ant-design/icons";
+import { Card, Tabs, Typography, Space, Button } from "antd";
+import { LeftOutlined} from "@ant-design/icons";
 
 import { companyService } from "../../../../../services/companyService";
 import { companySubscriptionService } from "../../../../../services/companySubscriptionService";
@@ -12,9 +13,9 @@ import type {
   Job,
 } from "../../../../../types/company.types";
 import type { CompanySubscription } from "../../../../../types/companySubscription.types";
-import {
-  toastError,
-} from "../../../../../components/UI/Toast";
+import { useAppSelector } from "../../../../../hooks/redux";
+import RejectCompanyModal from "../RejectCompanyModal";
+import { toastError, toastSuccess } from "../../../../../components/UI/Toast";
 
 import OverviewTab from "./OverviewTab";
 import JobsTab from "./JobsTab";
@@ -27,8 +28,21 @@ export default function CompanyDetail() {
   const { companyId } = useParams();
   const id = Number(companyId);
   const nav = useNavigate();
-
+  const { user } = useAppSelector((state) => state.auth);
+  const normalizedRole = (user?.roleName || "")
+    .replace(/_/g, " ")
+    .toLowerCase();
+  const isStaff = normalizedRole === "system staff";
   const [company, setCompany] = useState<Company | null>(null);
+  const status = (company?.companyStatus || "").toString();
+  const isTerminal = status === "Rejected" || status === "Canceled";
+  const canDecide = !isStaff && status === "Pending" && !isTerminal;
+
+  const [approveLoading, setApproveLoading] = useState(false);
+
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectLoading, setRejectLoading] = useState(false);
 
   // Members
   const [members, setMembers] = useState<CompanyMember[]>([]);
@@ -188,6 +202,74 @@ export default function CompanyDetail() {
       setSubscription(null);
     }
   };
+  const handleApprove = async () => {
+    if (!company || !canDecide) return;
+
+    try {
+      setApproveLoading(true);
+
+      // TODO: đổi tên hàm đúng theo service của bạn
+      const res = await companyService.updateStatus(company.companyId, {
+        status: "Approved",
+        rejectionReason: null,
+      });
+
+      if (res.status === "Success") {
+        toastSuccess(
+          "Approved",
+          `Company "${company.name}" approved successfully.`
+        );
+        await loadCompany(); // reload để status cập nhật ngay
+      } else {
+        toastError("Approve failed", res.message);
+      }
+    } catch {
+      toastError("Approve failed");
+    } finally {
+      setApproveLoading(false);
+    }
+  };
+
+  const openReject = () => {
+    if (!company || !canDecide) return;
+    setRejectReason("");
+    setRejectOpen(true);
+  };
+
+  const handleReject = async () => {
+    if (!company || !canDecide) return;
+
+    const reason = rejectReason.trim();
+    if (!reason) {
+      toastError("Reject failed", "Rejection reason is required.");
+      return;
+    }
+
+    try {
+      setRejectLoading(true);
+
+      const res = await companyService.updateStatus(company.companyId, {
+        status: "Rejected",
+        rejectionReason: reason,
+      });
+
+      if (res.status === "Success") {
+        toastSuccess(
+          "Rejected",
+          `Company "${company.name}" rejected successfully.`
+        );
+        setRejectOpen(false);
+        setRejectReason("");
+        await loadCompany();
+      } else {
+        toastError("Reject failed", res.message);
+      }
+    } catch {
+      toastError("Reject failed");
+    } finally {
+      setRejectLoading(false);
+    }
+  };
 
   // ================== EFFECTS ==================
   useEffect(() => {
@@ -236,7 +318,14 @@ export default function CompanyDetail() {
             label: "Overview",
             children: (
               <Card className="aices-card">
-                <OverviewTab company={company} subscription={subscription} />
+                <OverviewTab
+                  company={company}
+                  subscription={subscription}
+                  canDecide={canDecide}
+                  approveLoading={approveLoading}
+                  onApprove={handleApprove}
+                  onOpenReject={openReject}
+                />
               </Card>
             ),
           },
@@ -267,8 +356,16 @@ export default function CompanyDetail() {
               />
             ),
           },
-          
         ]}
+      />
+      <RejectCompanyModal
+        open={rejectOpen}
+        loading={rejectLoading}
+        company={company}
+        reason={rejectReason}
+        onReasonChange={setRejectReason}
+        onCancel={() => setRejectOpen(false)}
+        onConfirm={handleReject}
       />
     </div>
   );

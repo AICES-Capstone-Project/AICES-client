@@ -1,4 +1,6 @@
-import {Tag, Typography } from "antd";
+import { Tag, Typography, Space, Button, Popconfirm } from "antd";
+import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
+
 import type { Company } from "../../../../../types/company.types";
 import type { CompanySubscription } from "../../../../../types/companySubscription.types";
 
@@ -7,11 +9,19 @@ const { Title, Text } = Typography;
 interface OverviewTabProps {
   company: Company | null;
   subscription: CompanySubscription | null;
+  canDecide: boolean;
+  approveLoading: boolean;
+  onApprove: () => void;
+  onOpenReject: () => void;
 }
 
 export default function OverviewTab({
   company,
   subscription,
+  canDecide,
+  approveLoading,
+  onApprove,
+  onOpenReject,
 }: OverviewTabProps) {
   if (!company) {
     return (
@@ -47,6 +57,7 @@ export default function OverviewTab({
     <div className="company-overview-layout">
       {/* ==== HEADER STRIP ==== */}
       <div className="company-overview-header">
+        {/* LEFT: logo + name + tags */}
         <div className="company-overview-header-left">
           {company.logoUrl ? (
             <img
@@ -77,15 +88,53 @@ export default function OverviewTab({
           </div>
         </div>
 
+        {/* MIDDLE: actions (Approve/Reject) */}
+        <div
+          className={`company-overview-header-actions ${
+            canDecide ? "is-visible" : "is-hidden"
+          }`}
+        >
+          <Space>
+            <Popconfirm
+              title={`Approve company "${company.name}"?`}
+              okText="Yes"
+              cancelText="No"
+              onConfirm={onApprove}
+              disabled={!canDecide}
+            >
+              <Button
+                type="primary"
+                icon={<CheckOutlined />}
+                loading={approveLoading}
+                disabled={!canDecide}
+              >
+                Approve
+              </Button>
+            </Popconfirm>
+
+            <Button
+              danger
+              icon={<CloseOutlined />}
+              onClick={onOpenReject}
+              disabled={!canDecide}
+            >
+              Reject
+            </Button>
+          </Space>
+        </div>
+
+        {/* RIGHT: meta */}
         <div className="company-overview-header-meta">
           <div className="meta-item">
             <span className="label">Created by</span>
             <span className="value">{company.createdBy ?? "—"}</span>
           </div>
+
           <div className="meta-item">
             <span className="label">Approved by</span>
             <span className="value">{company.approvalBy ?? "—"}</span>
           </div>
+
           <div className="meta-item">
             <span className="label">Created at</span>
             <span className="value">
@@ -106,27 +155,19 @@ export default function OverviewTab({
           <div className="company-overview-fields">
             <div className="field">
               <span className="label">Description</span>
-              <span className="value">
-                {company.description || "—"}
-              </span>
+              <span className="value">{company.description || "—"}</span>
             </div>
 
             <div className="field">
               <span className="label">Address</span>
-              <span className="value">
-                {company.address || "—"}
-              </span>
+              <span className="value">{company.address || "—"}</span>
             </div>
 
             <div className="field">
               <span className="label">Website</span>
               <span className="value">
                 {company.websiteUrl ? (
-                  <a
-                    href={company.websiteUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
+                  <a href={company.websiteUrl} target="_blank" rel="noreferrer">
                     {company.websiteUrl}
                   </a>
                 ) : (
@@ -137,9 +178,7 @@ export default function OverviewTab({
 
             <div className="field">
               <span className="label">Tax code</span>
-              <span className="value">
-                {company.taxCode || "—"}
-              </span>
+              <span className="value">{company.taxCode || "—"}</span>
             </div>
           </div>
         </div>
@@ -159,15 +198,8 @@ export default function OverviewTab({
                     {subscription.subscriptionName}{" "}
                     {subscription.startDate && subscription.endDate && (
                       <>
-                        (
-                        {new Date(
-                          subscription.startDate
-                        ).toLocaleDateString()}{" "}
-                        -{" "}
-                        {new Date(
-                          subscription.endDate
-                        ).toLocaleDateString()}
-                        )
+                        ({new Date(subscription.startDate).toLocaleDateString()}{" "}
+                        - {new Date(subscription.endDate).toLocaleDateString()})
                       </>
                     )}
                     {subscriptionStatus && (
@@ -184,9 +216,7 @@ export default function OverviewTab({
 
             <div className="field">
               <span className="label">Rejection reason</span>
-              <span className="value">
-                {company.rejectionReason || "—"}
-              </span>
+              <span className="value">{company.rejectionReason || "—"}</span>
             </div>
 
             <div className="field field-docs">

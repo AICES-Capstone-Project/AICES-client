@@ -1182,6 +1182,49 @@
   align-items: center;
   gap: 12px;
 }
+/* ===== Header actions (middle area like red frame) ===== */
+.company-overview-header-actions {
+  flex: 1 1 auto;            /* ăn phần trống giữa */
+  display: flex;
+  justify-content: center;    /* canh giữa khung đỏ */
+  align-items: center;
+  min-width: 220px;           /* tránh co quá nhỏ */
+}
+/* ===== Animate approve / reject visibility ===== */
+.company-overview-header-actions {
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease,
+    max-height 0.25s ease;
+  overflow: hidden;
+}
+
+/* HIỆN khi Pending */
+.company-overview-header-actions.is-visible {
+  opacity: 1;
+  transform: scale(1);
+  max-height: 60px;
+  pointer-events: auto;
+}
+
+/* ẨN khi ≠ Pending */
+.company-overview-header-actions.is-hidden {
+  opacity: 0;
+  transform: scale(0.95);
+  max-height: 0;
+  pointer-events: none;
+}
+
+
+/* Nút trong header strip gọn đẹp hơn */
+.company-overview-header-actions .ant-btn {
+  border-radius: 999px !important;
+  height: 34px !important;
+  padding: 0 14px !important;
+  font-size: 13px;
+  font-weight: 600;
+}
+
 
 .company-overview-logo {
   width: 52px;
@@ -1213,7 +1256,12 @@
   flex-wrap: wrap;
   gap: 12px 24px;
   align-items: center;
+
+  margin-left: auto;
+  justify-content: flex-end;
 }
+
+
 
 .company-overview-header-meta .meta-item {
   display: flex;
@@ -1325,6 +1373,18 @@
   .company-overview-grid {
     grid-template-columns: 1fr;
   }
+    .company-overview-header-actions {
+    width: 100%;
+    justify-content: flex-start; /* mobile: nút canh trái */
+    min-width: 0;
+  }
+
+  .company-overview-header-meta {
+    width: 100%;
+    justify-content: flex-start;
+    margin-left: 0;
+  }
+
 }
 
 /* =========================

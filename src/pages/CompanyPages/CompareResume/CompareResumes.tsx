@@ -519,8 +519,8 @@ const CompareResumes: React.FC = () => {
                                 selectedRowKeys: selectedKeys,
                                 columnWidth: '5%',
                                 onChange: (keys) => {
-                                    if ((keys || []).length > 5) {
-                                        message.error('You may select up to 5 resumes only');
+                                    if ((keys || []).length > 3) {
+                                        message.error('You may select up to 3 resumes only');
                                         return;
                                     }
                                     setSelectedKeys(keys as React.Key[]);

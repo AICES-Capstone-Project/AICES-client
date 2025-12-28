@@ -32,12 +32,6 @@ const HistoryDrawer: React.FC<Props> = ({ open, onClose, loading, list = [] }) =
         gap: 12,
       }}
     >
-      <Button
-        className="company-btn"
-        icon={<LeftOutlined />}
-        onClick={() => setSelectedItem(null)}
-        aria-label="Back"
-      />
       <div style={{ fontWeight: 700 }}>{drawerTitleText}</div>
     </div>
   ) : drawerTitleText;

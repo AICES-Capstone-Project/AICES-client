@@ -38,6 +38,20 @@ export default function CandidateApplicationsDrawer({ open, onClose, resumeId, r
     return [String(val)];
   };
 
+  const formatDateDDMMYYYY = (t: any) => {
+    if (!t) return '-';
+    try {
+      const d = new Date(t);
+      if (isNaN(d.getTime())) return String(t);
+      const dd = String(d.getDate()).padStart(2, '0');
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const yyyy = d.getFullYear();
+      return `${dd}/${mm}/${yyyy}`;
+    } catch {
+      return String(t);
+    }
+  };
+
   return (
     <Drawer
       title={`Applications for resume ${resumeName ?? resumeId ?? ''}`}
@@ -143,7 +157,7 @@ export default function CandidateApplicationsDrawer({ open, onClose, resumeId, r
               <span style={{ fontWeight: 700, color: 'var(--color-primary-medium)', maxWidth: 240, display: 'inline-block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v}</span>
             ) },
             { title: 'Campaign', dataIndex: 'campaignTitle', key: 'campaignTitle', align: 'center' as const, width: "32%", render: (v: any) => (<span style={{ maxWidth: 220, display: 'inline-block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v}</span>) },
-            { title: 'Applied At', dataIndex: 'createdAt', key: 'createdAt', width: "15%", align: 'center' as const, render: (d: any) => d ? new Date(d).toLocaleString() : '-' },
+            { title: 'Applied At', dataIndex: 'createdAt', key: 'createdAt', width: "15%", align: 'center' as const, render: (d: any) => formatDateDDMMYYYY(d) },
             { title: 'Score', dataIndex: 'totalScore', key: 'totalScore', width: "8%", align: 'center' as const, render: (val: any) => {
                 if (val == null) return '-';
                 const n = Number(val);

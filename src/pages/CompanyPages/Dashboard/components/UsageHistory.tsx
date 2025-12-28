@@ -42,7 +42,7 @@ const UsageHistory: React.FC<UsageHistoryProps> = ({
             className="company-select"
             value={usageRange}
             onChange={handleUsageRangeChange}
-            style={{ width: 120 }}
+            style={{ width: 100, height: 32 }}
             size="small"
             options={[
               { label: '1 Day', value: '1d' },
@@ -102,20 +102,20 @@ const UsageHistory: React.FC<UsageHistoryProps> = ({
                       if (typeof label === 'number') {
                         const asMs = label.toString().length === 10 ? label * 1000 : label;
                         const d = dayjs(asMs);
-                        if (d.isValid()) return d.tz(tz).format('DD/MM/YYYY');
+                        if (d.isValid()) return d.tz(tz).format('DD/MM/');
                       }
                       // numeric string
                       if (/^\d+$/.test(String(label))) {
                         const num = Number(label);
                         const asMs = String(label).length === 10 ? num * 1000 : num;
                         const d = dayjs(asMs);
-                        if (d.isValid()) return d.tz(tz).format('DD/MM/YYYY');
+                        if (d.isValid()) return d.tz(tz).format('DD/MM');
                       }
                       // try parse as UTC then convert
                       const dUtc = dayjs.utc(String(label));
-                      if (dUtc.isValid()) return dUtc.tz(tz).format('DD/MM/YYYY');
+                      if (dUtc.isValid()) return dUtc.tz(tz).format('DD/MM');
                       const d = dayjs(String(label));
-                      if (d.isValid()) return d.tz(tz).format('DD/MM/YYYY');
+                      if (d.isValid()) return d.tz(tz).format('DD/MM');
                       // fallback to original label string
                       return String(label);
                     };

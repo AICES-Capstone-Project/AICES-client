@@ -104,15 +104,15 @@ const PlanCard: React.FC<Props> = ({
 						{plan.description}
 					</Paragraph>
 
-					<div className="mb-8">
+					<div className="mb-8" style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: 12 }}>
 						<Title
 							level={2}
 							className="!text-5xl !font-extrabold mb-1"
-							style={{ color: isPro ? "var(--color-primary-dark)" : "#0f172a" }}
+							style={{ color: isPro ? "var(--color-primary-dark)" : "#0f172a", margin: 0 }}
 						>
 							{plan.price}
 						</Title>
-						<Text className="!text-slate-600 !text-lg !font-semibold">
+						<Text className="!text-slate-600 !text-lg !font-semibold" style={{ marginBottom: 6 }}>
 							{plan.period}
 						</Text>
 					</div>

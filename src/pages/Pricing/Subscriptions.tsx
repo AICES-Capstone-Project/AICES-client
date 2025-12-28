@@ -51,7 +51,7 @@ function mapApiPlanToPlanType(apiPlan: any): PlanType {
 		description: apiPlan.description,
 		features: [
 			`${apiPlan.resumeLimit} Resume Limit / ${apiPlan.hoursLimit} Hours`,
-			`${apiPlan.compareLimit} Compare Limit / ${apiPlan.compareHoursLimit} Compare Hours`,
+			`${apiPlan.compareLimit} Compare Limit / ${apiPlan.compareHoursLimit} Hours`,
 			`Export reports (PDF, Excel)`,
 			`Batch screening`,
 		],

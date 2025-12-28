@@ -133,9 +133,9 @@ const ResumeDetailDrawer: React.FC<Props> = ({ open, loading, selectedResume, on
                         >
                           Score:  {detail.score}
                         </Tag>
-                        <Tag color={detail.matched ? 'success' : 'default'}>
+                        {/* <Tag color={detail.matched ? 'success' : 'default'}>
                           {detail.matched ? 'Matched' : 'Not Matched'}
-                        </Tag>
+                        </Tag> */}
                       </div>
                     </div>
                     <div style={{ color: "#666" }}>
